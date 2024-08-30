@@ -1,0 +1,19 @@
+export enum LearnerStatus {
+  UNVERIFIED = 'UNVERIFIED',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
+
+export enum UserSide {
+  LEARNER = 'LEARNER',
+  INSTRUCTOR = 'INSTRUCTOR',
+  MANAGEMENT = 'MANAGEMENT'
+}
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
+  GARDEN_MANAGER = 'GARDEN_MANAGER',
+  INSTRUCTOR = 'INSTRUCTOR',
+  LEARNER = 'LEARNER'
+}

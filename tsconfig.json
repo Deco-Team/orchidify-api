@@ -1,0 +1,64 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@common/*": [
+        "src/common/*"
+      ],
+      "@media/*": [
+        "src/media/*"
+      ],
+      "@mail/*": [
+        "src/mail/*"
+      ],
+      "@auth/*": [
+        "src/auth/*"
+      ],
+      "@customer/*": [
+        "src/learner/*"
+      ],
+      "@seeds/*": [
+        "src/seeds/*"
+      ],
+      "@i18n/*": [
+        "src/i18n/*"
+      ],
+      "@staff/*": [
+        "src/staff/*"
+      ],
+      "@payment/*": [
+        "src/payment/*"
+      ],
+      "@review/*": [
+        "src/review/*"
+      ],
+      "@setting/*": [
+        "src/setting/*"
+      ],
+      "@src/*": [
+        "src/*"
+      ]
+    },
+    "inlineSources": true,
+    // Set `sourceRoot` to  "/" to strip the build path prefix
+    // from generated source code references.
+    // This improves issue grouping in Sentry.
+    "sourceRoot": "/"
+  }
+}
