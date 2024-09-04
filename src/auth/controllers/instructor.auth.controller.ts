@@ -7,10 +7,10 @@ import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 
-@ApiTags('Auth - Learner')
-@Controller('learner')
+@ApiTags('Auth - Instructor')
+@Controller('instructor')
 @ApiBadRequestResponse({ type: ErrorResponse })
-export class LearnerAuthController {
+export class InstructorAuthController {
   constructor(
     @Inject(IAuthService)
     private readonly authService: IAuthService
@@ -19,7 +19,7 @@ export class LearnerAuthController {
   @Post('login')
   @ApiCreatedResponse({ type: TokenResponse })
   login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto, UserRole.LEARNER)
+    return this.authService.login(loginDto, UserRole.INSTRUCTOR)
   }
 
   @Post('logout')

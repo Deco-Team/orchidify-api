@@ -2,12 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
-import { LearnerStatus } from '@common/contracts/constant'
+import { StaffStatus, UserRole } from '@common/contracts/constant'
 
-export type LearnerDocument = HydratedDocument<Learner>
+export type StaffDocument = HydratedDocument<Staff>
 
 @Schema({
-  collection: 'learners',
+  collection: 'staffs',
   timestamps: {
     createdAt: true,
     updatedAt: true
@@ -18,7 +18,7 @@ export type LearnerDocument = HydratedDocument<Learner>
     }
   }
 })
-export class Learner {
+export class Staff {
   constructor(id?: string) {
     this._id = id
   }
@@ -31,26 +31,29 @@ export class Learner {
   @Prop({ type: String, required: true })
   email: string
 
+  @Prop({ type: String, required: true })
+  staffCode: string
+
   @Prop({ type: String, required: true, select: false })
   password: string
 
-  @Prop({ type: String })
-  avatar: string
-
-  @Prop({ type: Date, required: true })
-  dateOfBirth: Date
+  @Prop({
+    enum: StaffStatus,
+    default: StaffStatus.ACTIVE
+  })
+  status: StaffStatus
 
   @Prop({ type: String, required: true })
-  phone: string
+  idCardPhoto: string
 
   @Prop({
-    enum: LearnerStatus,
-    default: LearnerStatus.UNVERIFIED
+    enum: [UserRole.ADMIN, UserRole.STAFF],
+    default: UserRole.STAFF
   })
-  status: LearnerStatus
+  role: UserRole.ADMIN | UserRole.STAFF
 }
 
-export const LearnerSchema = SchemaFactory.createForClass(Learner)
+export const StaffSchema = SchemaFactory.createForClass(Staff)
 
-LearnerSchema.plugin(paginate)
-LearnerSchema.index({ email: 1 })
+StaffSchema.plugin(paginate)
+StaffSchema.index({ email: 1 })

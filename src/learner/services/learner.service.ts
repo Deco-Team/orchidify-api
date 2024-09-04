@@ -1,15 +1,14 @@
+import { IAuthUserService } from '@auth/services/auth.service'
 import { Injectable, Inject } from '@nestjs/common'
 import { ILearnerRepository } from '@src/learner/repositories/learner.repository'
 import { Learner } from '@src/learner/schemas/learner.schema'
-import { LearnerStatus } from '@common/contracts/constant'
 import { SaveOptions } from 'mongoose'
 
 export const ILearnerService = Symbol('ILearnerService')
 
-export interface ILearnerService {
+export interface ILearnerService extends IAuthUserService {
   create(learner: any, options?: SaveOptions | undefined): Promise<Learner>
   findById(learnerId: string): Promise<Learner>
-  findByEmail(email: string, projection?: string | Record<string, any>): Promise<Learner>
 }
 
 @Injectable()

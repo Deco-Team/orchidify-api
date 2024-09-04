@@ -37,9 +37,9 @@ export default () => ({
   },
   NODE_ENV: process.env.NODE_ENV,
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'accessSecret',
-  JWT_ACCESS_EXPIRATION: process.env.JWT_ACCESS_EXPIRATION || 864000, // seconds
+  JWT_ACCESS_EXPIRATION: Number(process.env.JWT_ACCESS_EXPIRATION) || 864000, // seconds
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'refreshSecret',
-  JWT_REFRESH_EXPIRATION: Number(process.env.JWT_REFRESH_EXPIRATION) || 90, // 90 days
+  JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '90d', // 90 days
   WEB_URL: process.env.WEB_URL || 'https://www.orchidify.tech',
   SERVER_URL: process.env.SERVER_URL || 'https://api.orchidify.tech'
 })

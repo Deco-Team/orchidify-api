@@ -1,7 +1,15 @@
+import { DataResponse } from '@common/contracts/openapi-builder'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsNotEmpty } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
 
-export class TokenResDto {
+export class RefreshTokenDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  refreshToken: string
+}
+
+export class TokenDataResponse {
   @ApiProperty()
   accessToken: string
 
@@ -9,8 +17,4 @@ export class TokenResDto {
   refreshToken: string
 }
 
-export class RefreshTokenReqDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  refreshToken: string
-}
+export class TokenResponse extends DataResponse(TokenDataResponse) {}

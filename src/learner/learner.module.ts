@@ -1,4 +1,4 @@
-import { Logger, Module, OnModuleInit } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Learner, LearnerSchema } from '@src/learner/schemas/learner.schema'
 import { ILearnerRepository, LearnerRepository } from '@src/learner/repositories/learner.repository'
@@ -8,23 +8,21 @@ import { LearnerController } from '@src/learner/controllers/learner.controller'
 @Module({
   imports: [MongooseModule.forFeature([{ name: Learner.name, schema: LearnerSchema }])],
   controllers: [LearnerController],
-  providers: [{
-    provide: ILearnerService,
-    useClass: LearnerService
-  }, {
-    provide: ILearnerRepository,
-    useClass: LearnerRepository
-  }],
-  exports: [{
-    provide: ILearnerService,
-    useClass: LearnerService
-  }]
+  providers: [
+    {
+      provide: ILearnerService,
+      useClass: LearnerService
+    },
+    {
+      provide: ILearnerRepository,
+      useClass: LearnerRepository
+    }
+  ],
+  exports: [
+    {
+      provide: ILearnerService,
+      useClass: LearnerService
+    }
+  ]
 })
-export class LearnerModule implements OnModuleInit {
-  private readonly logger = new Logger(LearnerModule.name) 
-  constructor() {}
-
-  async onModuleInit() {
-    this.logger.log(`LearnerModule.OnModuleInit: `)
-  }
-}
+export class LearnerModule {}
