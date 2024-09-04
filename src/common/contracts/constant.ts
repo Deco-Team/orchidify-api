@@ -11,9 +11,9 @@ export enum UserSide {
 }
 
 export enum UserRole {
+  LEARNER = 'LEARNER',
+  INSTRUCTOR = 'INSTRUCTOR',
   ADMIN = 'ADMIN',
   STAFF = 'STAFF',
   GARDEN_MANAGER = 'GARDEN_MANAGER',
-  INSTRUCTOR = 'INSTRUCTOR',
-  LEARNER = 'LEARNER'
 }

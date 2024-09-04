@@ -38,15 +38,19 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+
       - name: Install
         run: npm install
+
       - name: Build
         run: npm run build
+
       - name: Update sentry sourcemaps
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         continue-on-error: true
         run: npm run sentry:sourcemaps
+      
       - name: 'Create env file'
         run: |
           touch .env
@@ -88,6 +92,9 @@ jobs:
 
           echo DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} >> .env
           echo DISCORD_WEBHOOK_TOKEN=${{ secrets.DISCORD_WEBHOOK_TOKEN }} >> .env
+
+      # - name: Run tests
+      #   run: npm run test
 
       - name: Deploy
         run: pm2 restart orchidify-api
