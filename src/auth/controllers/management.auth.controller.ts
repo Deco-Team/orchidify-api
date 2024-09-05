@@ -1,14 +1,14 @@
 import { Body, Controller, Inject, Post, Req, UseGuards } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { IAuthService } from '@auth/services/auth.service'
-import { LoginDto } from '@auth/dto/login.dto'
+import { LoginDto, ManagementLoginDto } from '@auth/dto/login.dto'
 import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
 import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 
 @ApiTags('Auth - Management')
-@Controller()
+@Controller('management')
 @ApiBadRequestResponse({ type: ErrorResponse })
 export class ManagementAuthController {
   constructor(
@@ -16,34 +16,26 @@ export class ManagementAuthController {
     private readonly authService: IAuthService
   ) {}
 
-  @Post('staff/login')
+  @Post('login')
   @ApiOperation({
-    summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}`
+    summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
   @ApiCreatedResponse({ type: TokenResponse })
-  staffLogin(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto, UserRole.STAFF)
+  login(@Body() loginDto: ManagementLoginDto) {
+    console.log(loginDto)
+    return this.authService.login(loginDto, loginDto.role)
   }
 
-  @Post('garden-manager/login')
-  @ApiOperation({
-    summary: `role: ${UserRole.GARDEN_MANAGER}`
-  })
-  @ApiCreatedResponse({ type: TokenResponse })
-  gardenManagerLogin(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto, UserRole.GARDEN_MANAGER)
-  }
-
-  @Post('management/logout')
+  @Post('logout')
   @ApiOperation({
     summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
   @ApiCreatedResponse({ type: SuccessDataResponse })
-  async staffLogout(@Body() refreshTokenDto: RefreshTokenDto) {
+  async logout(@Body() refreshTokenDto: RefreshTokenDto) {
     return await this.authService.logout(refreshTokenDto)
   }
 
-  @Post('management/refresh')
+  @Post('refresh')
   @UseGuards(JwtAuthGuard.REFRESH_TOKEN)
   @ApiBearerAuth()
   @ApiOperation({

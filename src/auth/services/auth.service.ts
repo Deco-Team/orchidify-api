@@ -57,8 +57,6 @@ export class AuthService implements IAuthService {
 
   public async login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse> {
     const user = await this.authUserServiceMap[role].findByEmail(loginDto.email, '+password')
-    const userRole = user.role ?? role
-
     if (!user) throw new AppException(Errors.WRONG_EMAIL_OR_PASSWORD)
     if (user.status === LearnerStatus.UNVERIFIED) throw new AppException(Errors.UNVERIFIED_ACCOUNT)
     if (
@@ -71,6 +69,7 @@ export class AuthService implements IAuthService {
     const isPasswordMatch = await this.comparePassword(loginDto.password, user.password)
     if (!isPasswordMatch) throw new BadRequestException(Errors.WRONG_EMAIL_OR_PASSWORD.message)
 
+    const userRole = user.role ?? role
     const accessTokenPayload: AccessTokenPayload = { sub: user._id, role: userRole, name: user.name }
     const refreshTokenPayload: RefreshTokenPayload = { sub: user._id, role: userRole }
 
@@ -95,7 +94,7 @@ export class AuthService implements IAuthService {
     const accessTokenPayload: AccessTokenPayload = { sub: user._id, role, name: user.name }
     const refreshTokenPayload: RefreshTokenPayload = { sub: user._id, role }
     const tokens = this.generateTokens(accessTokenPayload, refreshTokenPayload)
-    
+
     await this.userTokenService.update({ _id: userToken._id }, { refreshToken: tokens.refreshToken })
     return tokens
   }
