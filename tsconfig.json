@@ -30,17 +30,26 @@
       "@auth/*": [
         "src/auth/*"
       ],
-      "@customer/*": [
+      "@learner/*": [
         "src/learner/*"
+      ],
+      "@instructor/*": [
+        "src/instructor/*"
+      ],
+      "@staff/*": [
+        "src/staff/*"
+      ],
+      "@garden-manager/*": [
+        "src/garden-manager/*"
+      ],
+      "@garden/*": [
+        "src/garden/*"
       ],
       "@seeds/*": [
         "src/seeds/*"
       ],
       "@i18n/*": [
         "src/i18n/*"
-      ],
-      "@staff/*": [
-        "src/staff/*"
       ],
       "@payment/*": [
         "src/payment/*"

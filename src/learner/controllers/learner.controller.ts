@@ -8,7 +8,6 @@ import { Roles } from '@auth/decorators/roles.decorator'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
-import { LearnerResponseDto } from '@src/learner/dto/learner.dto'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 

@@ -13,6 +13,10 @@ import configuration from '@src/config'
 import { CommonModule } from '@common/common.module'
 import { LearnerModule } from '@src/learner/learner.module'
 import { AuthModule } from '@auth/auth.module'
+import { InstructorModule } from '@instructor/instructor.module'
+import { StaffModule } from '@staff/staff.module'
+import { GardenManagerModule } from '@garden-manager/garden-manager.module'
+import { GardenModule } from '@garden/garden.module'
 
 @Module({
   imports: [
@@ -69,17 +73,37 @@ import { AuthModule } from '@auth/auth.module'
     }),
     RouterModule.register([
       {
+        path: 'auth',
+        module: AuthModule
+      },
+      {
         path: 'learners',
         module: LearnerModule
       },
       {
-        path: 'auth',
-        module: AuthModule
+        path: 'instructors',
+        module: InstructorModule
       },
+      {
+        path: 'staffs',
+        module: StaffModule
+      },
+      {
+        path: 'garden-managers',
+        module: GardenManagerModule
+      },
+      {
+        path: 'gardens',
+        module: GardenModule
+      }
     ]),
     CommonModule,
     LearnerModule,
-    AuthModule,
+    InstructorModule,
+    StaffModule,
+    GardenManagerModule,
+    GardenModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService]

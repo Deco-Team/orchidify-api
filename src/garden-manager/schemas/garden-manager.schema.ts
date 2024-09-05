@@ -1,13 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { HydratedDocument } from 'mongoose'
+import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
-import { LearnerStatus } from '@common/contracts/constant'
+import { GardenManagerStatus } from '@common/contracts/constant'
 
-export type LearnerDocument = HydratedDocument<Learner>
+export type GardenManagerDocument = HydratedDocument<GardenManager>
 
 @Schema({
-  collection: 'learners',
+  collection: 'garden-managers',
   timestamps: {
     createdAt: true,
     updatedAt: true
@@ -18,7 +18,7 @@ export type LearnerDocument = HydratedDocument<Learner>
     }
   }
 })
-export class Learner {
+export class GardenManager {
   constructor(id?: string) {
     this._id = id
   }
@@ -34,23 +34,17 @@ export class Learner {
   @Prop({ type: String, required: true, select: false })
   password: string
 
-  @Prop({ type: String })
-  avatar: string
-
-  @Prop({ type: Date, required: true })
-  dateOfBirth: Date
-
   @Prop({ type: String, required: true })
-  phone: string
+  idCardPhoto: string
 
   @Prop({
-    enum: LearnerStatus,
-    default: LearnerStatus.UNVERIFIED
+    enum: GardenManagerStatus,
+    default: GardenManagerStatus.ACTIVE
   })
-  status: LearnerStatus
+  status: GardenManagerStatus
 }
 
-export const LearnerSchema = SchemaFactory.createForClass(Learner)
+export const GardenManagerSchema = SchemaFactory.createForClass(GardenManager)
 
-LearnerSchema.plugin(paginate)
-LearnerSchema.index({ email: 1 })
+GardenManagerSchema.plugin(paginate)
+GardenManagerSchema.index({ email: 1 })

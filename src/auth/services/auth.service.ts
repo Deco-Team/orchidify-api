@@ -1,26 +1,33 @@
 import { JwtService } from '@nestjs/jwt'
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
-import { LoginReqDto } from '@auth/dto/login.dto'
-import { ILearnerRepository, LearnerRepository } from '@src/learner/repositories/learner.repository'
+import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { Errors } from '@common/contracts/error'
-import { Learner } from '@src/learner/schemas/learner.schema'
-import { UserSide, UserRole, LearnerStatus } from '@common/contracts/constant'
+import { UserRole, LearnerStatus, InstructorStatus, StaffStatus, GardenManagerStatus } from '@common/contracts/constant'
 import * as bcrypt from 'bcrypt'
 import { AccessTokenPayload } from '@auth/strategies/jwt-access.strategy'
 import { RefreshTokenPayload } from '@auth/strategies/jwt-refresh.strategy'
-import { TokenResDto } from '@auth/dto/token.dto'
+import { RefreshTokenDto, TokenDataResponse } from '@auth/dto/token.dto'
 import { ConfigService } from '@nestjs/config'
-import { RegisterReqDto } from '@auth/dto/register.dto'
 import { SuccessResponse } from '@common/contracts/dto'
-import { ILearnerService } from '@customer/services/learner.service'
+import { ILearnerService } from '@learner/services/learner.service'
 import { AppException } from '@common/exceptions/app.exception'
+import { LoginDto } from '@auth/dto/login.dto'
+import { IInstructorService } from '@instructor/services/instructor.service'
+import { IStaffService } from '@staff/services/staff.service'
+import { IGardenManagerService } from '@garden-manager/services/garden-manager.service'
+import { IUserTokenService } from './user-token.service'
+
+export interface IAuthUserService {
+  findByEmail(email: string, projection?: string | Record<string, any>)
+  findById(id: string): Promise<any>
+}
 
 export const IAuthService = Symbol('IAuthService')
 
 export interface IAuthService {
-  login(loginReqDto: LoginReqDto, role: UserRole): Promise<TokenResDto>
-  register(registerReqDto: RegisterReqDto): Promise<SuccessResponse>
-  refreshToken(id: string, role: UserRole): Promise<TokenResDto>
+  login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse>
+  logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>
+  refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenDataResponse>
+  // register(registerReqDto: LearnerRegisterDto): Promise<SuccessResponse>
 }
 
 @Injectable()
@@ -28,73 +35,87 @@ export class AuthService implements IAuthService {
   constructor(
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
+    @Inject(IInstructorService)
+    private readonly instructorService: IInstructorService,
+    @Inject(IStaffService)
+    private readonly staffService: IStaffService,
+    @Inject(IGardenManagerService)
+    private readonly gardenManagerService: IGardenManagerService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(IUserTokenService)
+    private readonly userTokenService: IUserTokenService
   ) {}
 
-  public async login(loginReqDto: LoginReqDto, role: UserRole): Promise<TokenResDto> {
-    let user: Learner
-    let userRole: UserRole
+  private readonly authUserServiceMap: Record<UserRole, IAuthUserService> = {
+    [UserRole.LEARNER]: this.learnerService,
+    [UserRole.INSTRUCTOR]: this.instructorService,
+    [UserRole.STAFF]: this.staffService,
+    [UserRole.ADMIN]: this.staffService,
+    [UserRole.GARDEN_MANAGER]: this.gardenManagerService
+  }
 
-    if (role === UserRole.LEARNER) {
-      user = await this.learnerService.findByEmail(loginReqDto.email, 'password')
-    }
+  public async login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse> {
+    const user = await this.authUserServiceMap[role].findByEmail(loginDto.email, '+password')
+    const userRole = user.role ?? role
 
     if (!user) throw new AppException(Errors.WRONG_EMAIL_OR_PASSWORD)
     if (user.status === LearnerStatus.UNVERIFIED) throw new AppException(Errors.UNVERIFIED_ACCOUNT)
-    if (user.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
+    if (
+      [LearnerStatus.INACTIVE, InstructorStatus.INACTIVE, StaffStatus.INACTIVE, GardenManagerStatus.INACTIVE].includes(
+        user.status
+      )
+    )
+      throw new AppException(Errors.INACTIVE_ACCOUNT)
 
-    const isPasswordMatch = await this.comparePassword(loginReqDto.password, user.password)
+    const isPasswordMatch = await this.comparePassword(loginDto.password, user.password)
     if (!isPasswordMatch) throw new BadRequestException(Errors.WRONG_EMAIL_OR_PASSWORD.message)
 
-    const accessTokenPayload: AccessTokenPayload = { name: user.name, sub: user._id, role: userRole }
+    const accessTokenPayload: AccessTokenPayload = { sub: user._id, role: userRole, name: user.name }
     const refreshTokenPayload: RefreshTokenPayload = { sub: user._id, role: userRole }
 
     const tokens = this.generateTokens(accessTokenPayload, refreshTokenPayload)
 
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken
-    }
+    await this.userTokenService.create({ userId: user._id, role: userRole, refreshToken: tokens.refreshToken })
+    return tokens
   }
 
-  public async register(registerReqDto: RegisterReqDto) {
-    const customer = await this.learnerService.findByEmail(registerReqDto.email)
-
-    if (customer) throw new BadRequestException(Errors.EMAIL_ALREADY_EXIST.message)
-
-    const password = await this.hashPassword(registerReqDto.password)
-
-    await this.learnerService.create({
-      firstName: registerReqDto.firstName,
-      lastName: registerReqDto.lastName,
-      email: registerReqDto.email,
-      password
-    })
-
+  async logout(refreshTokenDto: RefreshTokenDto) {
+    await this.userTokenService.disableRefreshToken(refreshTokenDto.refreshToken)
     return new SuccessResponse(true)
   }
 
-  public async refreshToken(id: string, role: UserRole): Promise<TokenResDto> {
-    let tokens: TokenResDto
+  public async refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenDataResponse> {
+    const userToken = await this.userTokenService.findByRefreshToken(refreshToken)
+    if (!userToken || userToken.enabled === false) throw new AppException(Errors.REFRESH_TOKEN_INVALID)
 
-    if (role === UserRole.LEARNER) {
-      const user = await this.learnerService.findById(id)
+    const user = await this.authUserServiceMap[role].findById(id)
+    if (!user) throw new AppException(Errors.REFRESH_TOKEN_INVALID)
 
-      if (!user) throw new UnauthorizedException()
-
-      const accessTokenPayload: AccessTokenPayload = { name: user.name, sub: user._id, role: UserRole.LEARNER }
-
-      const refreshTokenPayload: RefreshTokenPayload = { sub: user._id, role: UserRole.LEARNER }
-
-      tokens = this.generateTokens(accessTokenPayload, refreshTokenPayload)
-    }
-
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken
-    }
+    const accessTokenPayload: AccessTokenPayload = { sub: user._id, role, name: user.name }
+    const refreshTokenPayload: RefreshTokenPayload = { sub: user._id, role }
+    const tokens = this.generateTokens(accessTokenPayload, refreshTokenPayload)
+    
+    await this.userTokenService.update({ _id: userToken._id }, { refreshToken: tokens.refreshToken })
+    return tokens
   }
+
+  // public async register(learnerRegisterDto: LearnerRegisterDto) {
+  //   const learner = await this.learnerService.findByEmail(learnerRegisterDto.email)
+  //   if (learner) throw new BadRequestException(Errors.EMAIL_ALREADY_EXIST.message)
+
+  //   const password = await this.hashPassword(learnerRegisterDto.password)
+
+  //   await this.learnerService.create({
+  //     name: learnerRegisterDto.name,
+  //     email: learnerRegisterDto.email,
+  //     dateOfBirth: learnerRegisterDto.dateOfBirth,
+  //     phone: learnerRegisterDto.phone,
+  //     password
+  //   })
+
+  //   return new SuccessResponse(true)
+  // }
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt()

@@ -1,6 +1,11 @@
 import { HttpStatus } from '@nestjs/common'
 import { ErrorResponse } from '@common/exceptions/app.exception'
 export const Errors: Record<string, ErrorResponse> = {
+  REFRESH_TOKEN_INVALID: {
+    error: 'REFRESH_TOKEN_INVALID',
+    message: 'Phiên đăng nhập không hợp lệ',
+    httpStatus: HttpStatus.NOT_ACCEPTABLE
+  },
   VALIDATION_FAILED: {
     error: 'VALIDATION_FAILED',
     message: 'Dữ liệu không hợp lệ',
