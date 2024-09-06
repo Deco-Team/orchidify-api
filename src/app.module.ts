@@ -17,6 +17,7 @@ import { InstructorModule } from '@instructor/instructor.module'
 import { StaffModule } from '@staff/staff.module'
 import { GardenManagerModule } from '@garden-manager/garden-manager.module'
 import { GardenModule } from '@garden/garden.module'
+import { RecruitmentModule } from '@recruitment/recruitment.module'
 
 @Module({
   imports: [
@@ -95,6 +96,10 @@ import { GardenModule } from '@garden/garden.module'
       {
         path: 'gardens',
         module: GardenModule
+      },
+      {
+        path: 'recruitments',
+        module: RecruitmentModule
       }
     ]),
     CommonModule,
@@ -103,6 +108,7 @@ import { GardenModule } from '@garden/garden.module'
     StaffModule,
     GardenManagerModule,
     GardenModule,
+    RecruitmentModule,
     AuthModule
   ],
   controllers: [AppController],

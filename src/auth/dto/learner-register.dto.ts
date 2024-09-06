@@ -1,36 +1,22 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { PHONE_REGEX } from '@src/config'
-import { IsDateString, IsEmail, IsNotEmpty, IsString, IsStrongPassword, Matches, MaxLength } from 'class-validator'
+import { EmailDto } from '@common/dto/email.dto'
+import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
+import { ApiProperty, PickType } from '@nestjs/swagger'
+import { IsNotEmpty, IsString, Length } from 'class-validator'
 
-export class LearnerRegisterDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @MaxLength(30)
-  name: string
+export class LearnerRegisterDto extends PickType(BaseLearnerDto, [
+  'name',
+  'email',
+  'password',
+  'dateOfBirth',
+  'phone'
+]) {}
 
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail()
-  email: string
-
+export class LearnerVerifyAccountDto extends EmailDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  password: string
-
-  @ApiProperty({
-    type: Date,
-    example: '2000-12-12'
-  })
-  @IsNotEmpty()
-  @IsDateString()
-  dateOfBirth: Date
-
-  @ApiProperty({
-    type: String,
-    example: '0987654321'
-  })
-  @IsNotEmpty()
-  @Matches(PHONE_REGEX)
-  phone: Date
+  @Length(6, 6)
+  code: string
 }
+
+export class LearnerResendOtpDto extends EmailDto {}

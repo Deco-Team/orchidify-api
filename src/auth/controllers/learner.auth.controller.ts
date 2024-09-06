@@ -6,6 +6,7 @@ import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
 import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
+import { LearnerRegisterDto, LearnerResendOtpDto, LearnerVerifyAccountDto } from '@auth/dto/learner-register.dto'
 
 @ApiTags('Auth - Learner')
 @Controller('learner')
@@ -34,5 +35,23 @@ export class LearnerAuthController {
   @ApiCreatedResponse({ type: TokenResponse })
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)
+  }
+
+  @Post('register')
+  @ApiCreatedResponse({ type: SuccessDataResponse })
+  async register(@Body() LearnerRegisterDto: LearnerRegisterDto) {
+    return await this.authService.registerByLearner(LearnerRegisterDto)
+  }
+
+  @Post('verify-otp')
+  @ApiCreatedResponse({ type: SuccessDataResponse })
+  verifyOtp(@Body() LearnerVerifyAccountDto: LearnerVerifyAccountDto) {
+    return this.authService.verifyOtpByLearner(LearnerVerifyAccountDto)
+  }
+
+  @Post('resend-otp')
+  @ApiCreatedResponse({ type: SuccessDataResponse })
+  resendOtp(@Body() learnerResendOtpDto: LearnerResendOtpDto) {
+    return this.authService.resendOtpByLearner(learnerResendOtpDto)
   }
 }

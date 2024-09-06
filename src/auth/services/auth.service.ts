@@ -1,7 +1,14 @@
 import { JwtService } from '@nestjs/jwt'
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { Errors } from '@common/contracts/error'
-import { UserRole, LearnerStatus, InstructorStatus, StaffStatus, GardenManagerStatus } from '@common/contracts/constant'
+import {
+  UserRole,
+  LearnerStatus,
+  InstructorStatus,
+  StaffStatus,
+  GardenManagerStatus,
+  RecruitmentStatus
+} from '@common/contracts/constant'
 import * as bcrypt from 'bcrypt'
 import { AccessTokenPayload } from '@auth/strategies/jwt-access.strategy'
 import { RefreshTokenPayload } from '@auth/strategies/jwt-refresh.strategy'
@@ -15,6 +22,13 @@ import { IInstructorService } from '@instructor/services/instructor.service'
 import { IStaffService } from '@staff/services/staff.service'
 import { IGardenManagerService } from '@garden-manager/services/garden-manager.service'
 import { IUserTokenService } from './user-token.service'
+import { LearnerRegisterDto, LearnerResendOtpDto, LearnerVerifyAccountDto } from '@auth/dto/learner-register.dto'
+import { HelperService } from '@common/services/helper.service'
+import { IOtpService } from './otp.service'
+import { Types } from 'mongoose'
+import { MailerService } from '@nestjs-modules/mailer'
+import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
+import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -27,7 +41,12 @@ export interface IAuthService {
   login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse>
   logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>
   refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenDataResponse>
-  // register(registerReqDto: LearnerRegisterDto): Promise<SuccessResponse>
+
+  registerByInstructor(instructorRegisterDto: InstructorRegisterDto): Promise<SuccessResponse>
+
+  registerByLearner(learnerRegisterDto: LearnerRegisterDto): Promise<SuccessResponse>
+  verifyOtpByLearner(learnerVerifyAccountDto: LearnerVerifyAccountDto): Promise<SuccessResponse>
+  resendOtpByLearner(learnerResendOtpDto: LearnerResendOtpDto): Promise<SuccessResponse>
 }
 
 @Injectable()
@@ -41,10 +60,16 @@ export class AuthService implements IAuthService {
     private readonly staffService: IStaffService,
     @Inject(IGardenManagerService)
     private readonly gardenManagerService: IGardenManagerService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
     @Inject(IUserTokenService)
-    private readonly userTokenService: IUserTokenService
+    private readonly userTokenService: IUserTokenService,
+    @Inject(IOtpService)
+    private readonly otpService: IOtpService,
+    @Inject(IRecruitmentService)
+    private readonly recruitmentService: IRecruitmentService,
+    private readonly jwtService: JwtService,
+    private readonly helperService: HelperService,
+    private readonly configService: ConfigService,
+    private readonly mailerService: MailerService
   ) {}
 
   private readonly authUserServiceMap: Record<UserRole, IAuthUserService> = {
@@ -99,22 +124,130 @@ export class AuthService implements IAuthService {
     return tokens
   }
 
-  // public async register(learnerRegisterDto: LearnerRegisterDto) {
-  //   const learner = await this.learnerService.findByEmail(learnerRegisterDto.email)
-  //   if (learner) throw new BadRequestException(Errors.EMAIL_ALREADY_EXIST.message)
+  async registerByLearner(learnerRegisterDto: LearnerRegisterDto): Promise<SuccessResponse> {
+    const existedLearner = await this.learnerService.findByEmail(learnerRegisterDto.email)
+    if (existedLearner) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
 
-  //   const password = await this.hashPassword(learnerRegisterDto.password)
+    const password = await this.hashPassword(learnerRegisterDto.password)
 
-  //   await this.learnerService.create({
-  //     name: learnerRegisterDto.name,
-  //     email: learnerRegisterDto.email,
-  //     dateOfBirth: learnerRegisterDto.dateOfBirth,
-  //     phone: learnerRegisterDto.phone,
-  //     password
-  //   })
+    const learner = await this.learnerService.create({
+      name: learnerRegisterDto.name,
+      email: learnerRegisterDto.email,
+      dateOfBirth: learnerRegisterDto.dateOfBirth,
+      phone: learnerRegisterDto.phone,
+      status: LearnerStatus.UNVERIFIED,
+      password
+    })
 
-  //   return new SuccessResponse(true)
-  // }
+    const code = this.helperService.generateRandomString(6)
+    await this.otpService.create({
+      code,
+      userId: new Types.ObjectId(learner._id),
+      role: UserRole.LEARNER,
+      expiredAt: new Date(Date.now() + 5 * 60000)
+    })
+
+    await this.mailerService.sendMail({
+      to: learner.email,
+      subject: `[Orchidify] Account Verification`,
+      template: 'learner/verify-account',
+      context: {
+        code,
+        name: learner.name,
+        expirationMinutes: 5
+      }
+    })
+
+    return new SuccessResponse(true)
+  }
+
+  public async verifyOtpByLearner(learnerVerifyAccountDto: LearnerVerifyAccountDto): Promise<SuccessResponse> {
+    const learner = await this.learnerService.findByEmail(learnerVerifyAccountDto.email)
+    if (!learner) throw new AppException(Errors.LEARNER_NOT_FOUND)
+    if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
+    if (learner.status === LearnerStatus.ACTIVE) return new SuccessResponse(true)
+
+    const otp = await this.otpService.findByCode(learnerVerifyAccountDto.code)
+    if (!otp || otp.userId?.toString() !== learner._id?.toString() || otp.role !== UserRole.LEARNER)
+      throw new AppException(Errors.WRONG_OTP_CODE)
+    if (otp.expiredAt < new Date()) throw new AppException(Errors.OTP_CODE_IS_EXPIRED)
+
+    await Promise.all([
+      this.learnerService.update({ _id: learner._id }, { status: LearnerStatus.ACTIVE }),
+      this.otpService.clearOtp(learnerVerifyAccountDto.code)
+    ])
+
+    return new SuccessResponse(true)
+  }
+
+  async resendOtpByLearner(learnerResendOtpDto: LearnerResendOtpDto): Promise<SuccessResponse> {
+    const learner = await this.learnerService.findByEmail(learnerResendOtpDto.email)
+    if (!learner) throw new AppException(Errors.LEARNER_NOT_FOUND)
+    if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
+    if (learner.status === LearnerStatus.ACTIVE) return new SuccessResponse(true)
+
+    const otp = await this.otpService.findByUserIdAndRole(learner._id, UserRole.LEARNER)
+    if (otp.__v >= 5) throw new AppException(Errors.RESEND_OTP_CODE_LIMITED)
+
+    const code = this.helperService.generateRandomString(6)
+    otp.code = code
+    otp.expiredAt = new Date(Date.now() + 5 * 60000)
+    otp.__v++
+    await otp.save()
+
+    // Send email contain OTP to learner
+    await this.mailerService.sendMail({
+      to: learner.email,
+      subject: `[Orchidify] Resend Account Verification`,
+      template: 'learner/verify-account',
+      context: {
+        code,
+        name: learner.name,
+        expirationMinutes: 5
+      }
+    })
+
+    return new SuccessResponse(true)
+  }
+
+  async registerByInstructor(instructorRegisterDto: InstructorRegisterDto): Promise<SuccessResponse> {
+    const existedInstructor = await this.instructorService.findByEmail(instructorRegisterDto.email)
+    if (existedInstructor) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
+
+    const inProgressingRecruitments = await this.recruitmentService.findByApplicationEmailAndStatus(
+      instructorRegisterDto.email,
+      [RecruitmentStatus.PENDING, RecruitmentStatus.INTERVIEWING, RecruitmentStatus.SELECTED]
+    )
+    console.log(inProgressingRecruitments)
+    if (inProgressingRecruitments?.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS)
+
+    // await this.recruitmentService.create({
+    //   applicationInfo: instructorRegisterDto,
+    //   status: RecruitmentStatus.PENDING,
+    //   histories: [
+    //     {
+    //       status: RecruitmentStatus.PENDING,
+    //       timestamp: new Date()
+    //     }
+    //   ]
+    // })
+
+    // await this.mailerService.sendMail({
+    //   to: instructorRegisterDto.email,
+    //   subject: `[Orchidify] Confirmation of receipt of application`,
+    //   template: 'instructor/register-success',
+    //   context: {
+    //     name: instructorRegisterDto.name,
+    //     daysToRespond: 2
+    //   }
+    // })
+
+    return new SuccessResponse(true)
+  }
+
+  // =============================================================== //
+  //                         Private method
+  // =============================================================== //
 
   private async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt()

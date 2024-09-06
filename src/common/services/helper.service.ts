@@ -23,4 +23,13 @@ export class HelperService {
     const signature = createHmac('sha256', key).update(rawData).digest('hex')
     return signature
   }
+
+  generateRandomString = (length = 6, characters = '0123456789') => {
+    let randomString = '';
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomString += characters.charAt(randomIndex);
+    }
+    return randomString;
+  };
 }

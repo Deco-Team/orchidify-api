@@ -1,14 +1,15 @@
 import { IAuthUserService } from '@auth/services/auth.service'
 import { Injectable, Inject } from '@nestjs/common'
 import { IStaffRepository } from '@staff/repositories/staff.repository'
-import { Staff } from '@staff/schemas/staff.schema'
+import { StaffDocument } from '@staff/schemas/staff.schema'
 import { SaveOptions } from 'mongoose'
 
 export const IStaffService = Symbol('IStaffService')
 
 export interface IStaffService extends IAuthUserService {
-  create(staff: any, options?: SaveOptions | undefined): Promise<Staff>
-  findById(staffId: string): Promise<Staff>
+  create(staff: any, options?: SaveOptions | undefined): Promise<StaffDocument>
+  findById(staffId: string): Promise<StaffDocument>
+  findByEmail(email: string, projection?: string | Record<string, any>): Promise<StaffDocument>
 }
 
 @Injectable()
@@ -18,11 +19,11 @@ export class StaffService implements IStaffService {
     private readonly staffRepository: IStaffRepository
   ) {}
 
-  public create(staff: any, options?: SaveOptions | undefined): Promise<Staff> {
+  public create(staff: any, options?: SaveOptions | undefined) {
     return this.staffRepository.create(staff, options)
   }
 
-  public async findById(staffId: string): Promise<Staff> {
+  public async findById(staffId: string) {
     const staff = await this.staffRepository.findOne({
       conditions: {
         _id: staffId
@@ -32,7 +33,7 @@ export class StaffService implements IStaffService {
     return staff
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>): Promise<Staff> {
+  public async findByEmail(email: string, projection: string | Record<string, any>) {
     const staff = await this.staffRepository.findOne({
       conditions: {
         email
