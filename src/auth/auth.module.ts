@@ -16,18 +16,26 @@ import { InstructorAuthController } from './controllers/instructor.auth.controll
 import { ManagementAuthController } from './controllers/management.auth.controller'
 import { IUserTokenRepository, UserTokenRepository } from './repositories/user-token.repository'
 import { IUserTokenService, UserTokenService } from './services/user-token.service'
+import { Otp, OtpSchema } from './schemas/otp.schema'
+import { IOtpRepository, OtpRepository } from './repositories/otp.repository'
+import { IOtpService, OtpService } from './services/otp.service'
+import { RecruitmentModule } from '@recruitment/recruitment.module'
 
 @Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: UserToken.name, schema: UserTokenSchema }]),
+    MongooseModule.forFeature([
+      { name: UserToken.name, schema: UserTokenSchema },
+      { name: Otp.name, schema: OtpSchema }
+    ]),
     ConfigModule,
+    PassportModule,
+    JwtModule,
     LearnerModule,
     InstructorModule,
     StaffModule,
     GardenManagerModule,
-    PassportModule,
-    JwtModule
+    RecruitmentModule
   ],
   controllers: [LearnerAuthController, InstructorAuthController, ManagementAuthController],
   providers: [
@@ -42,6 +50,14 @@ import { IUserTokenService, UserTokenService } from './services/user-token.servi
     {
       provide: IUserTokenRepository,
       useClass: UserTokenRepository
+    },
+    {
+      provide: IOtpService,
+      useClass: OtpService
+    },
+    {
+      provide: IOtpRepository,
+      useClass: OtpRepository
     },
     JwtAccessStrategy,
     JwtRefreshStrategy

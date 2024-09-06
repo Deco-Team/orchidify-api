@@ -6,6 +6,7 @@ import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
 import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
+import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
 
 @ApiTags('Auth - Instructor')
 @Controller('instructor')
@@ -34,5 +35,11 @@ export class InstructorAuthController {
   @ApiCreatedResponse({ type: TokenResponse })
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)
+  }
+
+  @Post('register')
+  @ApiCreatedResponse({ type: SuccessDataResponse })
+  async register(@Body() instructorRegisterDto: InstructorRegisterDto) {
+    return await this.authService.registerByInstructor(instructorRegisterDto)
   }
 }

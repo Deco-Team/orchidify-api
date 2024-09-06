@@ -1,14 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { IGardenManagerRepository } from '@garden-manager/repositories/garden-manager.repository'
-import { GardenManager } from '@garden-manager/schemas/garden-manager.schema'
+import { GardenManagerDocument } from '@garden-manager/schemas/garden-manager.schema'
 import { SaveOptions } from 'mongoose'
 import { IAuthUserService } from '@auth/services/auth.service'
 
 export const IGardenManagerService = Symbol('IGardenManagerService')
 
 export interface IGardenManagerService extends IAuthUserService {
-  create(gardenManager: any, options?: SaveOptions | undefined): Promise<GardenManager>
-  findById(gardenManagerId: string): Promise<GardenManager>
+  create(gardenManager: any, options?: SaveOptions | undefined): Promise<GardenManagerDocument>
+  findById(gardenManagerId: string): Promise<GardenManagerDocument>
+  findByEmail(email: string, projection?: string | Record<string, any>): Promise<GardenManagerDocument>
 }
 
 @Injectable()
@@ -18,11 +19,11 @@ export class GardenManagerService implements IGardenManagerService {
     private readonly gardenManagerRepository: IGardenManagerRepository
   ) {}
 
-  public create(gardenManager: any, options?: SaveOptions | undefined): Promise<GardenManager> {
+  public create(gardenManager: any, options?: SaveOptions | undefined) {
     return this.gardenManagerRepository.create(gardenManager, options)
   }
 
-  public async findById(gardenManagerId: string): Promise<GardenManager> {
+  public async findById(gardenManagerId: string) {
     const gardenManager = await this.gardenManagerRepository.findOne({
       conditions: {
         _id: gardenManagerId
@@ -32,7 +33,7 @@ export class GardenManagerService implements IGardenManagerService {
     return gardenManager
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>): Promise<GardenManager> {
+  public async findByEmail(email: string, projection: string | Record<string, any>) {
     const gardenManager = await this.gardenManagerRepository.findOne({
       conditions: {
         email

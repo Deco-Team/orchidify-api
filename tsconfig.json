@@ -45,6 +45,9 @@
       "@garden/*": [
         "src/garden/*"
       ],
+      "@recruitment/*": [
+        "src/recruitment/*"
+      ],
       "@seeds/*": [
         "src/seeds/*"
       ],

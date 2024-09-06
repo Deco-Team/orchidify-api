@@ -1,6 +1,5 @@
 import {
   IsDateString,
-  IsEmail,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
@@ -12,8 +11,9 @@ import {
 } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { LearnerStatus } from '@common/contracts/constant'
+import { EmailDto } from '@common/dto/email.dto'
 
-export class BaseLearnerDto {
+export class BaseLearnerDto extends EmailDto {
   @ApiProperty({ type: String })
   @IsMongoId()
   _id: string
@@ -23,11 +23,6 @@ export class BaseLearnerDto {
   @IsString()
   @MaxLength(50)
   name: string
-
-  @ApiProperty({ type: String })
-  @IsEmail()
-  @MaxLength(50)
-  email: string
 
   @ApiProperty({ type: String })
   @IsString()

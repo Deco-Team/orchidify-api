@@ -1,14 +1,9 @@
 import { UserRole } from '@common/contracts/constant'
+import { EmailDto } from '@common/dto/email.dto'
 import { ApiProperty } from '@nestjs/swagger'
-import { IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator'
+import { IsEmail, IsIn, IsString, MaxLength, MinLength } from 'class-validator'
 
-export class LoginDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail()
-  @MaxLength(50)
-  email: string
-
+export class LoginDto extends EmailDto {
   @ApiProperty({ example: '123456789' })
   @IsString()
   @MinLength(8)
