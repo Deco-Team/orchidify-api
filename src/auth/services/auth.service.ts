@@ -218,7 +218,6 @@ export class AuthService implements IAuthService {
       instructorRegisterDto.email,
       [RecruitmentStatus.PENDING, RecruitmentStatus.INTERVIEWING, RecruitmentStatus.SELECTED]
     )
-    console.log(inProgressingRecruitments)
     if (inProgressingRecruitments?.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS)
 
     await this.recruitmentService.create({

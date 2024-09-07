@@ -7,6 +7,8 @@ import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { LearnerRegisterDto, LearnerResendOtpDto, LearnerVerifyAccountDto } from '@auth/dto/learner-register.dto'
+import { Errors } from '@common/contracts/error'
+import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 
 @ApiTags('Auth - Learner')
 @Controller('learner')
@@ -19,6 +21,7 @@ export class LearnerAuthController {
 
   @Post('login')
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT, Errors.UNVERIFIED_ACCOUNT])
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto, UserRole.LEARNER)
   }
@@ -33,24 +36,28 @@ export class LearnerAuthController {
   @UseGuards(JwtAuthGuard.REFRESH_TOKEN)
   @Post('refresh')
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.REFRESH_TOKEN_INVALID])
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)
   }
 
   @Post('register')
   @ApiCreatedResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.EMAIL_ALREADY_EXIST])
   async register(@Body() LearnerRegisterDto: LearnerRegisterDto) {
     return await this.authService.registerByLearner(LearnerRegisterDto)
   }
 
   @Post('verify-otp')
   @ApiCreatedResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.LEARNER_NOT_FOUND, Errors.INACTIVE_ACCOUNT, Errors.WRONG_OTP_CODE, Errors.OTP_CODE_IS_EXPIRED])
   verifyOtp(@Body() LearnerVerifyAccountDto: LearnerVerifyAccountDto) {
     return this.authService.verifyOtpByLearner(LearnerVerifyAccountDto)
   }
 
   @Post('resend-otp')
   @ApiCreatedResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.LEARNER_NOT_FOUND, Errors.INACTIVE_ACCOUNT, Errors.RESEND_OTP_CODE_LIMITED])
   resendOtp(@Body() learnerResendOtpDto: LearnerResendOtpDto) {
     return this.authService.resendOtpByLearner(learnerResendOtpDto)
   }

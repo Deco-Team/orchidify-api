@@ -6,6 +6,8 @@ import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
 import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
+import { Errors } from '@common/contracts/error'
+import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 
 @ApiTags('Auth - Management')
 @Controller('management')
@@ -21,6 +23,7 @@ export class ManagementAuthController {
     summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT])
   login(@Body() loginDto: ManagementLoginDto) {
     console.log(loginDto)
     return this.authService.login(loginDto, loginDto.role)
@@ -42,6 +45,7 @@ export class ManagementAuthController {
     summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.REFRESH_TOKEN_INVALID])
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)
   }

@@ -9,8 +9,8 @@ const ErrorResponseDefaultValues = {
 export interface ErrorResponse {
   message: string
   error?: string
-  httpStatus?: number
-  data?: any
+  httpStatus?: HttpStatus
+  data?: Record<string, any>;
 }
 
 export class AppException extends Error {

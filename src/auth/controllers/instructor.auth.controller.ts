@@ -7,6 +7,8 @@ import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
+import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
+import { Errors } from '@common/contracts/error'
 
 @ApiTags('Auth - Instructor')
 @Controller('instructor')
@@ -19,6 +21,7 @@ export class InstructorAuthController {
 
   @Post('login')
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT])
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto, UserRole.INSTRUCTOR)
   }
@@ -33,12 +36,14 @@ export class InstructorAuthController {
   @UseGuards(JwtAuthGuard.REFRESH_TOKEN)
   @Post('refresh')
   @ApiCreatedResponse({ type: TokenResponse })
+  @ApiErrorResponse([Errors.REFRESH_TOKEN_INVALID])
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)
   }
 
   @Post('register')
   @ApiCreatedResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.EMAIL_ALREADY_EXIST, Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS])
   async register(@Body() instructorRegisterDto: InstructorRegisterDto) {
     return await this.authService.registerByInstructor(instructorRegisterDto)
   }
