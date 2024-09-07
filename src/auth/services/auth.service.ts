@@ -1,5 +1,6 @@
 import { JwtService } from '@nestjs/jwt'
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import * as moment from 'moment'
 import { Errors } from '@common/contracts/error'
 import {
   UserRole,
@@ -187,7 +188,8 @@ export class AuthService implements IAuthService {
     if (learner.status === LearnerStatus.ACTIVE) return new SuccessResponse(true)
 
     const otp = await this.otpService.findByUserIdAndRole(learner._id, UserRole.LEARNER)
-    if (otp.__v >= 5) throw new AppException(Errors.RESEND_OTP_CODE_LIMITED)
+    if (otp.__v >= 5 && moment(otp['updatedAt']).isSame(new Date(), 'day'))
+      throw new AppException(Errors.RESEND_OTP_CODE_LIMITED)
 
     const code = this.helperService.generateRandomString(6)
     otp.code = code
