@@ -9,7 +9,7 @@ export class RefreshTokenDto {
   refreshToken: string
 }
 
-export class TokenDataResponse {
+export class TokenResponse {
   @ApiProperty()
   accessToken: string
 
@@ -17,4 +17,4 @@ export class TokenDataResponse {
   refreshToken: string
 }
 
-export class TokenResponse extends DataResponse(TokenDataResponse) {}
+export class TokenDataResponse extends DataResponse(TokenResponse) {}

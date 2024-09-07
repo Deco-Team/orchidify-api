@@ -8,7 +8,7 @@ export const IStaffService = Symbol('IStaffService')
 
 export interface IStaffService extends IAuthUserService {
   create(staff: any, options?: SaveOptions | undefined): Promise<StaffDocument>
-  findById(staffId: string): Promise<StaffDocument>
+  findById(staffId: string, projection?: string | Record<string, any>): Promise<StaffDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<StaffDocument>
 }
 
@@ -23,17 +23,17 @@ export class StaffService implements IStaffService {
     return this.staffRepository.create(staff, options)
   }
 
-  public async findById(staffId: string) {
+  public async findById(staffId: string, projection?: string | Record<string, any>) {
     const staff = await this.staffRepository.findOne({
       conditions: {
         _id: staffId
       },
-      projection: '-password'
+      projection
     })
     return staff
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>) {
+  public async findByEmail(email: string, projection?: string | Record<string, any>) {
     const staff = await this.staffRepository.findOne({
       conditions: {
         email
