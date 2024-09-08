@@ -4,13 +4,15 @@ import {
   IsEnum,
   IsMongoId,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   Matches,
   MaxLength,
+  Min,
   MinLength,
-  ValidateNested,
+  ValidateNested
 } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { InstructorStatus } from '@common/contracts/constant'
@@ -33,8 +35,20 @@ export class PaymentInfoDto {
   @ApiProperty({ type: String })
   @IsOptional()
   @IsString()
+  @MaxLength(100)
+  bankName: string
+
+  @ApiProperty({ type: String })
+  @IsOptional()
+  @IsString()
   @MaxLength(50)
-  type: string
+  bankShortName: string
+
+  @ApiProperty({ type: String })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  bankCode: string
 
   @ApiProperty({ type: String })
   @IsOptional()
@@ -47,11 +61,6 @@ export class PaymentInfoDto {
   @IsString()
   @MaxLength(50)
   accountName: string
-
-  @ApiProperty({ type: String })
-  @IsOptional()
-  @IsString()
-  metadata: string
 }
 
 export class BaseInstructorDto extends EmailDto {
@@ -76,17 +85,19 @@ export class BaseInstructorDto extends EmailDto {
   phone: string
 
   @ApiProperty({ type: Date })
+  @IsOptional()
   @IsDateString()
   dateOfBirth: Date
 
   @ApiProperty({ type: InstructorCertificateDto, isArray: true })
+  @IsOptional()
   @IsArray()
   @Type(() => InstructorCertificateDto)
-  @ValidateNested()
+  @ValidateNested({ each: true })
   certificates: InstructorCertificateDto[]
 
   @ApiProperty({ type: String })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   bio: string
 
@@ -95,6 +106,7 @@ export class BaseInstructorDto extends EmailDto {
   idCardPhoto: string
 
   @ApiProperty({ type: String })
+  @IsOptional()
   @IsUrl()
   avatar: string
 
@@ -103,8 +115,13 @@ export class BaseInstructorDto extends EmailDto {
   status: InstructorStatus
 
   @ApiProperty({ type: Number })
+  @IsNumber()
+  @Min(0)
   balance: number
 
   @ApiProperty({ type: PaymentInfoDto })
+  @IsOptional()
+  @Type(() => PaymentInfoDto)
+  @ValidateNested()
   paymentInfo: PaymentInfoDto
 }

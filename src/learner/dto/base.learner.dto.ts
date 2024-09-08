@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsMongoId,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUrl,
   Matches,
@@ -32,6 +33,7 @@ export class BaseLearnerDto extends EmailDto {
   password: string
 
   @ApiProperty({ type: String })
+  @IsOptional()
   @IsUrl()
   avatar: string
 
