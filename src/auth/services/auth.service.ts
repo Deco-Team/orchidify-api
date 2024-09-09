@@ -13,7 +13,7 @@ import {
 import * as bcrypt from 'bcrypt'
 import { AccessTokenPayload } from '@auth/strategies/jwt-access.strategy'
 import { RefreshTokenPayload } from '@auth/strategies/jwt-refresh.strategy'
-import { RefreshTokenDto, TokenDataResponse } from '@auth/dto/token.dto'
+import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
 import { ConfigService } from '@nestjs/config'
 import { SuccessResponse } from '@common/contracts/dto'
 import { ILearnerService } from '@learner/services/learner.service'
@@ -39,9 +39,9 @@ export interface IAuthUserService {
 export const IAuthService = Symbol('IAuthService')
 
 export interface IAuthService {
-  login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse>
+  login(loginDto: LoginDto, role: UserRole): Promise<TokenResponse>
   logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>
-  refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenDataResponse>
+  refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenResponse>
 
   registerByInstructor(instructorRegisterDto: InstructorRegisterDto): Promise<SuccessResponse>
 
@@ -81,7 +81,7 @@ export class AuthService implements IAuthService {
     [UserRole.GARDEN_MANAGER]: this.gardenManagerService
   }
 
-  public async login(loginDto: LoginDto, role: UserRole): Promise<TokenDataResponse> {
+  public async login(loginDto: LoginDto, role: UserRole): Promise<TokenResponse> {
     const user = await this.authUserServiceMap[role].findByEmail(loginDto.email, '+password')
     if (!user) throw new AppException(Errors.WRONG_EMAIL_OR_PASSWORD)
     if (user.status === LearnerStatus.UNVERIFIED) throw new AppException(Errors.UNVERIFIED_ACCOUNT)
@@ -110,7 +110,7 @@ export class AuthService implements IAuthService {
     return new SuccessResponse(true)
   }
 
-  public async refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenDataResponse> {
+  public async refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenResponse> {
     const userToken = await this.userTokenService.findByRefreshToken(refreshToken)
     if (!userToken || userToken.enabled === false) throw new AppException(Errors.REFRESH_TOKEN_INVALID)
 

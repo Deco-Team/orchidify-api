@@ -3,20 +3,7 @@ import { HydratedDocument } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
 import { InstructorStatus } from '@common/contracts/constant'
-
-class PaymentInfo {
-  @Prop({ type: String })
-  type: string
-
-  @Prop({ type: String })
-  accountNumber: string
-
-  @Prop({ type: String })
-  accountName: string
-
-  @Prop({ type: Object })
-  metadata: unknown
-}
+import { InstructorCertificateDto, PaymentInfoDto } from '@instructor/dto/base.instructor.dto'
 
 export type InstructorDocument = HydratedDocument<Instructor>
 
@@ -54,8 +41,8 @@ export class Instructor {
   @Prop({ type: Date, required: true })
   dateOfBirth: Date
 
-  @Prop({ type: Array })
-  certificates: unknown[]
+  @Prop({ type: [InstructorCertificateDto] })
+  certificates: InstructorCertificateDto[]
 
   @Prop({ type: String })
   bio: string
@@ -75,8 +62,8 @@ export class Instructor {
   @Prop({ type: Number, default: 0 })
   balance: number
 
-  @Prop({ type: PaymentInfo })
-  paymentInfo: PaymentInfo
+  @Prop({ type: PaymentInfoDto })
+  paymentInfo: PaymentInfoDto
 }
 
 export const InstructorSchema = SchemaFactory.createForClass(Instructor)

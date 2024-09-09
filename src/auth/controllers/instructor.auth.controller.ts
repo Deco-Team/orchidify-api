@@ -3,7 +3,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiTags } fro
 import { IAuthService } from '@auth/services/auth.service'
 import { LoginDto } from '@auth/dto/login.dto'
 import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
-import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
+import { RefreshTokenDto, TokenDataResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
@@ -20,7 +20,7 @@ export class InstructorAuthController {
   ) {}
 
   @Post('login')
-  @ApiCreatedResponse({ type: TokenResponse })
+  @ApiCreatedResponse({ type: TokenDataResponse })
   @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT])
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto, UserRole.INSTRUCTOR)
@@ -35,7 +35,7 @@ export class InstructorAuthController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard.REFRESH_TOKEN)
   @Post('refresh')
-  @ApiCreatedResponse({ type: TokenResponse })
+  @ApiCreatedResponse({ type: TokenDataResponse })
   @ApiErrorResponse([Errors.REFRESH_TOKEN_INVALID])
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)

@@ -1,15 +1,16 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { IInstructorRepository } from '@instructor/repositories/instructor.repository'
-import { InstructorDocument } from '@instructor/schemas/instructor.schema'
-import { SaveOptions } from 'mongoose'
+import { Instructor, InstructorDocument } from '@instructor/schemas/instructor.schema'
+import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
 import { IAuthUserService } from '@auth/services/auth.service'
 
 export const IInstructorService = Symbol('IInstructorService')
 
 export interface IInstructorService extends IAuthUserService {
   create(instructor: any, options?: SaveOptions | undefined): Promise<InstructorDocument>
-  findById(instructorId: string): Promise<InstructorDocument>
+  findById(instructorId: string, projection?: string | Record<string, any>): Promise<InstructorDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<InstructorDocument>
+  update(conditions: FilterQuery<Instructor>, payload: UpdateQuery<Instructor>, options?: QueryOptions | undefined): Promise<InstructorDocument>
 }
 
 @Injectable()
@@ -23,17 +24,17 @@ export class InstructorService implements IInstructorService {
     return this.instructorRepository.create(instructor, options)
   }
 
-  public async findById(instructorId: string) {
+  public async findById(instructorId: string, projection?: string | Record<string, any>) {
     const instructor = await this.instructorRepository.findOne({
       conditions: {
         _id: instructorId
       },
-      projection: '-password'
+      projection
     })
     return instructor
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>) {
+  public async findByEmail(email: string, projection?: string | Record<string, any>) {
     const instructor = await this.instructorRepository.findOne({
       conditions: {
         email
@@ -41,5 +42,13 @@ export class InstructorService implements IInstructorService {
       projection
     })
     return instructor
+  }
+
+  public update(
+    conditions: FilterQuery<Instructor>,
+    payload: UpdateQuery<Instructor>,
+    options?: QueryOptions | undefined
+  ) {
+    return this.instructorRepository.findOneAndUpdate(conditions, payload, options)
   }
 }

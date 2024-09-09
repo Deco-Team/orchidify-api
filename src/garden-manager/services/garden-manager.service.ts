@@ -8,7 +8,7 @@ export const IGardenManagerService = Symbol('IGardenManagerService')
 
 export interface IGardenManagerService extends IAuthUserService {
   create(gardenManager: any, options?: SaveOptions | undefined): Promise<GardenManagerDocument>
-  findById(gardenManagerId: string): Promise<GardenManagerDocument>
+  findById(gardenManagerId: string, projection?: string | Record<string, any>): Promise<GardenManagerDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<GardenManagerDocument>
 }
 
@@ -23,17 +23,17 @@ export class GardenManagerService implements IGardenManagerService {
     return this.gardenManagerRepository.create(gardenManager, options)
   }
 
-  public async findById(gardenManagerId: string) {
+  public async findById(gardenManagerId: string, projection?: string | Record<string, any>) {
     const gardenManager = await this.gardenManagerRepository.findOne({
       conditions: {
         _id: gardenManagerId
       },
-      projection: '-password'
+      projection
     })
     return gardenManager
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>) {
+  public async findByEmail(email: string, projection?: string | Record<string, any>) {
     const gardenManager = await this.gardenManagerRepository.findOne({
       conditions: {
         email

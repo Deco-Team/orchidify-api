@@ -8,7 +8,7 @@ export const ILearnerService = Symbol('ILearnerService')
 
 export interface ILearnerService extends IAuthUserService {
   create(learner: any, options?: SaveOptions | undefined): Promise<LearnerDocument>
-  findById(learnerId: string): Promise<LearnerDocument>
+  findById(learnerId: string, projection?: string | Record<string, any>): Promise<LearnerDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<LearnerDocument>
   update(conditions: FilterQuery<Learner>, payload: UpdateQuery<Learner>, options?: QueryOptions | undefined): Promise<LearnerDocument>
 }
@@ -24,17 +24,17 @@ export class LearnerService implements ILearnerService {
     return this.learnerRepository.create(learner, options)
   }
 
-  public async findById(learnerId: string) {
+  public async findById(learnerId: string, projection?: string | Record<string, any>) {
     const learner = await this.learnerRepository.findOne({
       conditions: {
         _id: learnerId
       },
-      projection: '-password'
+      projection
     })
     return learner
   }
 
-  public async findByEmail(email: string, projection: string | Record<string, any>) {
+  public async findByEmail(email: string, projection?: string | Record<string, any>) {
     const learner = await this.learnerRepository.findOne({
       conditions: {
         email

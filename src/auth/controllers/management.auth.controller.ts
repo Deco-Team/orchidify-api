@@ -3,7 +3,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOperation,
 import { IAuthService } from '@auth/services/auth.service'
 import { LoginDto, ManagementLoginDto } from '@auth/dto/login.dto'
 import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
-import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'
+import { RefreshTokenDto, TokenDataResponse } from '@auth/dto/token.dto'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { Errors } from '@common/contracts/error'
@@ -22,7 +22,7 @@ export class ManagementAuthController {
   @ApiOperation({
     summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
-  @ApiCreatedResponse({ type: TokenResponse })
+  @ApiCreatedResponse({ type: TokenDataResponse })
   @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT])
   login(@Body() loginDto: ManagementLoginDto) {
     console.log(loginDto)
@@ -44,7 +44,7 @@ export class ManagementAuthController {
   @ApiOperation({
     summary: `role: ${UserRole.STAFF}, ${UserRole.ADMIN}, ${UserRole.GARDEN_MANAGER}`
   })
-  @ApiCreatedResponse({ type: TokenResponse })
+  @ApiCreatedResponse({ type: TokenDataResponse })
   @ApiErrorResponse([Errors.REFRESH_TOKEN_INVALID])
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user?._id, req.user?.role, req.user?.refreshToken)

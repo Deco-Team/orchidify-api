@@ -2,7 +2,6 @@ import { Controller, Get, Req, UseGuards, Inject, Put, Body } from '@nestjs/comm
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import { ILearnerService } from '@src/learner/services/learner.service'
 import { ErrorResponse, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { UserRole } from '@common/contracts/constant'
@@ -10,49 +9,50 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
-import { LearnerProfileDataResponse } from '@learner/dto/view-learner.dto'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
-import { LEARNER_PROFILE_PROJECTION } from '@learner/contracts/constant'
-import { UpdateLearnerProfileDto } from '@learner/dto/update-learner-profile.dto'
+import { IInstructorService } from '@instructor/services/instructor.service'
+import { InstructorProfileDataResponse } from '@instructor/dto/view-instructor.dto'
+import { INSTRUCTOR_PROFILE_PROJECTION } from '@instructor/contracts/constant'
+import { UpdateInstructorProfileDto } from '@instructor/dto/update-instructor-profile.dto'
 
-@ApiTags('Learner')
+@ApiTags('Instructor')
 @ApiBearerAuth()
-@Roles(UserRole.LEARNER)
+@Roles(UserRole.INSTRUCTOR)
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
 @Controller()
-export class LearnerController {
+export class InstructorController {
   constructor(
-    @Inject(ILearnerService)
-    private readonly learnerService: ILearnerService
+    @Inject(IInstructorService)
+    private readonly instructorService: IInstructorService
   ) {}
 
   @ApiOperation({
-    summary: 'View learner profile'
+    summary: 'View instructor profile'
   })
   @Get('profile')
   @ApiBadRequestResponse({ type: ErrorResponse })
-  @ApiOkResponse({ type: LearnerProfileDataResponse })
-  @ApiErrorResponse([Errors.LEARNER_NOT_FOUND])
+  @ApiOkResponse({ type: InstructorProfileDataResponse })
+  @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
   async viewProfile(@Req() req) {
     const { _id } = _.get(req, 'user')
-    const learner = await this.learnerService.findById(_id, LEARNER_PROFILE_PROJECTION)
+    const instructor = await this.instructorService.findById(_id, INSTRUCTOR_PROFILE_PROJECTION)
 
-    if (!learner) throw new AppException(Errors.LEARNER_NOT_FOUND)
-    return learner
+    if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
+    return instructor
   }
 
   @ApiOperation({
-    summary: 'Update learner profile'
+    summary: 'Update instructor profile'
   })
   @Put('profile')
   @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.LEARNER_NOT_FOUND])
-  async updateProfile(@Req() req, @Body() updateLearnerProfileDto: UpdateLearnerProfileDto) {
+  @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
+  async updateProfile(@Req() req, @Body() updateInstructorProfileDto: UpdateInstructorProfileDto) {
     const { _id } = _.get(req, 'user')
-    const learner = await this.learnerService.update({ _id }, updateLearnerProfileDto)
+    const instructor = await this.instructorService.update({ _id }, updateInstructorProfileDto)
 
-    if (!learner) throw new AppException(Errors.LEARNER_NOT_FOUND)
+    if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
     return new SuccessResponse(true)
   }
 }

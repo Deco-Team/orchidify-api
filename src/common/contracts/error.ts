@@ -1,5 +1,4 @@
 import { HttpStatus } from '@nestjs/common'
-import { ErrorResponse } from '@common/exceptions/app.exception'
 export const Errors = {
   /**
    * General
@@ -71,6 +70,11 @@ export const Errors = {
   /**
    * Instructor
    */
+  INSTRUCTOR_NOT_FOUND: {
+    error: 'INSTRUCTOR_NOT_FOUND',
+    message: 'Thông tin giảng viên không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
   INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS: {
     error: 'INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS',
     message: 'Chúng tôi đang tiến hành đánh giá hồ sơ ứng tuyển. Vui lòng chờ đợi.',

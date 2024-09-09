@@ -3,6 +3,7 @@ import {
   IsEnum,
   IsMongoId,
   IsNotEmpty,
+  IsOptional,
   IsString,
   IsUrl,
   Matches,
@@ -12,6 +13,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger'
 import { LearnerStatus } from '@common/contracts/constant'
 import { EmailDto } from '@common/dto/email.dto'
+import { PastYear } from '@common/decorators/past-year.decorator'
 
 export class BaseLearnerDto extends EmailDto {
   @ApiProperty({ type: String })
@@ -31,11 +33,12 @@ export class BaseLearnerDto extends EmailDto {
   password: string
 
   @ApiProperty({ type: String })
+  @IsOptional()
   @IsUrl()
   avatar: string
 
   @ApiProperty({ type: Date })
-  @IsDateString()
+  @PastYear(10)
   dateOfBirth: Date
 
   @ApiProperty({ type: String })
