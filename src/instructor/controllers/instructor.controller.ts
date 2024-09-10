@@ -17,6 +17,7 @@ import { UpdateInstructorProfileDto } from '@instructor/dto/update-instructor-pr
 
 @ApiTags('Instructor')
 @ApiBearerAuth()
+@ApiBadRequestResponse({ type: ErrorResponse })
 @Roles(UserRole.INSTRUCTOR)
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
 @Controller()
@@ -30,7 +31,6 @@ export class InstructorController {
     summary: 'View instructor profile'
   })
   @Get('profile')
-  @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiOkResponse({ type: InstructorProfileDataResponse })
   @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
   async viewProfile(@Req() req) {
@@ -45,7 +45,6 @@ export class InstructorController {
     summary: 'Update instructor profile'
   })
   @Put('profile')
-  @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
   async updateProfile(@Req() req, @Body() updateInstructorProfileDto: UpdateInstructorProfileDto) {

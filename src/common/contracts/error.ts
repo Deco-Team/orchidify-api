@@ -79,5 +79,19 @@ export const Errors = {
     error: 'INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS',
     message: 'Chúng tôi đang tiến hành đánh giá hồ sơ ứng tuyển. Vui lòng chờ đợi.',
     httpStatus: HttpStatus.BAD_REQUEST
-  }
+  },
+
+  /**
+   * Garden Manager
+   */
+  GARDEN_MANAGER_NOT_FOUND: {
+    error: 'GARDEN_MANAGER_NOT_FOUND',
+    message: 'Thông tin quản lý vườn không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  GARDEN_MANAGER_IS_ASSIGNED_TO_GARDEN: {
+    error: 'GARDEN_MANAGER_IS_ASSIGNED_TO_GARDEN',
+    message: 'Người quản lý vườn đang quản lý vườn nên không thể bị vô hiệu hóa.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 }

@@ -25,7 +25,6 @@ export class ManagementAuthController {
   @ApiCreatedResponse({ type: TokenDataResponse })
   @ApiErrorResponse([Errors.WRONG_EMAIL_OR_PASSWORD, Errors.INACTIVE_ACCOUNT])
   login(@Body() loginDto: ManagementLoginDto) {
-    console.log(loginDto)
     return this.authService.login(loginDto, loginDto.role)
   }
 

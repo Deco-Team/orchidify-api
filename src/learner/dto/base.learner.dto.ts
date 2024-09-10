@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsStrongPassword,
   IsUrl,
   Matches,
   MaxLength,
@@ -30,6 +31,7 @@ export class BaseLearnerDto extends EmailDto {
   @IsString()
   @MinLength(8)
   @MaxLength(50)
+  @IsStrongPassword()
   password: string
 
   @ApiProperty({ type: String })

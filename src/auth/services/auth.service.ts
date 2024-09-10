@@ -27,9 +27,9 @@ import { LearnerRegisterDto, LearnerResendOtpDto, LearnerVerifyAccountDto } from
 import { HelperService } from '@common/services/helper.service'
 import { IOtpService } from './otp.service'
 import { Types } from 'mongoose'
-import { MailerService } from '@nestjs-modules/mailer'
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
+import { NotificationAdapter } from '@common/adapters/notification.adapter'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -70,7 +70,7 @@ export class AuthService implements IAuthService {
     private readonly jwtService: JwtService,
     private readonly helperService: HelperService,
     private readonly configService: ConfigService,
-    private readonly mailerService: MailerService
+    private readonly notificationAdapter: NotificationAdapter
   ) {}
 
   private readonly authUserServiceMap: Record<UserRole, IAuthUserService> = {
@@ -92,7 +92,7 @@ export class AuthService implements IAuthService {
     )
       throw new AppException(Errors.INACTIVE_ACCOUNT)
 
-    const isPasswordMatch = await this.comparePassword(loginDto.password, user.password)
+    const isPasswordMatch = await this.helperService.comparePassword(loginDto.password, user.password)
     if (!isPasswordMatch) throw new BadRequestException(Errors.WRONG_EMAIL_OR_PASSWORD.message)
 
     const userRole = user.role ?? role
@@ -129,7 +129,7 @@ export class AuthService implements IAuthService {
     const existedLearner = await this.learnerService.findByEmail(learnerRegisterDto.email)
     if (existedLearner) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
 
-    const password = await this.hashPassword(learnerRegisterDto.password)
+    const password = await this.helperService.hashPassword(learnerRegisterDto.password)
 
     const learner = await this.learnerService.create({
       name: learnerRegisterDto.name,
@@ -148,7 +148,7 @@ export class AuthService implements IAuthService {
       expiredAt: new Date(Date.now() + 5 * 60000)
     })
 
-    await this.mailerService.sendMail({
+    this.notificationAdapter.sendMail({
       to: learner.email,
       subject: `[Orchidify] Account Verification`,
       template: 'learner/verify-account',
@@ -198,7 +198,7 @@ export class AuthService implements IAuthService {
     await otp.save()
 
     // Send email contain OTP to learner
-    await this.mailerService.sendMail({
+    this.notificationAdapter.sendMail({
       to: learner.email,
       subject: `[Orchidify] Resend Account Verification`,
       template: 'learner/verify-account',
@@ -233,7 +233,7 @@ export class AuthService implements IAuthService {
       ]
     })
 
-    await this.mailerService.sendMail({
+    this.notificationAdapter.sendMail({
       to: instructorRegisterDto.email,
       subject: `[Orchidify] Confirmation of receipt of application`,
       template: 'instructor/register-success',
@@ -249,16 +249,6 @@ export class AuthService implements IAuthService {
   // =============================================================== //
   //                         Private method
   // =============================================================== //
-
-  private async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt()
-    const hash = await bcrypt.hash(password, salt)
-    return hash
-  }
-
-  private async comparePassword(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash)
-  }
 
   private generateTokens(accessTokenPayload: AccessTokenPayload, refreshTokenPayload: RefreshTokenPayload) {
     return {

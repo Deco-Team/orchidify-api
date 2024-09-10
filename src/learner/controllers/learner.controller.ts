@@ -17,6 +17,7 @@ import { UpdateLearnerProfileDto } from '@learner/dto/update-learner-profile.dto
 
 @ApiTags('Learner')
 @ApiBearerAuth()
+@ApiBadRequestResponse({ type: ErrorResponse })
 @Roles(UserRole.LEARNER)
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
 @Controller()
@@ -30,7 +31,6 @@ export class LearnerController {
     summary: 'View learner profile'
   })
   @Get('profile')
-  @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiOkResponse({ type: LearnerProfileDataResponse })
   @ApiErrorResponse([Errors.LEARNER_NOT_FOUND])
   async viewProfile(@Req() req) {
@@ -45,7 +45,6 @@ export class LearnerController {
     summary: 'Update learner profile'
   })
   @Put('profile')
-  @ApiBadRequestResponse({ type: ErrorResponse })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([Errors.LEARNER_NOT_FOUND])
   async updateProfile(@Req() req, @Body() updateLearnerProfileDto: UpdateLearnerProfileDto) {

@@ -66,6 +66,10 @@ import { RecruitmentModule } from '@recruitment/recruitment.module'
     {
       provide: IAuthService,
       useClass: AuthService
+    },
+    {
+      provide: IUserTokenService,
+      useClass: UserTokenService
     }
   ]
 })
