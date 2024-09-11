@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectConnection } from '@nestjs/mongoose'
 import { createHmac } from 'crypto'
+import * as bcrypt from 'bcrypt'
 import { Connection, ClientSession } from 'mongoose'
 
 @Injectable()
@@ -32,4 +33,14 @@ export class HelperService {
     }
     return randomString;
   };
+
+  async hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt()
+    const hash = await bcrypt.hash(password, salt)
+    return hash
+  }
+
+  async comparePassword(password: string, hash: string): Promise<boolean> {
+    return await bcrypt.compare(password, hash)
+  }
 }

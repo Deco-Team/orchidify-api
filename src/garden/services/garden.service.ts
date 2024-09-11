@@ -8,6 +8,7 @@ export const IGardenService = Symbol('IGardenService')
 export interface IGardenService {
   create(garden: any, options?: SaveOptions | undefined): Promise<GardenDocument>
   findById(gardenId: string): Promise<GardenDocument>
+  findByGardenManagerId(gardenManagerId: string): Promise<GardenDocument[]>
 }
 
 @Injectable()
@@ -28,5 +29,14 @@ export class GardenService implements IGardenService {
       },
     })
     return garden
+  }
+
+  async findByGardenManagerId(gardenManagerId: string): Promise<GardenDocument[]> {
+    const gardens = await this.GardenRepository.findMany({
+      conditions: {
+        gardenManagerId
+      },
+    })
+    return gardens
   }
 }

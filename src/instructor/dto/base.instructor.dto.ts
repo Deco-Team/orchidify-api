@@ -18,6 +18,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { InstructorStatus } from '@common/contracts/constant'
 import { EmailDto } from '@common/dto/email.dto'
 import { Type } from 'class-transformer'
+import { PastYear } from '@common/decorators/past-year.decorator'
 
 export class InstructorCertificateDto {
   @ApiProperty({ type: String })
@@ -86,7 +87,7 @@ export class BaseInstructorDto extends EmailDto {
 
   @ApiProperty({ type: Date })
   @IsOptional()
-  @IsDateString()
+  @PastYear(18)
   dateOfBirth: Date
 
   @ApiProperty({ type: InstructorCertificateDto, isArray: true })
