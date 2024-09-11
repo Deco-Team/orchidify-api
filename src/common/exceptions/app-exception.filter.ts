@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import { AppException } from '@common/exceptions/app.exception'
 import { captureException as sentryCaptureException } from '@sentry/node'
 import { DiscordService } from '@common/services/discord.service'
+import { Errors } from '@common/contracts/error'
 
 @Catch()
 export class AppExceptionFilter extends BaseExceptionFilter {
@@ -19,13 +20,24 @@ export class AppExceptionFilter extends BaseExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse()
     const { error, httpStatus, message, data } = this._parseError(exception)
-    response.status(httpStatus).json({
-      error,
-      message,
-      data: {
-        result: data
-      }
-    })
+    if (httpStatus === HttpStatus.INTERNAL_SERVER_ERROR) {
+      response.status(httpStatus).json({
+        error: Errors.INTERNAL_SERVER_ERROR.error,
+        message: Errors.INTERNAL_SERVER_ERROR.message,
+        data: {
+          result: data
+        }
+      })
+    } else {
+      response.status(httpStatus).json({
+        error,
+        message,
+        data: {
+          result: data
+        }
+      })
+    }
+
     if (httpStatus === HttpStatus.INTERNAL_SERVER_ERROR && process.env.NODE_ENV !== 'local') {
       // Sentry
       sentryCaptureException(exception)
@@ -34,15 +46,19 @@ export class AppExceptionFilter extends BaseExceptionFilter {
       this.discordService.sendMessage({
         fields: [
           {
-            name: 'error',
+            name: `${ctx.getRequest().method} ${ctx.getRequest().url}`,
+            value: `${httpStatus} ${JSON.stringify(ctx.getRequest().body)}`
+          },
+          {
+            name: 'Error',
             value: error
           },
           {
-            name: 'message',
+            name: 'Message',
             value: message
           },
           {
-            name: 'data',
+            name: 'Data',
             value: `${JSON.stringify(data).slice(0, 200)}...`
           },
           {

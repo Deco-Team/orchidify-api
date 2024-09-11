@@ -3,19 +3,24 @@ export const Errors = {
   /**
    * General
    */
+  INTERNAL_SERVER_ERROR: {
+    error: 'INTERNAL_SERVER_ERROR',
+    message: 'Hệ thống của chúng tôi đang gặp sự cố. Vui lòng thử lại sau.',
+    httpStatus: HttpStatus.INTERNAL_SERVER_ERROR
+  },
   OBJECT_NOT_FOUND: {
     error: 'OBJECT_NOT_FOUND',
-    message: 'Không tìm thấy đối tượng',
+    message: 'Không tìm thấy đối tượng.',
     httpStatus: HttpStatus.NOT_FOUND
   },
   VALIDATION_FAILED: {
     error: 'VALIDATION_FAILED',
-    message: 'Dữ liệu không hợp lệ',
+    message: 'Dữ liệu không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   EMAIL_ALREADY_EXIST: {
     error: 'EMAIL_ALREADY_EXIST',
-    message: 'Email đã được sử dụng',
+    message: 'Email này đã được sử dụng. Vui lòng sử dụng email khác.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 
@@ -24,37 +29,37 @@ export const Errors = {
    */
   WRONG_EMAIL_OR_PASSWORD: {
     error: 'WRONG_EMAIL_OR_PASSWORD',
-    message: 'Email hoặc mật khẩu không đúng.',
+    message: 'Email hoặc mật khẩu không chính xác.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   UNVERIFIED_ACCOUNT: {
     error: 'UNVERIFIED_ACCOUNT',
-    message: 'Tài khoản của bạn chưa được xác thực.',
+    message: 'Tài khoản chưa được xác thực. Vui lòng xác thực và thử lại.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   INACTIVE_ACCOUNT: {
     error: 'INACTIVE_ACCOUNT',
-    message: 'Tài khoản của bạn đã bị vô hiệu hóa.',
+    message: 'Tài khoản bị vô hiệu hóa.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   REFRESH_TOKEN_INVALID: {
     error: 'REFRESH_TOKEN_INVALID',
-    message: 'Phiên đăng nhập không hợp lệ',
+    message: 'Phiên đăng nhập không hợp lệ.',
     httpStatus: HttpStatus.NOT_ACCEPTABLE
   },
   WRONG_OTP_CODE: {
     error: 'WRONG_OTP',
-    message: 'Mã OTP không hợp lệ',
+    message: 'Mã OTP không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   OTP_CODE_IS_EXPIRED: {
     error: 'OTP_CODE_IS_EXPIRED',
-    message: 'Mã OTP hết hạn',
+    message: 'Mã OTP hết hạn.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
   RESEND_OTP_CODE_LIMITED: {
     error: 'RESEND_OTP_CODE_LIMITED',
-    message: 'Bạn đã đạt giới hạn số lần gửi lại OTP',
+    message: 'Bạn đã đạt giới hạn số lần gửi lại OTP trong ngày.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 

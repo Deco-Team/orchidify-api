@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { APIEmbedField, EmbedBuilder, WebhookClient } from 'discord.js'
+import { APIEmbedField, WebhookClient } from 'discord.js'
 
 @Injectable()
 export class DiscordService {
   webhookClient: WebhookClient
-  embed = new EmbedBuilder().setTitle('Orchidify API').setColor(0x00ffff)
   constructor(private readonly configService: ConfigService) {
     this.webhookClient = new WebhookClient({
       id: this.configService.get('discord.webhookId'),
@@ -17,10 +16,15 @@ export class DiscordService {
     try {
       await this.webhookClient.send({
         content,
-        username: `${this.configService.get('NODE_ENV')} Orchidify Bot`,
-        avatarURL:
-          'https://nftcalendar.io/storage/uploads/2021/11/30/webp_net-gifmaker__1__1130202114500961a63a2147d4d.gif',
-        embeds: [fields ? this.embed.setFields(fields) : this.embed]
+        username: `Orchidify API Bot`,
+        avatarURL: 'https://cdn.pfps.gg/pfps/3323-como.gif',
+        embeds: [
+          {
+            title: `ENV ${this.configService.get('NODE_ENV')}`,
+            color: 0x00ffff,
+            fields
+          }
+        ]
       })
     } catch (err) {}
   }
