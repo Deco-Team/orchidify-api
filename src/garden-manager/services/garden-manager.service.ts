@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { IGardenManagerRepository } from '@garden-manager/repositories/garden-manager.repository'
 import { GardenManager, GardenManagerDocument } from '@garden-manager/schemas/garden-manager.schema'
-import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
 import { IAuthUserService } from '@auth/services/auth.service'
 import { CreateGardenManagerDto } from '@garden-manager/dto/create-garden-manager.dto'
 import { QueryGardenManagerDto } from '@garden-manager/dto/view-garden-manager.dto'
@@ -15,7 +15,11 @@ export const IGardenManagerService = Symbol('IGardenManagerService')
 
 export interface IGardenManagerService extends IAuthUserService {
   create(gardenManager: CreateGardenManagerDto, options?: SaveOptions | undefined): Promise<GardenManagerDocument>
-  findById(gardenManagerId: string, projection?: string | Record<string, any>): Promise<GardenManagerDocument>
+  findById(
+    gardenManagerId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<GardenManagerDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<GardenManagerDocument>
   update(
     conditions: FilterQuery<GardenManager>,
@@ -39,7 +43,7 @@ export class GardenManagerService implements IGardenManagerService {
     const hashPassword = await this.helperService.hashPassword(password)
     createGardenManagerDto['password'] = hashPassword
     const gardenManager = await this.gardenManagerRepository.create(createGardenManagerDto, options)
-    
+
     this.notificationAdapter.sendMail({
       to: gardenManager.email,
       subject: `[Orchidify] Login Information`,
@@ -53,12 +57,17 @@ export class GardenManagerService implements IGardenManagerService {
     return gardenManager
   }
 
-  public async findById(gardenManagerId: string, projection?: string | Record<string, any>) {
+  public async findById(
+    gardenManagerId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
     const gardenManager = await this.gardenManagerRepository.findOne({
       conditions: {
         _id: gardenManagerId
       },
-      projection
+      projection,
+      populates
     })
     return gardenManager
   }

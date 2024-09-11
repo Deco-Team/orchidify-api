@@ -73,7 +73,13 @@ export class ManagementGardenManagerController {
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') gardenManagerId: string) {
-    const gardenManager = await this.gardenManagerService.findById(gardenManagerId, GARDEN_MANAGER_DETAIL_PROJECTION)
+    const gardenManager = await this.gardenManagerService.findById(gardenManagerId, GARDEN_MANAGER_DETAIL_PROJECTION, [
+      {
+        path: 'gardens',
+        perDocumentLimit: 10,
+        select: ['name', '-gardenManagerId']
+      }
+    ])
 
     if (!gardenManager) throw new AppException(Errors.GARDEN_MANAGER_NOT_FOUND)
     return gardenManager
