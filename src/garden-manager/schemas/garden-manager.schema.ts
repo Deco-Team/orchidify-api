@@ -15,7 +15,8 @@ export type GardenManagerDocument = HydratedDocument<GardenManager>
   toJSON: {
     transform(doc, ret) {
       delete ret.__v
-    }
+    },
+    virtuals: true
   }
 })
 export class GardenManager {
@@ -47,4 +48,11 @@ export class GardenManager {
 export const GardenManagerSchema = SchemaFactory.createForClass(GardenManager)
 
 GardenManagerSchema.plugin(paginate)
+
 GardenManagerSchema.index({ email: 1 })
+
+GardenManagerSchema.virtual('gardens', {
+  ref: 'Garden',
+  localField: '_id',
+  foreignField: 'gardenManagerId'
+})

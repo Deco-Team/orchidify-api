@@ -36,7 +36,7 @@ export class Garden {
   address: string
 
   @Prop({ type: [Array], required: true })
-  images: String[]
+  images: string[]
 
   @Prop({
     enum: GardenStatus,
