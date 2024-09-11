@@ -56,7 +56,7 @@ jobs:
           touch .env
           echo NODE_ENV=${{ vars.NODE_ENV }} >> .env
           echo PORT=${{ vars.PORT }} >> .env
-          echo MONGODB_CONNECTION_STRING=${{ vars.MONGODB_CONNECTION_STRING }} >> .env
+          echo MONGODB_CONNECTION_STRING=${{ secrets.MONGODB_CONNECTION_STRING }} >> .env
           echo CORS_VALID_ORIGINS=${{ vars.CORS_VALID_ORIGINS }} >> .env
 
           echo JWT_ACCESS_SECRET=${{ vars.JWT_ACCESS_SECRET }} >> .env
