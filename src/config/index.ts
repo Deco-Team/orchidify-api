@@ -2,7 +2,7 @@
  * ENV
  */
 export default () => ({
-  mongodbUrl: process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify',
+  mongodbUrl: decodeURIComponent(process.env.MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify',
   mail: {
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
