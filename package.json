@@ -92,15 +92,58 @@
       "json",
       "ts"
     ],
+    "preset": "ts-jest",
+    "modulePaths": [
+      "<rootDir>",
+      "<rootDir>/src"
+    ],
     "rootDir": "src",
-    "testRegex": ".*\\.(spec|e2e-spec)\\.ts$",
+    "testMatch": [
+    "<rootDir>/**/*.e2e-spec.ts",
+    "<rootDir>/**/test/*.e2e-spec.ts",
+    "<rootDir>/**/*.spec.ts",
+    "<rootDir>/**/test/*.spec.ts"
+  ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "<rootDir>/**/*.(t|j)s"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/src/seeds",
+      ".schema.ts",
+      ".pipe.ts",
+      ".guard.ts",
+      ".dto.ts",
+      ".validator.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70
+      }
+    },
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@common/(.*)$": "<rootDir>/common/$1",
+      "^@media/(.*)$": "<rootDir>/media/$1",
+      "^@mail/(.*)$": "<rootDir>/mail/$1",
+      "^@auth/(.*)$": "<rootDir>/auth/$1",
+      "^@learner/(.*)$": "<rootDir>/learner/$1",
+      "^@instructor/(.*)$": "<rootDir>/instructor/$1",
+      "^@staff/(.*)$": "<rootDir>/staff/$1",
+      "^@garden-manager/(.*)$": "<rootDir>/garden-manager/$1",
+      "^@garden/(.*)$": "<rootDir>/garden/$1",
+      "^@recruitment/(.*)$": "<rootDir>/recruitment/$1",
+      "^@seeds/(.*)$": "<rootDir>/seeds/$1",
+      "^@i18n/(.*)$": "<rootDir>/i18n/$1",
+      "^@payment/(.*)$": "<rootDir>/payment/$1",
+      "^@review/(.*)$": "<rootDir>/review/$1",
+      "^@setting/(.*)$": "<rootDir>/setting/$1",
+      "^@src/(.*)$": "<rootDir>/$1"
+    }
   }
 }
