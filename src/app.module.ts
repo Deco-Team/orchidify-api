@@ -18,6 +18,7 @@ import { StaffModule } from '@staff/staff.module'
 import { GardenManagerModule } from '@garden-manager/garden-manager.module'
 import { GardenModule } from '@garden/garden.module'
 import { RecruitmentModule } from '@recruitment/recruitment.module'
+import { MediaModule } from '@media/media.module'
 
 @Module({
   imports: [
@@ -78,6 +79,10 @@ import { RecruitmentModule } from '@recruitment/recruitment.module'
         module: AuthModule
       },
       {
+        path: 'media',
+        module: MediaModule
+      },
+      {
         path: 'learners',
         module: LearnerModule
       },
@@ -103,6 +108,7 @@ import { RecruitmentModule } from '@recruitment/recruitment.module'
       }
     ]),
     CommonModule,
+    MediaModule,
     LearnerModule,
     InstructorModule,
     StaffModule,
