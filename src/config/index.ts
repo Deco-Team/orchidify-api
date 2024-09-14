@@ -31,6 +31,11 @@ export default () => ({
       checksumKey: process.env.PAYOS_CHECKSUM_KEY,
     },
   },
+  cloudinary: {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  },
   discord: {
     webhookId: process.env.DISCORD_WEBHOOK_ID,
     webhookToken: process.env.DISCORD_WEBHOOK_TOKEN,

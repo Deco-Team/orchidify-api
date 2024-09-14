@@ -63,6 +63,10 @@ jobs:
           echo JWT_REFRESH_SECRET=${{ vars.JWT_REFRESH_SECRET }} >> .env
           echo JWT_REFRESH_EXPIRATION=${{ vars.JWT_REFRESH_EXPIRATION }} >> .env
 
+          echo CLOUDINARY_CLOUD_NAME=${{ vars.CLOUDINARY_CLOUD_NAME }} >> .env
+          echo CLOUDINARY_API_KEY=${{ vars.CLOUDINARY_API_KEY }} >> .env
+          echo CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }} >> .env
+
           echo SMTP_USERNAME=${{ secrets.SMTP_USERNAME }} >> .env
           echo SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} >> .env
           echo SMTP_HOST=${{ vars.SMTP_HOST }} >> .env

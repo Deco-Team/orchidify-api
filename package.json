@@ -39,6 +39,7 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "cloudinary": "^2.4.0",
     "discord.js": "^14.15.1",
     "ejs": "^3.1.9",
     "lodash": "^4.17.21",
@@ -99,11 +100,11 @@
     ],
     "rootDir": "src",
     "testMatch": [
-    "<rootDir>/**/*.e2e-spec.ts",
-    "<rootDir>/**/test/*.e2e-spec.ts",
-    "<rootDir>/**/*.spec.ts",
-    "<rootDir>/**/test/*.spec.ts"
-  ],
+      "<rootDir>/**/*.e2e-spec.ts",
+      "<rootDir>/**/test/*.e2e-spec.ts",
+      "<rootDir>/**/*.spec.ts",
+      "<rootDir>/**/test/*.spec.ts"
+    ],
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
