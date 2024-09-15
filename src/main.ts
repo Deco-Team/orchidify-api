@@ -86,6 +86,7 @@ async function bootstrap() {
     /orchidify.tech/
   ]
   app.use('/media/upload/base64', json({ limit: '60mb' }));
+  app.use(json({ limit: '500kb' }));
   app.enableCors({ origin: origins });
 
   const port = process.env.PORT || 5000
