@@ -14,7 +14,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger'
 import { LearnerStatus } from '@common/contracts/constant'
 import { EmailDto } from '@common/dto/email.dto'
-import { PastYear } from '@common/decorators/past-year.decorator'
+import { PastYear } from '@common/validators/past-year.validator'
 
 export class BaseLearnerDto extends EmailDto {
   @ApiProperty({ type: String })

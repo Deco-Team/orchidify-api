@@ -63,6 +63,9 @@
       "@setting/*": [
         "src/setting/*"
       ],
+      "@course/*": [
+        "src/course/*"
+      ],
       "@src/*": [
         "src/*"
       ]

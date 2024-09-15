@@ -19,6 +19,8 @@ import { GardenManagerModule } from '@garden-manager/garden-manager.module'
 import { GardenModule } from '@garden/garden.module'
 import { RecruitmentModule } from '@recruitment/recruitment.module'
 import { MediaModule } from '@media/media.module'
+import { CourseModule } from '@course/course.module'
+import { TerminusModule } from '@nestjs/terminus'
 
 @Module({
   imports: [
@@ -105,8 +107,15 @@ import { MediaModule } from '@media/media.module'
       {
         path: 'recruitments',
         module: RecruitmentModule
-      }
+      },
+      {
+        path: 'courses',
+        module: CourseModule
+      },
     ]),
+    TerminusModule.forRoot({
+      errorLogStyle: 'pretty'
+    }),
     CommonModule,
     MediaModule,
     LearnerModule,
@@ -115,6 +124,7 @@ import { MediaModule } from '@media/media.module'
     GardenManagerModule,
     GardenModule,
     RecruitmentModule,
+    CourseModule,
     AuthModule
   ],
   controllers: [AppController],

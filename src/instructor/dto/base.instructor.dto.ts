@@ -18,7 +18,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { InstructorStatus } from '@common/contracts/constant'
 import { EmailDto } from '@common/dto/email.dto'
 import { Type } from 'class-transformer'
-import { PastYear } from '@common/decorators/past-year.decorator'
+import { PastYear } from '@common/validators/past-year.validator'
 
 export class InstructorCertificateDto {
   @ApiProperty({ type: String })
