@@ -45,3 +45,13 @@ export enum RecruitmentStatus {
   EXPIRED = 'EXPIRED',
   REJECTED = 'REJECTED'
 }
+
+export enum CourseStatus {
+  DRAFT = 'DRAFT',
+  PENDING = 'PENDING',
+  PUBLISHED = 'PUBLISHED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+  DELETED = 'DELETED'
+}

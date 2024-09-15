@@ -30,6 +30,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/swagger": "^7.2.0",
+    "@nestjs/terminus": "^10.2.3",
     "@payos/node": "^1.0.6",
     "@sentry/cli": "^2.31.2",
     "@sentry/node": "^7.113.0",
@@ -144,6 +145,7 @@
       "^@payment/(.*)$": "<rootDir>/payment/$1",
       "^@review/(.*)$": "<rootDir>/review/$1",
       "^@setting/(.*)$": "<rootDir>/setting/$1",
+      "^@course/(.*)$": "<rootDir>/course/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }

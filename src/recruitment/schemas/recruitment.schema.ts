@@ -21,7 +21,7 @@ class ApplicationInfo {
   note: string
 }
 
-class StatusHistory {
+class RecruitmentStatusHistory {
   @Prop({ enum: RecruitmentStatus, required: true })
   status: RecruitmentStatus
 
@@ -68,8 +68,8 @@ export class Recruitment {
   })
   status: RecruitmentStatus
 
-  @Prop({ type: [StatusHistory] })
-  histories: StatusHistory[]
+  @Prop({ type: [RecruitmentStatusHistory] })
+  histories: RecruitmentStatusHistory[]
 
   @Prop({ type: String })
   rejectReason: string

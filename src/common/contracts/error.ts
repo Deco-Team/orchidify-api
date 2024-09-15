@@ -99,4 +99,13 @@ export const Errors = {
     message: 'Người quản lý vườn đang quản lý vườn nên không thể bị vô hiệu hóa.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+
+  /**
+   * Course
+   */
+  COURSE_NOT_FOUND: {
+    error: 'COURSE_NOT_FOUND',
+    message: 'Không tìm thấy khóa học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }
