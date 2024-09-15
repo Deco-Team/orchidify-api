@@ -15,6 +15,7 @@ import {
 } from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { DiscordService } from '@common/services/discord.service'
+import { json } from 'express'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -84,6 +85,7 @@ async function bootstrap() {
     /ngrok-free/,
     /orchidify.tech/
   ]
+  app.use('/media/upload/base64', json({ limit: '60mb' }));
   app.enableCors({ origin: origins });
 
   const port = process.env.PORT || 5000

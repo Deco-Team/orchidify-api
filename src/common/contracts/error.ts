@@ -13,6 +13,11 @@ export const Errors = {
     message: 'Không tìm thấy đối tượng.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+  UPLOAD_MEDIA_ERROR: {
+    error: 'UPLOAD_MEDIA_ERROR',
+    message: 'Upload đang gặp sự cố. Vui lòng thử lại sau.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
   VALIDATION_FAILED: {
     error: 'VALIDATION_FAILED',
     message: 'Dữ liệu không hợp lệ.',
@@ -107,5 +112,5 @@ export const Errors = {
     error: 'COURSE_NOT_FOUND',
     message: 'Không tìm thấy khóa học.',
     httpStatus: HttpStatus.NOT_FOUND
-  },
+  }
 }
