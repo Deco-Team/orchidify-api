@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common'
 import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus'
 import { AppService } from '@src/app.service'
+// import * as fs from 'fs'
+// import * as path from 'path'
 
 @Controller()
 export class AppController {
@@ -15,6 +17,12 @@ export class AppController {
   getWelcome(): string {
     return this.appService.getI18nText()
   }
+
+  // @Get('base64')
+  // async base64() {
+  //   const fileName = path.join(__dirname, '../IMG_1442.JPG')
+  //   return await fs.promises.readFile(fileName, { encoding: 'base64' })
+  // }
 
   @Get('health')
   @HealthCheck()
