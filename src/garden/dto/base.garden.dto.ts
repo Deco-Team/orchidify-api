@@ -1,4 +1,14 @@
-import { IsEnum, IsMongoId } from 'class-validator'
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsString,
+  IsUrl,
+  MaxLength
+} from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { GardenStatus } from '@common/contracts/constant'
 
@@ -8,18 +18,28 @@ export class BaseGardenDto {
   _id: string
 
   @ApiProperty({ type: String })
-  // @IsNotEmpty()
-  // @IsString()
-  // @MaxLength(50)
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(50)
   name: string
 
   @ApiProperty({ type: String })
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(500)
   description: string
 
   @ApiProperty({ type: String })
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
   address: string
 
   @ApiProperty({ type: String, isArray: true })
+  @IsArray()
+  @IsUrl({}, { each: true })
+  @ArrayMinSize(1)
+  @ArrayMaxSize(8)
   images: string[]
 
   @ApiProperty({ type: String, enum: GardenStatus })
@@ -27,7 +47,8 @@ export class BaseGardenDto {
   status: GardenStatus
 
   @ApiProperty({ type: String })
-  gardenManagerId: String
+  @IsMongoId()
+  gardenManagerId: string
 
   @ApiProperty({ type: Date })
   createdAt: Date

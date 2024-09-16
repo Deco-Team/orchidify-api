@@ -7,10 +7,9 @@ import {
 } from '@garden-manager/repositories/garden-manager.repository'
 import { IGardenManagerService, GardenManagerService } from '@garden-manager/services/garden-manager.service'
 import { ManagementGardenManagerController } from './controllers/management.garden-manager.controller'
-import { GardenModule } from '@garden/garden.module'
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: GardenManager.name, schema: GardenManagerSchema }]), GardenModule],
+  imports: [MongooseModule.forFeature([{ name: GardenManager.name, schema: GardenManagerSchema }])],
   controllers: [ManagementGardenManagerController],
   providers: [
     {

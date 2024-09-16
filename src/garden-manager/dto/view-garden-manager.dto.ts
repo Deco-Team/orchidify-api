@@ -33,11 +33,9 @@ export class QueryGardenManagerDto {
   status: GardenManagerStatus[]
 }
 
-class GardenDetailResponse extends PickType(BaseGardenDto, ['_id', 'name']) {}
-
 class GardenManagerDetailResponse extends PickType(BaseGardenManagerDto, GARDEN_MANAGER_LIST_PROJECTION) {
-  @ApiProperty({ type: GardenDetailResponse, isArray: true })
-  gardens: GardenDetailResponse[]
+  @ApiProperty({ type: PickType(BaseGardenDto, ['_id', 'name']), isArray: true })
+  gardens: BaseGardenDto[]
 }
 
 class GardenManagerListResponse extends PaginateResponse(GardenManagerDetailResponse) {}

@@ -122,7 +122,7 @@ export class ManagementGardenManagerController {
   @Patch('/:id([0-9a-f]{24})/deactivate')
   async deactivate(@Param('id') gardenManagerId: string) {
     // BR-30: If the garden manager is assigned to a garden, the garden manager cannot be deactivated.
-    const gardens = await this.gardenService.findByGardenManagerId(gardenManagerId)
+    const gardens = await this.gardenService.findManyByGardenManagerId(gardenManagerId)
     if (gardens.length > 0) throw new AppException(Errors.GARDEN_MANAGER_IS_ASSIGNED_TO_GARDEN)
 
     await Promise.all([
