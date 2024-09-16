@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common'
 import { IGardenManagerRepository } from '@garden-manager/repositories/garden-manager.repository'
 import { GardenManager, GardenManagerDocument } from '@garden-manager/schemas/garden-manager.schema'
-import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { IAuthUserService } from '@auth/services/auth.service'
 import { CreateGardenManagerDto } from '@garden-manager/dto/create-garden-manager.dto'
 import { QueryGardenManagerDto } from '@garden-manager/dto/view-garden-manager.dto'

@@ -106,6 +106,25 @@ export const Errors = {
   },
 
   /**
+   * Garden
+   */
+  GARDEN_NOT_FOUND: {
+    error: 'GARDEN_NOT_FOUND',
+    message: 'Thông tin nhà vườn không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  GARDEN_NAME_EXISTED: {
+    error: 'GARDEN_NAME_EXISTED',
+    message: 'Tên nhà vườn đã tồn tại. Vui lòng thử tên khác.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN: {
+    error: 'SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN',
+    message: 'Có khóa học đã lên lịch hoặc đang diễn ra, nhà vườn không thể bị vô hiệu hóa.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
    * Course
    */
   COURSE_NOT_FOUND: {

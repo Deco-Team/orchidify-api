@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Course, CourseSchema } from '@course/schemas/course.schema'
 import {
@@ -9,6 +9,7 @@ import { ICourseService, CourseService } from '@course/services/course.service'
 import { InstructorCourseController } from './controllers/instructor.course.controller'
 import { GardenModule } from '@garden/garden.module'
 
+@Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]), GardenModule],
   controllers: [InstructorCourseController],
