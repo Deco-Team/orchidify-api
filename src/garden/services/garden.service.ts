@@ -103,8 +103,11 @@ export class GardenService implements IGardenService {
     projection = GARDEN_LIST_PROJECTION,
     populate?: Array<PopulateOptions>
   ) {
-    const { name, address, status } = queryCourseDto
+    const { name, address, status, gardenManagerId } = queryCourseDto
     const filter: Record<string, any> = {}
+    if (gardenManagerId) {
+      filter['gardenManagerId'] = gardenManagerId
+    }
 
     const validStatus = status?.filter((status) => [GardenStatus.ACTIVE, GardenStatus.INACTIVE].includes(status))
     if (validStatus?.length > 0) {

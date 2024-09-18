@@ -6,6 +6,7 @@ import { Transform } from 'class-transformer'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { GARDEN_DETAIL_PROJECTION, GARDEN_LIST_PROJECTION } from '@garden/contracts/constant'
 import { BaseGardenManagerDto } from '@garden-manager/dto/base.garden-manager.dto'
+import { Types } from 'mongoose'
 
 export class QueryGardenDto {
   @ApiPropertyOptional({
@@ -31,6 +32,8 @@ export class QueryGardenDto {
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
   status: GardenStatus[]
+
+  gardenManagerId: Types.ObjectId
 }
 
 class GardenListItemResponse extends PickType(BaseGardenDto, GARDEN_LIST_PROJECTION) {

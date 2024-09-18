@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Put, Body, Post, Query, Param, Patch } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Put, Body, Post, Query, Param, Patch, Req } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -33,6 +33,7 @@ import { CreateGardenDto } from '@garden/dto/create-garden.dto'
 import { UpdateGardenDto } from '@garden/dto/update-garden.dto'
 import { IGardenManagerService } from '@garden-manager/services/garden-manager.service'
 import { ICourseService } from '@course/services/course.service'
+import { Types } from 'mongoose'
 
 @ApiTags('Garden - Management')
 @ApiBearerAuth()
@@ -50,13 +51,17 @@ export class ManagementGardenController {
   ) {}
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] View Garden List`
+    summary: `[${UserRole.STAFF}][${UserRole.GARDEN_MANAGER}] View Garden List`
   })
   @ApiQuery({ type: PaginationQuery })
   @ApiOkResponse({ type: GardenListDataResponse })
-  @Roles(UserRole.STAFF)
+  @Roles(UserRole.STAFF, UserRole.GARDEN_MANAGER)
   @Get()
-  async list(@Pagination() pagination: PaginationParams, @Query() queryGardenDto: QueryGardenDto) {
+  async list(@Req() req, @Pagination() pagination: PaginationParams, @Query() queryGardenDto: QueryGardenDto) {
+    const { _id, role } = _.get(req, 'user')
+    if (role === UserRole.GARDEN_MANAGER) {
+      queryGardenDto.gardenManagerId = new Types.ObjectId(_id)
+    }
     return await this.gardenService.list(pagination, queryGardenDto, GARDEN_LIST_PROJECTION, [
       {
         path: 'gardenManager',
@@ -66,13 +71,14 @@ export class ManagementGardenController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] View Garden Detail`
+    summary: `[${UserRole.STAFF}][${UserRole.GARDEN_MANAGER}] View Garden Detail`
   })
   @ApiOkResponse({ type: GardenDetailDataResponse })
   @ApiErrorResponse([Errors.GARDEN_NOT_FOUND])
-  @Roles(UserRole.STAFF)
+  @Roles(UserRole.STAFF, UserRole.GARDEN_MANAGER)
   @Get(':id([0-9a-f]{24})')
-  async getDetail(@Param('id') gardenId: string) {
+  async getDetail(@Req() req, @Param('id') gardenId: string) {
+    const { _id, role } = _.get(req, 'user')
     const garden = await this.gardenService.findById(gardenId, GARDEN_DETAIL_PROJECTION, [
       {
         path: 'gardenManager',
@@ -80,7 +86,8 @@ export class ManagementGardenController {
       }
     ])
 
-    if (!garden) throw new AppException(Errors.GARDEN_NOT_FOUND)
+    if (!garden || (role === UserRole.GARDEN_MANAGER && garden?.gardenManagerId?.toString() !== _id))
+      throw new AppException(Errors.GARDEN_NOT_FOUND)
     return garden
   }
 
@@ -101,20 +108,27 @@ export class ManagementGardenController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] Update Garden`
+    summary: `[${UserRole.STAFF}][${UserRole.GARDEN_MANAGER}] Update Garden`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([Errors.GARDEN_NOT_FOUND, Errors.GARDEN_NAME_EXISTED, Errors.GARDEN_MANAGER_NOT_FOUND])
-  @Roles(UserRole.STAFF)
+  @Roles(UserRole.STAFF, UserRole.GARDEN_MANAGER)
   @Put(':id([0-9a-f]{24})')
-  async update(@Param('id') gardenId: string, @Body() updateGardenDto: UpdateGardenDto) {
+  async update(@Req() req, @Param('id') gardenId: string, @Body() updateGardenDto: UpdateGardenDto) {
+    const { _id, role } = _.get(req, 'user')
+    const conditions = { _id: gardenId }
+    if (role === UserRole.GARDEN_MANAGER) {
+      delete updateGardenDto.gardenManagerId
+      conditions['gardenManagerId'] = new Types.ObjectId(_id)
+    }
+
     if (updateGardenDto.gardenManagerId) {
       const gardenManager = await this.gardenManagerService.findById(updateGardenDto.gardenManagerId)
       if (!gardenManager || gardenManager.status !== GardenManagerStatus.ACTIVE)
         throw new AppException(Errors.GARDEN_MANAGER_NOT_FOUND)
     }
 
-    const garden = await this.gardenService.update({ _id: gardenId }, updateGardenDto)
+    const garden = await this.gardenService.update(conditions, updateGardenDto)
 
     if (!garden) throw new AppException(Errors.GARDEN_NOT_FOUND)
     return new SuccessResponse(true)
