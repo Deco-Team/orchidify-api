@@ -6,5 +6,7 @@ export enum MediaType {
 
 export enum MediaResourceType {
   image = 'image',
-  video = 'video'
+  video = 'video',
+  raw = 'raw',
+  auto = 'auto'
 }

@@ -42,12 +42,12 @@ export class BaseMediaDto {
   asset_folder: string
 
   @ApiProperty({ type: String, example: 'IMG_0207' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   original_filename: string
 
   @ApiProperty({ type: String, example: 'JPG' })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
   original_extension: string
 }
