@@ -66,6 +66,9 @@
       "@course/*": [
         "src/course/*"
       ],
+      "@garden-timesheet/*": [
+        "src/garden-timesheet/*"
+      ],
       "@src/*": [
         "src/*"
       ]

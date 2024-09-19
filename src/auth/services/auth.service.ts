@@ -10,7 +10,6 @@ import {
   GardenManagerStatus,
   RecruitmentStatus
 } from '@common/contracts/constant'
-import * as bcrypt from 'bcrypt'
 import { AccessTokenPayload } from '@auth/strategies/jwt-access.strategy'
 import { RefreshTokenPayload } from '@auth/strategies/jwt-refresh.strategy'
 import { RefreshTokenDto, TokenResponse } from '@auth/dto/token.dto'

@@ -8,13 +8,11 @@ import {
   IsMongoId,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   IsUrl,
   Max,
   MaxLength,
   Min,
-  MinLength,
   ValidateNested
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
@@ -22,8 +20,6 @@ import { CourseStatus } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { CourseStatusHistory } from '@course/schemas/course.schema'
-import { Lesson } from '@course/schemas/lesson.schema'
-import { Assignment } from '@course/schemas/assignment.schema'
 import { CourseLevel } from '@course/contracts/constant'
 import { BaseLessonDto } from './lesson.dto'
 import { BaseAssignmentDto } from './assignment.dto'
