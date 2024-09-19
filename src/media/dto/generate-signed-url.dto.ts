@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString } from 'class-validator'
+import { Equals, IsEnum, IsIn, IsOptional, IsString } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { MediaType } from '@media/contracts/constant'
 import { DataResponse } from '@common/contracts/openapi-builder'
@@ -17,6 +17,12 @@ export class GenerateSignedUrlDto {
   @IsOptional()
   @IsString()
   folder: string
+
+  @ApiPropertyOptional({ type: String, example: 'uw' })
+  @IsOptional()
+  @IsString()
+  @Equals('uw')
+  source: 'uw'
 }
 
 class GenerateSignedUrlResponse extends GenerateSignedUrlDto {
