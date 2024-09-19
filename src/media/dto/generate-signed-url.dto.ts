@@ -23,6 +23,11 @@ export class GenerateSignedUrlDto {
   @IsString()
   @Equals('uw')
   source: 'uw'
+
+  @ApiPropertyOptional({ type: String, example: 'upload_preset' })
+  @IsOptional()
+  @IsString()
+  upload_preset: string
 }
 
 class GenerateSignedUrlResponse extends GenerateSignedUrlDto {
