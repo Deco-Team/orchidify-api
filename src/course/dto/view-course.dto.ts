@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
+import { ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseCourseDto } from './base.course.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
 import { IsOptional, IsString, MaxLength } from 'class-validator'

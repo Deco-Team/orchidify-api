@@ -21,6 +21,7 @@ import { RecruitmentModule } from '@recruitment/recruitment.module'
 import { MediaModule } from '@media/media.module'
 import { CourseModule } from '@course/course.module'
 import { TerminusModule } from '@nestjs/terminus'
+import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module'
 
 @Module({
   imports: [
@@ -112,6 +113,10 @@ import { TerminusModule } from '@nestjs/terminus'
         path: 'courses',
         module: CourseModule
       },
+      {
+        path: 'garden-timesheets',
+        module: GardenTimesheetModule
+      },
     ]),
     TerminusModule.forRoot({
       errorLogStyle: 'pretty'
@@ -125,6 +130,7 @@ import { TerminusModule } from '@nestjs/terminus'
     GardenModule,
     RecruitmentModule,
     CourseModule,
+    GardenTimesheetModule,
     AuthModule
   ],
   controllers: [AppController],

@@ -9,7 +9,12 @@ export enum UserRole {
   INSTRUCTOR = 'INSTRUCTOR',
   ADMIN = 'ADMIN',
   STAFF = 'STAFF',
-  GARDEN_MANAGER = 'GARDEN_MANAGER',
+  GARDEN_MANAGER = 'GARDEN_MANAGER'
+}
+
+export enum TimesheetType {
+  MONTH = 'MONTH',
+  WEEK = 'WEEK'
 }
 
 export enum LearnerStatus {
@@ -54,4 +59,15 @@ export enum CourseStatus {
   COMPLETED = 'COMPLETED',
   CANCELED = 'CANCELED',
   DELETED = 'DELETED'
+}
+
+export enum GardenTimesheetStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}
+
+export enum SlotStatus {
+  AVAILABLE = 'AVAILABLE',
+  LOCKED = 'LOCKED',
+  NOT_AVAILABLE = 'NOT_AVAILABLE'
 }

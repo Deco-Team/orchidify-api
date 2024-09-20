@@ -23,5 +23,5 @@ class PastYearValidator implements ValidatorConstraintInterface {
 }
 
 export function PastYear(yearsAgo: number = 10): PropertyDecorator {
-  return applyDecorators(IsDateString(), Validate(PastYearValidator, [yearsAgo]))
+  return applyDecorators(IsDateString({ strict: true }), Validate(PastYearValidator, [yearsAgo]))
 }

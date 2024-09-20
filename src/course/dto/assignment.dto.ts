@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsNotEmpty, IsString, MaxLength, ValidateNested } from 'class-validator'
+import { IsMongoId, IsNotEmpty, IsString, MaxLength, ValidateNested } from 'class-validator'
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'

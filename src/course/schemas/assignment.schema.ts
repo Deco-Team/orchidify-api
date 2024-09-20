@@ -6,8 +6,6 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 export type AssignmentDocument = HydratedDocument<Assignment>
 
 @Schema({
-  // _id: false,
-  // collection: 'assignments',
   timestamps: false,
 })
 export class Assignment {
