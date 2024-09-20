@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Put, Body, Post, Query, Param, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Put, Body, Post, Query, Param, Req, Delete } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -102,7 +102,11 @@ export class InstructorCourseController {
   @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
   @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
   @Get(':courseId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
-  async getAssignmentDetail(@Req() req, @Param('courseId') courseId: string, @Param('assignmentId') assignmentId: string) {
+  async getAssignmentDetail(
+    @Req() req,
+    @Param('courseId') courseId: string,
+    @Param('assignmentId') assignmentId: string
+  ) {
     const { _id: instructorId } = _.get(req, 'user')
     const assignment = await this.assignmentService.findOneBy({ assignmentId, courseId, instructorId })
 
@@ -142,6 +146,23 @@ export class InstructorCourseController {
     const course = await this.courseService.update(
       { _id: courseId, status: CourseStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
       updateCourseDto
+    )
+
+    if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
+    return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `Delete ${CourseStatus.DRAFT} Course`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.COURSE_NOT_FOUND])
+  @Delete(':id([0-9a-f]{24})')
+  async delete(@Req() req, @Param('id') courseId: string) {
+    const { _id } = _.get(req, 'user')
+    const course = await this.courseService.update(
+      { _id: courseId, status: CourseStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
+      { status: CourseStatus.DELETED }
     )
 
     if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
