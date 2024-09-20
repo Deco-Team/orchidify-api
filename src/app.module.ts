@@ -22,6 +22,7 @@ import { MediaModule } from '@media/media.module'
 import { CourseModule } from '@course/course.module'
 import { TerminusModule } from '@nestjs/terminus'
 import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module'
+import { CourseTemplateModule } from '@course-template/course-template.module'
 
 @Module({
   imports: [
@@ -114,6 +115,10 @@ import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module
         module: CourseModule
       },
       {
+        path: 'course-templates',
+        module: CourseTemplateModule
+      },
+      {
         path: 'garden-timesheets',
         module: GardenTimesheetModule
       },
@@ -130,6 +135,7 @@ import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module
     GardenModule,
     RecruitmentModule,
     CourseModule,
+    CourseTemplateModule,
     GardenTimesheetModule,
     AuthModule
   ],

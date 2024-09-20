@@ -19,7 +19,7 @@ export class QueryCourseDto {
   title: string
 
   @ApiPropertyOptional({
-    enum: CourseStatus,
+    enum: [CourseStatus.PUBLISHED, CourseStatus.IN_PROGRESS, CourseStatus.COMPLETED, CourseStatus.CANCELED],
     isArray: true
   })
   @IsOptional()

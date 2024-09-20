@@ -125,6 +125,15 @@ export const Errors = {
   },
 
   /**
+   * CourseTemplate
+   */
+  COURSE_TEMPLATE_NOT_FOUND: {
+    error: 'COURSE_TEMPLATE_NOT_FOUND',
+    message: 'Không tìm thấy mẫu khóa học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+
+  /**
    * Course
    */
   COURSE_NOT_FOUND: {

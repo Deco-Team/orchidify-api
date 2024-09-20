@@ -69,14 +69,7 @@ export class CourseService implements ICourseService {
     }
 
     const validStatus = status?.filter((status) =>
-      [
-        CourseStatus.DRAFT,
-        CourseStatus.PENDING,
-        CourseStatus.PUBLISHED,
-        CourseStatus.IN_PROGRESS,
-        CourseStatus.COMPLETED,
-        CourseStatus.CANCELED
-      ].includes(status)
+      [CourseStatus.PUBLISHED, CourseStatus.IN_PROGRESS, CourseStatus.COMPLETED, CourseStatus.CANCELED].includes(status)
     )
     if (validStatus?.length > 0) {
       filter['status'] = {

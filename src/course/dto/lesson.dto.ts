@@ -1,4 +1,4 @@
-import { IsArray, IsMongoId, IsNotEmpty, IsString, MaxLength, ValidateNested } from 'class-validator'
+import { IsArray, IsMongoId, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
@@ -7,6 +7,7 @@ import { ArrayMediaMaxSize } from '@common/validators/array-media-max-size.valid
 
 export class BaseLessonDto {
   @ApiProperty({ type: String })
+  @IsOptional()
   @IsMongoId()
   _id: string
 
