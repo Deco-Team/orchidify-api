@@ -36,6 +36,10 @@ import {
 } from '@course/dto/view-course.dto'
 import { INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { Types } from 'mongoose'
+import { ILessonService } from '@course/services/lesson.service'
+import { ViewLessonDetailDataResponse } from '@course/dto/view-lesson.dto'
+import { IAssignmentService } from '@course/services/assignment.service'
+import { ViewAssignmentDetailDataResponse } from '@course/dto/view-assignment.dto'
 
 @ApiTags('Course - Instructor')
 @ApiBearerAuth()
@@ -46,7 +50,11 @@ import { Types } from 'mongoose'
 export class InstructorCourseController {
   constructor(
     @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    private readonly courseService: ICourseService,
+    @Inject(ILessonService)
+    private readonly lessonService: ILessonService,
+    @Inject(IAssignmentService)
+    private readonly assignmentService: IAssignmentService
   ) {}
 
   @ApiOperation({
@@ -72,6 +80,34 @@ export class InstructorCourseController {
 
     if (!course || course.instructorId?.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
     return course
+  }
+
+  @ApiOperation({
+    summary: `View Lesson Detail`
+  })
+  @ApiOkResponse({ type: ViewLessonDetailDataResponse })
+  @ApiErrorResponse([Errors.LESSON_NOT_FOUND])
+  @Get(':courseId([0-9a-f]{24})/lessons/:lessonId([0-9a-f]{24})')
+  async getLessonDetail(@Req() req, @Param('courseId') courseId: string, @Param('lessonId') lessonId: string) {
+    const { _id: instructorId } = _.get(req, 'user')
+    const lesson = await this.lessonService.findOneBy({ lessonId, courseId, instructorId })
+
+    if (!lesson) throw new AppException(Errors.LESSON_NOT_FOUND)
+    return lesson
+  }
+
+  @ApiOperation({
+    summary: `View Assignment Detail`
+  })
+  @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
+  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
+  @Get(':courseId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
+  async getAssignmentDetail(@Req() req, @Param('courseId') courseId: string, @Param('assignmentId') assignmentId: string) {
+    const { _id: instructorId } = _.get(req, 'user')
+    const assignment = await this.assignmentService.findOneBy({ assignmentId, courseId, instructorId })
+
+    if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
+    return assignment
   }
 
   @ApiOperation({

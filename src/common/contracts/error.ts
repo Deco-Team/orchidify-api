@@ -131,5 +131,23 @@ export const Errors = {
     error: 'COURSE_NOT_FOUND',
     message: 'Không tìm thấy khóa học.',
     httpStatus: HttpStatus.NOT_FOUND
+  },
+
+  /**
+   * Lesson
+   */
+  LESSON_NOT_FOUND: {
+    error: 'LESSON_NOT_FOUND',
+    message: 'Không tìm thấy bài học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+
+  /**
+   * Assignment
+   */
+  ASSIGNMENT_NOT_FOUND: {
+    error: 'ASSIGNMENT_NOT_FOUND',
+    message: 'Không tìm thấy bài tập.',
+    httpStatus: HttpStatus.NOT_FOUND
   }
 }
