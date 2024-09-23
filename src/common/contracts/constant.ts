@@ -51,9 +51,14 @@ export enum RecruitmentStatus {
   REJECTED = 'REJECTED'
 }
 
-export enum CourseStatus {
+export enum CourseTemplateStatus {
   DRAFT = 'DRAFT',
-  PENDING = 'PENDING',
+  REQUESTING = 'REQUESTING',
+  ACTIVE = 'ACTIVE',
+  DELETED = 'DELETED'
+}
+
+export enum CourseStatus {
   PUBLISHED = 'PUBLISHED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',

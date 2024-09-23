@@ -2,32 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
-import { CourseStatus, UserRole } from '@common/contracts/constant'
+import { CourseTemplateStatus } from '@common/contracts/constant'
 import { Instructor } from '@instructor/schemas/instructor.schema'
-import { Garden } from '@garden/schemas/garden.schema'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
-import { Lesson, LessonSchema } from './lesson.schema'
-import { Assignment, AssignmentSchema } from './assignment.schema'
+import { Lesson, LessonSchema } from '@course/schemas/lesson.schema'
+import { Assignment, AssignmentSchema } from '@course/schemas/assignment.schema'
 import { CourseLevel } from '@course/contracts/constant'
 
-export type CourseDocument = HydratedDocument<Course>
-
-export class CourseStatusHistory {
-  @Prop({ enum: CourseStatus, required: true })
-  status: CourseStatus
-
-  @Prop({ type: Date, required: true })
-  timestamp: Date
-
-  @Prop({ type: Types.ObjectId })
-  userId: Types.ObjectId
-
-  @Prop({ type: String, enum: UserRole })
-  userRole: UserRole
-}
+export type CourseTemplateDocument = HydratedDocument<CourseTemplate>
 
 @Schema({
-  collection: 'courses',
+  collection: 'course-templates',
   timestamps: {
     createdAt: true,
     updatedAt: true
@@ -39,7 +24,7 @@ export class CourseStatusHistory {
     virtuals: true
   }
 })
-export class Course {
+export class CourseTemplate {
   constructor(id?: string) {
     this._id = id
   }
@@ -52,20 +37,14 @@ export class Course {
   @Prop({ type: String, required: true })
   description: string
 
-  @Prop({ type: Date })
-  startDate: Date
-
   @Prop({ type: Number, required: true })
   price: number
 
-  @Prop({ enum: CourseLevel, required: true })
+  @Prop({ required: true, enum: CourseLevel })
   level: string
 
   @Prop({ type: String, required: true })
   type: string
-
-  @Prop({ type: Number })
-  duration: number
 
   @Prop({ type: String, required: true })
   thumbnail: string
@@ -74,36 +53,19 @@ export class Course {
   media: BaseMediaDto[]
 
   @Prop({
-    enum: CourseStatus,
-    default: CourseStatus.PUBLISHED
+    enum: CourseTemplateStatus,
+    default: CourseTemplateStatus.DRAFT
   })
-  status: CourseStatus
-
-  @Prop({
-    type: [CourseStatusHistory]
-  })
-  histories: CourseStatusHistory[]
+  status: CourseTemplateStatus
 
   @Prop({ type: Number })
   learnerLimit: number
 
-  @Prop({ type: Number })
-  learnerQuantity: number
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: Course.name }] })
-  childCourseIds: Types.ObjectId[]
-
   @Prop({ type: String })
   rate: string
 
-  @Prop({ type: String })
-  cancelReason: string
-
   @Prop({ type: Types.ObjectId, ref: Instructor.name, required: true })
   instructorId: Types.ObjectId
-
-  @Prop({ type: Types.ObjectId, ref: Garden.name })
-  gardenId: Types.ObjectId
 
   @Prop({ type: [LessonSchema], select: false })
   lessons: Lesson[]
@@ -112,6 +74,6 @@ export class Course {
   assignments: Assignment[]
 }
 
-export const CourseSchema = SchemaFactory.createForClass(Course)
-CourseSchema.plugin(paginate)
-// CourseSchema.index({ instructorId: 1 })
+export const CourseTemplateSchema = SchemaFactory.createForClass(CourseTemplate)
+CourseTemplateSchema.plugin(paginate)
+// CourseTemplateSchema.index({ instructorId: 1 })

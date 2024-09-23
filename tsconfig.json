@@ -66,6 +66,9 @@
       "@course/*": [
         "src/course/*"
       ],
+      "@course-template/*": [
+        "src/course-template/*"
+      ],
       "@garden-timesheet/*": [
         "src/garden-timesheet/*"
       ],
