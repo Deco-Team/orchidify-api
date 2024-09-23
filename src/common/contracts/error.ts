@@ -132,6 +132,16 @@ export const Errors = {
     message: 'Không tìm thấy mẫu khóa học.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+  CAN_NOT_UPDATE_COURSE_TEMPLATE: {
+    error: 'CAN_NOT_UPDATE_COURSE_TEMPLATE',
+    message: 'Mẫu khóa học không thể cập nhật.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CAN_NOT_DELETE_COURSE_TEMPLATE: {
+    error: 'CAN_NOT_DELETE_COURSE_TEMPLATE',
+    message: 'Mẫu khóa học không thể xóa.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Course

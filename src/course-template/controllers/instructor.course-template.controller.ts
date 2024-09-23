@@ -127,7 +127,7 @@ export class InstructorCourseTemplateController {
   }
 
   @ApiOperation({
-    summary: `Create ${CourseTemplateStatus.DRAFT} Course`
+    summary: `Create Template Course`
   })
   @ApiCreatedResponse({ type: IDDataResponse })
   @Post()
@@ -140,10 +140,10 @@ export class InstructorCourseTemplateController {
   }
 
   @ApiOperation({
-    summary: `Update ${CourseTemplateStatus.DRAFT} Template Course`
+    summary: `Update Template Course at status: [${CourseTemplateStatus.DRAFT}, ${CourseTemplateStatus.ACTIVE}]`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.COURSE_TEMPLATE_NOT_FOUND])
+  @ApiErrorResponse([Errors.COURSE_TEMPLATE_NOT_FOUND, Errors.CAN_NOT_UPDATE_COURSE_TEMPLATE])
   @Put(':id([0-9a-f]{24})')
   async update(
     @Req() req,
@@ -151,29 +151,52 @@ export class InstructorCourseTemplateController {
     @Body() updateCourseTemplateDto: UpdateCourseTemplateDto
   ) {
     const { _id } = _.get(req, 'user')
-    const courseTemplate = await this.courseTemplateService.update(
-      { _id: courseTemplateId, status: CourseTemplateStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
+    const courseTemplate = await this.courseTemplateService.findById(courseTemplateId)
+
+    if (
+      !courseTemplate ||
+      courseTemplate.instructorId?.toString() !== _id ||
+      courseTemplate.status === CourseTemplateStatus.DELETED
+    )
+      throw new AppException(Errors.COURSE_TEMPLATE_NOT_FOUND)
+    if ([CourseTemplateStatus.DRAFT, CourseTemplateStatus.ACTIVE].includes(courseTemplate.status) === false)
+      throw new AppException(Errors.CAN_NOT_UPDATE_COURSE_TEMPLATE)
+    if (courseTemplate.status === CourseTemplateStatus.ACTIVE) {
+      delete updateCourseTemplateDto.title
+      delete updateCourseTemplateDto.type
+      delete updateCourseTemplateDto.level
+    }
+
+    await this.courseTemplateService.update(
+      {
+        _id: courseTemplateId
+      },
       updateCourseTemplateDto
     )
-
-    if (!courseTemplate) throw new AppException(Errors.COURSE_TEMPLATE_NOT_FOUND)
     return new SuccessResponse(true)
   }
 
   @ApiOperation({
-    summary: `Delete ${CourseTemplateStatus.DRAFT} Template Course`
+    summary: `Delete Template Course at status ${CourseTemplateStatus.DRAFT}`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.COURSE_TEMPLATE_NOT_FOUND])
+  @ApiErrorResponse([Errors.COURSE_TEMPLATE_NOT_FOUND, Errors.CAN_NOT_DELETE_COURSE_TEMPLATE])
   @Delete(':id([0-9a-f]{24})')
   async delete(@Req() req, @Param('id') courseTemplateId: string) {
     const { _id } = _.get(req, 'user')
-    const courseTemplate = await this.courseTemplateService.update(
-      { _id: courseTemplateId, status: CourseTemplateStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
-      { status: CourseTemplateStatus.DELETED }
-    )
+    const courseTemplate = await this.courseTemplateService.findById(courseTemplateId)
 
-    if (!courseTemplate) throw new AppException(Errors.COURSE_TEMPLATE_NOT_FOUND)
+    if (
+      !courseTemplate ||
+      courseTemplate.instructorId?.toString() !== _id ||
+      courseTemplate.status === CourseTemplateStatus.DELETED
+    )
+      throw new AppException(Errors.COURSE_TEMPLATE_NOT_FOUND)
+    if (courseTemplate.status !== CourseTemplateStatus.DRAFT)
+      throw new AppException(Errors.CAN_NOT_DELETE_COURSE_TEMPLATE)
+
+    await this.courseTemplateService.update({ _id: courseTemplateId }, { status: CourseTemplateStatus.DELETED })
+
     return new SuccessResponse(true)
   }
 }
