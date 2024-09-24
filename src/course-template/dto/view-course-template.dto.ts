@@ -8,6 +8,7 @@ import {
   INSTRUCTOR_VIEW_COURSE_TEMPLATE_LIST_PROJECTION,
   INSTRUCTOR_VIEW_COURSE_TEMPLATE_DETAIL_PROJECTION
 } from '@course-template/contracts/constant'
+import { CourseLevel } from '@course/contracts/constant'
 
 export class QueryCourseTemplateDto {
   @ApiPropertyOptional({
@@ -17,6 +18,22 @@ export class QueryCourseTemplateDto {
   @IsString()
   @MaxLength(50)
   title: string
+
+  @ApiPropertyOptional({
+    description: 'Type to search'
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  type: string
+
+  @ApiPropertyOptional({
+    enum: CourseLevel,
+    isArray: true
+  })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  level: CourseLevel[]
 
   @ApiPropertyOptional({
     enum: [CourseTemplateStatus.DRAFT, CourseTemplateStatus.ACTIVE, CourseTemplateStatus.REQUESTING],

@@ -16,6 +16,7 @@ import {
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { DiscordService } from '@common/services/discord.service'
 import { json } from 'express'
+import mongoose from 'mongoose'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -79,15 +80,19 @@ async function bootstrap() {
     })
   }
 
+  if (process.env.NODE_ENV === 'local') {
+    mongoose.set('debug', true)
+  }
+
   // Example: process.env.CORS_VALID_ORIGINS=localhost,ngrok-free => parse to [ /localhost/, /ngrok-free/ ]
   const origins = process.env.CORS_VALID_ORIGINS?.split(',').map((origin) => new RegExp(origin)) || [
     /localhost/,
     /ngrok-free/,
     /orchidify.tech/
   ]
-  app.use('/media/upload/base64', json({ limit: '60mb' }));
-  app.use(json({ limit: '500kb' }));
-  app.enableCors({ origin: origins });
+  app.use('/media/upload/base64', json({ limit: '60mb' }))
+  app.use(json({ limit: '500kb' }))
+  app.enableCors({ origin: origins })
 
   const port = process.env.PORT || 5000
   await app.listen(port)

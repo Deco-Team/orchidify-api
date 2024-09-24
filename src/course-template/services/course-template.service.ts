@@ -7,6 +7,7 @@ import { CourseTemplateStatus } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { INSTRUCTOR_VIEW_COURSE_TEMPLATE_LIST_PROJECTION } from '@course-template/contracts/constant'
 import { QueryCourseTemplateDto } from '@course-template/dto/view-course-template.dto'
+import { CourseLevel } from '@course/contracts/constant'
 
 export const ICourseTemplateService = Symbol('ICourseTemplateService')
 
@@ -70,11 +71,20 @@ export class CourseTemplateService implements ICourseTemplateService {
     queryCourseTemplateDto: QueryCourseTemplateDto,
     projection = INSTRUCTOR_VIEW_COURSE_TEMPLATE_LIST_PROJECTION
   ) {
-    const { title, status } = queryCourseTemplateDto
+    const { title, type, level, status } = queryCourseTemplateDto
     const filter: Record<string, any> = {
       instructorId: new Types.ObjectId(instructorId),
       status: {
         $ne: CourseTemplateStatus.DELETED
+      }
+    }
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      filter['level'] = {
+        $in: validLevel
       }
     }
 
@@ -84,6 +94,15 @@ export class CourseTemplateService implements ICourseTemplateService {
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
       }
     }
 

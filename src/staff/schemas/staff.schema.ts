@@ -57,3 +57,4 @@ export const StaffSchema = SchemaFactory.createForClass(Staff)
 
 StaffSchema.plugin(paginate)
 StaffSchema.index({ email: 1 })
+StaffSchema.index({ name: 'text', email: 'text' })

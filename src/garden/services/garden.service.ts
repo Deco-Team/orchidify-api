@@ -116,6 +116,15 @@ export class GardenService implements IGardenService {
       }
     }
 
+    let textSearch = ''
+    if (name) textSearch += name.trim()
+    if (address) textSearch += ' ' + address.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
+      }
+    }
+
     return this.gardenRepository.model.paginate(filter, {
       ...pagination,
       projection,

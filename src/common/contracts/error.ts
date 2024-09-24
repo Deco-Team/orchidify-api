@@ -168,5 +168,19 @@ export const Errors = {
     error: 'ASSIGNMENT_NOT_FOUND',
     message: 'Không tìm thấy bài tập.',
     httpStatus: HttpStatus.NOT_FOUND
-  }
+  },
+
+  /**
+   * Staff
+   */
+  STAFF_NOT_FOUND: {
+    error: 'STAFF_NOT_FOUND',
+    message: 'Thông tin nhân viên không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  STAFF_IS_ASSIGNED_TO_RECRUITMENT_PROCESS: {
+    error: 'STAFF_IS_ASSIGNED_TO_RECRUITMENT_PROCESS',
+    message: 'Nhân viên được phân công vào một quá trình tuyển dụng.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 }
