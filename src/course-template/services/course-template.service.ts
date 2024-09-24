@@ -11,7 +11,10 @@ import { QueryCourseTemplateDto } from '@course-template/dto/view-course-templat
 export const ICourseTemplateService = Symbol('ICourseTemplateService')
 
 export interface ICourseTemplateService {
-  create(CreateCourseTemplateDto: CreateCourseTemplateDto, options?: SaveOptions | undefined): Promise<CourseTemplateDocument>
+  create(
+    CreateCourseTemplateDto: CreateCourseTemplateDto,
+    options?: SaveOptions | undefined
+  ): Promise<CourseTemplateDocument>
   findById(
     courseTemplateId: string,
     projection?: string | Record<string, any>,
@@ -69,7 +72,10 @@ export class CourseTemplateService implements ICourseTemplateService {
   ) {
     const { title, status } = queryCourseTemplateDto
     const filter: Record<string, any> = {
-      instructorId: new Types.ObjectId(instructorId)
+      instructorId: new Types.ObjectId(instructorId),
+      status: {
+        $ne: CourseTemplateStatus.DELETED
+      }
     }
 
     const validStatus = status?.filter((status) =>
