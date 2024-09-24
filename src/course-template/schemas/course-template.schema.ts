@@ -76,4 +76,4 @@ export class CourseTemplate {
 
 export const CourseTemplateSchema = SchemaFactory.createForClass(CourseTemplate)
 CourseTemplateSchema.plugin(paginate)
-// CourseTemplateSchema.index({ instructorId: 1 })
+CourseTemplateSchema.index({ title: 'text', type: 'text'})

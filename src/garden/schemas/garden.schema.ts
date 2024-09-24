@@ -55,6 +55,7 @@ GardenSchema.plugin(paginate)
 
 GardenSchema.index({ gardenManagerId: 1 })
 GardenSchema.index({ name: 1 }, { unique: true})
+GardenSchema.index({ name: 'text', address: 'text' })
 
 GardenSchema.virtual('gardenManager', {
   ref: 'GardenManager',

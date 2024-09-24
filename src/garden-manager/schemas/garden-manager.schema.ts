@@ -50,6 +50,7 @@ export const GardenManagerSchema = SchemaFactory.createForClass(GardenManager)
 GardenManagerSchema.plugin(paginate)
 
 GardenManagerSchema.index({ email: 1 })
+GardenManagerSchema.index({ name: 'text', email: 'text' })
 
 GardenManagerSchema.virtual('gardens', {
   ref: 'Garden',
