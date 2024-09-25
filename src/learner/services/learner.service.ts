@@ -1,4 +1,8 @@
 import { IAuthUserService } from '@auth/services/auth.service'
+import { LearnerStatus } from '@common/contracts/constant'
+import { PaginationParams } from '@common/decorators/pagination.decorator'
+import { LEARNER_LIST_PROJECTION } from '@learner/contracts/constant'
+import { QueryLearnerDto } from '@learner/dto/view-learner.dto'
 import { Injectable, Inject } from '@nestjs/common'
 import { ILearnerRepository } from '@src/learner/repositories/learner.repository'
 import { Learner, LearnerDocument } from '@src/learner/schemas/learner.schema'
@@ -10,7 +14,12 @@ export interface ILearnerService extends IAuthUserService {
   create(learner: any, options?: SaveOptions | undefined): Promise<LearnerDocument>
   findById(learnerId: string, projection?: string | Record<string, any>): Promise<LearnerDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<LearnerDocument>
-  update(conditions: FilterQuery<Learner>, payload: UpdateQuery<Learner>, options?: QueryOptions | undefined): Promise<LearnerDocument>
+  update(
+    conditions: FilterQuery<Learner>,
+    payload: UpdateQuery<Learner>,
+    options?: QueryOptions | undefined
+  ): Promise<LearnerDocument>
+  list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto)
 }
 
 @Injectable()
@@ -44,11 +53,39 @@ export class LearnerService implements ILearnerService {
     return learner
   }
 
-  public update(
-    conditions: FilterQuery<Learner>,
-    payload: UpdateQuery<Learner>,
-    options?: QueryOptions | undefined
-  ) {
+  public update(conditions: FilterQuery<Learner>, payload: UpdateQuery<Learner>, options?: QueryOptions | undefined) {
     return this.learnerRepository.findOneAndUpdate(conditions, payload, options)
+  }
+
+  async list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto, projection = LEARNER_LIST_PROJECTION) {
+    const { name, email, status } = queryLearnerDto
+    const filter: Record<string, any> = {
+      status: {
+        $ne: LearnerStatus.UNVERIFIED
+      }
+    }
+
+    const validStatus = status?.filter((status) =>
+      [LearnerStatus.ACTIVE, LearnerStatus.INACTIVE].includes(status)
+    )
+    if (validStatus?.length > 0) {
+      filter['status'] = {
+        $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (name) textSearch += name.trim()
+    if (email) textSearch += ' ' + email.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
+      }
+    }
+
+    return this.learnerRepository.model.paginate(filter, {
+      ...pagination,
+      projection
+    })
   }
 }

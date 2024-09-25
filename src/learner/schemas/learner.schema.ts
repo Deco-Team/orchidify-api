@@ -54,3 +54,4 @@ export const LearnerSchema = SchemaFactory.createForClass(Learner)
 
 LearnerSchema.plugin(paginate)
 LearnerSchema.index({ email: 1 })
+LearnerSchema.index({ name: 'text', email: 'text' })

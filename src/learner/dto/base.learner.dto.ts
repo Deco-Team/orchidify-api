@@ -49,4 +49,10 @@ export class BaseLearnerDto extends EmailDto {
   @ApiProperty({ type: String, enum: LearnerStatus })
   @IsEnum(LearnerStatus)
   status: LearnerStatus
+
+  @ApiProperty({ type: Date })
+  createdAt: Date
+
+  @ApiProperty({ type: Date })
+  updatedAt: Date
 }
