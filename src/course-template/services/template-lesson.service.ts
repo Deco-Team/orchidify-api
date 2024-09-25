@@ -23,8 +23,13 @@ export class TemplateLessonService implements ITemplateLessonService {
         _id: courseTemplateId,
         instructorId: new Types.ObjectId(instructorId)
       },
-      projection: 'lessons'
+      projection: 'lessons',
+      options: { lean: true }
     })
-    return courseTemplate?.lessons?.find((lesson) => lesson._id.toString() === lessonId)
+
+    const lessonIndex = courseTemplate?.lessons?.findIndex((lesson) => lesson._id.toString() === lessonId)
+    if (lessonIndex === -1) return null
+
+    return { ...courseTemplate?.lessons[lessonIndex], index: lessonIndex }
   }
 }

@@ -23,8 +23,14 @@ export class TemplateAssignmentService implements ITemplateAssignmentService {
         _id: courseTemplateId,
         instructorId: new Types.ObjectId(instructorId)
       },
-      projection: 'assignments'
+      projection: 'assignments',
+      options: { lean: true }
     })
-    return courseTemplate?.assignments?.find((templateAssignment) => templateAssignment._id.toString() === assignmentId)
+    const assignmentIndex = courseTemplate?.assignments?.findIndex(
+      (templateAssignment) => templateAssignment._id.toString() === assignmentId
+    )
+    if (assignmentIndex === -1) return null
+
+    return { ...courseTemplate?.assignments[assignmentIndex], index: assignmentIndex }
   }
 }

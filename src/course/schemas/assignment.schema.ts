@@ -21,8 +21,8 @@ export class Assignment {
   @Prop({ type: String, required: true })
   description: string
 
-  @Prop({ type: BaseMediaDto, required: true })
-  attachment: BaseMediaDto
+  @Prop({ type: [BaseMediaDto], required: true })
+  attachments: BaseMediaDto[]
 }
 
 export const AssignmentSchema = SchemaFactory.createForClass(Assignment)
