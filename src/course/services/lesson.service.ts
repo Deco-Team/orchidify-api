@@ -23,8 +23,13 @@ export class LessonService implements ILessonService {
         _id: courseId,
         instructorId: new Types.ObjectId(instructorId)
       },
-      projection: 'lessons'
+      projection: 'lessons',
+      options: { lean: true }
     })
-    return course?.lessons?.find((lesson) => lesson._id.toString() === lessonId)
+
+    const lessonIndex = course?.lessons.findIndex((lesson) => lesson._id.toString() === lessonId)
+    if (lessonIndex === -1) return null
+
+    return { ...course?.lessons[lessonIndex], index: lessonIndex }
   }
 }

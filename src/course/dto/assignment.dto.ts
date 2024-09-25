@@ -1,4 +1,4 @@
-import { IsMongoId, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
+import { ArrayMaxSize, IsArray, IsMongoId, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
@@ -20,11 +20,12 @@ export class BaseAssignmentDto {
   @MaxLength(500)
   description: string
 
-  @ApiProperty({ type: BaseMediaDto })
-  @IsNotEmpty()
+  @ApiProperty({ type: BaseMediaDto, isArray: true })
+  @IsArray()
+  @ArrayMaxSize(1)
   @Type(() => BaseMediaDto)
-  @ValidateNested()
-  attachment: BaseMediaDto
+  @ValidateNested({ each: true })
+  attachments: BaseMediaDto[]
 }
 
-export class CreateAssignmentDto extends PickType(BaseAssignmentDto, ['title', 'description', 'attachment']) {}
+export class CreateAssignmentDto extends PickType(BaseAssignmentDto, ['title', 'description', 'attachments']) {}
