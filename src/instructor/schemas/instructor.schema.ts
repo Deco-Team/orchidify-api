@@ -70,3 +70,4 @@ export const InstructorSchema = SchemaFactory.createForClass(Instructor)
 
 InstructorSchema.plugin(paginate)
 InstructorSchema.index({ email: 1 })
+InstructorSchema.index({ name: 'text', email: 'text' })

@@ -1,8 +1,47 @@
-import { PickType } from '@nestjs/swagger'
+import { ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseLearnerDto } from './base.learner.dto'
-import { DataResponse } from '@common/contracts/openapi-builder'
-import { LEARNER_PROFILE_PROJECTION } from '@learner/contracts/constant'
+import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
+import {
+  LEARNER_DETAIL_PROJECTION,
+  LEARNER_LIST_PROJECTION,
+  LEARNER_PROFILE_PROJECTION
+} from '@learner/contracts/constant'
+import { IsOptional, IsString, MaxLength } from 'class-validator'
+import { LearnerStatus } from '@common/contracts/constant'
+import { Transform } from 'class-transformer'
+
+export class QueryLearnerDto {
+  @ApiPropertyOptional({
+    description: 'Name to search'
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  name: string
+
+  @ApiPropertyOptional({
+    description: 'Email to search'
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  email: string
+
+  @ApiPropertyOptional({
+    enum: [LearnerStatus.ACTIVE, LearnerStatus.INACTIVE],
+    isArray: true
+  })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  status: LearnerStatus[]
+}
 
 class LearnerProfileResponse extends PickType(BaseLearnerDto, LEARNER_PROFILE_PROJECTION) {}
-
 export class LearnerProfileDataResponse extends DataResponse(LearnerProfileResponse) {}
+
+class LearnerDetailResponse extends PickType(BaseLearnerDto, LEARNER_DETAIL_PROJECTION) {}
+export class LearnerDetailDataResponse extends DataResponse(LearnerDetailResponse) {}
+
+class LearnerListItemResponse extends PickType(BaseLearnerDto, LEARNER_LIST_PROJECTION) {}
+class LearnerListResponse extends PaginateResponse(LearnerListItemResponse) {}
+export class LearnerListDataResponse extends DataResponse(LearnerListResponse) {}
