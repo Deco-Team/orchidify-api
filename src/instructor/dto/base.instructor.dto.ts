@@ -124,4 +124,10 @@ export class BaseInstructorDto extends EmailDto {
   @Type(() => PaymentInfoDto)
   @ValidateNested()
   paymentInfo: PaymentInfoDto
+  
+  @ApiProperty({ type: Date })
+  createdAt: Date
+
+  @ApiProperty({ type: Date })
+  updatedAt: Date
 }
