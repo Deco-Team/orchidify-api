@@ -24,6 +24,7 @@ export interface ICourseService {
   ): Promise<CourseDocument>
   listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto)
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
+  findManyByInstructorIdAndStatus(instructorId: string, status: CourseStatus[]): Promise<CourseDocument[]>
 }
 
 @Injectable()
@@ -84,13 +85,25 @@ export class CourseService implements ICourseService {
   }
 
   async findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]> {
-    const gardens = await this.courseRepository.findMany({
+    const courses = await this.courseRepository.findMany({
       conditions: {
         status: {
           $in: status
         }
       }
     })
-    return gardens
+    return courses
+  }
+
+  async findManyByInstructorIdAndStatus(instructorId: string, status: CourseStatus[]): Promise<CourseDocument[]> {
+    const courses = await this.courseRepository.findMany({
+      conditions: {
+        instructorId: new Types.ObjectId(instructorId),
+        status: {
+          $in: status
+        }
+      }
+    })
+    return courses
   }
 }

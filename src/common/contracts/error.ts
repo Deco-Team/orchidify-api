@@ -90,6 +90,11 @@ export const Errors = {
     message: 'Chúng tôi đang tiến hành đánh giá hồ sơ ứng tuyển. Vui lòng chờ đợi.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES: {
+    error: 'INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES',
+    message: 'Giảng viên đang có khóa học đang được mở hoặc đang diễn ra.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Garden Manager
