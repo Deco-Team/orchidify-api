@@ -19,10 +19,10 @@ import { GardenManagerModule } from '@garden-manager/garden-manager.module'
 import { GardenModule } from '@garden/garden.module'
 import { RecruitmentModule } from '@recruitment/recruitment.module'
 import { MediaModule } from '@media/media.module'
-import { CourseModule } from '@course/course.module'
+import { ClassModule } from '@src/class/class.module'
 import { TerminusModule } from '@nestjs/terminus'
 import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module'
-import { CourseTemplateModule } from '@course-template/course-template.module'
+import { CourseModule } from '@course/course.module'
 
 @Module({
   imports: [
@@ -111,17 +111,17 @@ import { CourseTemplateModule } from '@course-template/course-template.module'
         module: RecruitmentModule
       },
       {
+        path: 'classes',
+        module: ClassModule
+      },
+      {
         path: 'courses',
         module: CourseModule
       },
       {
-        path: 'course-templates',
-        module: CourseTemplateModule
-      },
-      {
         path: 'garden-timesheets',
         module: GardenTimesheetModule
-      },
+      }
     ]),
     TerminusModule.forRoot({
       errorLogStyle: 'pretty'
@@ -134,8 +134,8 @@ import { CourseTemplateModule } from '@course-template/course-template.module'
     GardenManagerModule,
     GardenModule,
     RecruitmentModule,
+    ClassModule,
     CourseModule,
-    CourseTemplateModule,
     GardenTimesheetModule,
     AuthModule
   ],

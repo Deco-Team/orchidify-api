@@ -1,11 +1,11 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
-import { BaseCourseTemplateDto } from './base.course-template.dto'
-import { CreateLessonDto } from '@course/dto/lesson.dto'
+import { BaseClassDto } from './base.class.dto'
+import { CreateLessonDto } from './lesson.dto'
 import { ArrayMaxSize, ArrayMinSize, IsArray, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { CreateAssignmentDto } from '@course/dto/assignment.dto'
+import { CreateAssignmentDto } from './assignment.dto'
 
-export class CreateCourseTemplateDto extends PickType(BaseCourseTemplateDto, [
+export class CreateClassDto extends PickType(BaseClassDto, [
   'title',
   'description',
   'price',

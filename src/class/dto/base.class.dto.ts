@@ -2,6 +2,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsDateString,
   IsEnum,
   IsInt,
   IsMongoId,
@@ -15,28 +16,33 @@ import {
   ValidateNested
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { CourseTemplateStatus } from '@common/contracts/constant'
+import { ClassStatus } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
-import { CourseLevel } from '@course/contracts/constant'
-import { BaseLessonDto } from '@course/dto/lesson.dto'
-import { BaseAssignmentDto } from '@course/dto/assignment.dto'
+import { ClassStatusHistory } from '@src/class/schemas/class.schema'
+import { CourseLevel } from '@src/common/contracts/constant'
+import { BaseLessonDto } from './lesson.dto'
+import { BaseAssignmentDto } from './assignment.dto'
 
-export class BaseCourseTemplateDto {
+export class BaseClassDto {
   @ApiProperty({ type: String })
   @IsMongoId()
   _id: string
 
-  @ApiProperty({ type: String, example: 'Course title' })
+  @ApiProperty({ type: String, example: 'Class title' })
   @IsNotEmpty()
   @IsString()
   @MaxLength(50)
   title: string
 
-  @ApiProperty({ type: String, example: 'Course description' })
+  @ApiProperty({ type: String, example: 'Class description' })
   @IsString()
   @MaxLength(500)
   description: string
+
+  @ApiProperty({ type: Date, example: '2024-12-12' })
+  @IsDateString()
+  startDate: Date
 
   @ApiProperty({ type: Number, example: 500_000 })
   @IsNumber()
@@ -53,7 +59,15 @@ export class BaseCourseTemplateDto {
   @IsString()
   type: string
 
-  @ApiProperty({ type: String, example: 'https://res.cloudinary.com/orchidify/image/upload/v1726377866/hcgbmek4qa8kksw2zrcg.jpg' })
+  @ApiProperty({ type: Number, example: 30 })
+  @IsInt()
+  @Min(0)
+  duration: number
+
+  @ApiProperty({
+    type: String,
+    example: 'https://res.cloudinary.com/orchidify/image/upload/v1726377866/hcgbmek4qa8kksw2zrcg.jpg'
+  })
   @IsUrl()
   thumbnail: string
 
@@ -65,9 +79,12 @@ export class BaseCourseTemplateDto {
   @ValidateNested({ each: true })
   media: BaseMediaDto[]
 
-  @ApiProperty({ type: String, enum: CourseTemplateStatus })
-  @IsEnum(CourseTemplateStatus)
-  status: CourseTemplateStatus
+  @ApiProperty({ type: String, enum: ClassStatus })
+  @IsEnum(ClassStatus)
+  status: ClassStatus
+
+  @ApiProperty({ type: ClassStatusHistory, isArray: true })
+  histories: ClassStatusHistory[]
 
   @ApiProperty({ type: Number, example: 20 })
   @IsInt()
@@ -75,11 +92,20 @@ export class BaseCourseTemplateDto {
   @Max(30)
   learnerLimit: number
 
+  @ApiProperty({ type: Number })
+  learnerQuantity: number
+
   @ApiProperty({ type: String })
   instructorId: string
 
+  @ApiProperty({ type: String })
+  gardenId: string
+
   @ApiPropertyOptional({ type: Number })
   rate: number
+
+  @ApiPropertyOptional({ type: String })
+  cancelReason: string
 
   @ApiProperty({ type: BaseLessonDto, isArray: true })
   @IsArray()

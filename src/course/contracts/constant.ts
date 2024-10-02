@@ -1,43 +1,34 @@
-export enum CourseLevel {
-  BASIC = 'BASIC',
-  INTERMEDIATE = 'INTERMEDIATE',
-  ADVANCED = 'ADVANCED'
-}
-
 export const INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION = [
   '_id',
+  'code',
   'title',
-  'startDate',
   'price',
   'level',
   'type',
-  'duration',
   'status',
   'learnerLimit',
-  'learnerQuantity',
+  'rate',
   'createdAt',
   'updatedAt'
 ] as const
 
 export const INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION = [
   '_id',
+  'code',
   'title',
   'description',
-  'startDate',
   'price',
   'level',
   'type',
-  'duration',
   'thumbnail',
   'media',
   'status',
-  'histories',
-  'learnerLimit',
-  'learnerQuantity',
-  'instructorId',
-  'gardenId',
   'lessons',
   'assignments',
+  'learnerLimit',
+  'rate',
+  'gardenRequiredToolkits',
+  'instructorId',
   'createdAt',
   'updatedAt'
 ] as const

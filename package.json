@@ -147,7 +147,7 @@
       "^@review/(.*)$": "<rootDir>/review/$1",
       "^@setting/(.*)$": "<rootDir>/setting/$1",
       "^@course/(.*)$": "<rootDir>/course/$1",
-      "^@course-template/(.*)$": "<rootDir>/course-template/$1",
+      "^@class/(.*)$": "<rootDir>/class/$1",
       "^@garden-timesheet/(.*)$": "<rootDir>/garden-timesheet/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }

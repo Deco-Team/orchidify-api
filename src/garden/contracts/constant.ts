@@ -5,6 +5,7 @@ export const GARDEN_LIST_PROJECTION = [
   'address',
   'gardenManagerId',
   'status',
+  'maxClass',
   'createdAt',
   'updatedAt'
 ] as const
@@ -17,6 +18,7 @@ export const GARDEN_DETAIL_PROJECTION = [
   'gardenManagerId',
   'images',
   'status',
+  'maxClass',
   'createdAt',
   'updatedAt'
 ] as const

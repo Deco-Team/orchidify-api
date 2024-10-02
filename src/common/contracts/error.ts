@@ -90,9 +90,9 @@ export const Errors = {
     message: 'Chúng tôi đang tiến hành đánh giá hồ sơ ứng tuyển. Vui lòng chờ đợi.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
-  INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES: {
-    error: 'INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES',
-    message: 'Giảng viên đang có khóa học đang được mở hoặc đang diễn ra.',
+  INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_CLASSES: {
+    error: 'INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_CLASSES',
+    message: 'Giảng viên đang có lớp học đang được mở hoặc đang diễn ra.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 
@@ -123,28 +123,9 @@ export const Errors = {
     message: 'Tên nhà vườn đã tồn tại. Vui lòng thử tên khác.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
-  SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN: {
-    error: 'SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN',
-    message: 'Có khóa học đã lên lịch hoặc đang diễn ra, nhà vườn không thể bị vô hiệu hóa.',
-    httpStatus: HttpStatus.BAD_REQUEST
-  },
-
-  /**
-   * CourseTemplate
-   */
-  COURSE_TEMPLATE_NOT_FOUND: {
-    error: 'COURSE_TEMPLATE_NOT_FOUND',
-    message: 'Không tìm thấy mẫu khóa học.',
-    httpStatus: HttpStatus.NOT_FOUND
-  },
-  CAN_NOT_UPDATE_COURSE_TEMPLATE: {
-    error: 'CAN_NOT_UPDATE_COURSE_TEMPLATE',
-    message: 'Mẫu khóa học không thể cập nhật.',
-    httpStatus: HttpStatus.BAD_REQUEST
-  },
-  CAN_NOT_DELETE_COURSE_TEMPLATE: {
-    error: 'CAN_NOT_DELETE_COURSE_TEMPLATE',
-    message: 'Mẫu khóa học không thể xóa.',
+  SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN: {
+    error: 'SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN',
+    message: 'Có lớp học đã lên lịch hoặc đang diễn ra, nhà vườn không thể bị vô hiệu hóa.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 
@@ -154,6 +135,25 @@ export const Errors = {
   COURSE_NOT_FOUND: {
     error: 'COURSE_NOT_FOUND',
     message: 'Không tìm thấy khóa học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  CAN_NOT_UPDATE_COURSE: {
+    error: 'CAN_NOT_UPDATE_COURSE',
+    message: 'Khóa học không thể cập nhật.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CAN_NOT_DELETE_COURSE: {
+    error: 'CAN_NOT_DELETE_COURSE',
+    message: 'Khóa học không thể xóa.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
+   * Class
+   */
+  CLASS_NOT_FOUND: {
+    error: 'CLASS_NOT_FOUND',
+    message: 'Không tìm thấy lớp học.',
     httpStatus: HttpStatus.NOT_FOUND
   },
 

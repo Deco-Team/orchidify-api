@@ -51,14 +51,14 @@ export enum RecruitmentStatus {
   REJECTED = 'REJECTED'
 }
 
-export enum CourseTemplateStatus {
+export enum CourseStatus {
   DRAFT = 'DRAFT',
   REQUESTING = 'REQUESTING',
   ACTIVE = 'ACTIVE',
   DELETED = 'DELETED'
 }
 
-export enum CourseStatus {
+export enum ClassStatus {
   PUBLISHED = 'PUBLISHED',
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
@@ -75,4 +75,10 @@ export enum SlotStatus {
   AVAILABLE = 'AVAILABLE',
   LOCKED = 'LOCKED',
   NOT_AVAILABLE = 'NOT_AVAILABLE'
+}
+
+export enum CourseLevel {
+  BASIC = 'BASIC',
+  INTERMEDIATE = 'INTERMEDIATE',
+  ADVANCED = 'ADVANCED'
 }

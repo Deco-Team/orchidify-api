@@ -3,11 +3,14 @@ import {
   ArrayMinSize,
   IsArray,
   IsEnum,
+  IsInt,
   IsMongoId,
   IsNotEmpty,
   IsString,
   IsUrl,
-  MaxLength
+  Max,
+  MaxLength,
+  Min
 } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 import { GardenStatus } from '@common/contracts/constant'
@@ -45,6 +48,12 @@ export class BaseGardenDto {
   @ApiProperty({ type: String, enum: GardenStatus })
   @IsEnum(GardenStatus)
   status: GardenStatus
+
+  @ApiProperty({ type: Number })
+  @IsInt()
+  @Min(1)
+  @Max(4)
+  maxClass: number
 
   @ApiProperty({ type: String })
   @IsMongoId()
