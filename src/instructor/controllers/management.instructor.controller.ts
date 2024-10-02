@@ -1,17 +1,10 @@
-import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiTags
-} from '@nestjs/swagger'
+import { Controller, Get, UseGuards, Inject, Query, Param, Patch, Put, Body } from '@nestjs/common'
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
+import { ErrorResponse, PaginationQuery, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { UserRole } from '@common/contracts/constant'
+import { CourseStatus, InstructorStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -26,6 +19,9 @@ import {
   InstructorListDataResponse,
   QueryInstructorDto
 } from '@instructor/dto/view-instructor.dto'
+import { UpdateInstructorDto } from '@instructor/dto/update-instructor.dto'
+import { Types } from 'mongoose'
+import { ICourseService } from '@course/services/course.service'
 
 @ApiTags('Instructor - Management')
 @ApiBearerAuth()
@@ -37,7 +33,9 @@ export class ManagementInstructorController {
     @Inject(IInstructorService)
     private readonly instructorService: IInstructorService,
     @Inject(IUserTokenService)
-    private readonly userTokenService: IUserTokenService
+    private readonly userTokenService: IUserTokenService,
+    @Inject(ICourseService)
+    private readonly courseService: ICourseService
   ) {}
 
   @ApiOperation({
@@ -65,38 +63,60 @@ export class ManagementInstructorController {
     return instructor
   }
 
-  // @ApiOperation({
-  //   summary: `[${UserRole.STAFF}] Deactivate Instructor`
-  // })
-  // @ApiOkResponse({ type: SuccessDataResponse })
-  // @Roles(UserRole.STAFF)
-  // @Patch('/:id([0-9a-f]{24})/deactivate')
-  // async deactivate(@Param('id') instructorId: string) {
-  //   await Promise.all([
-  //     this.instructorService.update(
-  //       {
-  //         _id: instructorId
-  //       },
-  //       { status: InstructorStatus.INACTIVE }
-  //     ),
-  //     this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(instructorId), UserRole.INSTRUCTOR)
-  //   ])
-  //   return new SuccessResponse(true)
-  // }
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Update Instructor`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
+  @Roles(UserRole.STAFF)
+  @Put(':id([0-9a-f]{24})')
+  async update(@Param('id') instructorId: string, @Body() updateInstructorDto: UpdateInstructorDto) {
+    const instructor = await this.instructorService.update({ _id: instructorId }, updateInstructorDto)
 
-  // @ApiOperation({
-  //   summary: `[${UserRole.STAFF}] Activate Instructor`
-  // })
-  // @ApiOkResponse({ type: SuccessDataResponse })
-  // @Roles(UserRole.STAFF)
-  // @Patch('/:id([0-9a-f]{24})/active')
-  // async activate(@Param('id') instructorId: string) {
-  //   await this.instructorService.update(
-  //     {
-  //       _id: instructorId
-  //     },
-  //     { status: InstructorStatus.ACTIVE }
-  //   )
-  //   return new SuccessResponse(true)
-  // }
+    if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
+    return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Deactivate Instructor`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES])
+  @Roles(UserRole.STAFF)
+  @Patch('/:id([0-9a-f]{24})/deactivate')
+  async deactivate(@Param('id') instructorId: string) {
+    // TODO: BR-21 Cannot deactivate an instructor whose class is published or in progress.
+    const courses = await this.courseService.findManyByInstructorIdAndStatus(instructorId, [
+      CourseStatus.PUBLISHED,
+      CourseStatus.IN_PROGRESS
+    ])
+    if (courses.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES)
+
+    await Promise.all([
+      this.instructorService.update(
+        {
+          _id: instructorId
+        },
+        { status: InstructorStatus.INACTIVE }
+      ),
+      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(instructorId), UserRole.INSTRUCTOR)
+    ])
+    return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Activate Instructor`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @Roles(UserRole.STAFF)
+  @Patch('/:id([0-9a-f]{24})/active')
+  async activate(@Param('id') instructorId: string) {
+    await this.instructorService.update(
+      {
+        _id: instructorId
+      },
+      { status: InstructorStatus.ACTIVE }
+    )
+    return new SuccessResponse(true)
+  }
 }
