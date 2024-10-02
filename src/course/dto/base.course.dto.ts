@@ -2,7 +2,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsDateString,
   IsEnum,
   IsInt,
   IsMongoId,
@@ -19,15 +18,17 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { CourseStatus } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
-import { CourseStatusHistory } from '@course/schemas/course.schema'
-import { CourseLevel } from '@course/contracts/constant'
-import { BaseLessonDto } from './lesson.dto'
-import { BaseAssignmentDto } from './assignment.dto'
+import { CourseLevel } from '@src/common/contracts/constant'
+import { BaseLessonDto } from '@src/class/dto/lesson.dto'
+import { BaseAssignmentDto } from '@src/class/dto/assignment.dto'
 
 export class BaseCourseDto {
   @ApiProperty({ type: String })
   @IsMongoId()
   _id: string
+
+  @ApiProperty({ type: String, example: 'Course code' })
+  code: string
 
   @ApiProperty({ type: String, example: 'Course title' })
   @IsNotEmpty()
@@ -40,10 +41,6 @@ export class BaseCourseDto {
   @MaxLength(500)
   description: string
 
-  @ApiProperty({ type: Date, example: '2024-12-12' })
-  @IsDateString()
-  startDate: Date
-
   @ApiProperty({ type: Number, example: 500_000 })
   @IsNumber()
   @Min(0)
@@ -54,17 +51,16 @@ export class BaseCourseDto {
   @IsEnum(CourseLevel)
   level: CourseLevel
 
-  @ApiProperty({ type: String, example: 'Orchid' })
+  @ApiProperty({ type: [String], example: 'Orchid' })
   @IsNotEmpty()
-  @IsString()
-  type: string
+  @IsArray()
+  @ArrayMinSize(1)
+  type: string[]
 
-  @ApiProperty({ type: Number, example: 30 })
-  @IsInt()
-  @Min(0)
-  duration: number
-
-  @ApiProperty({ type: String, example: 'https://res.cloudinary.com/orchidify/image/upload/v1726377866/hcgbmek4qa8kksw2zrcg.jpg' })
+  @ApiProperty({
+    type: String,
+    example: 'https://res.cloudinary.com/orchidify/image/upload/v1726377866/hcgbmek4qa8kksw2zrcg.jpg'
+  })
   @IsUrl()
   thumbnail: string
 
@@ -79,30 +75,6 @@ export class BaseCourseDto {
   @ApiProperty({ type: String, enum: CourseStatus })
   @IsEnum(CourseStatus)
   status: CourseStatus
-
-  @ApiProperty({ type: CourseStatusHistory, isArray: true })
-  histories: CourseStatusHistory[]
-
-  @ApiProperty({ type: Number, example: 20 })
-  @IsInt()
-  @Min(10)
-  @Max(30)
-  learnerLimit: number
-
-  @ApiProperty({ type: Number })
-  learnerQuantity: number
-
-  @ApiProperty({ type: String })
-  instructorId: string
-
-  @ApiProperty({ type: String })
-  gardenId: string
-
-  @ApiPropertyOptional({ type: Number })
-  rate: number
-
-  @ApiPropertyOptional({ type: String })
-  cancelReason: string
 
   @ApiProperty({ type: BaseLessonDto, isArray: true })
   @IsArray()
@@ -119,6 +91,29 @@ export class BaseCourseDto {
   @Type(() => BaseAssignmentDto)
   @ValidateNested({ each: true })
   assignments: BaseAssignmentDto[]
+
+  @ApiProperty({ type: Number, example: 20 })
+  @IsInt()
+  @Min(10)
+  @Max(30)
+  learnerLimit: number
+
+  @ApiPropertyOptional({ type: Number })
+  rate: number
+
+  @ApiProperty({ type: Number, example: 20 })
+  @IsInt()
+  @Min(5)
+  @Max(50)
+  discount: number
+
+  @ApiProperty({ type: String, example: 'Course Garden Required Toolkits' })
+  @IsString()
+  @MaxLength(500)
+  gardenRequiredToolkits: string
+
+  @ApiProperty({ type: String })
+  instructorId: string
 
   @ApiProperty({ type: Date })
   createdAt: Date

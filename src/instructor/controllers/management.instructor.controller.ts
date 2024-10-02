@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 
 import { ErrorResponse, PaginationQuery, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { CourseStatus, InstructorStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, InstructorStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -21,7 +21,7 @@ import {
 } from '@instructor/dto/view-instructor.dto'
 import { UpdateInstructorDto } from '@instructor/dto/update-instructor.dto'
 import { Types } from 'mongoose'
-import { ICourseService } from '@course/services/course.service'
+import { IClassService } from '@src/class/services/class.service'
 
 @ApiTags('Instructor - Management')
 @ApiBearerAuth()
@@ -34,8 +34,8 @@ export class ManagementInstructorController {
     private readonly instructorService: IInstructorService,
     @Inject(IUserTokenService)
     private readonly userTokenService: IUserTokenService,
-    @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    @Inject(IClassService)
+    private readonly classService: IClassService
   ) {}
 
   @ApiOperation({
@@ -81,16 +81,16 @@ export class ManagementInstructorController {
     summary: `[${UserRole.STAFF}] Deactivate Instructor`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES])
+  @ApiErrorResponse([Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_CLASSES])
   @Roles(UserRole.STAFF)
   @Patch('/:id([0-9a-f]{24})/deactivate')
   async deactivate(@Param('id') instructorId: string) {
     // TODO: BR-21 Cannot deactivate an instructor whose class is published or in progress.
-    const courses = await this.courseService.findManyByInstructorIdAndStatus(instructorId, [
-      CourseStatus.PUBLISHED,
-      CourseStatus.IN_PROGRESS
+    const classes = await this.classService.findManyByInstructorIdAndStatus(instructorId, [
+      ClassStatus.PUBLISHED,
+      ClassStatus.IN_PROGRESS
     ])
-    if (courses.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_COURSES)
+    if (classes.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_PUBLISHED_OR_IN_PROGRESSING_CLASSES)
 
     await Promise.all([
       this.instructorService.update(

@@ -45,6 +45,9 @@ export class Garden {
   })
   status: GardenStatus
 
+  @Prop({ type: Number })
+  maxClass: number
+
   @Prop({ type: Types.ObjectId, ref: GardenManager.name, required: true })
   gardenManagerId: Types.ObjectId | GardenManager
 }
@@ -54,7 +57,7 @@ export const GardenSchema = SchemaFactory.createForClass(Garden)
 GardenSchema.plugin(paginate)
 
 GardenSchema.index({ gardenManagerId: 1 })
-GardenSchema.index({ name: 1 }, { unique: true})
+GardenSchema.index({ name: 1 }, { unique: true })
 GardenSchema.index({ name: 'text', address: 'text' })
 
 GardenSchema.virtual('gardenManager', {

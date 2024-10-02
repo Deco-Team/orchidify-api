@@ -1,8 +1,8 @@
 import { PartialType, PickType } from '@nestjs/swagger'
-import { BaseCourseTemplateDto } from './base.course-template.dto'
+import { BaseClassDto } from './base.class.dto'
 
-export class UpdateCourseTemplateDto extends PartialType(
-  PickType(BaseCourseTemplateDto, [
+export class UpdateClassDto extends PartialType(
+  PickType(BaseClassDto, [
     'title',
     'description',
     'price',

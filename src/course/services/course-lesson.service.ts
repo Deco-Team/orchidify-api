@@ -1,16 +1,16 @@
 import { Injectable, Inject } from '@nestjs/common'
-import { ICourseRepository } from '@course/repositories/course.repository'
-import { Lesson } from '@course/schemas/lesson.schema'
+import { Lesson } from '@src/class/schemas/lesson.schema'
 import { Types } from 'mongoose'
+import { ICourseRepository } from '@course/repositories/course.repository'
 
-export const ILessonService = Symbol('ILessonService')
+export const ICourseLessonService = Symbol('ICourseLessonService')
 
-export interface ILessonService {
+export interface ICourseLessonService {
   findOneBy(params: { lessonId: string; courseId: string; instructorId?: string }): Promise<Lesson>
 }
 
 @Injectable()
-export class LessonService implements ILessonService {
+export class CourseLessonService implements ICourseLessonService {
   constructor(
     @Inject(ICourseRepository)
     private readonly courseRepository: ICourseRepository
@@ -27,7 +27,7 @@ export class LessonService implements ILessonService {
       options: { lean: true }
     })
 
-    const lessonIndex = course?.lessons.findIndex((lesson) => lesson._id.toString() === lessonId)
+    const lessonIndex = course?.lessons?.findIndex((lesson) => lesson._id.toString() === lessonId)
     if (lessonIndex === -1) return null
 
     return { ...course?.lessons[lessonIndex], index: lessonIndex }

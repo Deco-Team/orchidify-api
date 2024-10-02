@@ -2,12 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import { Transform } from 'class-transformer'
 import { SlotStatus } from '@common/contracts/constant'
-import { Course } from '@course/schemas/course.schema'
+import { Class } from '@src/class/schemas/class.schema'
 
 export type SlotDocument = HydratedDocument<Slot>
 
 @Schema({
-  timestamps: false,
+  timestamps: false
 })
 export class Slot {
   constructor(id?: string) {
@@ -28,8 +28,8 @@ export class Slot {
   })
   status: SlotStatus
 
-  @Prop({ type: Types.ObjectId, ref: Course.name })
-  courseId: Types.ObjectId
+  @Prop({ type: [Types.ObjectId], ref: Class.name })
+  classIds: Types.ObjectId[]
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)

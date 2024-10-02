@@ -7,11 +7,13 @@ import { CourseStatus } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION } from '@course/contracts/constant'
 import { QueryCourseDto } from '@course/dto/view-course.dto'
+import { CourseLevel } from '@src/common/contracts/constant'
+import * as _ from 'lodash'
 
 export const ICourseService = Symbol('ICourseService')
 
 export interface ICourseService {
-  create(course: CreateCourseDto, options?: SaveOptions | undefined): Promise<CourseDocument>
+  create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined): Promise<CourseDocument>
   findById(
     courseId: string,
     projection?: string | Record<string, any>,
@@ -24,7 +26,6 @@ export interface ICourseService {
   ): Promise<CourseDocument>
   listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto)
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
-  findManyByInstructorIdAndStatus(instructorId: string, status: CourseStatus[]): Promise<CourseDocument[]>
 }
 
 @Injectable()
@@ -35,6 +36,7 @@ export class CourseService implements ICourseService {
   ) {}
 
   public async create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined) {
+    createCourseDto['code'] = await this.generateCode()
     const course = await this.courseRepository.create(createCourseDto, options)
     return course
   }
@@ -64,17 +66,38 @@ export class CourseService implements ICourseService {
     queryCourseDto: QueryCourseDto,
     projection = INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION
   ) {
-    const { title, status } = queryCourseDto
+    const { title, type, level, status } = queryCourseDto
     const filter: Record<string, any> = {
-      instructorId: new Types.ObjectId(instructorId)
+      instructorId: new Types.ObjectId(instructorId),
+      status: {
+        $ne: CourseStatus.DELETED
+      }
+    }
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      filter['level'] = {
+        $in: validLevel
+      }
     }
 
     const validStatus = status?.filter((status) =>
-      [CourseStatus.PUBLISHED, CourseStatus.IN_PROGRESS, CourseStatus.COMPLETED, CourseStatus.CANCELED].includes(status)
+      [CourseStatus.DRAFT, CourseStatus.REQUESTING, CourseStatus.ACTIVE].includes(status)
     )
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
       }
     }
 
@@ -95,15 +118,12 @@ export class CourseService implements ICourseService {
     return courses
   }
 
-  async findManyByInstructorIdAndStatus(instructorId: string, status: CourseStatus[]): Promise<CourseDocument[]> {
-    const courses = await this.courseRepository.findMany({
-      conditions: {
-        instructorId: new Types.ObjectId(instructorId),
-        status: {
-          $in: status
-        }
-      }
-    })
-    return courses
+  private async generateCode(): Promise<string> {
+    // Generate OCPxxx format data
+    const prefix = `OCP`
+    // Find the latest entry with the same date prefix
+    const lastRecord = await this.courseRepository.model.findOne().sort({ createdAt: -1 })
+    const number = parseInt(_.get(lastRecord, 'code', `${prefix}000`).split(prefix)[1]) + 1
+    return `${prefix}${number.toString().padStart(3, '0')}`
   }
 }

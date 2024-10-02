@@ -1,29 +1,29 @@
 import { Global, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
-import { Course, CourseSchema } from '@course/schemas/course.schema'
-import { ICourseRepository, CourseRepository } from '@course/repositories/course.repository'
-import { ICourseService, CourseService } from '@course/services/course.service'
-// import { InstructorCourseController } from './controllers/instructor.course.controller'
+import { InstructorCourseController } from './controllers/instructor.course.controller'
+import { CourseService, ICourseService } from './services/course.service'
+import { ICourseLessonService, CourseLessonService } from './services/course-lesson.service'
+import { ICourseAssignmentService, CourseAssignmentService } from './services/course-assignment.service'
+import { CourseRepository, ICourseRepository } from './repositories/course.repository'
 import { GardenModule } from '@garden/garden.module'
-import { ILessonService, LessonService } from './services/lesson.service'
-import { AssignmentService, IAssignmentService } from './services/assignment.service'
+import { Course, CourseSchema } from './schemas/course.schema'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]), GardenModule],
-  // controllers: [InstructorCourseController],
+  controllers: [InstructorCourseController],
   providers: [
     {
       provide: ICourseService,
       useClass: CourseService
     },
     {
-      provide: ILessonService,
-      useClass: LessonService
+      provide: ICourseLessonService,
+      useClass: CourseLessonService
     },
     {
-      provide: IAssignmentService,
-      useClass: AssignmentService
+      provide: ICourseAssignmentService,
+      useClass: CourseAssignmentService
     },
     {
       provide: ICourseRepository,

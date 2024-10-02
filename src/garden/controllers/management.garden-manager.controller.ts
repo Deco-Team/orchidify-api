@@ -19,7 +19,7 @@ import {
   SuccessResponse
 } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { CourseStatus, GardenManagerStatus, GardenStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, GardenManagerStatus, GardenStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -32,7 +32,7 @@ import { GARDEN_DETAIL_PROJECTION, GARDEN_LIST_PROJECTION } from '@garden/contra
 import { CreateGardenDto } from '@garden/dto/create-garden.dto'
 import { UpdateGardenDto } from '@garden/dto/update-garden.dto'
 import { IGardenManagerService } from '@garden-manager/services/garden-manager.service'
-import { ICourseService } from '@course/services/course.service'
+import { IClassService } from '@src/class/services/class.service'
 import { Types } from 'mongoose'
 
 @ApiTags('Garden - Management')
@@ -46,8 +46,8 @@ export class ManagementGardenController {
     private readonly gardenService: IGardenService,
     @Inject(IGardenManagerService)
     private readonly gardenManagerService: IGardenManagerService,
-    @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    @Inject(IClassService)
+    private readonly classService: IClassService
   ) {}
 
   @ApiOperation({
@@ -138,13 +138,13 @@ export class ManagementGardenController {
     summary: `[${UserRole.STAFF}] Deactivate Garden`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN])
+  @ApiErrorResponse([Errors.SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN])
   @Roles(UserRole.STAFF)
   @Patch('/:id([0-9a-f]{24})/deactivate')
   async deactivate(@Param('id') gardenId: string) {
-    // BR-29: Garden can not be deactivated if there are any in-progressing or scheduled courses.
-    const courses = await this.courseService.findManyByStatus([CourseStatus.PUBLISHED, CourseStatus.IN_PROGRESS])
-    if (courses.length > 0) throw new AppException(Errors.SCHEDULED_OR_IN_PROGRESSING_COURSE_IN_GARDEN)
+    // BR-30: Garden can not be deactivated if there are any in-progressing or scheduled classes.
+    const courses = await this.classService.findManyByStatus([ClassStatus.PUBLISHED, ClassStatus.IN_PROGRESS])
+    if (courses.length > 0) throw new AppException(Errors.SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN)
 
     await this.gardenService.update(
       {
