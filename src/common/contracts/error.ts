@@ -188,4 +188,13 @@ export const Errors = {
     message: 'Nhân viên được phân công vào một quá trình tuyển dụng.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+
+  /**
+   * Recruitment
+   */
+  RECRUITMENT_NOT_FOUND: {
+    error: 'RECRUITMENT_NOT_FOUND',
+    message: 'Thông tin ứng tuyển không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }
