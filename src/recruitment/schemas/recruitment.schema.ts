@@ -81,3 +81,4 @@ export class Recruitment {
 export const RecruitmentSchema = SchemaFactory.createForClass(Recruitment)
 
 RecruitmentSchema.plugin(paginate)
+RecruitmentSchema.index({ 'applicationInfo.name': 'text', 'applicationInfo.email': 'text' })
