@@ -1,8 +1,8 @@
-import { ApiProperty, PickType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsDateString, IsEnum, IsMongoId } from 'class-validator'
-import { BaseGardenTimesheetDto } from './base.garden-timesheet.dto'
-import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
+// import { BaseGardenTimesheetDto } from './base.garden-timesheet.dto'
+// import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
 import { TimesheetType } from '@common/contracts/constant'
 
 export class QueryGardenTimesheetDto {
@@ -19,7 +19,32 @@ export class QueryGardenTimesheetDto {
   type: TimesheetType
 }
 
-class ViewGardenTimesheetItemResponse extends PickType(BaseGardenTimesheetDto, VIEW_GARDEN_TIMESHEET_LIST_PROJECTION) {}
+export class ViewGardenTimesheetItemResponse {
+  @ApiProperty({ type: String })
+  @IsMongoId()
+  _id: string
+
+  @ApiProperty({ type: Date })
+  start: Date
+
+  @ApiProperty({ type: Date })
+  end: Date
+
+  @ApiProperty({ type: String })
+  status: string
+
+  // @ApiProperty({ type: String })
+  // gardenId: string
+
+  @ApiPropertyOptional({ type: String })
+  classId: string
+
+  // @ApiProperty({ type: Date })
+  // createdAt: Date
+
+  // @ApiProperty({ type: Date })
+  // updatedAt: Date
+}
 class ViewGardenTimesheetListResponse {
   @ApiProperty({ type: ViewGardenTimesheetItemResponse, isArray: true })
   docs: ViewGardenTimesheetItemResponse[]

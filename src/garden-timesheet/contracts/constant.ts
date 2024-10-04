@@ -2,8 +2,8 @@ export const VIEW_GARDEN_TIMESHEET_LIST_PROJECTION = [
   '_id',
   'status',
   'date',
-  'gardenId',
+  // 'gardenId',
   'slots',
-  'createdAt',
-  'updatedAt'
+  // 'createdAt',
+  // 'updatedAt'
 ] as const
