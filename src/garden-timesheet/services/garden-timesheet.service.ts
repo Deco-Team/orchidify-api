@@ -1,13 +1,15 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as moment from 'moment-timezone'
+import * as _ from 'lodash'
 import { IGardenTimesheetRepository } from '@garden-timesheet/repositories/garden-timesheet.repository'
 import { GardenTimesheet, GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { QueryGardenTimesheetDto } from '@garden-timesheet/dto/view-garden-timesheet.dto'
-import { TimesheetType } from '@common/contracts/constant'
+import { GardenTimesheetStatus, SlotStatus, TimesheetType } from '@common/contracts/constant'
 import { VN_TIMEZONE } from '@src/config'
 import { CreateGardenTimesheetDto } from '@garden-timesheet/dto/create-garden-timesheet.dto'
 import { AppLogger } from '@src/common/services/app-logger.service'
+import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -59,7 +61,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
   public async viewTimesheetList(queryGardenTimesheetDto: QueryGardenTimesheetDto) {
     const { type, gardenId, date } = queryGardenTimesheetDto
     const dateMoment = moment(date).tz(VN_TIMEZONE)
-    this.appLogger.log('viewTimesheetList: ', type, gardenId, date)
+    this.appLogger.log(`viewTimesheetList: type=${type}, gardenId=${gardenId}, date=${date}`)
 
     // check month garden timesheet has been generated
     const existedGardenTimesheet = await this.gardenTimesheetRepository.findOne({
@@ -82,17 +84,27 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       fromDate = dateMoment.clone().startOf('isoWeek').toDate()
       toDate = dateMoment.clone().endOf('isoWeek').toDate()
     }
-    this.appLogger.log('gardenTimesheetRepository.findMany', fromDate, toDate, gardenId)
 
-    return await this.gardenTimesheetRepository.findMany({
+    const timesheets = await this.gardenTimesheetRepository.findMany({
+      projection: VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
+      options: { lean: true },
       conditions: {
         gardenId: new Types.ObjectId(gardenId),
         date: {
           $gte: fromDate,
           $lte: toDate
-        }
+        },
+        $or: [
+          {
+            status: GardenTimesheetStatus.INACTIVE
+          },
+          {
+            'slots.status': SlotStatus.NOT_AVAILABLE
+          }
+        ]
       }
     })
+    return this.transformDataToCalendar(timesheets)
   }
 
   private async generateTimesheetOfMonth(gardenId: string, date: Date) {
@@ -106,5 +118,27 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       currentDate.add(1, 'day')
     }
     await this.gardenTimesheetRepository.model.insertMany(monthTimesheet)
+  }
+
+  private transformDataToCalendar(timesheets: GardenTimesheetDocument[]) {
+    const calendars = []
+    for (const timesheet of timesheets) {
+      if (timesheet.status === GardenTimesheetStatus.INACTIVE) {
+        const startOfDate = moment(timesheet.date).tz(VN_TIMEZONE).startOf('date')
+        const endOfDate = moment(timesheet.date).tz(VN_TIMEZONE).endOf('date')
+        _.set(timesheet, 'start', startOfDate)
+        _.set(timesheet, 'end', endOfDate)
+        _.unset(timesheet, 'date')
+        _.unset(timesheet, 'slots')
+        calendars.push(timesheet)
+      } else {
+        for (const slot of timesheet.slots) {
+          if (slot.status === SlotStatus.NOT_AVAILABLE) {
+            calendars.push(slot)
+          }
+        }
+      }
+    }
+    return calendars
   }
 }

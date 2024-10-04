@@ -9,11 +9,11 @@ export class BaseSlotDto {
 
   @ApiProperty({ type: Date })
   @IsDateString({ strict: true })
-  startTime: Date
+  start: Date
 
   @ApiProperty({ type: Date })
   @IsDateString({ strict: true })
-  endTime: Date
+  end: Date
 
   @ApiProperty({ enum: SlotStatus })
   status: SlotStatus
@@ -22,4 +22,4 @@ export class BaseSlotDto {
   courseId: string
 }
 
-export class CreateSlotDto extends PickType(BaseSlotDto, ['startTime', 'endTime', 'status']) {}
+export class CreateSlotDto extends PickType(BaseSlotDto, ['start', 'end', 'status']) {}

@@ -17,10 +17,10 @@ export class Slot {
   _id: string
 
   @Prop({ type: Date, required: true })
-  startTime: Date
+  start: Date
 
   @Prop({ type: Date, required: true })
-  endTime: Date
+  end: Date
 
   @Prop({
     enum: SlotStatus,
@@ -28,8 +28,8 @@ export class Slot {
   })
   status: SlotStatus
 
-  @Prop({ type: [Types.ObjectId], ref: Class.name })
-  classIds: Types.ObjectId[]
+  @Prop({ type: Types.ObjectId, ref: Class.name })
+  classId: Types.ObjectId
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)
