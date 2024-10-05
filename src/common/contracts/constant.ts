@@ -82,3 +82,32 @@ export enum CourseLevel {
   INTERMEDIATE = 'INTERMEDIATE',
   ADVANCED = 'ADVANCED'
 }
+
+export enum ClassRequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+  CANCELED = 'CANCELED'
+}
+
+export enum ClassRequestType {
+  PUBLISH_CLASS = 'PUBLISH_CLASS'
+}
+
+export enum Weekday {
+  MONDAY = 'Monday',
+  TUESDAY = 'Tuesday',
+  WEDNESDAY = 'Wednesday',
+  THURSDAY = 'Thursday',
+  FRIDAY = 'Friday',
+  SATURDAY = 'Saturday',
+  SUNDAY = 'Sunday'
+}
+
+export enum SlotNumber {
+  ONE = 1,
+  TWO = 2,
+  THREE = 3,
+  FOUR = 4
+}

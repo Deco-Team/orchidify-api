@@ -147,6 +147,11 @@ export const Errors = {
     message: 'Khóa học không thể xóa.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS: {
+    error: 'COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS',
+    message: 'Không thể tạo yêu cầu mở lớp học từ khóa học này.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 
   /**
    * Class
@@ -197,4 +202,18 @@ export const Errors = {
     message: 'Thông tin ứng tuyển không tồn tại.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+
+  /**
+   * Class Request
+   */
+  CLASS_REQUEST_NOT_FOUND: {
+    error: 'CLASS_REQUEST_NOT_FOUND',
+    message: 'Không tìm thấy yêu cầu lớp học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  CREATE_CLASS_REQUEST_LIMIT: {
+    error: 'CREATE_CLASS_REQUEST_LIMIT',
+    message: 'Bạn đã đạt số lượng tạo yêu cầu khóa học trong ngày.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  }
 }

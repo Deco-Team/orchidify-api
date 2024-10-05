@@ -23,6 +23,7 @@ import { ClassModule } from '@src/class/class.module'
 import { TerminusModule } from '@nestjs/terminus'
 import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module'
 import { CourseModule } from '@course/course.module'
+import { ClassRequestModule } from '@class-request/class-request.module'
 
 @Module({
   imports: [
@@ -121,7 +122,11 @@ import { CourseModule } from '@course/course.module'
       {
         path: 'garden-timesheets',
         module: GardenTimesheetModule
-      }
+      },
+      {
+        path: 'class-requests',
+        module: ClassRequestModule
+      },
     ]),
     TerminusModule.forRoot({
       errorLogStyle: 'pretty'
@@ -137,7 +142,8 @@ import { CourseModule } from '@course/course.module'
     ClassModule,
     CourseModule,
     GardenTimesheetModule,
-    AuthModule
+    AuthModule,
+    ClassRequestModule
   ],
   controllers: [AppController],
   providers: [AppService]
