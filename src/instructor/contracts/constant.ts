@@ -23,6 +23,7 @@ export const INSTRUCTOR_DETAIL_PROJECTION = [
   'idCardPhoto',
   'avatar',
   'status',
+  'balance',
   'createdAt',
   'updatedAt'
 ] as const
