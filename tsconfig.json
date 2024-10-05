@@ -72,6 +72,9 @@
       "@garden-timesheet/*": [
         "src/garden-timesheet/*"
       ],
+      "@class-request/*": [
+        "src/class-request/*"
+      ],
       "@src/*": [
         "src/*"
       ]

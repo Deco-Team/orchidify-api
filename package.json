@@ -149,6 +149,7 @@
       "^@course/(.*)$": "<rootDir>/course/$1",
       "^@class/(.*)$": "<rootDir>/class/$1",
       "^@garden-timesheet/(.*)$": "<rootDir>/garden-timesheet/$1",
+      "^@class-request/(.*)$": "<rootDir>/class-request/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }
