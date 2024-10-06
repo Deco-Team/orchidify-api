@@ -4,10 +4,7 @@ import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builde
 import { IsOptional } from 'class-validator'
 import { ClassRequestStatus, ClassRequestType } from '@common/contracts/constant'
 import { Transform } from 'class-transformer'
-import {
-  INSTRUCTOR_VIEW_CLASS_REQUEST_DETAIL_PROJECTION,
-  INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION
-} from '@src/class-request/contracts/constant'
+import { CLASS_REQUEST_DETAIL_PROJECTION, CLASS_REQUEST_LIST_PROJECTION } from '@src/class-request/contracts/constant'
 
 export class QueryClassRequestDto {
   // @ApiPropertyOptional({
@@ -27,17 +24,27 @@ export class QueryClassRequestDto {
   type: ClassRequestType[]
 
   @ApiPropertyOptional({
-    enum: [ClassRequestStatus.PENDING, ClassRequestStatus.APPROVED, ClassRequestStatus.CANCELED, ClassRequestStatus.EXPIRED, ClassRequestStatus.REJECTED],
+    enum: [
+      ClassRequestStatus.PENDING,
+      ClassRequestStatus.APPROVED,
+      ClassRequestStatus.CANCELED,
+      ClassRequestStatus.EXPIRED,
+      ClassRequestStatus.REJECTED
+    ],
     isArray: true
   })
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
   status: ClassRequestStatus[]
+
+  createdBy: string
 }
 
-class InstructorViewClassRequestListItemResponse extends PickType(BaseClassRequestDto, INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION) {}
+class InstructorViewClassRequestListItemResponse extends PickType(BaseClassRequestDto, CLASS_REQUEST_LIST_PROJECTION) {}
 class InstructorViewClassRequestListResponse extends PaginateResponse(InstructorViewClassRequestListItemResponse) {}
 export class InstructorViewClassRequestListDataResponse extends DataResponse(InstructorViewClassRequestListResponse) {}
 
-class InstructorViewClassRequestDetailResponse extends PickType(BaseClassRequestDto, INSTRUCTOR_VIEW_CLASS_REQUEST_DETAIL_PROJECTION) {}
-export class InstructorViewClassRequestDetailDataResponse extends DataResponse(InstructorViewClassRequestDetailResponse) {}
+class InstructorViewClassRequestDetailResponse extends PickType(BaseClassRequestDto, CLASS_REQUEST_DETAIL_PROJECTION) {}
+export class InstructorViewClassRequestDetailDataResponse extends DataResponse(
+  InstructorViewClassRequestDetailResponse
+) {}
