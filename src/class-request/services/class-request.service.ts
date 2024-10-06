@@ -6,7 +6,7 @@ import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQ
 import { CreatePublishClassRequestDto } from '@class-request/dto/create-publish-class-request.dto'
 import { ClassRequestStatus, ClassRequestType } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
-import { INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION } from '@src/class-request/contracts/constant'
+import { CLASS_REQUEST_LIST_PROJECTION } from '@src/class-request/contracts/constant'
 import { QueryClassRequestDto } from '@src/class-request/dto/view-class-request.dto'
 import { VN_TIMEZONE } from '@src/config'
 
@@ -27,7 +27,7 @@ export interface IClassRequestService {
     payload: UpdateQuery<ClassRequest>,
     options?: QueryOptions | undefined
   ): Promise<ClassRequestDocument>
-  listByCreatedBy(createdBy: string, pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto)
+  list(pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto)
   findManyByStatus(status: ClassRequestStatus[]): Promise<ClassRequestDocument[]>
   findManyByCreatedByAndStatus(createdBy: string, status?: ClassRequestStatus[]): Promise<ClassRequestDocument[]>
   countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>
@@ -70,22 +70,19 @@ export class ClassRequestService implements IClassRequestService {
     return this.classRepository.findOneAndUpdate(conditions, payload, options)
   }
 
-  async listByCreatedBy(
-    createdBy: string,
+  async list(
     pagination: PaginationParams,
     queryClassRequestDto: QueryClassRequestDto,
-    projection = INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION
+    projection = CLASS_REQUEST_LIST_PROJECTION
   ) {
-    const { type, status } = queryClassRequestDto
-    const filter: Record<string, any> = {
-      createdBy: new Types.ObjectId(createdBy)
+    const { type, status, createdBy } = queryClassRequestDto
+    const filter: Record<string, any> = {}
+
+    if (createdBy) {
+      filter['createdBy'] = new Types.ObjectId(createdBy)
     }
 
-    const validType = type?.filter((status) =>
-      [
-        ClassRequestType.PUBLISH_CLASS,
-      ].includes(status)
-    )
+    const validType = type?.filter((status) => [ClassRequestType.PUBLISH_CLASS].includes(status))
     if (validType?.length > 0) {
       filter['status'] = {
         $in: validType
@@ -109,7 +106,7 @@ export class ClassRequestService implements IClassRequestService {
 
     return this.classRepository.model.paginate(filter, {
       ...pagination,
-      projection: ['-metadata.lessons', '-metadata.assignments', '-histories']
+      projection: ['-metadata.lessons', '-metadata.assignments', '-metadata.media', '-histories']
     })
   }
 

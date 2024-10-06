@@ -1,4 +1,4 @@
-export const INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION = [
+export const CLASS_REQUEST_LIST_PROJECTION = [
   '_id',
   'type',
   'status',
@@ -12,7 +12,7 @@ export const INSTRUCTOR_VIEW_CLASS_REQUEST_LIST_PROJECTION = [
   'updatedAt'
 ] as const
 
-export const INSTRUCTOR_VIEW_CLASS_REQUEST_DETAIL_PROJECTION = [
+export const CLASS_REQUEST_DETAIL_PROJECTION = [
   '_id',
   'type',
   'status',

@@ -33,7 +33,7 @@ import {
   InstructorViewClassRequestListDataResponse,
   QueryClassRequestDto
 } from '@class-request/dto/view-class-request.dto'
-import { INSTRUCTOR_VIEW_CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
+import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
 import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
 
@@ -63,7 +63,8 @@ export class InstructorClassRequestController {
     @Query() queryClassRequestDto: QueryClassRequestDto
   ) {
     const { _id } = _.get(req, 'user')
-    return await this.classRequestService.listByCreatedBy(_id, pagination, queryClassRequestDto)
+    queryClassRequestDto.createdBy = _id
+    return await this.classRequestService.list(pagination, queryClassRequestDto)
   }
 
   @ApiOperation({
@@ -72,12 +73,9 @@ export class InstructorClassRequestController {
   @ApiOkResponse({ type: InstructorViewClassRequestDetailDataResponse })
   @ApiErrorResponse([Errors.CLASS_REQUEST_NOT_FOUND])
   @Get(':id([0-9a-f]{24})')
-  async getDetail(@Req() req, @Param('id') classId: string) {
+  async getDetail(@Req() req, @Param('id') classRequestId: string) {
     const { _id } = _.get(req, 'user')
-    const classRequest = await this.classRequestService.findById(
-      classId,
-      INSTRUCTOR_VIEW_CLASS_REQUEST_DETAIL_PROJECTION
-    )
+    const classRequest = await this.classRequestService.findById(classRequestId, CLASS_REQUEST_DETAIL_PROJECTION)
 
     if (!classRequest || classRequest.createdBy?.toString() !== _id)
       throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
