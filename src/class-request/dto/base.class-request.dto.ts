@@ -4,6 +4,7 @@ import { ClassRequestStatus, ClassRequestType } from '@common/contracts/constant
 import { ClassRequestStatusHistory } from '@src/class-request/schemas/class-request.schema'
 import { Types } from 'mongoose'
 import { BaseClassDto } from '@class/dto/base.class.dto'
+import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 
 class BaseClassRequestMetadataDto extends BaseClassDto {}
 
@@ -37,7 +38,7 @@ export class BaseClassRequestDto {
 
   @ApiProperty({ type: String })
   @IsMongoId()
-  createdBy: Types.ObjectId
+  createdBy: Types.ObjectId | BaseInstructorDto
 
   @ApiProperty({ type: String })
   @IsMongoId()

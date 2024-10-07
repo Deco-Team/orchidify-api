@@ -22,9 +22,9 @@ import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IClassRequestService } from '@class-request/services/class-request.service'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import {
-  InstructorViewClassRequestDetailDataResponse,
-  InstructorViewClassRequestListDataResponse,
-  QueryClassRequestDto
+  QueryClassRequestDto,
+  StaffViewClassRequestDetailDataResponse,
+  StaffViewClassRequestListDataResponse
 } from '@class-request/dto/view-class-request.dto'
 import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
 
@@ -43,7 +43,7 @@ export class ManagementClassRequestController {
     summary: `[${UserRole.STAFF}] View Class Request List`
   })
   @ApiQuery({ type: PaginationQuery })
-  @ApiOkResponse({ type: InstructorViewClassRequestListDataResponse })
+  @ApiOkResponse({ type: StaffViewClassRequestListDataResponse })
   @Roles(UserRole.STAFF)
   @Get()
   async list(@Pagination() pagination: PaginationParams, @Query() queryClassRequestDto: QueryClassRequestDto) {
@@ -53,12 +53,17 @@ export class ManagementClassRequestController {
   @ApiOperation({
     summary: `[${UserRole.STAFF}] View Class Request Detail`
   })
-  @ApiOkResponse({ type: InstructorViewClassRequestDetailDataResponse })
+  @ApiOkResponse({ type: StaffViewClassRequestDetailDataResponse })
   @ApiErrorResponse([Errors.CLASS_REQUEST_NOT_FOUND])
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') classRequestId: string) {
-    const classRequest = await this.classRequestService.findById(classRequestId, CLASS_REQUEST_DETAIL_PROJECTION)
+    const classRequest = await this.classRequestService.findById(classRequestId, CLASS_REQUEST_DETAIL_PROJECTION, [
+      {
+        path: 'createdBy',
+        select: ['_id', 'name', 'phone', 'email', 'idCardPhoto', 'avatar']
+      }
+    ])
 
     if (!classRequest)
       throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
