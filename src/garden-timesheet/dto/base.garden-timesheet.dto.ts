@@ -27,6 +27,9 @@ export class BaseGardenTimesheetDto {
   @ValidateNested({ each: true })
   slots: BaseSlotDto[]
 
+  @ApiProperty({ type: Number })
+  gardenMaxClass: number
+
   @ApiProperty({ type: Date })
   createdAt: Date
 

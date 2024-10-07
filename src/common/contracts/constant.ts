@@ -111,3 +111,5 @@ export enum SlotNumber {
   THREE = 3,
   FOUR = 4
 }
+
+export const SLOT_NUMBERS = [1,2,3,4]

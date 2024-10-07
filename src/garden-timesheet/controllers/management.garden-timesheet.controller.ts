@@ -42,7 +42,7 @@ export class ManagementGardenTimesheetController {
     if (!garden || (role === UserRole.GARDEN_MANAGER && garden?.gardenManagerId?.toString() !== _id))
       throw new AppException(Errors.GARDEN_NOT_FOUND)
 
-    const docs = await this.gardenTimesheetService.viewTimesheetList(queryGardenTimesheetDto)
+    const docs = await this.gardenTimesheetService.viewGardenTimesheetList(queryGardenTimesheetDto,garden)
     return { docs }
   }
 
