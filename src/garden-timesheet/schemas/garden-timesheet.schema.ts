@@ -42,8 +42,11 @@ export class GardenTimesheet {
 
   @Prop({ type: [SlotSchema] })
   slots: Slot[]
+
+  @Prop({ type: Number, required: true })
+  gardenMaxClass: number
 }
 
 export const GardenTimesheetSchema = SchemaFactory.createForClass(GardenTimesheet)
 GardenTimesheetSchema.plugin(paginate)
-GardenTimesheetSchema.index({ gardenId: 1, date: 1 }, { unique: true })
+GardenTimesheetSchema.index({ date: 1, status: 1, gardenId: 1 }, { unique: true })

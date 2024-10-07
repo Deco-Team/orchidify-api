@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import { Transform } from 'class-transformer'
-import { SlotStatus } from '@common/contracts/constant'
+import { SlotNumber, SlotStatus } from '@common/contracts/constant'
 import { Class } from '@src/class/schemas/class.schema'
 
 export type SlotDocument = HydratedDocument<Slot>
@@ -15,6 +15,9 @@ export class Slot {
   }
   @Transform(({ value }) => value?.toString())
   _id: string
+
+  @Prop({ type: Number, required: true, enum: SlotNumber })
+  slotNumber: SlotNumber
 
   @Prop({ type: Date, required: true })
   start: Date

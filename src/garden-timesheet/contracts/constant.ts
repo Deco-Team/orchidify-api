@@ -4,6 +4,7 @@ export const VIEW_GARDEN_TIMESHEET_LIST_PROJECTION = [
   'date',
   // 'gardenId',
   'slots',
+  'gardenMaxClass',
   // 'createdAt',
   // 'updatedAt'
 ] as const
