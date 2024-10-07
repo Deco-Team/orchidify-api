@@ -29,6 +29,9 @@ export class BaseClassDto {
   @IsMongoId()
   _id: string
 
+  @ApiProperty({ type: String })
+  code: string
+
   @ApiProperty({ type: String, example: 'Class title' })
   @IsNotEmpty()
   @IsString()
