@@ -1,6 +1,7 @@
 import {
   ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsDateString,
   IsEnum,
@@ -16,7 +17,7 @@ import {
   ValidateNested
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { ClassStatus } from '@common/contracts/constant'
+import { ClassStatus, SlotNumber, Weekday } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { ClassStatusHistory } from '@src/class/schemas/class.schema'
@@ -83,6 +84,22 @@ export class BaseClassDto {
   @ValidateNested({ each: true })
   media: BaseMediaDto[]
 
+  @ApiProperty({ type: BaseLessonDto, isArray: true })
+  @IsArray()
+  @ArrayMinSize(3)
+  @ArrayMaxSize(10)
+  @Type(() => BaseLessonDto)
+  @ValidateNested({ each: true })
+  lessons: BaseLessonDto[]
+
+  @ApiProperty({ type: BaseAssignmentDto, isArray: true })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(3)
+  @Type(() => BaseAssignmentDto)
+  @ValidateNested({ each: true })
+  assignments: BaseAssignmentDto[]
+
   @ApiProperty({ type: String, enum: ClassStatus })
   @IsEnum(ClassStatus)
   status: ClassStatus
@@ -99,11 +116,19 @@ export class BaseClassDto {
   @ApiProperty({ type: Number })
   learnerQuantity: number
 
-  @ApiProperty({ type: String })
-  instructorId: string
+  @ApiProperty({ enum: Weekday, isArray: true })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(7)
+  @ArrayUnique()
+  weekdays: Weekday[]
 
-  @ApiProperty({ type: String })
-  gardenId: string
+  @ApiProperty({ enum: SlotNumber, isArray: true })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(4)
+  @ArrayUnique()
+  slotNumbers: SlotNumber[]
 
   @ApiPropertyOptional({ type: Number })
   rate: number
@@ -111,21 +136,19 @@ export class BaseClassDto {
   @ApiPropertyOptional({ type: String })
   cancelReason: string
 
-  @ApiProperty({ type: BaseLessonDto, isArray: true })
-  @IsArray()
-  @ArrayMinSize(3)
-  @ArrayMaxSize(10)
-  @Type(() => BaseLessonDto)
-  @ValidateNested({ each: true })
-  lessons: BaseLessonDto[]
+  @ApiProperty({ type: String, example: 'Course Garden Required Toolkits' })
+  @IsString()
+  @MaxLength(500)
+  gardenRequiredToolkits: string
 
-  @ApiProperty({ type: BaseAssignmentDto, isArray: true })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(3)
-  @Type(() => BaseAssignmentDto)
-  @ValidateNested({ each: true })
-  assignments: BaseAssignmentDto[]
+  @ApiProperty({ type: String })
+  instructorId: string
+
+  @ApiProperty({ type: String })
+  gardenId: string
+
+  @ApiProperty({ type: String })
+  courseId: string
 
   @ApiProperty({ type: Date })
   createdAt: Date
