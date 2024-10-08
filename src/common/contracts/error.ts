@@ -155,7 +155,7 @@ export const Errors = {
   COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS: {
     error: 'COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS',
     message: 'Không thể tạo yêu cầu mở lớp học từ khóa học này.',
-    httpStatus: HttpStatus.NOT_FOUND
+    httpStatus: HttpStatus.BAD_REQUEST
   },
 
   /**
@@ -219,6 +219,11 @@ export const Errors = {
   CREATE_CLASS_REQUEST_LIMIT: {
     error: 'CREATE_CLASS_REQUEST_LIMIT',
     message: 'Bạn đã đạt số lượng tạo yêu cầu khóa học trong ngày.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID: {
+    error: 'CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID',
+    message: 'Tiết học của yêu cầu khóa học không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   }
 }

@@ -36,6 +36,7 @@ import {
 import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
 import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
+import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 
 @ApiTags('ClassRequest - Instructor')
 @ApiBearerAuth()
@@ -48,7 +49,9 @@ export class InstructorClassRequestController {
     @Inject(IClassRequestService)
     private readonly classRequestService: IClassRequestService,
     @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    private readonly courseService: ICourseService,
+    @Inject(IGardenTimesheetService)
+    private readonly gardenTimesheetService: IGardenTimesheetService
   ) {}
 
   @ApiOperation({
@@ -89,7 +92,8 @@ export class InstructorClassRequestController {
   @ApiErrorResponse([
     Errors.COURSE_NOT_FOUND,
     Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS,
-    Errors.CREATE_CLASS_REQUEST_LIMIT
+    Errors.CREATE_CLASS_REQUEST_LIMIT,
+    Errors.CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID
   ])
   @Post('publish-class')
   async createPublishClassRequest(@Req() req, @Body() createPublishClassRequestDto: CreatePublishClassRequestDto) {
@@ -107,6 +111,12 @@ export class InstructorClassRequestController {
     if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
     if ([CourseStatus.REQUESTING, CourseStatus.DELETED].includes(course.status))
       throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
+
+    // validate slots with startDate, duration, weekdays
+    const { startDate, duration, weekdays, slotNumbers } = createPublishClassRequestDto
+    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({ startDate, duration, weekdays })
+    if (_.difference(slotNumbers, availableSlots.slotNumbers).length !== 0)
+      throw new AppException(Errors.CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID)
 
     createPublishClassRequestDto['status'] = ClassRequestStatus.PENDING
     createPublishClassRequestDto['histories'] = [

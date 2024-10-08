@@ -29,7 +29,7 @@ export class InstructorGardenTimesheetController {
   ) {}
 
   @ApiOperation({
-    summary: `View Available Time (Weekdays And SlotNumbers) of Garden Timesheet`
+    summary: `View Available Time (SlotNumbers) of Garden Timesheet`
   })
   @ApiOkResponse({ type: ViewAvailableTimeDataResponse })
   @Get('available-time')
