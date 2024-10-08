@@ -34,6 +34,7 @@ import { UpdateGardenDto } from '@garden/dto/update-garden.dto'
 import { IGardenManagerService } from '@garden-manager/services/garden-manager.service'
 import { IClassService } from '@src/class/services/class.service'
 import { Types } from 'mongoose'
+import { AvailableGardenListDataResponse, QueryAvailableGardenDto } from '@garden/dto/view-available-garden.dto'
 
 @ApiTags('Garden - Management')
 @ApiBearerAuth()
@@ -169,5 +170,16 @@ export class ManagementGardenController {
       { status: GardenStatus.ACTIVE }
     )
     return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] View Available Garden List for Create Request to Publish Class`
+  })
+  @ApiOkResponse({ type: AvailableGardenListDataResponse })
+  @Roles(UserRole.STAFF)
+  @Get('available')
+  async getAvailableGardenList(@Query() queryAvailableGardenDto: QueryAvailableGardenDto) {
+    const docs = await this.gardenService.getAvailableGardenList(queryAvailableGardenDto)
+    return { docs }
   }
 }
