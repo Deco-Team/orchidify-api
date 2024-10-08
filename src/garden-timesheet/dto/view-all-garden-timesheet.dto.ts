@@ -1,15 +1,18 @@
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
-import { IsDateString, IsEnum, IsMongoId } from 'class-validator'
+import { IsEnum, IsMongoId } from 'class-validator'
 import { TimesheetType } from '@common/contracts/constant'
+import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
+import { PastMaxMonth } from '@common/validators/past-max-month.validator'
 
 export class QueryAllGardenTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
-  @IsDateString({ strict: true })
+  @FutureMaxMonth(12)
+  @PastMaxMonth(24)
   date: Date
 
-  @ApiProperty({ enum: TimesheetType })
-  @IsEnum(TimesheetType)
+  @ApiProperty({ enum: [TimesheetType.WEEK] })
+  @IsEnum([TimesheetType.WEEK])
   type: TimesheetType
 }
 

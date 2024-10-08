@@ -24,6 +24,10 @@ import { GardenManagerModule } from '@garden-manager/garden-manager.module'
     {
       provide: IGardenService,
       useClass: GardenService
+    },
+    {
+      provide: IGardenRepository,
+      useClass: GardenRepository
     }
   ]
 })

@@ -128,6 +128,11 @@ export const Errors = {
     message: 'Có lớp học đã lên lịch hoặc đang diễn ra, nhà vườn không thể bị vô hiệu hóa.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  GARDEN_INACTIVE: {
+    error: 'GARDEN_INACTIVE',
+    message: 'Nhà vườn đã bị vô hiệu hóa.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Course

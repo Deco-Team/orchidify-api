@@ -3,7 +3,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiT
 import * as _ from 'lodash'
 import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { UserRole } from '@common/contracts/constant'
+import { GardenStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
@@ -33,7 +33,7 @@ export class ManagementGardenTimesheetController {
     summary: `[${UserRole.STAFF}][${UserRole.GARDEN_MANAGER}] View GardenTimesheet List`
   })
   @ApiOkResponse({ type: ViewGardenTimesheetListDataResponse })
-  @ApiErrorResponse([Errors.GARDEN_NOT_FOUND])
+  @ApiErrorResponse([Errors.GARDEN_NOT_FOUND, Errors.GARDEN_INACTIVE])
   @Roles(UserRole.STAFF, UserRole.GARDEN_MANAGER)
   @Get()
   async viewGardenTimesheet(@Req() req, @Query() queryGardenTimesheetDto: QueryGardenTimesheetDto) {
@@ -41,8 +41,9 @@ export class ManagementGardenTimesheetController {
     const garden = await this.gardenService.findById(queryGardenTimesheetDto.gardenId)
     if (!garden || (role === UserRole.GARDEN_MANAGER && garden?.gardenManagerId?.toString() !== _id))
       throw new AppException(Errors.GARDEN_NOT_FOUND)
+    if (garden.status === GardenStatus.INACTIVE) throw new AppException(Errors.GARDEN_INACTIVE)
 
-    const docs = await this.gardenTimesheetService.viewGardenTimesheetList(queryGardenTimesheetDto,garden)
+    const docs = await this.gardenTimesheetService.viewGardenTimesheetList(queryGardenTimesheetDto, garden)
     return { docs }
   }
 

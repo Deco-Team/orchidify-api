@@ -105,7 +105,7 @@ export class InstructorClassRequestController {
       '+assignments'
     ])
     if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.DRAFT)
+    if ([CourseStatus.REQUESTING, CourseStatus.DELETED].includes(course.status))
       throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
 
     createPublishClassRequestDto['status'] = ClassRequestStatus.PENDING

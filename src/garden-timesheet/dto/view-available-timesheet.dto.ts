@@ -8,7 +8,7 @@ import { Transform, Type } from 'class-transformer'
 
 export class QueryAvailableTimeDto {
   @ApiProperty({ type: Date })
-  @FutureMinMonth(1)
+  // @FutureMinMonth(1)
   @FutureMaxMonth(3)
   startDate: Date
 
