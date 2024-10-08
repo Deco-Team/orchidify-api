@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common'
+import * as _ from 'lodash'
 import { IGardenRepository } from '@garden/repositories/garden.repository'
 import { Garden, GardenDocument } from '@garden/schemas/garden.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
@@ -10,6 +11,9 @@ import { GardenStatus } from '@common/contracts/constant'
 import { MongoServerError } from 'mongodb'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
+import { AvailableGardenListItemResponse, QueryAvailableGardenDto } from '@garden/dto/view-available-garden.dto'
+import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
+import { AppLogger } from '@common/services/app-logger.service'
 
 export const IGardenService = Symbol('IGardenService')
 
@@ -32,13 +36,17 @@ export interface IGardenService {
     projection?: string | Record<string, any>,
     populate?: Array<PopulateOptions>
   )
+  getAvailableGardenList(queryAvailableGardenDto: QueryAvailableGardenDto): Promise<AvailableGardenListItemResponse[]>
 }
 
 @Injectable()
 export class GardenService implements IGardenService {
+  private readonly appLogger = new AppLogger(GardenService.name)
   constructor(
     @Inject(IGardenRepository)
-    private readonly gardenRepository: IGardenRepository
+    private readonly gardenRepository: IGardenRepository,
+    @Inject(IGardenTimesheetService)
+    private readonly gardenTimesheetService: IGardenTimesheetService
   ) {}
 
   public async create(createGardenDto: CreateGardenDto, options?: SaveOptions | undefined) {
@@ -130,5 +138,36 @@ export class GardenService implements IGardenService {
       projection,
       populate
     })
+  }
+
+  async getAvailableGardenList(
+    queryAvailableGardenDto: QueryAvailableGardenDto
+  ): Promise<AvailableGardenListItemResponse[]> {
+    const { startDate, duration, weekdays, slotNumbers } = queryAvailableGardenDto
+    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({ startDate, duration, weekdays })
+    this.appLogger.log(
+      `getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${
+        availableSlots.slotNumbers
+      }, availableTimeOfGardens=${JSON.stringify(availableSlots.availableTimeOfGardens)}`
+    )
+    if (_.difference(slotNumbers, availableSlots.slotNumbers).length !== 0) return []
+
+    const availableGardens = availableSlots.availableTimeOfGardens.filter((availableTimeOfGarden) => {
+      this.appLogger.log(`gardenId=${availableTimeOfGarden.gardenId}, slotNumbers=${availableTimeOfGarden.slotNumbers}`)
+      return _.difference(slotNumbers, availableTimeOfGarden.slotNumbers).length === 0
+    })
+    if (availableGardens.length === 0) return []
+
+    const gardenIds = availableGardens.map((availableGarden) => availableGarden.gardenId)
+    const gardens = await this.gardenRepository.findMany({
+      conditions: {
+        _id: {
+          $in: gardenIds
+        },
+        status: GardenStatus.ACTIVE
+      },
+      projection: ['_id', 'name']
+    })
+    return gardens
   }
 }

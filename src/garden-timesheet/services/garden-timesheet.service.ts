@@ -257,7 +257,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     if (availableGroupGardenTimesheets.length === 0) return { slotNumbers: [] }
     this.appLogger.debug(`availableGroupGardenTimesheets.length=${availableGroupGardenTimesheets.length}`)
 
-    let availableTimeOfDates = []
+    let availableTimeOfGardens = []
     let availableTime = SLOT_NUMBERS
     for (const availableGroupGardenTimesheet of availableGroupGardenTimesheets) {
       let availableGardenSlots = SLOT_NUMBERS
@@ -277,13 +277,13 @@ export class GardenTimesheetService implements IGardenTimesheetService {
           availableGardenSlots = _.intersection(tempAvailableGardenSlots, availableGardenSlots)
         }
       }
-      availableTimeOfDates.push({ availableGardenSlots, gardenId: availableGroupGardenTimesheet._id })
+      availableTimeOfGardens.push({ slotNumbers: availableGardenSlots, gardenId: availableGroupGardenTimesheet._id })
       availableTime = _.union(availableTime, availableGardenSlots)
     }
 
-    this.appLogger.log(`availableTimeOfDates=${JSON.stringify(availableTimeOfDates)}`)
+    this.appLogger.log(`availableTimeOfDates=${JSON.stringify(availableTimeOfGardens)}`)
     this.appLogger.log(`availableTime=${availableTime}`)
-    return { slotNumbers: availableTime }
+    return { slotNumbers: availableTime, availableTimeOfGardens }
   }
 
   private async generateTimesheetOfMonth(gardenId: string, date: Date, gardenMaxClass: number) {

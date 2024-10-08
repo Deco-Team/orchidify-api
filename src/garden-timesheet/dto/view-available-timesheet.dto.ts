@@ -5,10 +5,11 @@ import { SlotNumber, Weekday } from '@common/contracts/constant'
 import { FutureMinMonth } from '@common/validators/future-min-month.validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { Transform, Type } from 'class-transformer'
+import { Types } from 'mongoose'
 
 export class QueryAvailableTimeDto {
   @ApiProperty({ type: Date })
-  // @FutureMinMonth(1)
+  @FutureMinMonth(1)
   @FutureMaxMonth(3)
   startDate: Date
 
@@ -28,8 +29,15 @@ export class QueryAvailableTimeDto {
   weekdays: Weekday[]
 }
 
+class AvailableTimeOfGardens {
+  slotNumbers: SlotNumber[]
+  gardenId: Types.ObjectId
+}
+
 export class ViewAvailableTimeResponse {
   @ApiProperty({ enum: SlotNumber, isArray: true })
   slotNumbers: SlotNumber[]
+
+  availableTimeOfGardens?: AvailableTimeOfGardens[]
 }
 export class ViewAvailableTimeDataResponse extends DataResponse(ViewAvailableTimeResponse) {}

@@ -1,7 +1,6 @@
 import {
   ArrayMaxSize,
   ArrayMinSize,
-  ArrayUnique,
   IsArray,
   IsDateString,
   IsEnum,
@@ -18,7 +17,7 @@ import {
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { ClassStatus, SlotNumber, Weekday } from '@common/contracts/constant'
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { ClassStatusHistory } from '@src/class/schemas/class.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
@@ -120,14 +119,14 @@ export class BaseClassDto {
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(7)
-  @ArrayUnique()
+  @Transform(({ value }) => (Array.isArray(value) ? [...new Set(value)] : Array(value)))
   weekdays: Weekday[]
 
   @ApiProperty({ enum: SlotNumber, isArray: true })
   @IsArray()
   @ArrayMinSize(1)
   @ArrayMaxSize(4)
-  @ArrayUnique()
+  @Transform(({ value }) => (Array.isArray(value) ? [...new Set(value)].map(Number) : Array(value).map(Number)))
   slotNumbers: SlotNumber[]
 
   @ApiPropertyOptional({ type: Number })
