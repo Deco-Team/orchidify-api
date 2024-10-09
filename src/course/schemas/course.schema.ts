@@ -84,6 +84,9 @@ export class Course {
 
   @Prop({ type: Types.ObjectId, ref: Instructor.name, required: true })
   instructorId: Types.ObjectId
+
+  @Prop({ type: Boolean, default: false })
+  isPublished: boolean
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course)

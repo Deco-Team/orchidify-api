@@ -144,6 +144,7 @@ export class BaseClassDto {
   instructorId: string
 
   @ApiProperty({ type: String })
+  @IsMongoId()
   gardenId: string
 
   @ApiProperty({ type: String })

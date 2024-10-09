@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { IsOptional, IsPositive } from 'class-validator'
 import { DataResponse } from '@common/contracts/openapi-builder'
+import { UserRole } from './constant'
 
 export class PaginationQuery {
   @ApiPropertyOptional({
@@ -71,4 +72,10 @@ export class ErrorResponse {
 
   @ApiProperty()
   data: any
+}
+
+export class UserAuth {
+  _id: string
+
+  role: UserRole
 }
