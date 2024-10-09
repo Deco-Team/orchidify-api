@@ -1,17 +1,8 @@
-import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiTags
-} from '@nestjs/swagger'
+import { Controller, Get, UseGuards, Inject, Query, Param, Patch, Req, Body } from '@nestjs/common'
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import {
-  ErrorResponse,
-  PaginationQuery} from '@common/contracts/dto'
+import { ErrorResponse, PaginationQuery, SuccessDataResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
@@ -27,6 +18,8 @@ import {
   StaffViewClassRequestListDataResponse
 } from '@class-request/dto/view-class-request.dto'
 import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
+import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto'
+import { ApprovePublishClassRequestDto } from '@class-request/dto/approve-publish-class-request.dto'
 
 @ApiTags('ClassRequest - Management')
 @ApiBearerAuth()
@@ -65,8 +58,50 @@ export class ManagementClassRequestController {
       }
     ])
 
-    if (!classRequest)
-      throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
+    if (!classRequest) throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
     return classRequest
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Approve Publish Class Request`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.CLASS_REQUEST_NOT_FOUND,
+    Errors.CLASS_REQUEST_STATUS_INVALID,
+    Errors.COURSE_NOT_FOUND,
+    Errors.COURSE_STATUS_INVALID,
+    Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST
+  ])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/cancel')
+  async approve(
+    @Req() req,
+    @Param('id') classRequestId: string,
+    @Body() approvePublishClassRequestDto: ApprovePublishClassRequestDto
+  ) {
+    const user = _.get(req, 'user')
+    return this.classRequestService.approvePublishClassRequest(classRequestId, approvePublishClassRequestDto, user)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Reject Publish Class Request`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.CLASS_REQUEST_NOT_FOUND,
+    Errors.CLASS_REQUEST_STATUS_INVALID,
+    Errors.COURSE_NOT_FOUND,
+    Errors.COURSE_STATUS_INVALID
+  ])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/reject')
+  async reject(
+    @Req() req,
+    @Param('id') classRequestId: string,
+    @Body() rejectPublishClassRequestDto: RejectPublishClassRequestDto
+  ) {
+    const user = _.get(req, 'user')
+    return this.classRequestService.rejectPublishClassRequest(classRequestId, rejectPublishClassRequestDto, user)
   }
 }

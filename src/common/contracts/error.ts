@@ -157,6 +157,11 @@ export const Errors = {
     message: 'Không thể tạo yêu cầu mở lớp học từ khóa học này.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  COURSE_STATUS_INVALID: {
+    error: 'COURSE_STATUS_INVALID',
+    message: 'Trạng thái của khóa học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Class
@@ -225,5 +230,15 @@ export const Errors = {
     error: 'CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID',
     message: 'Tiết học của yêu cầu khóa học không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
-  }
+  },
+  CLASS_REQUEST_STATUS_INVALID: {
+    error: 'CLASS_REQUEST_STATUS_INVALID',
+    message: 'Trạng thái của yêu cầu khóa học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST: {
+    error: 'GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST',
+    message: 'Vườn đã chọn không phù hợp với yêu cầu khóa học.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 }

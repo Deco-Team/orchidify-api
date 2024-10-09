@@ -97,7 +97,7 @@ export class InstructorClassRequestController {
   ])
   @Post('publish-class')
   async createPublishClassRequest(@Req() req, @Body() createPublishClassRequestDto: CreatePublishClassRequestDto) {
-    const { _id } = _.get(req, 'user')
+    const { _id, role } = _.get(req, 'user')
 
     // BR-39: Instructors can only create 10 class requests per day.
     const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date())
@@ -124,7 +124,7 @@ export class InstructorClassRequestController {
         status: ClassRequestStatus.PENDING,
         timestamp: new Date(),
         userId: new Types.ObjectId(_id),
-        userRole: UserRole.INSTRUCTOR
+        userRole: role
       }
     ]
     createPublishClassRequestDto['createdBy'] = new Types.ObjectId(_id)
@@ -153,27 +153,18 @@ export class InstructorClassRequestController {
   }
 
   @ApiOperation({
-    summary: `Cancel Class Request`
+    summary: `Cancel Publish Class Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.CLASS_REQUEST_NOT_FOUND])
+  @ApiErrorResponse([
+    Errors.CLASS_REQUEST_NOT_FOUND,
+    Errors.CLASS_REQUEST_STATUS_INVALID,
+    Errors.COURSE_NOT_FOUND,
+    Errors.COURSE_STATUS_INVALID
+  ])
   @Patch(':id([0-9a-f]{24})/cancel')
   async cancel(@Req() req, @Param('id') classRequestId: string) {
-    const { _id } = _.get(req, 'user')
-    // Update course to CANCELED
-    const classRequest = await this.classRequestService.update(
-      { _id: classRequestId, status: ClassRequestStatus.PENDING, createdBy: new Types.ObjectId(_id) },
-      { status: ClassRequestStatus.CANCELED }
-    )
-    if (!classRequest) throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
-
-    // Update course to DRAFT
-    await this.courseService.update(
-      { _id: classRequest.courseId, status: CourseStatus.REQUESTING, instructorId: new Types.ObjectId(_id) },
-      {
-        status: CourseStatus.DRAFT
-      }
-    )
-    return new SuccessResponse(true)
+    const user = _.get(req, 'user')
+    return this.classRequestService.cancelPublishClassRequest(classRequestId, user)
   }
 }
