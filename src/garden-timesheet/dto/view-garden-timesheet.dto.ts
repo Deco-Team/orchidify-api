@@ -3,7 +3,7 @@ import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsEnum, IsMongoId } from 'class-validator'
 // import { BaseGardenTimesheetDto } from './base.garden-timesheet.dto'
 // import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
-import { TimesheetType } from '@common/contracts/constant'
+import { SlotNumber, TimesheetType } from '@common/contracts/constant'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 
@@ -36,17 +36,11 @@ export class ViewGardenTimesheetItemResponse {
   @ApiProperty({ type: String })
   status: string
 
-  // @ApiProperty({ type: String })
-  // gardenId: string
-
   @ApiPropertyOptional({ type: String })
   classId: string
 
-  // @ApiProperty({ type: Date })
-  // createdAt: Date
-
-  // @ApiProperty({ type: Date })
-  // updatedAt: Date
+  @ApiPropertyOptional({ type: Number, enum: SlotNumber })
+  slotNumber: SlotNumber
 }
 class ViewGardenTimesheetListResponse {
   @ApiProperty({ type: ViewGardenTimesheetItemResponse, isArray: true })

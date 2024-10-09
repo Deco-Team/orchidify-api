@@ -11,7 +11,8 @@ import {
   SLOT_NUMBERS,
   SlotNumber,
   SlotStatus,
-  TimesheetType
+  TimesheetType,
+  Weekday
 } from '@common/contracts/constant'
 import { VN_TIMEZONE } from '@src/config'
 import { CreateGardenTimesheetDto } from '@garden-timesheet/dto/create-garden-timesheet.dto'
@@ -22,6 +23,7 @@ import { QueryAvailableTimeDto, ViewAvailableTimeResponse } from '@garden-timesh
 import { Slot } from '@garden-timesheet/schemas/slot.schema'
 import { Garden } from '@garden/schemas/garden.schema'
 import { IGardenRepository } from '@garden/repositories/garden.repository'
+import { CreateSlotDto } from '@garden-timesheet/dto/slot.dto'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -42,6 +44,17 @@ export interface IGardenTimesheetService {
   ): Promise<GardenTimesheetDocument[]>
   viewAllGardenTimesheetList(queryAllGardenTimesheetDto: QueryAllGardenTimesheetDto): Promise<GardenTimesheetDocument[]>
   viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse>
+  generateSlotsForClass(
+    params: {
+      startDate: Date
+      duration: number
+      weekdays: Weekday[]
+      slotNumbers: SlotNumber[]
+      gardenId: Types.ObjectId
+      classId: Types.ObjectId
+    },
+    options?: QueryOptions | undefined
+  ): Promise<boolean>
 }
 
 @Injectable()
@@ -220,7 +233,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     let currentDate = startOfDate.clone()
     while (currentDate.isSameOrBefore(endOfDate)) {
       for (let weekday of weekdays) {
-        const searchDate = currentDate.isoWeekday(weekday)
+        const searchDate = currentDate.clone().isoWeekday(weekday)
         if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
           searchDates.push(searchDate.toDate())
         }
@@ -284,6 +297,65 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     this.appLogger.log(`availableTimeOfDates=${JSON.stringify(availableTimeOfGardens)}`)
     this.appLogger.log(`availableTime=${availableTime}`)
     return { slotNumbers: availableTime, availableTimeOfGardens }
+  }
+
+  async generateSlotsForClass(
+    params: {
+      startDate: Date
+      duration: number
+      weekdays: Weekday[]
+      slotNumbers: SlotNumber[]
+      gardenId: Types.ObjectId
+      classId: Types.ObjectId
+    },
+    options?: QueryOptions | undefined
+  ): Promise<boolean> {
+    const { startDate, duration, weekdays, slotNumbers, gardenId, classId } = params
+    this.appLogger.debug(
+      `generateSlotsForClass: startDate=${startDate}, duration=${duration}, weekdays=${weekdays}, slotNumbers=${slotNumbers}, gardenId=${gardenId}, classId=${classId}`
+    )
+
+    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').endOf('date')
+
+    const classDates = []
+    let currentDate = startOfDate.clone()
+    while (currentDate.isSameOrBefore(endOfDate)) {
+      for (let weekday of weekdays) {
+        const classDate = currentDate.clone().isoWeekday(weekday)
+        if (classDate.isSameOrAfter(startOfDate) && classDate.isSameOrBefore(endOfDate)) {
+          classDates.push(classDate.toDate())
+        }
+      }
+      currentDate.add(1, 'week')
+    }
+
+    const gardenTimesheets = await this.gardenTimesheetRepository.findMany({
+      conditions: {
+        date: { $in: classDates },
+        status: GardenTimesheetStatus.ACTIVE,
+        gardenId
+      }
+    })
+    this.appLogger.debug(`generateSlotsForClass: totalNumberOfDays=${duration * weekdays.length}`)
+    this.appLogger.debug(`generateSlotsForClass: classDates.length=${classDates.length}`)
+    this.appLogger.debug(`generateSlotsForClass: gardenTimesheets.length=${gardenTimesheets.length}`)
+    const updateGardenTimesheetPromises = []
+    for (let gardenTimesheet of gardenTimesheets) {
+      const newSlots = slotNumbers.map((slotNumber) => new CreateSlotDto(slotNumber, gardenTimesheet.date, classId))
+      const totalSlots = [...gardenTimesheet.slots, ...newSlots].sort((a, b) => a.slotNumber - b.slotNumber)
+      updateGardenTimesheetPromises.push(
+        this.update(
+          { _id: gardenTimesheet._id },
+          {
+            slots: totalSlots
+          },
+          options
+        )
+      )
+    }
+    await Promise.all(updateGardenTimesheetPromises)
+    return true
   }
 
   private async generateTimesheetOfMonth(gardenId: string, date: Date, gardenMaxClass: number) {

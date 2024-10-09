@@ -74,7 +74,7 @@ export class ManagementClassRequestController {
     Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST
   ])
   @Roles(UserRole.STAFF)
-  @Patch(':id([0-9a-f]{24})/cancel')
+  @Patch(':id([0-9a-f]{24})/approve')
   async approve(
     @Req() req,
     @Param('id') classRequestId: string,
