@@ -34,7 +34,9 @@ export class InstructorGardenTimesheetController {
   @ApiOkResponse({ type: ViewAvailableTimeDataResponse })
   @Get('available-time')
   async viewAvailableTime(@Query() queryAvailableTimeDto: QueryAvailableTimeDto) {
-    return await this.gardenTimesheetService.viewAvailableTime(queryAvailableTimeDto)
+    const result = await this.gardenTimesheetService.viewAvailableTime(queryAvailableTimeDto)
+    delete result.availableTimeOfGardens
+    return result
   }
 
   @ApiOperation({

@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common'
+import * as _ from 'lodash'
 import { IClassRepository } from '@src/class/repositories/class.repository'
 import { Class, ClassDocument } from '@src/class/schemas/class.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
@@ -25,6 +26,7 @@ export interface IClassService {
   listByInstructor(instructorId: string, pagination: PaginationParams, queryClassDto: QueryClassDto)
   findManyByStatus(status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByInstructorIdAndStatus(instructorId: string, status: ClassStatus[]): Promise<ClassDocument[]>
+  generateCode(): Promise<string>
 }
 
 @Injectable()
@@ -105,5 +107,14 @@ export class ClassService implements IClassService {
       }
     })
     return courseClasses
+  }
+
+  public async generateCode(): Promise<string> {
+    // Generate ORCHIDxxx format data
+    const prefix = `ORCHID`
+    // Find the latest entry with the same date prefix
+    const lastRecord = await this.classRepository.model.findOne().sort({ createdAt: -1 })
+    const number = parseInt(_.get(lastRecord, 'code', `${prefix}000`).split(prefix)[1]) + 1
+    return `${prefix}${number.toString().padStart(3, '0')}`
   }
 }

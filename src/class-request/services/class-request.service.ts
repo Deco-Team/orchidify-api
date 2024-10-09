@@ -250,7 +250,7 @@ export class ClassRequestService implements IClassRequestService {
 
     // validate course
     const course = await this.courseService.findById(classRequest.courseId?.toString())
-    if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
+    if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
     if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // validate gardenId fit with time of class request
@@ -277,68 +277,83 @@ export class ClassRequestService implements IClassRequestService {
     const session = await this.connection.startSession()
     try {
       await session.withTransaction(async () => {
-        // // update class request
-        // await this.classRequestRepository.findOneAndUpdate(
-        //   { _id: classRequestId },
-        //   {
-        //     $set: {
-        //       status: ClassRequestStatus.APPROVED
-        //     },
-        //     $push: {
-        //       status: ClassRequestStatus.APPROVED,
-        //       timestamp: new Date(),
-        //       userId: new Types.ObjectId(_id),
-        //       userRole: role
-        //     }
-        //   },
-        //   { session }
-        // )
-        // // update course
-        // await this.courseService.update(
-        //   { _id: classRequest.courseId },
-        //   {
-        //     $set: {
-        //       status: CourseStatus.ACTIVE,
-        //       isPublished: true
-        //     }
-        //   },
-        //   { session }
-        // )
-        // // create new class
-        // // _id, code, status,. histories, learnerQuantity, gardenId, courseId
-        // const classData = _.pick(classRequest.metadata, [
-        //   'title',
-        //   'description',
-        //   'startDate',
-        //   'price',
-        //   'level',
-        //   'type',
-        //   'duration',
-        //   'thumbnail',
-        //   'media',
-        //   'lessons',
-        //   'assignments',
-        //   'learnerLimit',
-        //   'weekdays',
-        //   'slotNumbers',
-        //   'gardenRequiredToolkits',
-        //   'instructorId'
-        // ])
-        // classData['code'] = ''
-        // classData['status'] = ClassStatus.PUBLISHED
-        // classData['histories'] = [
-        //   {
-        //     status: ClassStatus.PUBLISHED,
-        //     timestamp: new Date(),
-        //     userId: new Types.ObjectId(_id),
-        //     userRole: role
-        //   }
-        // ]
-        // classData['learnerQuantity'] = 0
-        // classData['gardenId'] = new Types.ObjectId(gardenId)
-        // classData['courseId'] = classRequest.courseId
-        // const createdClass = await this.classService.create(classData, { session })
-        // // gen slots for class
+        // update class request
+        await this.classRequestRepository.findOneAndUpdate(
+          { _id: classRequestId },
+          {
+            $set: {
+              status: ClassRequestStatus.APPROVED
+            },
+            $push: {
+              histories: {
+                status: ClassRequestStatus.APPROVED,
+                timestamp: new Date(),
+                userId: new Types.ObjectId(_id),
+                userRole: role
+              }
+            }
+          },
+          { session }
+        )
+
+        // update course
+        await this.courseService.update(
+          { _id: classRequest.courseId },
+          {
+            $set: {
+              status: CourseStatus.ACTIVE,
+              isPublished: true
+            }
+          },
+          { session }
+        )
+
+        // create new class
+        const classData = _.pick(classRequest.metadata, [
+          'title',
+          'description',
+          'startDate',
+          'price',
+          'level',
+          'type',
+          'duration',
+          'thumbnail',
+          'media',
+          'lessons',
+          'assignments',
+          'learnerLimit',
+          'weekdays',
+          'slotNumbers',
+          'gardenRequiredToolkits',
+          'instructorId'
+        ])
+        classData['code'] = await this.classService.generateCode()
+        classData['status'] = ClassStatus.PUBLISHED
+        classData['histories'] = [
+          {
+            status: ClassStatus.PUBLISHED,
+            timestamp: new Date(),
+            userId: new Types.ObjectId(_id),
+            userRole: role
+          }
+        ]
+        classData['learnerQuantity'] = 0
+        classData['gardenId'] = new Types.ObjectId(gardenId)
+        classData['courseId'] = classRequest.courseId
+        const createdClass = await this.classService.create(classData, { session })
+        
+        // gen slots for class
+        await this.gardenTimesheetService.generateSlotsForClass(
+          {
+            startDate,
+            duration,
+            weekdays,
+            slotNumbers,
+            gardenId: new Types.ObjectId(gardenId),
+            classId: new Types.ObjectId(createdClass._id)
+          },
+          { session }
+        )
       })
     } finally {
       await session.endSession()
