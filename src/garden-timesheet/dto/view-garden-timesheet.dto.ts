@@ -6,6 +6,7 @@ import { IsEnum, IsMongoId } from 'class-validator'
 import { SlotNumber, TimesheetType } from '@common/contracts/constant'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
+import { BaseSlotMetadataDto } from './slot.dto'
 
 export class QueryGardenTimesheetDto {
   @ApiProperty({ type: String, example: 'gardenId' })
@@ -27,6 +28,9 @@ export class ViewGardenTimesheetItemResponse {
   @IsMongoId()
   _id: string
 
+  @ApiPropertyOptional({ type: Number, enum: SlotNumber })
+  slotNumber: SlotNumber
+
   @ApiProperty({ type: Date })
   start: Date
 
@@ -39,8 +43,8 @@ export class ViewGardenTimesheetItemResponse {
   @ApiPropertyOptional({ type: String })
   classId: string
 
-  @ApiPropertyOptional({ type: Number, enum: SlotNumber })
-  slotNumber: SlotNumber
+  @ApiPropertyOptional({ type: BaseSlotMetadataDto })
+  metadata: BaseSlotMetadataDto
 }
 class ViewGardenTimesheetListResponse {
   @ApiProperty({ type: ViewGardenTimesheetItemResponse, isArray: true })

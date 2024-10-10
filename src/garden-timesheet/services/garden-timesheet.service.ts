@@ -23,7 +23,7 @@ import { QueryAvailableTimeDto, ViewAvailableTimeResponse } from '@garden-timesh
 import { Slot } from '@garden-timesheet/schemas/slot.schema'
 import { Garden } from '@garden/schemas/garden.schema'
 import { IGardenRepository } from '@garden/repositories/garden.repository'
-import { CreateSlotDto } from '@garden-timesheet/dto/slot.dto'
+import { BaseSlotMetadataDto, CreateSlotDto } from '@garden-timesheet/dto/slot.dto'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -52,6 +52,7 @@ export interface IGardenTimesheetService {
       slotNumbers: SlotNumber[]
       gardenId: Types.ObjectId
       classId: Types.ObjectId
+      metadata: BaseSlotMetadataDto
     },
     options?: QueryOptions | undefined
   ): Promise<boolean>
@@ -307,10 +308,11 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       slotNumbers: SlotNumber[]
       gardenId: Types.ObjectId
       classId: Types.ObjectId
+      metadata: BaseSlotMetadataDto
     },
     options?: QueryOptions | undefined
   ): Promise<boolean> {
-    const { startDate, duration, weekdays, slotNumbers, gardenId, classId } = params
+    const { startDate, duration, weekdays, slotNumbers, gardenId, classId, metadata } = params
     this.appLogger.debug(
       `generateSlotsForClass: startDate=${startDate}, duration=${duration}, weekdays=${weekdays}, slotNumbers=${slotNumbers}, gardenId=${gardenId}, classId=${classId}`
     )
@@ -342,7 +344,9 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     this.appLogger.debug(`generateSlotsForClass: gardenTimesheets.length=${gardenTimesheets.length}`)
     const updateGardenTimesheetPromises = []
     for (let gardenTimesheet of gardenTimesheets) {
-      const newSlots = slotNumbers.map((slotNumber) => new CreateSlotDto(slotNumber, gardenTimesheet.date, classId))
+      const newSlots = slotNumbers.map(
+        (slotNumber) => new CreateSlotDto(slotNumber, gardenTimesheet.date, classId, metadata)
+      )
       const totalSlots = [...gardenTimesheet.slots, ...newSlots].sort((a, b) => a.slotNumber - b.slotNumber)
       updateGardenTimesheetPromises.push(
         this.update(

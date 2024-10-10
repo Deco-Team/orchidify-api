@@ -1,9 +1,12 @@
 import { IsDateString, IsMongoId } from 'class-validator'
 import * as moment from 'moment-timezone'
-import { ApiProperty, PickType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { SlotNumber, SlotStatus } from '@common/contracts/constant'
 import { Types } from 'mongoose'
 import { VN_TIMEZONE } from '@src/config'
+import { BaseClassDto } from '@class/dto/base.class.dto'
+
+export class BaseSlotMetadataDto extends PickType(BaseClassDto, ['code', 'title']) {}
 
 export class BaseSlotDto {
   @ApiProperty({ type: String })
@@ -24,17 +27,28 @@ export class BaseSlotDto {
   @ApiProperty({ enum: SlotStatus })
   status: SlotStatus
 
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: String })
   classId: string | Types.ObjectId
+
+  @ApiPropertyOptional({ type: BaseSlotMetadataDto })
+  metadata: BaseSlotMetadataDto
 }
 
-export class CreateSlotDto extends PickType(BaseSlotDto, ['slotNumber', 'start', 'end', 'status', 'classId']) {
-  constructor(slotNumber: SlotNumber, date: Date, classId?: Types.ObjectId) {
+export class CreateSlotDto extends PickType(BaseSlotDto, [
+  'slotNumber',
+  'start',
+  'end',
+  'status',
+  'classId',
+  'metadata'
+]) {
+  constructor(slotNumber: SlotNumber, date: Date, classId?: Types.ObjectId, metadata?: BaseSlotMetadataDto) {
     const startOfDate = moment(date).tz(VN_TIMEZONE).startOf('day')
     super()
     this.slotNumber = slotNumber
     this.status = SlotStatus.NOT_AVAILABLE
     this.classId = classId
+    this.metadata = metadata
     switch (slotNumber) {
       case SlotNumber.ONE:
         this.start = startOfDate.clone().add(7, 'hour').toDate()

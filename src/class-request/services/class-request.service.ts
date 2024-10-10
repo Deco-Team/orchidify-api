@@ -341,7 +341,7 @@ export class ClassRequestService implements IClassRequestService {
         classData['gardenId'] = new Types.ObjectId(gardenId)
         classData['courseId'] = classRequest.courseId
         const createdClass = await this.classService.create(classData, { session })
-        
+
         // gen slots for class
         await this.gardenTimesheetService.generateSlotsForClass(
           {
@@ -350,7 +350,8 @@ export class ClassRequestService implements IClassRequestService {
             weekdays,
             slotNumbers,
             gardenId: new Types.ObjectId(gardenId),
-            classId: new Types.ObjectId(createdClass._id)
+            classId: new Types.ObjectId(createdClass._id),
+            metadata: { code: createdClass.code, title: createdClass.title }
           },
           { session }
         )
