@@ -140,7 +140,7 @@ export class InstructorClassRequestController {
 
     // Update course to REQUESTING
     await this.courseService.update(
-      { _id: createPublishClassRequestDto.courseId, status: CourseStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
+      { _id: createPublishClassRequestDto.courseId },
       {
         status: CourseStatus.REQUESTING
       }
