@@ -1,18 +1,22 @@
-export const INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION = [
+export const COURSE_LIST_PROJECTION = [
   '_id',
   'code',
   'title',
   'price',
   'level',
   'type',
+  'thumbnail',
   'status',
   'learnerLimit',
   'rate',
+  'discount',
+  'instructorId',
+  'isPublished',
   'createdAt',
   'updatedAt'
 ] as const
 
-export const INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION = [
+export const COURSE_DETAIL_PROJECTION = [
   '_id',
   'code',
   'title',
@@ -27,8 +31,10 @@ export const INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION = [
   'assignments',
   'learnerLimit',
   'rate',
+  'discount',
   'gardenRequiredToolkits',
   'instructorId',
+  'isPublished',
   'createdAt',
   'updatedAt'
 ] as const

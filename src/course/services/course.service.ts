@@ -5,8 +5,8 @@ import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQ
 import { CreateCourseDto } from '@course/dto/create-course.dto'
 import { CourseStatus } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
-import { INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION } from '@course/contracts/constant'
-import { QueryCourseDto } from '@course/dto/view-course.dto'
+import { COURSE_LIST_PROJECTION } from '@course/contracts/constant'
+import { QueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto'
 import { CourseLevel } from '@src/common/contracts/constant'
 import * as _ from 'lodash'
 
@@ -25,6 +25,7 @@ export interface ICourseService {
     options?: QueryOptions | undefined
   ): Promise<CourseDocument>
   listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto)
+  listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto)
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
 }
 
@@ -64,7 +65,7 @@ export class CourseService implements ICourseService {
     instructorId: string,
     pagination: PaginationParams,
     queryCourseDto: QueryCourseDto,
-    projection = INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION
+    projection = COURSE_LIST_PROJECTION
   ) {
     const { title, type, level, status } = queryCourseDto
     const filter: Record<string, any> = {
@@ -86,6 +87,50 @@ export class CourseService implements ICourseService {
     const validStatus = status?.filter((status) =>
       [CourseStatus.DRAFT, CourseStatus.REQUESTING, CourseStatus.ACTIVE].includes(status)
     )
+    if (validStatus?.length > 0) {
+      filter['status'] = {
+        $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
+      }
+    }
+
+    return this.courseRepository.model.paginate(filter, {
+      ...pagination,
+      projection
+    })
+  }
+
+  async listByStaff(
+    pagination: PaginationParams,
+    queryCourseDto: StaffQueryCourseDto,
+    projection = COURSE_LIST_PROJECTION
+  ) {
+    const { title, type, level, status } = queryCourseDto
+    const filter: Record<string, any> = {
+      status: {
+        $ne: CourseStatus.DELETED
+      },
+      isPublished: true
+    }
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      filter['level'] = {
+        $in: validLevel
+      }
+    }
+
+    const validStatus = status?.filter((status) => [CourseStatus.REQUESTING, CourseStatus.ACTIVE].includes(status))
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus

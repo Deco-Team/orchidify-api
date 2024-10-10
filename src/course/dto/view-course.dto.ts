@@ -4,10 +4,7 @@ import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builde
 import { IsOptional, IsString, MaxLength } from 'class-validator'
 import { CourseStatus } from '@common/contracts/constant'
 import { Transform } from 'class-transformer'
-import {
-  INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION,
-  INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION
-} from '@course/contracts/constant'
+import { COURSE_LIST_PROJECTION, COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { CourseLevel } from '@src/common/contracts/constant'
 
 export class QueryCourseDto {
@@ -44,19 +41,19 @@ export class QueryCourseDto {
   status: CourseStatus[]
 }
 
-class InstructorViewCourseListItemResponse extends PickType(
-  BaseCourseDto,
-  INSTRUCTOR_VIEW_COURSE_LIST_PROJECTION
-) {}
-class InstructorViewCourseListResponse extends PaginateResponse(InstructorViewCourseListItemResponse) {}
-export class InstructorViewCourseListDataResponse extends DataResponse(
-  InstructorViewCourseListResponse
-) {}
+export class StaffQueryCourseDto extends QueryCourseDto {
+  @ApiPropertyOptional({
+    enum: [CourseStatus.ACTIVE, CourseStatus.REQUESTING],
+    isArray: true
+  })
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  status: CourseStatus[]
+}
 
-class InstructorViewCourseDetailResponse extends PickType(
-  BaseCourseDto,
-  INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION
-) {}
-export class InstructorViewCourseDetailDataResponse extends DataResponse(
-  InstructorViewCourseDetailResponse
-) {}
+class CourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {}
+class CourseListResponse extends PaginateResponse(CourseListItemResponse) {}
+export class CourseListDataResponse extends DataResponse(CourseListResponse) {}
+
+class CourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {}
+export class CourseDetailDataResponse extends DataResponse(CourseDetailResponse) {}

@@ -18,11 +18,11 @@ export class CourseLessonService implements ICourseLessonService {
 
   public async findOneBy(params: { lessonId: string; courseId: string; instructorId?: string }) {
     const { lessonId, courseId, instructorId } = params
+    const conditions = { _id: courseId }
+    if (instructorId) conditions['instructorId'] = new Types.ObjectId(instructorId)
+
     const course = await this.courseRepository.findOne({
-      conditions: {
-        _id: courseId,
-        instructorId: new Types.ObjectId(instructorId)
-      },
+      conditions,
       projection: 'lessons',
       options: { lean: true }
     })
