@@ -3,10 +3,10 @@ import { ICourseRepository } from '@course/repositories/course.repository'
 import { Course, CourseDocument } from '@course/schemas/course.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreateCourseDto } from '@course/dto/create-course.dto'
-import { CourseStatus } from '@common/contracts/constant'
+import { ClassStatus, CourseStatus } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { COURSE_LIST_PROJECTION } from '@course/contracts/constant'
-import { QueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto'
+import { QueryCourseDto, PublicQueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto'
 import { CourseLevel } from '@src/common/contracts/constant'
 import * as _ from 'lodash'
 
@@ -26,6 +26,7 @@ export interface ICourseService {
   ): Promise<CourseDocument>
   listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto)
   listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto)
+  listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto)
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
 }
 
@@ -116,7 +117,7 @@ export class CourseService implements ICourseService {
     const { title, type, level, status } = queryCourseDto
     const filter: Record<string, any> = {
       status: {
-        $ne: CourseStatus.DELETED
+        $in: [CourseStatus.REQUESTING, CourseStatus.ACTIVE]
       },
       isPublished: true
     }
@@ -150,6 +151,187 @@ export class CourseService implements ICourseService {
       ...pagination,
       projection
     })
+  }
+
+  async listPublicCourses(
+    pagination: PaginationParams,
+    queryCourseDto: PublicQueryCourseDto,
+  ) {
+    const { title, type, level } = queryCourseDto
+    const aggregateMatch = []
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      aggregateMatch.push({
+        $match: {
+          $text: {
+            $search: textSearch.trim()
+          }
+        }
+      })
+    }
+
+    aggregateMatch.push({
+      $match: {
+        isPublished: true
+      }
+    })
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      aggregateMatch.push({
+        $match: {
+          level: {
+            $in: validLevel
+          }
+        }
+      })
+    }
+
+    const [result] = await this.courseRepository.model.aggregate([
+      ...aggregateMatch,
+      {
+        $addFields: {
+          lessonsCount: {
+            $reduce: {
+              input: {
+                $ifNull: ['$lessons', []]
+              },
+              initialValue: 0,
+              in: {
+                $add: ['$$value', 1]
+              }
+            }
+          },
+          assignmentsCount: {
+            $reduce: {
+              input: {
+                $ifNull: ['$assignments', []]
+              },
+              initialValue: 0,
+              in: {
+                $add: ['$$value', 1]
+              }
+            }
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          code: 1,
+          title: 1,
+          price: 1,
+          level: 1,
+          type: 1,
+          thumbnail: 1,
+          status: 1,
+          learnerLimit: 1,
+          rate: 1,
+          discount: 1,
+          instructorId: 1,
+          isPublished: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          lessonsCount: 1,
+          assignmentsCount: 1
+        }
+      },
+      {
+        $lookup: {
+          from: 'classes',
+          localField: '_id',
+          foreignField: 'courseId',
+          as: 'classes',
+          pipeline: [
+            {
+              $match: {
+                status: ClassStatus.PUBLISHED
+              }
+            },
+            {
+              $project: {
+                _id: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $match: {
+          classes: {
+            $exists: true,
+            $ne: []
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'instructors',
+          localField: 'instructorId',
+          foreignField: '_id',
+          as: 'instructors',
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                idCardPhoto: 1,
+                avatar: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          instructor: {
+            $arrayElemAt: ['$instructors', 0]
+          }
+        }
+      },
+      {
+        $project: {
+          classes: 0,
+          instructors: 0
+        }
+      },
+      {
+        $facet: {
+          docs: [
+            {
+              $skip: (pagination.page - 1) * 10
+            },
+            {
+              $limit: pagination.limit
+            }
+          ],
+          totalCount: [
+            {
+              $count: 'count'
+            }
+          ]
+        }
+      },
+      {
+        $project: {
+          docs: 1,
+          totalDocs: {
+            $arrayElemAt: ['$totalCount.count', 0]
+          }
+        }
+      }
+    ])
+    return {
+      ...result,
+      totalDocs: result?.totalDocs ?? 0,
+      limit: pagination.limit,
+      page: pagination.page
+    }
   }
 
   async findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]> {

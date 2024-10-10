@@ -8,11 +8,12 @@ import { CourseRepository, ICourseRepository } from './repositories/course.repos
 import { GardenModule } from '@garden/garden.module'
 import { Course, CourseSchema } from './schemas/course.schema'
 import { ManagementCourseController } from './controllers/management.course.controller'
+import { CourseController } from './controllers/learner.course.controller'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]), GardenModule],
-  controllers: [InstructorCourseController, ManagementCourseController],
+  controllers: [InstructorCourseController, ManagementCourseController, CourseController],
   providers: [
     {
       provide: ICourseService,
