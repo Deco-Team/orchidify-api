@@ -17,7 +17,7 @@ import { ICourseAssignmentService } from '@course/services/course-assignment.ser
 import {
   CourseDetailDataResponse,
   CourseListDataResponse,
-  QueryCourseDto,
+  PublicQueryCourseDto,
   StaffQueryCourseDto
 } from '@course/dto/view-course.dto'
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'

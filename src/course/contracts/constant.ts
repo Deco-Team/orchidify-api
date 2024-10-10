@@ -38,3 +38,28 @@ export const COURSE_DETAIL_PROJECTION = [
   'createdAt',
   'updatedAt'
 ] as const
+
+export const PUBLIC_COURSE_DETAIL_PROJECTION = [
+  '_id',
+  'code',
+  'title',
+  'description',
+  'price',
+  'level',
+  'type',
+  'thumbnail',
+  'media',
+  'status',
+  'lessons._id',
+  'lessons.title',
+  'assignments._id',
+  'assignments.title',
+  'learnerLimit',
+  'rate',
+  'discount',
+  'gardenRequiredToolkits',
+  'instructorId',
+  'isPublished',
+  'createdAt',
+  'updatedAt'
+] as const
