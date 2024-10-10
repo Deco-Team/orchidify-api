@@ -115,6 +115,9 @@ export class BaseCourseDto {
   @ApiProperty({ type: String })
   instructorId: string
 
+  @ApiPropertyOptional({ type: Boolean })
+  isPublished: Boolean
+
   @ApiProperty({ type: Date })
   createdAt: Date
 

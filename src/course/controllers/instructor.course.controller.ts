@@ -30,12 +30,8 @@ import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
 import { ICourseLessonService } from '@course/services/course-lesson.service'
 import { ICourseAssignmentService } from '@course/services/course-assignment.service'
-import {
-  InstructorViewCourseDetailDataResponse,
-  InstructorViewCourseListDataResponse,
-  QueryCourseDto
-} from '@course/dto/view-course.dto'
-import { INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
+import { CourseDetailDataResponse, CourseListDataResponse, QueryCourseDto } from '@course/dto/view-course.dto'
+import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { ViewCourseLessonDetailDataResponse } from '@course/dto/view-course-lesson.dto'
 import { CreateCourseDto } from '@course/dto/create-course.dto'
 import { UpdateCourseDto } from '@course/dto/update-course.dto'
@@ -61,7 +57,7 @@ export class InstructorCourseController {
     summary: `View Course List`
   })
   @ApiQuery({ type: PaginationQuery })
-  @ApiOkResponse({ type: InstructorViewCourseListDataResponse })
+  @ApiOkResponse({ type: CourseListDataResponse })
   @Get()
   async list(@Req() req, @Pagination() pagination: PaginationParams, @Query() queryCourseDto: QueryCourseDto) {
     const { _id } = _.get(req, 'user')
@@ -71,12 +67,12 @@ export class InstructorCourseController {
   @ApiOperation({
     summary: `View Course Detail`
   })
-  @ApiOkResponse({ type: InstructorViewCourseDetailDataResponse })
+  @ApiOkResponse({ type: CourseDetailDataResponse })
   @ApiErrorResponse([Errors.COURSE_NOT_FOUND])
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Req() req, @Param('id') courseId: string) {
     const { _id } = _.get(req, 'user')
-    const course = await this.courseService.findById(courseId, INSTRUCTOR_VIEW_COURSE_DETAIL_PROJECTION)
+    const course = await this.courseService.findById(courseId, COURSE_DETAIL_PROJECTION)
 
     if (!course || course.instructorId?.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
     return course

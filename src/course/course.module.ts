@@ -7,11 +7,12 @@ import { ICourseAssignmentService, CourseAssignmentService } from './services/co
 import { CourseRepository, ICourseRepository } from './repositories/course.repository'
 import { GardenModule } from '@garden/garden.module'
 import { Course, CourseSchema } from './schemas/course.schema'
+import { ManagementCourseController } from './controllers/management.course.controller'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]), GardenModule],
-  controllers: [InstructorCourseController],
+  controllers: [InstructorCourseController, ManagementCourseController],
   providers: [
     {
       provide: ICourseService,
