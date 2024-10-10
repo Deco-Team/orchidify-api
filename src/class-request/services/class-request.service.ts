@@ -112,9 +112,9 @@ export class ClassRequestService implements IClassRequestService {
       filter['createdBy'] = new Types.ObjectId(createdBy)
     }
 
-    const validType = type?.filter((status) => [ClassRequestType.PUBLISH_CLASS].includes(status))
+    const validType = type?.filter((type) => [ClassRequestType.PUBLISH_CLASS].includes(type))
     if (validType?.length > 0) {
-      filter['status'] = {
+      filter['type'] = {
         $in: validType
       }
     }
