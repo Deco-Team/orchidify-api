@@ -3,7 +3,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQ
 import * as _ from 'lodash'
 
 import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
-import { CourseStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, CourseStatus, UserRole } from '@common/contracts/constant'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
@@ -11,6 +11,7 @@ import { Pagination, PaginationParams } from '@common/decorators/pagination.deco
 import { ICourseService } from '@course/services/course.service'
 import {
   CourseDetailDataResponse,
+  PublicCourseDetailDataResponse,
   PublicQueryCourseDto,
   PublishCourseListDataResponse
 } from '@course/dto/view-course.dto'
@@ -18,6 +19,8 @@ import { PUBLIC_COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
+import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
+import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 @ApiTags('Course - Viewer/Learner')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -42,26 +45,33 @@ export class CourseController {
     summary: `[${UserRole.LEARNER}] View Course Detail`
   })
   @ApiBearerAuth()
-  @ApiOkResponse({ type: CourseDetailDataResponse })
+  @ApiOkResponse({ type: PublicCourseDetailDataResponse })
   @ApiErrorResponse([Errors.COURSE_NOT_FOUND])
   @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
   @Roles(UserRole.LEARNER)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') courseId: string) {
-    const course = await this.courseService.findById(courseId, PUBLIC_COURSE_DETAIL_PROJECTION)
+    const course = await this.courseService.findById(courseId, PUBLIC_COURSE_DETAIL_PROJECTION, [
+      {
+        path: 'classes',
+        select: PUBLIC_COURSE_CLASS_DETAIL_PROJECTION,
+        match: { status: ClassStatus.PUBLISHED },
+        populate: {
+          path: 'garden',
+          select: ['_id', 'name']
+        }
+      },
+      {
+        path: 'instructor',
+        select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+      }
+    ])
     if (
       !course ||
       course.isPublished === false ||
       [CourseStatus.ACTIVE, CourseStatus.REQUESTING].includes(course.status) === false
     )
       throw new AppException(Errors.COURSE_NOT_FOUND)
-
-    // check course has published class
-    // instructor
-    // classes => garden
-    // lesson => title
-    // assignment => title
-    // ratings
     return course
   }
 }
