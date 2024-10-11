@@ -144,8 +144,11 @@ export class ManagementGardenController {
   @Patch('/:id([0-9a-f]{24})/deactivate')
   async deactivate(@Param('id') gardenId: string) {
     // BR-30: Garden can not be deactivated if there are any in-progressing or scheduled classes.
-    const courses = await this.classService.findManyByStatus([ClassStatus.PUBLISHED, ClassStatus.IN_PROGRESS])
-    if (courses.length > 0) throw new AppException(Errors.SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN)
+    const courseClasses = await this.classService.findManyByGardenIdAndStatus(gardenId, [
+      ClassStatus.PUBLISHED,
+      ClassStatus.IN_PROGRESS
+    ])
+    if (courseClasses.length > 0) throw new AppException(Errors.SCHEDULED_OR_IN_PROGRESSING_CLASS_IN_GARDEN)
 
     await this.gardenService.update(
       {

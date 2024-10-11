@@ -26,6 +26,7 @@ export interface IClassService {
   listByInstructor(instructorId: string, pagination: PaginationParams, queryClassDto: QueryClassDto)
   findManyByStatus(status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByInstructorIdAndStatus(instructorId: string, status: ClassStatus[]): Promise<ClassDocument[]>
+  findManyByGardenIdAndStatus(gardenId: string, status: ClassStatus[]): Promise<ClassDocument[]>
   generateCode(): Promise<string>
 }
 
@@ -101,6 +102,18 @@ export class ClassService implements IClassService {
     const courseClasses = await this.classRepository.findMany({
       conditions: {
         instructorId: new Types.ObjectId(instructorId),
+        status: {
+          $in: status
+        }
+      }
+    })
+    return courseClasses
+  }
+
+  async findManyByGardenIdAndStatus(gardenId: string, status: ClassStatus[]): Promise<ClassDocument[]> {
+    const courseClasses = await this.classRepository.findMany({
+      conditions: {
+        gardenId: new Types.ObjectId(gardenId),
         status: {
           $in: status
         }

@@ -128,3 +128,10 @@ export class Class {
 export const ClassSchema = SchemaFactory.createForClass(Class)
 ClassSchema.plugin(paginate)
 // ClassSchema.index({ instructorId: 1 })
+
+ClassSchema.virtual('garden', {
+  ref: 'Garden',
+  localField: 'gardenId',
+  foreignField: '_id',
+  justOne: true
+})
