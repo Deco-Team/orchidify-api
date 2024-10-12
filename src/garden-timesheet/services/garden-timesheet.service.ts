@@ -223,7 +223,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
   public async viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse> {
     const { startDate, duration, weekdays } = queryAvailableTimeDto
     const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
-    const endOfDate = startOfDate.clone().add(duration, 'week').endOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
     this.appLogger.log(
       `viewAvailableTime: startOfDate=${startOfDate.toISOString()}, duration=${duration}, endOfDate=${endOfDate.toISOString()}, weekdays=${weekdays}`
     )
@@ -232,7 +232,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
 
     const searchDates = []
     let currentDate = startOfDate.clone()
-    while (currentDate.isSameOrBefore(endOfDate)) {
+    while (currentDate.isBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const searchDate = currentDate.clone().isoWeekday(weekday)
         if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
@@ -249,6 +249,34 @@ export class GardenTimesheetService implements IGardenTimesheetService {
             $in: searchDates
           },
           status: GardenTimesheetStatus.ACTIVE
+        }
+      },
+      {
+        $lookup: {
+          from: 'gardens',
+          localField: 'gardenId',
+          foreignField: '_id',
+          as: 'gardens',
+          pipeline: [
+            {
+              $match: {
+                status: GardenStatus.ACTIVE
+              }
+            },
+            {
+              $project: {
+                _id: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $match: {
+          gardens: {
+            $exists: true,
+            $ne: []
+          }
         }
       },
       {
@@ -318,11 +346,11 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     )
 
     const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
-    const endOfDate = startOfDate.clone().add(duration, 'week').endOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
 
     const classDates = []
     let currentDate = startOfDate.clone()
-    while (currentDate.isSameOrBefore(endOfDate)) {
+    while (currentDate.isBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const classDate = currentDate.clone().isoWeekday(weekday)
         if (classDate.isSameOrAfter(startOfDate) && classDate.isSameOrBefore(endOfDate)) {

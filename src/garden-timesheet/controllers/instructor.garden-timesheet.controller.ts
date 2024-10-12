@@ -35,7 +35,6 @@ export class InstructorGardenTimesheetController {
   @Get('available-time')
   async viewAvailableTime(@Query() queryAvailableTimeDto: QueryAvailableTimeDto) {
     const result = await this.gardenTimesheetService.viewAvailableTime(queryAvailableTimeDto)
-    delete result.availableTimeOfGardens
     return result
   }
 
