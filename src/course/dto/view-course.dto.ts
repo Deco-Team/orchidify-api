@@ -68,8 +68,8 @@ export class CourseDetailDataResponse extends DataResponse(CourseDetailResponse)
 
 class PublicCourseInstructorDto extends PickType(BaseInstructorDto, PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
 class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {
-  @ApiProperty({ type: Number })
-  sessionsCount: number
+  // @ApiProperty({ type: Number })
+  // sessionsCount: number
 
   @ApiProperty({ type: PublicCourseInstructorDto })
   instructor: PublicCourseInstructorDto
