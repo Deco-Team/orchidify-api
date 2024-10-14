@@ -12,7 +12,7 @@ import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import { ICourseService } from '@course/services/course.service'
-import { ICourseLessonService } from '@course/services/course-lesson.service'
+import { ICourseSessionService } from '@course/services/course-session.service'
 import { ICourseAssignmentService } from '@course/services/course-assignment.service'
 import {
   CourseDetailDataResponse,
@@ -21,7 +21,7 @@ import {
   StaffQueryCourseDto
 } from '@course/dto/view-course.dto'
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
-import { ViewCourseLessonDetailDataResponse } from '@course/dto/view-course-lesson.dto'
+import { ViewCourseSessionDetailDataResponse } from '@course/dto/view-course-session.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
 
 @ApiTags('Course - Management')
@@ -33,8 +33,8 @@ export class ManagementCourseController {
   constructor(
     @Inject(ICourseService)
     private readonly courseService: ICourseService,
-    @Inject(ICourseLessonService)
-    private readonly courseLessonService: ICourseLessonService,
+    @Inject(ICourseSessionService)
+    private readonly courseSessionService: ICourseSessionService,
     @Inject(ICourseAssignmentService)
     private readonly courseAssignmentService: ICourseAssignmentService
   ) {}
@@ -69,17 +69,17 @@ export class ManagementCourseController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] View Course Lesson Detail`
+    summary: `[${UserRole.STAFF}] View Course Session Detail`
   })
-  @ApiOkResponse({ type: ViewCourseLessonDetailDataResponse })
-  @ApiErrorResponse([Errors.LESSON_NOT_FOUND])
+  @ApiOkResponse({ type: ViewCourseSessionDetailDataResponse })
+  @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
   @Roles(UserRole.STAFF)
-  @Get(':courseId([0-9a-f]{24})/lessons/:lessonId([0-9a-f]{24})')
-  async getLessonDetail(@Param('courseId') courseId: string, @Param('lessonId') lessonId: string) {
-    const lesson = await this.courseLessonService.findOneBy({ lessonId, courseId })
+  @Get(':courseId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})')
+  async getSessionDetail(@Param('courseId') courseId: string, @Param('sessionId') sessionId: string) {
+    const session = await this.courseSessionService.findOneBy({ sessionId, courseId })
 
-    if (!lesson) throw new AppException(Errors.LESSON_NOT_FOUND)
-    return lesson
+    if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
+    return session
   }
 
   @ApiOperation({

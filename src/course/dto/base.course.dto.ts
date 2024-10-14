@@ -19,7 +19,7 @@ import { CourseStatus } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { CourseLevel } from '@src/common/contracts/constant'
-import { BaseLessonDto } from '@src/class/dto/lesson.dto'
+import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseAssignmentDto } from '@src/class/dto/assignment.dto'
 
 export class BaseCourseDto {
@@ -57,6 +57,13 @@ export class BaseCourseDto {
   @ArrayMinSize(1)
   type: string[]
 
+  @ApiProperty({ type: Number })
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  duration: number
+
   @ApiProperty({
     type: String,
     example: 'https://res.cloudinary.com/orchidify/image/upload/v1726377866/hcgbmek4qa8kksw2zrcg.jpg'
@@ -76,21 +83,13 @@ export class BaseCourseDto {
   @IsEnum(CourseStatus)
   status: CourseStatus
 
-  @ApiProperty({ type: BaseLessonDto, isArray: true })
+  @ApiProperty({ type: BaseSessionDto, isArray: true })
   @IsArray()
   @ArrayMinSize(3)
   @ArrayMaxSize(10)
-  @Type(() => BaseLessonDto)
+  @Type(() => BaseSessionDto)
   @ValidateNested({ each: true })
-  lessons: BaseLessonDto[]
-
-  @ApiProperty({ type: BaseAssignmentDto, isArray: true })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(3)
-  @Type(() => BaseAssignmentDto)
-  @ValidateNested({ each: true })
-  assignments: BaseAssignmentDto[]
+  sessions: BaseSessionDto[]
 
   @ApiProperty({ type: Number, example: 20 })
   @IsInt()

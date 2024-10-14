@@ -2,7 +2,7 @@ import { Global, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { InstructorCourseController } from './controllers/instructor.course.controller'
 import { CourseService, ICourseService } from './services/course.service'
-import { ICourseLessonService, CourseLessonService } from './services/course-lesson.service'
+import { ICourseSessionService, CourseSessionService } from './services/course-session.service'
 import { ICourseAssignmentService, CourseAssignmentService } from './services/course-assignment.service'
 import { CourseRepository, ICourseRepository } from './repositories/course.repository'
 import { GardenModule } from '@garden/garden.module'
@@ -20,8 +20,8 @@ import { CourseController } from './controllers/learner.course.controller'
       useClass: CourseService
     },
     {
-      provide: ICourseLessonService,
-      useClass: CourseLessonService
+      provide: ICourseSessionService,
+      useClass: CourseSessionService
     },
     {
       provide: ICourseAssignmentService,

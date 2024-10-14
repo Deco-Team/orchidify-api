@@ -153,10 +153,7 @@ export class CourseService implements ICourseService {
     })
   }
 
-  async listPublicCourses(
-    pagination: PaginationParams,
-    queryCourseDto: PublicQueryCourseDto,
-  ) {
+  async listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto) {
     const { title, type, level } = queryCourseDto
     const aggregateMatch = []
 
@@ -194,32 +191,32 @@ export class CourseService implements ICourseService {
 
     const [result] = await this.courseRepository.model.aggregate([
       ...aggregateMatch,
-      {
-        $addFields: {
-          lessonsCount: {
-            $reduce: {
-              input: {
-                $ifNull: ['$lessons', []]
-              },
-              initialValue: 0,
-              in: {
-                $add: ['$$value', 1]
-              }
-            }
-          },
-          assignmentsCount: {
-            $reduce: {
-              input: {
-                $ifNull: ['$assignments', []]
-              },
-              initialValue: 0,
-              in: {
-                $add: ['$$value', 1]
-              }
-            }
-          }
-        }
-      },
+      // {
+        // $addFields: {
+        //   sessionsCount: {
+        //     $reduce: {
+        //       input: {
+        //         $ifNull: ['$sessions', []]
+        //       },
+        //       initialValue: 0,
+        //       in: {
+        //         $add: ['$$value', 1]
+        //       }
+        //     }
+        //   }
+          // assignmentsCount: {
+          //   $reduce: {
+          //     input: {
+          //       $ifNull: ['$assignments', []]
+          //     },
+          //     initialValue: 0,
+          //     in: {
+          //       $add: ['$$value', 1]
+          //     }
+          //   }
+          // }
+      //   }
+      // },
       {
         $project: {
           _id: 1,
@@ -237,8 +234,8 @@ export class CourseService implements ICourseService {
           isPublished: 1,
           createdAt: 1,
           updatedAt: 1,
-          lessonsCount: 1,
-          assignmentsCount: 1
+          // sessionsCount: 1,
+          // assignmentsCount: 1
         }
       },
       {

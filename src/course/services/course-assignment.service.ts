@@ -23,14 +23,20 @@ export class CourseAssignmentService implements ICourseAssignmentService {
 
     const course = await this.courseRepository.findOne({
       conditions,
-      projection: 'assignments',
+      projection: 'sessions',
       options: { lean: true }
     })
-    const assignmentIndex = course?.assignments?.findIndex(
-      (templateAssignment) => templateAssignment._id.toString() === assignmentId
-    )
-    if (assignmentIndex === -1) return null
 
-    return { ...course?.assignments[assignmentIndex], index: assignmentIndex }
+    let assignment: Assignment
+    for (let session of course.sessions) {
+      assignment = session?.assignments?.find((assignment) => assignment._id.toString() === assignmentId)
+      if (assignment) {
+        assignment['sessionNumber'] = session.sessionNumber
+        break
+      }
+    }
+    if (!assignment) return null
+
+    return assignment
   }
 }

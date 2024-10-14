@@ -7,8 +7,7 @@ import { Transform } from 'class-transformer'
 import { COURSE_LIST_PROJECTION, COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
-import { BaseAssignmentDto } from '@class/dto/assignment.dto'
-import { BaseLessonDto } from '@class/dto/lesson.dto'
+import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseClassDto } from '@class/dto/base.class.dto'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
@@ -69,11 +68,8 @@ export class CourseDetailDataResponse extends DataResponse(CourseDetailResponse)
 
 class PublicCourseInstructorDto extends PickType(BaseInstructorDto, PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
 class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {
-  @ApiProperty({ type: Number })
-  lessonsCount: number
-
-  @ApiProperty({ type: Number })
-  assignmentsCount: number
+  // @ApiProperty({ type: Number })
+  // sessionsCount: number
 
   @ApiProperty({ type: PublicCourseInstructorDto })
   instructor: PublicCourseInstructorDto
@@ -82,8 +78,7 @@ class PublicCourseListResponse extends PaginateResponse(PublicCourseListItemResp
 export class PublishCourseListDataResponse extends DataResponse(PublicCourseListResponse) {}
 
 class PublicCourseClassGardenDto extends PickType(BaseGardenDto, ['_id', 'name']) {}
-class PublicCourseLessonDto extends PickType(BaseLessonDto, ['_id', 'title']) {}
-class PublicCourseAssignmentDto extends PickType(BaseAssignmentDto, ['_id', 'title']) {}
+class PublicCourseSessionDto extends PickType(BaseSessionDto, ['_id', 'title']) {}
 class PublicCourseClassDto extends PickType(BaseClassDto, PUBLIC_COURSE_CLASS_DETAIL_PROJECTION) {
   @ApiProperty({ type: PublicCourseClassGardenDto })
   garden: BaseGardenDto
@@ -92,11 +87,8 @@ class PublicCourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_P
   @ApiProperty({ type: PublicCourseInstructorDto })
   instructor: PublicCourseInstructorDto
 
-  @ApiProperty({ type: PublicCourseLessonDto, isArray: true })
-  lessons: BaseLessonDto[]
-
-  @ApiProperty({ type: PublicCourseAssignmentDto, isArray: true })
-  assignments: BaseAssignmentDto[]
+  @ApiProperty({ type: PublicCourseSessionDto, isArray: true })
+  sessions: BaseSessionDto[]
 
   @ApiProperty({ type: PublicCourseClassDto, isArray: true })
   classes: BaseClassDto

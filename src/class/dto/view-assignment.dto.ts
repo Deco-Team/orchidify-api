@@ -3,7 +3,7 @@ import { BaseAssignmentDto } from './assignment.dto'
 import { ApiProperty } from '@nestjs/swagger'
 
 class ViewAssignmentDetailResponse extends BaseAssignmentDto {
-  @ApiProperty()
-  index: string
+  @ApiProperty({ type: Number })
+  sessionNumber: number
 }
 export class ViewAssignmentDetailDataResponse extends DataResponse(ViewAssignmentDetailResponse) {}

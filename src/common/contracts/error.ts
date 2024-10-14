@@ -162,6 +162,16 @@ export const Errors = {
     message: 'Trạng thái của khóa học không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  TOTAL_SESSIONS_OF_COURSE_INVALID: {
+    error: 'TOTAL_SESSIONS_OF_COURSE_INVALID',
+    message: 'Tổng số lượng buổi học của khóa học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  TOTAL_ASSIGNMENTS_OF_COURSE_INVALID: {
+    error: 'TOTAL_ASSIGNMENTS_OF_COURSE_INVALID',
+    message: 'Tổng số lượng bài tập của khóa học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Class
@@ -173,11 +183,11 @@ export const Errors = {
   },
 
   /**
-   * Lesson
+   * Session
    */
-  LESSON_NOT_FOUND: {
-    error: 'LESSON_NOT_FOUND',
-    message: 'Không tìm thấy bài học.',
+  SESSION_NOT_FOUND: {
+    error: 'SESSION_NOT_FOUND',
+    message: 'Không tìm thấy buổi học.',
     httpStatus: HttpStatus.NOT_FOUND
   },
 
@@ -240,5 +250,5 @@ export const Errors = {
     error: 'GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST',
     message: 'Vườn đã chọn không phù hợp với yêu cầu khóa học.',
     httpStatus: HttpStatus.BAD_REQUEST
-  },
+  }
 }

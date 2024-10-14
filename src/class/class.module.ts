@@ -5,7 +5,7 @@ import { IClassRepository, ClassRepository } from '@src/class/repositories/class
 import { IClassService, ClassService } from '@src/class/services/class.service'
 // import { InstructorClassController } from './controllers/instructor.class.controller'
 import { GardenModule } from '@garden/garden.module'
-import { ILessonService, LessonService } from './services/lesson.service'
+import { ISessionService, SessionService } from './services/session.service'
 import { AssignmentService, IAssignmentService } from './services/assignment.service'
 
 @Global()
@@ -18,8 +18,8 @@ import { AssignmentService, IAssignmentService } from './services/assignment.ser
       useClass: ClassService
     },
     {
-      provide: ILessonService,
-      useClass: LessonService
+      provide: ISessionService,
+      useClass: SessionService
     },
     {
       provide: IAssignmentService,

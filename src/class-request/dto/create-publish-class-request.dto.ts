@@ -15,7 +15,7 @@ export class CreatePublishClassRequestDto extends PickType(BaseClassRequestDto, 
   @ApiProperty({ type: Number })
   @IsInt()
   @Min(1)
-  @Max(16)
+  @Max(12)
   duration: number
 
   @ApiProperty({ enum: Weekday, isArray: true })
