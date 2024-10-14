@@ -21,7 +21,7 @@ import { Transform, Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { ClassStatusHistory } from '@src/class/schemas/class.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
-import { BaseLessonDto } from './lesson.dto'
+import { BaseSessionDto } from './session.dto'
 import { BaseAssignmentDto } from './assignment.dto'
 
 export class BaseClassDto {
@@ -63,9 +63,11 @@ export class BaseClassDto {
   @ArrayMinSize(1)
   type: string[]
 
-  @ApiProperty({ type: Number, example: 30 })
+  @ApiProperty({ type: Number })
+  @Type(() => Number)
   @IsInt()
-  @Min(0)
+  @Min(1)
+  @Max(12)
   duration: number
 
   @ApiProperty({
@@ -83,21 +85,13 @@ export class BaseClassDto {
   @ValidateNested({ each: true })
   media: BaseMediaDto[]
 
-  @ApiProperty({ type: BaseLessonDto, isArray: true })
+  @ApiProperty({ type: BaseSessionDto, isArray: true })
   @IsArray()
   @ArrayMinSize(3)
   @ArrayMaxSize(10)
-  @Type(() => BaseLessonDto)
+  @Type(() => BaseSessionDto)
   @ValidateNested({ each: true })
-  lessons: BaseLessonDto[]
-
-  @ApiProperty({ type: BaseAssignmentDto, isArray: true })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(3)
-  @Type(() => BaseAssignmentDto)
-  @ValidateNested({ each: true })
-  assignments: BaseAssignmentDto[]
+  sessions: BaseSessionDto[]
 
   @ApiProperty({ type: String, enum: ClassStatus })
   @IsEnum(ClassStatus)

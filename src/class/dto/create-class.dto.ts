@@ -1,9 +1,8 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { BaseClassDto } from './base.class.dto'
-import { CreateLessonDto } from './lesson.dto'
+import { CreateSessionDto } from './session.dto'
 import { ArrayMaxSize, ArrayMinSize, IsArray, ValidateNested } from 'class-validator'
 import { Type } from 'class-transformer'
-import { CreateAssignmentDto } from './assignment.dto'
 
 export class CreateClassDto extends PickType(BaseClassDto, [
   'title',
@@ -15,19 +14,11 @@ export class CreateClassDto extends PickType(BaseClassDto, [
   'media',
   'learnerLimit'
 ]) {
-  @ApiProperty({ type: CreateLessonDto, isArray: true })
+  @ApiProperty({ type: CreateSessionDto, isArray: true })
   @IsArray()
-  @ArrayMinSize(3)
-  @ArrayMaxSize(10)
-  @Type(() => CreateLessonDto)
+  @ArrayMinSize(2)
+  @ArrayMaxSize(24)
+  @Type(() => CreateSessionDto)
   @ValidateNested({ each: true })
-  lessons: CreateLessonDto[]
-
-  @ApiProperty({ type: CreateAssignmentDto, isArray: true })
-  @IsArray()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(3)
-  @Type(() => CreateAssignmentDto)
-  @ValidateNested({ each: true })
-  assignments: CreateAssignmentDto[]
+  sessions: CreateSessionDto[]
 }

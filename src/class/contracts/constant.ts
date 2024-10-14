@@ -30,8 +30,7 @@ export const INSTRUCTOR_VIEW_CLASS_DETAIL_PROJECTION = [
   'learnerQuantity',
   'instructorId',
   'gardenId',
-  'lessons',
-  'assignments',
+  'sessions',
   'createdAt',
   'updatedAt'
 ] as const

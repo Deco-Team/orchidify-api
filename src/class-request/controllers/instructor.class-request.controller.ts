@@ -105,8 +105,7 @@ export class InstructorClassRequestController {
 
     // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
     const course = await this.courseService.findById(createPublishClassRequestDto.courseId.toString(), [
-      '+lessons',
-      '+assignments'
+      '+sessions',
     ])
     if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
     if ([CourseStatus.REQUESTING, CourseStatus.DELETED].includes(course.status))

@@ -136,7 +136,7 @@ export class ClassRequestService implements IClassRequestService {
 
     return this.classRequestRepository.model.paginate(filter, {
       ...pagination,
-      projection: ['-metadata.lessons', '-metadata.assignments', '-metadata.media', '-histories']
+      projection: ['-metadata.sessions', '-metadata.media', '-histories']
     })
   }
 
@@ -319,8 +319,7 @@ export class ClassRequestService implements IClassRequestService {
           'duration',
           'thumbnail',
           'media',
-          'lessons',
-          'assignments',
+          'sessions',
           'learnerLimit',
           'weekdays',
           'slotNumbers',

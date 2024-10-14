@@ -86,13 +86,13 @@
 //     summary: `View Lesson Detail`
 //   })
 //   @ApiOkResponse({ type: ViewLessonDetailDataResponse })
-//   @ApiErrorResponse([Errors.LESSON_NOT_FOUND])
+//   @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
 //   @Get(':classId([0-9a-f]{24})/lessons/:lessonId([0-9a-f]{24})')
 //   async getLessonDetail(@Req() req, @Param('classId') classId: string, @Param('lessonId') lessonId: string) {
 //     const { _id: instructorId } = _.get(req, 'user')
 //     const lesson = await this.lessonService.findOneBy({ lessonId, classId, instructorId })
 
-//     if (!lesson) throw new AppException(Errors.LESSON_NOT_FOUND)
+//     if (!lesson) throw new AppException(Errors.SESSION_NOT_FOUND)
 //     return lesson
 //   }
 

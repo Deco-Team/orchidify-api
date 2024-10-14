@@ -5,8 +5,7 @@ import { Transform } from 'class-transformer'
 import { CourseStatus } from '@common/contracts/constant'
 import { Instructor } from '@instructor/schemas/instructor.schema'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
-import { Lesson, LessonSchema } from '@src/class/schemas/lesson.schema'
-import { Assignment, AssignmentSchema } from '@src/class/schemas/assignment.schema'
+import { Session, SessionSchema } from '@class/schemas/session.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 
 export type CourseDocument = HydratedDocument<Course>
@@ -49,6 +48,9 @@ export class Course {
   @Prop({ type: [String] })
   type: string[]
 
+  @Prop({ type: Number })
+  duration: number
+
   @Prop({ type: String })
   thumbnail: string
 
@@ -61,11 +63,8 @@ export class Course {
   })
   status: CourseStatus
 
-  @Prop({ type: [LessonSchema], select: false })
-  lessons: Lesson[]
-
-  @Prop({ type: [AssignmentSchema], select: false })
-  assignments: Assignment[]
+  @Prop({ type: [SessionSchema], select: false })
+  sessions: Session[]
 
   @Prop({ type: [{ type: Types.ObjectId, ref: Course.name }] })
   childCourseIds: Types.ObjectId[]

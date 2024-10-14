@@ -8,11 +8,11 @@ export class UpdateCourseDto extends PartialType(
     'price',
     'level',
     'type',
+    'duration',
     'thumbnail',
     'media',
     'learnerLimit',
-    'lessons',
-    'assignments',
+    'sessions',
     'gardenRequiredToolkits'
   ])
 ) {}

@@ -6,8 +6,7 @@ import { ClassStatus, SlotNumber, UserRole, Weekday } from '@common/contracts/co
 import { Instructor } from '@instructor/schemas/instructor.schema'
 import { Garden } from '@garden/schemas/garden.schema'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
-import { Lesson, LessonSchema } from './lesson.schema'
-import { Assignment, AssignmentSchema } from './assignment.schema'
+import { Session, SessionSchema } from './session.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { Course } from '@course/schemas/course.schema'
 
@@ -77,11 +76,8 @@ export class Class {
   @Prop({ type: [BaseMediaDto], required: true })
   media: BaseMediaDto[]
 
-  @Prop({ type: [LessonSchema], select: false })
-  lessons: Lesson[]
-
-  @Prop({ type: [AssignmentSchema], select: false })
-  assignments: Assignment[]
+  @Prop({ type: [SessionSchema], select: false })
+  sessions: Session[]
 
   @Prop({
     enum: ClassStatus,

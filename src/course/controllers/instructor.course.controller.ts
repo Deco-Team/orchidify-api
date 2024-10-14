@@ -28,14 +28,15 @@ import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
-import { ICourseLessonService } from '@course/services/course-lesson.service'
+import { ICourseSessionService } from '@course/services/course-session.service'
 import { ICourseAssignmentService } from '@course/services/course-assignment.service'
 import { CourseDetailDataResponse, CourseListDataResponse, QueryCourseDto } from '@course/dto/view-course.dto'
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
-import { ViewCourseLessonDetailDataResponse } from '@course/dto/view-course-lesson.dto'
+import { ViewCourseSessionDetailDataResponse } from '@course/dto/view-course-session.dto'
 import { CreateCourseDto } from '@course/dto/create-course.dto'
 import { UpdateCourseDto } from '@course/dto/update-course.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
+import { session } from 'passport'
 
 @ApiTags('Course - Instructor')
 @ApiBearerAuth()
@@ -47,8 +48,8 @@ export class InstructorCourseController {
   constructor(
     @Inject(ICourseService)
     private readonly courseService: ICourseService,
-    @Inject(ICourseLessonService)
-    private readonly courseLessonService: ICourseLessonService,
+    @Inject(ICourseSessionService)
+    private readonly courseSessionService: ICourseSessionService,
     @Inject(ICourseAssignmentService)
     private readonly courseAssignmentService: ICourseAssignmentService
   ) {}
@@ -79,17 +80,17 @@ export class InstructorCourseController {
   }
 
   @ApiOperation({
-    summary: `View Course Lesson Detail`
+    summary: `View Course Session Detail`
   })
-  @ApiOkResponse({ type: ViewCourseLessonDetailDataResponse })
-  @ApiErrorResponse([Errors.LESSON_NOT_FOUND])
-  @Get(':courseId([0-9a-f]{24})/lessons/:lessonId([0-9a-f]{24})')
-  async getLessonDetail(@Req() req, @Param('courseId') courseId: string, @Param('lessonId') lessonId: string) {
+  @ApiOkResponse({ type: ViewCourseSessionDetailDataResponse })
+  @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
+  @Get(':courseId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})')
+  async getSessionDetail(@Req() req, @Param('courseId') courseId: string, @Param('sessionId') sessionId: string) {
     const { _id: instructorId } = _.get(req, 'user')
-    const lesson = await this.courseLessonService.findOneBy({ lessonId, courseId, instructorId })
+    const session = await this.courseSessionService.findOneBy({ sessionId, courseId, instructorId })
 
-    if (!lesson) throw new AppException(Errors.LESSON_NOT_FOUND)
-    return lesson
+    if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
+    return session
   }
 
   @ApiOperation({
@@ -116,9 +117,22 @@ export class InstructorCourseController {
   @ApiCreatedResponse({ type: IDDataResponse })
   @Post()
   async create(@Req() req, @Body() createCourseDto: CreateCourseDto) {
+    // validate sessionsCount = 2 * duration
+    if (createCourseDto.sessions.length !== 2 * createCourseDto.duration) {
+      throw new AppException(Errors.TOTAL_SESSIONS_OF_COURSE_INVALID)
+    }
+    // validate assignments from 1 to 3
+    const assignmentsCount = createCourseDto.sessions.filter((session) => session.assignments.length === 1).length
+    if (assignmentsCount < 1 || assignmentsCount > 3) {
+      throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
+    }
+
     const { _id } = _.get(req, 'user')
     createCourseDto['status'] = CourseStatus.DRAFT
     createCourseDto['instructorId'] = new Types.ObjectId(_id)
+    createCourseDto.sessions = createCourseDto.sessions.map((session, index) => {
+      return { ...session, sessionNumber: index + 1 }
+    })
     const course = await this.courseService.create(createCourseDto)
     return new IDResponse(course._id)
   }

@@ -1,9 +1,9 @@
 import { DataResponse } from '@common/contracts/openapi-builder'
-import { BaseLessonDto } from './lesson.dto'
+import { BaseSessionDto } from './session.dto'
 import { ApiProperty } from '@nestjs/swagger'
 
-class ViewLessonDetailResponse extends BaseLessonDto {
+class ViewSessionDetailResponse extends BaseSessionDto {
   @ApiProperty()
   index: string
 }
-export class ViewLessonDetailDataResponse extends DataResponse(ViewLessonDetailResponse) {}
+export class ViewSessionDetailDataResponse extends DataResponse(ViewSessionDetailResponse) {}

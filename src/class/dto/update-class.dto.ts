@@ -11,7 +11,6 @@ export class UpdateClassDto extends PartialType(
     'thumbnail',
     'media',
     'learnerLimit',
-    'lessons',
-    'assignments'
+    'sessions',
   ])
 ) {}

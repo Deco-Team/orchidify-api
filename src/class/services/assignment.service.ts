@@ -23,12 +23,19 @@ export class AssignmentService implements IAssignmentService {
         _id: classId,
         instructorId: new Types.ObjectId(instructorId)
       },
-      projection: 'assignments',
+      projection: 'sessions',
       options: { lean: true }
     })
-    const assignmentIndex = courseClass?.assignments?.findIndex((assignment) => assignment._id.toString() === assignmentId)
-    if (assignmentIndex === -1) return null
+    let assignment: Assignment
+    for (let session of courseClass.sessions) {
+      assignment = session?.assignments?.find((assignment) => assignment._id.toString() === assignmentId)
+      if (assignment) {
+        assignment['sessionNumber'] = session.sessionNumber
+        break
+      }
+    }
+    if (!assignment) return null
 
-    return { ...courseClass?.assignments[assignmentIndex], index: assignmentIndex }
+    return assignment
   }
 }
