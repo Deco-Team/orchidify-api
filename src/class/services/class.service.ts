@@ -4,9 +4,9 @@ import { IClassRepository } from '@src/class/repositories/class.repository'
 import { Class, ClassDocument } from '@src/class/schemas/class.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreateClassDto } from '@class/dto/create-class.dto'
-import { ClassStatus } from '@common/contracts/constant'
+import { ClassStatus, CourseLevel } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
-import { INSTRUCTOR_VIEW_CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
+import { CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
 import { QueryClassDto } from '@src/class/dto/view-class.dto'
 
 export const IClassService = Symbol('IClassService')
@@ -24,6 +24,7 @@ export interface IClassService {
     options?: QueryOptions | undefined
   ): Promise<ClassDocument>
   listByInstructor(instructorId: string, pagination: PaginationParams, queryClassDto: QueryClassDto)
+  listByStaff(pagination: PaginationParams, queryClassDto: QueryClassDto)
   findManyByStatus(status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByInstructorIdAndStatus(instructorId: string, status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByGardenIdAndStatus(gardenId: string, status: ClassStatus[]): Promise<ClassDocument[]>
@@ -65,11 +66,20 @@ export class ClassService implements IClassService {
     instructorId: string,
     pagination: PaginationParams,
     queryClassDto: QueryClassDto,
-    projection = INSTRUCTOR_VIEW_CLASS_LIST_PROJECTION
+    projection = CLASS_LIST_PROJECTION
   ) {
-    const { title, status } = queryClassDto
+    const { title, type, level,  status } = queryClassDto
     const filter: Record<string, any> = {
       instructorId: new Types.ObjectId(instructorId)
+    }
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      filter['level'] = {
+        $in: validLevel
+      }
     }
 
     const validStatus = status?.filter((status) =>
@@ -78,6 +88,52 @@ export class ClassService implements IClassService {
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
+      }
+    }
+
+    return this.classRepository.model.paginate(filter, {
+      ...pagination,
+      projection
+    })
+  }
+
+  async listByStaff(pagination: PaginationParams, queryClassDto: QueryClassDto, projection = CLASS_LIST_PROJECTION) {
+    const { title, type, level, status } = queryClassDto
+    const filter: Record<string, any> = {}
+
+    const validLevel = level?.filter((level) =>
+      [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
+    )
+    if (validLevel?.length > 0) {
+      filter['level'] = {
+        $in: validLevel
+      }
+    }
+
+    const validStatus = status?.filter((status) =>
+      [ClassStatus.PUBLISHED, ClassStatus.IN_PROGRESS, ClassStatus.COMPLETED, ClassStatus.CANCELED].includes(status)
+    )
+    if (validStatus?.length > 0) {
+      filter['status'] = {
+        $in: validStatus
+      }
+    }
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      filter['$text'] = {
+        $search: textSearch.trim()
       }
     }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -12,24 +12,19 @@ import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IClassService } from '@class/services/class.service'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
-import {
-  InstructorViewClassDetailDataResponse,
-  InstructorViewClassListDataResponse,
-  QueryClassDto
-} from '@class/dto/view-class.dto'
+import { QueryClassDto, StaffViewClassDetailDataResponse, StaffViewClassListDataResponse } from '@class/dto/view-class.dto'
 import { CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { IAssignmentService } from '@class/services/assignment.service'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 import { ISessionService } from '@class/services/session.service'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
 
-@ApiTags('Class - Instructor')
+@ApiTags('Class - Management')
 @ApiBearerAuth()
 @ApiBadRequestResponse({ type: ErrorResponse })
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
-@Roles(UserRole.INSTRUCTOR)
-@Controller('instructor')
-export class InstructorClassController {
+@Controller('management')
+export class ManagementClassController {
   constructor(
     @Inject(IClassService)
     private readonly classService: IClassService,
@@ -40,62 +35,62 @@ export class InstructorClassController {
   ) {}
 
   @ApiOperation({
-    summary: `View Class List`
+    summary: `[${UserRole.STAFF}] View Class List`
   })
   @ApiQuery({ type: PaginationQuery })
-  @ApiOkResponse({ type: InstructorViewClassListDataResponse })
+  @ApiOkResponse({ type: StaffViewClassListDataResponse })
+  @Roles(UserRole.STAFF)
   @Get()
-  async list(@Req() req, @Pagination() pagination: PaginationParams, @Query() queryClassDto: QueryClassDto) {
-    const { _id } = _.get(req, 'user')
-    return await this.classService.listByInstructor(_id, pagination, queryClassDto)
+  async list(@Pagination() pagination: PaginationParams, @Query() queryClassDto: QueryClassDto) {
+    return await this.classService.listByStaff(pagination, queryClassDto)
   }
 
   @ApiOperation({
-    summary: `View Class Detail`
+    summary: `[${UserRole.STAFF}] View Class Detail`
   })
-  @ApiOkResponse({ type: InstructorViewClassDetailDataResponse })
+  @ApiOkResponse({ type: StaffViewClassDetailDataResponse })
   @ApiErrorResponse([Errors.CLASS_NOT_FOUND])
+  @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
-  async getDetail(@Req() req, @Param('id') classId: string) {
-    const { _id } = _.get(req, 'user')
+  async getDetail(@Param('id') classId: string) {
     const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION, [
       {
         path: 'garden',
         select: ['name']
+      },
+      {
+        path: 'instructor',
+        select: ['name']
       }
     ])
 
-    if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
     return courseClass
   }
 
   @ApiOperation({
-    summary: `View Lesson Detail`
+    summary: `[${UserRole.STAFF}] View Lesson Detail`
   })
   @ApiOkResponse({ type: ViewSessionDetailDataResponse })
   @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
+  @Roles(UserRole.STAFF)
   @Get(':classId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})')
-  async getLessonDetail(@Req() req, @Param('classId') classId: string, @Param('sessionId') sessionId: string) {
-    const { _id: instructorId } = _.get(req, 'user')
-    const session = await this.sessionService.findOneBy({ sessionId, classId, instructorId })
+  async getLessonDetail(@Param('classId') classId: string, @Param('sessionId') sessionId: string) {
+    const session = await this.sessionService.findOneBy({ sessionId, classId })
 
     if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
     return session
   }
 
   @ApiOperation({
-    summary: `View Assignment Detail`
+    summary: `[${UserRole.STAFF}] View Assignment Detail`
   })
   @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
   @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
+  @Roles(UserRole.STAFF)
   @Get(':classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
-  async getAssignmentDetail(
-    @Req() req,
-    @Param('classId') classId: string,
-    @Param('assignmentId') assignmentId: string
-  ) {
-    const { _id: instructorId } = _.get(req, 'user')
-    const assignment = await this.assignmentService.findOneBy({ assignmentId, classId, instructorId })
+  async getAssignmentDetail(@Param('classId') classId: string, @Param('assignmentId') assignmentId: string) {
+    const assignment = await this.assignmentService.findOneBy({ assignmentId, classId })
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
     return assignment

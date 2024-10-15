@@ -18,11 +18,11 @@ export class SessionService implements ISessionService {
 
   public async findOneBy(params: { sessionId: string; classId: string; instructorId?: string }) {
     const { sessionId, classId, instructorId } = params
+    const conditions = { _id: classId }
+    if (instructorId) conditions['instructorId'] = new Types.ObjectId(instructorId)
+
     const courseClass = await this.classRepository.findOne({
-      conditions: {
-        _id: classId,
-        instructorId: new Types.ObjectId(instructorId)
-      },
+      conditions,
       projection: 'sessions',
       options: { lean: true }
     })
