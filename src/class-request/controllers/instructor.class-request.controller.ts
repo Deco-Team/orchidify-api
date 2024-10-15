@@ -37,6 +37,7 @@ import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/consta
 import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
+import { HelperService } from '@common/services/helper.service'
 
 @ApiTags('ClassRequest - Instructor')
 @ApiBearerAuth()
@@ -51,7 +52,8 @@ export class InstructorClassRequestController {
     @Inject(ICourseService)
     private readonly courseService: ICourseService,
     @Inject(IGardenTimesheetService)
-    private readonly gardenTimesheetService: IGardenTimesheetService
+    private readonly gardenTimesheetService: IGardenTimesheetService,
+    private readonly helperService: HelperService
   ) {}
 
   @ApiOperation({
@@ -93,27 +95,35 @@ export class InstructorClassRequestController {
     Errors.COURSE_NOT_FOUND,
     Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS,
     Errors.CREATE_CLASS_REQUEST_LIMIT,
-    Errors.CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID
+    Errors.CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID,
+    Errors.WEEKDAYS_OF_CLASS_INVALID
   ])
   @Post('publish-class')
   async createPublishClassRequest(@Req() req, @Body() createPublishClassRequestDto: CreatePublishClassRequestDto) {
     const { _id, role } = _.get(req, 'user')
+    const { startDate, weekdays, slotNumbers } = createPublishClassRequestDto
+
+    const isValidWeekdays = this.helperService.validateWeekdays(weekdays)
+    if (!isValidWeekdays) throw new AppException(Errors.WEEKDAYS_OF_CLASS_INVALID)
 
     // BR-39: Instructors can only create 10 class requests per day.
     const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date())
     if (classRequestsCount > 10) throw new AppException(Errors.CREATE_CLASS_REQUEST_LIMIT)
 
     // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
-    const course = await this.courseService.findById(createPublishClassRequestDto.courseId.toString(), [
-      '+sessions',
-    ])
+    const course = await this.courseService.findById(createPublishClassRequestDto.courseId.toString(), ['+sessions'])
     if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
     if ([CourseStatus.REQUESTING, CourseStatus.DELETED].includes(course.status))
       throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
 
-    // validate slots with startDate, duration, weekdays
-    const { startDate, duration, weekdays, slotNumbers } = createPublishClassRequestDto
-    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({ startDate, duration, weekdays })
+    // validate slots with startDate, weekdays
+    const { duration } = course
+    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({
+      startDate,
+      duration,
+      weekdays,
+      instructorId: _id
+    })
     if (_.difference(slotNumbers, availableSlots.slotNumbers).length !== 0)
       throw new AppException(Errors.CREATE_CLASS_REQUEST_SLOT_NUMBERS_INVALID)
 
@@ -130,10 +140,9 @@ export class InstructorClassRequestController {
     createPublishClassRequestDto['courseId'] = new Types.ObjectId(createPublishClassRequestDto.courseId)
     createPublishClassRequestDto['type'] = ClassRequestType.PUBLISH_CLASS
     createPublishClassRequestDto['metadata'] = {
-      weekdays: createPublishClassRequestDto.weekdays,
-      slotNumbers: createPublishClassRequestDto.slotNumbers,
-      startDate: createPublishClassRequestDto.startDate,
-      duration: createPublishClassRequestDto.duration,
+      weekdays,
+      slotNumbers,
+      startDate,
       ...course.toObject()
     }
 

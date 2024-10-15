@@ -249,13 +249,18 @@ export class ClassRequestService implements IClassRequestService {
     if (classRequest.status !== ClassRequestStatus.PENDING) throw new AppException(Errors.CLASS_REQUEST_STATUS_INVALID)
 
     // validate course
-    const course = await this.courseService.findById(classRequest.courseId?.toString())
+    const course = await this.courseService.findById(classRequest.courseId?.toString(), ['+sessions'])
     if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
     if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // validate gardenId fit with time of class request
     const { startDate, duration, weekdays, slotNumbers } = classRequest?.metadata
-    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({ startDate, duration, weekdays })
+    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({
+      startDate,
+      duration,
+      weekdays,
+      instructorId: course.instructorId
+    })
     this.appLogger.log(
       `getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${
         availableSlots.slotNumbers
@@ -349,8 +354,10 @@ export class ClassRequestService implements IClassRequestService {
             weekdays,
             slotNumbers,
             gardenId: new Types.ObjectId(gardenId),
+            instructorId: course.instructorId,
             classId: new Types.ObjectId(createdClass._id),
-            metadata: { code: createdClass.code, title: createdClass.title }
+            metadata: { code: createdClass.code, title: createdClass.title },
+            courseData: course
           },
           { session }
         )

@@ -1,11 +1,13 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsInt, Max, Min } from 'class-validator'
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsInt, IsMongoId, Max, Min } from 'class-validator'
 import { SlotNumber, Weekday } from '@common/contracts/constant'
 import { Transform, Type } from 'class-transformer'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { FutureMinMonth } from '@common/validators/future-min-month.validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
+import { Observable } from 'rxjs'
+import { Types } from 'mongoose'
 
 export class QueryAvailableGardenDto {
   @ApiProperty({ type: Date })
@@ -35,6 +37,10 @@ export class QueryAvailableGardenDto {
   @ArrayMaxSize(4)
   @Transform(({ value }) => (Array.isArray(value) ? [...new Set(value)].map(Number) : Array(value).map(Number)))
   slotNumbers: SlotNumber[]
+
+  @ApiProperty({ type: String })
+  @IsMongoId()
+  instructorId: Types.ObjectId
 }
 
 export class AvailableGardenListItemResponse extends PickType(BaseGardenDto, ['_id', 'name']) {}

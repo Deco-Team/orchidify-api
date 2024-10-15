@@ -6,7 +6,13 @@ import { Types } from 'mongoose'
 import { VN_TIMEZONE } from '@src/config'
 import { BaseClassDto } from '@class/dto/base.class.dto'
 
-export class BaseSlotMetadataDto extends PickType(BaseClassDto, ['code', 'title']) {}
+export class BaseSlotMetadataDto extends PickType(BaseClassDto, ['code', 'title']) {
+  @ApiProperty({ type: Number })
+  sessionNumber?: number
+
+  @ApiProperty({ type: String, example: 'Session title' })
+  sessionTitle?: string
+}
 
 export class BaseSlotDto {
   @ApiProperty({ type: String })
@@ -28,6 +34,12 @@ export class BaseSlotDto {
   status: SlotStatus
 
   @ApiPropertyOptional({ type: String })
+  instructorId: string | Types.ObjectId
+
+  @ApiPropertyOptional({ type: String })
+  sessionId: string | Types.ObjectId
+
+  @ApiPropertyOptional({ type: String })
   classId: string | Types.ObjectId
 
   @ApiPropertyOptional({ type: BaseSlotMetadataDto })
@@ -39,14 +51,25 @@ export class CreateSlotDto extends PickType(BaseSlotDto, [
   'start',
   'end',
   'status',
+  'instructorId',
+  'sessionId',
   'classId',
   'metadata'
 ]) {
-  constructor(slotNumber: SlotNumber, date: Date, classId?: Types.ObjectId, metadata?: BaseSlotMetadataDto) {
+  constructor(
+    slotNumber: SlotNumber,
+    date: Date,
+    instructorId?: Types.ObjectId,
+    sessionId?: Types.ObjectId,
+    classId?: Types.ObjectId,
+    metadata?: BaseSlotMetadataDto
+  ) {
     const startOfDate = moment(date).tz(VN_TIMEZONE).startOf('day')
     super()
     this.slotNumber = slotNumber
     this.status = SlotStatus.NOT_AVAILABLE
+    this.instructorId = instructorId
+    this.sessionId = sessionId
     this.classId = classId
     this.metadata = metadata
     switch (slotNumber) {

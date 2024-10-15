@@ -28,7 +28,7 @@ export class Session {
   @Prop({ type: [BaseMediaDto], required: true })
   media: BaseMediaDto[]
   
-  @Prop({ type: [AssignmentSchema], select: false })
+  @Prop({ type: [AssignmentSchema] })
   assignments: Assignment[]
 }
 

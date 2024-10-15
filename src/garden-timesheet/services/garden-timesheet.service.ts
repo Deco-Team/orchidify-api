@@ -3,7 +3,7 @@ import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import { IGardenTimesheetRepository } from '@garden-timesheet/repositories/garden-timesheet.repository'
 import { GardenTimesheet, GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
-import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
+import { FilterQuery, PopulateOptions, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { QueryGardenTimesheetDto } from '@garden-timesheet/dto/view-garden-timesheet.dto'
 import {
   GardenStatus,
@@ -24,6 +24,10 @@ import { Slot } from '@garden-timesheet/schemas/slot.schema'
 import { Garden } from '@garden/schemas/garden.schema'
 import { IGardenRepository } from '@garden/repositories/garden.repository'
 import { BaseSlotMetadataDto, CreateSlotDto } from '@garden-timesheet/dto/slot.dto'
+import { HelperService } from '@common/services/helper.service'
+import { AppException } from '@common/exceptions/app.exception'
+import { Errors } from '@common/contracts/error'
+import { Course } from '@course/schemas/course.schema'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -51,8 +55,10 @@ export interface IGardenTimesheetService {
       weekdays: Weekday[]
       slotNumbers: SlotNumber[]
       gardenId: Types.ObjectId
+      instructorId: Types.ObjectId
       classId: Types.ObjectId
       metadata: BaseSlotMetadataDto
+      courseData: Course
     },
     options?: QueryOptions | undefined
   ): Promise<boolean>
@@ -65,7 +71,8 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     @Inject(IGardenTimesheetRepository)
     private readonly gardenTimesheetRepository: IGardenTimesheetRepository,
     @Inject(IGardenRepository)
-    private readonly gardenRepository: IGardenRepository
+    private readonly gardenRepository: IGardenRepository,
+    private readonly helperService: HelperService
   ) {}
 
   public async findById(
@@ -221,7 +228,11 @@ export class GardenTimesheetService implements IGardenTimesheetService {
   }
 
   public async viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse> {
-    const { startDate, duration, weekdays } = queryAvailableTimeDto
+    const { startDate, duration, weekdays, instructorId } = queryAvailableTimeDto
+
+    const isValidWeekdays = this.helperService.validateWeekdays(weekdays)
+    if (!isValidWeekdays) throw new AppException(Errors.WEEKDAYS_OF_CLASS_INVALID)
+
     const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
     const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
     this.appLogger.log(
@@ -232,7 +243,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
 
     const searchDates = []
     let currentDate = startOfDate.clone()
-    while (currentDate.isBefore(endOfDate)) {
+    while (currentDate.isSameOrBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const searchDate = currentDate.clone().isoWeekday(weekday)
         if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
@@ -300,7 +311,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     this.appLogger.debug(`availableGroupGardenTimesheets.length=${availableGroupGardenTimesheets.length}`)
 
     let availableTimeOfGardens = []
-    let availableTime = SLOT_NUMBERS
+    let availableTime = []
     for (const availableGroupGardenTimesheet of availableGroupGardenTimesheets) {
       let availableGardenSlots = SLOT_NUMBERS
       for (const gardenTimesheet of availableGroupGardenTimesheet.timesheets as GardenTimesheet[]) {
@@ -309,10 +320,13 @@ export class GardenTimesheetService implements IGardenTimesheetService {
           const groupSlots = _.groupBy(slots, 'slotNumber')
           const tempAvailableGardenSlots = []
           SLOT_NUMBERS.forEach((slotNumber) => {
-            if (
-              !_.get(groupSlots, slotNumber) ||
-              _.get(groupSlots, slotNumber)?.length < gardenTimesheet.gardenMaxClass
-            ) {
+            const groupSlot = _.get(groupSlots, slotNumber)
+            const isSlotBusyByInstructor =
+              groupSlot &&
+              groupSlot?.length > 0 &&
+              groupSlot.find((slot) => slot.instructorId?.toString() === instructorId?.toString()) !== undefined
+
+            if (!groupSlot || groupSlot?.length < gardenTimesheet.gardenMaxClass || !isSlotBusyByInstructor) {
               tempAvailableGardenSlots.push(slotNumber)
             }
           })
@@ -320,7 +334,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
         }
       }
       availableTimeOfGardens.push({ slotNumbers: availableGardenSlots, gardenId: availableGroupGardenTimesheet._id })
-      availableTime = _.union(availableTime, availableGardenSlots)
+      availableTime = [...new Set([...availableTime, ...availableGardenSlots])]
     }
 
     this.appLogger.log(`availableTimeOfDates=${JSON.stringify(availableTimeOfGardens)}`)
@@ -335,14 +349,16 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       weekdays: Weekday[]
       slotNumbers: SlotNumber[]
       gardenId: Types.ObjectId
+      instructorId: Types.ObjectId
       classId: Types.ObjectId
       metadata: BaseSlotMetadataDto
+      courseData: Course
     },
     options?: QueryOptions | undefined
   ): Promise<boolean> {
-    const { startDate, duration, weekdays, slotNumbers, gardenId, classId, metadata } = params
+    const { startDate, duration, weekdays, slotNumbers, gardenId, instructorId, classId, metadata, courseData } = params
     this.appLogger.debug(
-      `generateSlotsForClass: startDate=${startDate}, duration=${duration}, weekdays=${weekdays}, slotNumbers=${slotNumbers}, gardenId=${gardenId}, classId=${classId}`
+      `generateSlotsForClass: startDate=${startDate}, duration=${duration}, weekdays=${weekdays}, slotNumbers=${slotNumbers}, gardenId=${gardenId}, instructorId=${instructorId}, classId=${classId}`
     )
 
     const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
@@ -350,7 +366,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
 
     const classDates = []
     let currentDate = startOfDate.clone()
-    while (currentDate.isBefore(endOfDate)) {
+    while (currentDate.isSameOrBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const classDate = currentDate.clone().isoWeekday(weekday)
         if (classDate.isSameOrAfter(startOfDate) && classDate.isSameOrBefore(endOfDate)) {
@@ -365,15 +381,23 @@ export class GardenTimesheetService implements IGardenTimesheetService {
         date: { $in: classDates },
         status: GardenTimesheetStatus.ACTIVE,
         gardenId
-      }
+      },
+      sort: { date: 1 }
     })
     this.appLogger.debug(`generateSlotsForClass: totalNumberOfDays=${duration * weekdays.length}`)
     this.appLogger.debug(`generateSlotsForClass: classDates.length=${classDates.length}`)
     this.appLogger.debug(`generateSlotsForClass: gardenTimesheets.length=${gardenTimesheets.length}`)
     const updateGardenTimesheetPromises = []
-    for (let gardenTimesheet of gardenTimesheets) {
+
+    gardenTimesheets.forEach((gardenTimesheet, index) => {
+      const session = courseData.sessions[index]
       const newSlots = slotNumbers.map(
-        (slotNumber) => new CreateSlotDto(slotNumber, gardenTimesheet.date, classId, metadata)
+        (slotNumber) =>
+          new CreateSlotDto(slotNumber, gardenTimesheet.date, instructorId, new Types.ObjectId(session._id), classId, {
+            ...metadata,
+            sessionNumber: session?.sessionNumber,
+            sessionTitle: session?.title
+          })
       )
       const totalSlots = [...gardenTimesheet.slots, ...newSlots].sort((a, b) => a.slotNumber - b.slotNumber)
       updateGardenTimesheetPromises.push(
@@ -385,7 +409,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
           options
         )
       )
-    }
+    })
     await Promise.all(updateGardenTimesheetPromises)
     return true
   }

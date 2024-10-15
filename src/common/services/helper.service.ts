@@ -3,6 +3,7 @@ import { InjectConnection } from '@nestjs/mongoose'
 import { createHmac } from 'crypto'
 import * as bcrypt from 'bcrypt'
 import { Connection, ClientSession } from 'mongoose'
+import { Weekday } from '@common/contracts/constant'
 
 @Injectable()
 export class HelperService {
@@ -26,13 +27,13 @@ export class HelperService {
   }
 
   generateRandomString = (length = 6, characters = '0123456789') => {
-    let randomString = '';
+    let randomString = ''
     for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      randomString += characters.charAt(randomIndex);
+      const randomIndex = Math.floor(Math.random() * characters.length)
+      randomString += characters.charAt(randomIndex)
     }
-    return randomString;
-  };
+    return randomString
+  }
 
   async hashPassword(password: string): Promise<string> {
     const salt = await bcrypt.genSalt()
@@ -42,5 +43,19 @@ export class HelperService {
 
   async comparePassword(password: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(password, hash)
+  }
+
+  validateWeekdays(weekdays: Weekday[]): boolean {
+    if (!weekdays || weekdays.length !== 2) {
+      return false
+    }
+
+    const validWeekdayTuples = [
+      [Weekday.MONDAY, Weekday.THURSDAY],
+      [Weekday.TUESDAY, Weekday.FRIDAY],
+      [Weekday.WEDNESDAY, Weekday.SATURDAY]
+    ]
+
+    return validWeekdayTuples.some((tuple) => weekdays[0] === tuple[0] && weekdays[1] === tuple[1])
   }
 }

@@ -15,6 +15,8 @@ import {
   QueryAvailableTimeDto,
   ViewAvailableTimeDataResponse
 } from '@garden-timesheet/dto/view-available-timesheet.dto'
+import { Errors } from '@common/contracts/error'
+import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 
 @ApiTags('GardenTimesheet - Instructor')
 @ApiBearerAuth()
@@ -32,6 +34,7 @@ export class InstructorGardenTimesheetController {
     summary: `View Available Time (SlotNumbers) of Garden Timesheet`
   })
   @ApiOkResponse({ type: ViewAvailableTimeDataResponse })
+  @ApiErrorResponse([Errors.WEEKDAYS_OF_CLASS_INVALID])
   @Get('available-time')
   async viewAvailableTime(@Query() queryAvailableTimeDto: QueryAvailableTimeDto) {
     const result = await this.gardenTimesheetService.viewAvailableTime(queryAvailableTimeDto)

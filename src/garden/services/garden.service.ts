@@ -143,8 +143,13 @@ export class GardenService implements IGardenService {
   async getAvailableGardenList(
     queryAvailableGardenDto: QueryAvailableGardenDto
   ): Promise<AvailableGardenListItemResponse[]> {
-    const { startDate, duration, weekdays, slotNumbers } = queryAvailableGardenDto
-    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({ startDate, duration, weekdays })
+    const { startDate, duration, weekdays, slotNumbers, instructorId } = queryAvailableGardenDto
+    const availableSlots = await this.gardenTimesheetService.viewAvailableTime({
+      startDate,
+      duration,
+      weekdays,
+      instructorId
+    })
     this.appLogger.log(
       `getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${
         availableSlots.slotNumbers
