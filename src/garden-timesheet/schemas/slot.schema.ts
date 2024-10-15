@@ -3,6 +3,8 @@ import { HydratedDocument, Types } from 'mongoose'
 import { Transform } from 'class-transformer'
 import { SlotNumber, SlotStatus } from '@common/contracts/constant'
 import { Class } from '@src/class/schemas/class.schema'
+import { Instructor } from '@instructor/schemas/instructor.schema'
+import { Session } from '@class/schemas/session.schema'
 
 export type SlotDocument = HydratedDocument<Slot>
 
@@ -30,6 +32,12 @@ export class Slot {
     default: SlotStatus.AVAILABLE
   })
   status: SlotStatus
+
+  @Prop({ type: Types.ObjectId, ref: Instructor.name })
+  instructorId: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Session.name })
+  sessionId: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Class.name })
   classId: Types.ObjectId

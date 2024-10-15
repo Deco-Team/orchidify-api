@@ -190,6 +190,11 @@ export const Errors = {
     message: 'Không tìm thấy lớp học.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+  WEEKDAYS_OF_CLASS_INVALID: {
+    error: 'WEEKDAYS_OF_CLASS_INVALID',
+    message: 'Số buổi học trong tuần của lớp học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Session

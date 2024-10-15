@@ -23,10 +23,12 @@ export class QueryAvailableTimeDto {
   @ApiProperty({ enum: Weekday, isArray: true })
   @IsArray()
   @IsEnum(Weekday, { each: true })
-  @ArrayMinSize(1)
-  @ArrayMaxSize(7)
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
   @Transform(({ value }) => (Array.isArray(value) ? [...new Set(value)] : Array(value)))
   weekdays: Weekday[]
+
+  instructorId: Types.ObjectId
 }
 
 class AvailableTimeOfGardens {
