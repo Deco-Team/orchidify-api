@@ -24,6 +24,7 @@ import { TerminusModule } from '@nestjs/terminus'
 import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module'
 import { CourseModule } from '@course/course.module'
 import { ClassRequestModule } from '@class-request/class-request.module'
+import { SettingModule } from '@setting/setting.module'
 
 @Module({
   imports: [
@@ -80,6 +81,10 @@ import { ClassRequestModule } from '@class-request/class-request.module'
     }),
     RouterModule.register([
       {
+        path: 'settings',
+        module: SettingModule
+      },
+      {
         path: 'auth',
         module: AuthModule
       },
@@ -132,6 +137,7 @@ import { ClassRequestModule } from '@class-request/class-request.module'
       errorLogStyle: 'pretty'
     }),
     CommonModule,
+    SettingModule,
     MediaModule,
     LearnerModule,
     InstructorModule,
