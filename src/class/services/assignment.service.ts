@@ -18,14 +18,16 @@ export class AssignmentService implements IAssignmentService {
 
   public async findOneBy(params: { assignmentId: string; classId: string; instructorId?: string }) {
     const { assignmentId, classId, instructorId } = params
+
+    const conditions = { _id: classId }
+    if (instructorId) conditions['instructorId'] = new Types.ObjectId(instructorId)
+
     const courseClass = await this.classRepository.findOne({
-      conditions: {
-        _id: classId,
-        instructorId: new Types.ObjectId(instructorId)
-      },
+      conditions,
       projection: 'sessions',
       options: { lean: true }
     })
+    
     let assignment: Assignment
     for (let session of courseClass.sessions) {
       assignment = session?.assignments?.find((assignment) => assignment._id.toString() === assignmentId)

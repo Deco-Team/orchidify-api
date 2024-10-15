@@ -22,7 +22,6 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { ClassStatusHistory } from '@src/class/schemas/class.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from './session.dto'
-import { BaseAssignmentDto } from './assignment.dto'
 
 export class BaseClassDto {
   @ApiProperty({ type: String })

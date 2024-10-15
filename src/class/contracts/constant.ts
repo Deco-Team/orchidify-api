@@ -1,20 +1,26 @@
-export const INSTRUCTOR_VIEW_CLASS_LIST_PROJECTION = [
+export const CLASS_LIST_PROJECTION = [
   '_id',
+  'code',
   'title',
   'startDate',
   'price',
   'level',
   'type',
   'duration',
+  'thumbnail',
   'status',
   'learnerLimit',
   'learnerQuantity',
+  'weekdays',
+  'slotNumbers',
+  'rate',
   'createdAt',
   'updatedAt'
 ] as const
 
-export const INSTRUCTOR_VIEW_CLASS_DETAIL_PROJECTION = [
+export const CLASS_DETAIL_PROJECTION = [
   '_id',
+  'code',
   'title',
   'description',
   'startDate',
@@ -24,13 +30,19 @@ export const INSTRUCTOR_VIEW_CLASS_DETAIL_PROJECTION = [
   'duration',
   'thumbnail',
   'media',
+  'sessions',
   'status',
   'histories',
   'learnerLimit',
   'learnerQuantity',
+  'weekdays',
+  'slotNumbers',
+  'rate',
+  'cancelReason',
+  'gardenRequiredToolkits',
   'instructorId',
   'gardenId',
-  'sessions',
+  'courseId',
   'createdAt',
   'updatedAt'
 ] as const
