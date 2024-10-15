@@ -30,6 +30,15 @@ export const Errors = {
   },
 
   /**
+   * Setting
+   */
+  SETTING_NOT_FOUND: {
+    error: 'SETTING_NOT_FOUND',
+    message: 'Không tìm thấy thông tin cài đặt.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+
+  /**
    * Authentication
    */
   WRONG_EMAIL_OR_PASSWORD: {
