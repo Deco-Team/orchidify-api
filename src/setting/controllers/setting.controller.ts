@@ -8,6 +8,8 @@ import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { ISettingService } from '@setting/services/setting.service'
 import { CourseTypesSettingDetailDataResponse } from '@setting/dto/view-setting.dto'
+import { SettingKey } from '@setting/contracts/constant'
+import { AppException } from '@common/exceptions/app.exception'
 
 @ApiTags('Setting')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -37,27 +39,8 @@ export class SettingController {
   @ApiErrorResponse([Errors.SETTING_NOT_FOUND])
   @Get('course-types')
   async getCourseTypesSetting() {
-    const CourseTypes = [
-      {
-        groupName: 'Lan rừng',
-        groupItems: ['Lan phi điệp', 'Lan hải yến']
-      },
-      {
-        groupName: 'Lan công nghiệp',
-        groupItems: ['Dendrobium', 'Cattleya', 'Lan hồ điệp']
-      },
-      {
-        groupName: 'Quá trình',
-        groupItems: ['Cây con', 'Cây trưởng thành', 'Ra hoa', 'Hoa tàn']
-      },
-      {
-        groupName: 'Phương pháp',
-        groupItems: ['Tạo hình', 'Tách chiết', 'Chiết ghép', 'Cấy mô']
-      }
-    ]
-    return { docs: CourseTypes }
-    // const setting = await this.settingService.findById(settingId)
-    // if (!setting || setting.enabled === false) throw new AppException(Errors.SETTING_NOT_FOUND)
-    // return setting.value
+    const setting = await this.settingService.findByKey(SettingKey.CourseTypes)
+    if (!setting || setting.enabled === false) throw new AppException(Errors.SETTING_NOT_FOUND)
+    return { docs: setting.value }
   }
 }
