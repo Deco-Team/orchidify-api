@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -17,7 +17,6 @@ import { ICourseAssignmentService } from '@course/services/course-assignment.ser
 import {
   CourseDetailDataResponse,
   CourseListDataResponse,
-  PublicQueryCourseDto,
   StaffQueryCourseDto
 } from '@course/dto/view-course.dto'
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'

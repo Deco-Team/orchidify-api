@@ -1,3 +1,6 @@
 export enum SettingKey {
-  CourseTypes = 'CourseTypes'
+  CourseTypes = 'CourseTypes',
+  ResendOtpCodeLimit = 'ResendOtpCodeLimit',
+  CreateClassRequestLimitPerDay = 'CreateClassRequestLimitPerDay',
+  AssignmentsCountRange = 'AssignmentsCountRange'
 }

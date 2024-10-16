@@ -1,15 +1,15 @@
-import { Controller, Get, Inject, Param } from '@nestjs/common'
+import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
 import { ErrorResponse } from '@common/contracts/dto'
-import { UserRole } from '@common/contracts/constant'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { ISettingService } from '@setting/services/setting.service'
-import { CourseTypesSettingDetailDataResponse } from '@setting/dto/view-setting.dto'
+import { CourseTypesSettingDetailDataResponse, QuerySettingDto, SettingDetailDataResponse } from '@setting/dto/view-setting.dto'
 import { SettingKey } from '@setting/contracts/constant'
 import { AppException } from '@common/exceptions/app.exception'
+import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 
 @ApiTags('Setting')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -20,17 +20,16 @@ export class SettingController {
     private readonly settingService: ISettingService
   ) {}
 
-  // @ApiOperation({
-  //   summary: `[${UserRole.STAFF}] View Setting List`
-  // })
-  // @ApiBearerAuth()
-  // @ApiQuery({ type: PaginationQuery })
-  // @ApiOkResponse({ type: SettingListDataResponse })
-  // @Roles(UserRole.STAFF)
-  // @Get()
-  // async list(@Pagination() pagination: PaginationParams, @Query() querySettingDto: StaffQuerySettingDto) {
-  //   return await this.settingService.list(pagination, querySettingDto)
-  // }
+  @ApiOperation({
+    summary: `View Setting Value By Key`
+  })
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: SettingDetailDataResponse })
+  @UseGuards(JwtAuthGuard.ACCESS_TOKEN)
+  @Get()
+  async getByKey(@Query() querySettingDto: QuerySettingDto) {
+    return await this.settingService.findByKey(querySettingDto.key)
+  }
 
   @ApiOperation({
     summary: `View Course Types (Setting Detail)`

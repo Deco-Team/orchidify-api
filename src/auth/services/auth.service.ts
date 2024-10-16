@@ -29,6 +29,8 @@ import { Types } from 'mongoose'
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 import { NotificationAdapter } from '@common/adapters/notification.adapter'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -66,6 +68,8 @@ export class AuthService implements IAuthService {
     private readonly otpService: IOtpService,
     @Inject(IRecruitmentService)
     private readonly recruitmentService: IRecruitmentService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService,
     private readonly jwtService: JwtService,
     private readonly helperService: HelperService,
     private readonly configService: ConfigService,
@@ -186,8 +190,9 @@ export class AuthService implements IAuthService {
     if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
     if (learner.status === LearnerStatus.ACTIVE) return new SuccessResponse(true)
 
+    const resendOtpCodeLimit = Number((await this.settingService.findByKey(SettingKey.ResendOtpCodeLimit)).value) || 5
     const otp = await this.otpService.findByUserIdAndRole(learner._id, UserRole.LEARNER)
-    if (otp.__v >= 5 && moment(otp['updatedAt']).isSame(new Date(), 'day'))
+    if (otp.__v >= resendOtpCodeLimit && moment(otp['updatedAt']).isSame(new Date(), 'day'))
       throw new AppException(Errors.RESEND_OTP_CODE_LIMITED)
 
     const code = this.helperService.generateRandomString(6)

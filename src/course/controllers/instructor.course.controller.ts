@@ -37,6 +37,8 @@ import { CreateCourseDto } from '@course/dto/create-course.dto'
 import { UpdateCourseDto } from '@course/dto/update-course.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
 import { session } from 'passport'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
 
 @ApiTags('Course - Instructor')
 @ApiBearerAuth()
@@ -51,7 +53,9 @@ export class InstructorCourseController {
     @Inject(ICourseSessionService)
     private readonly courseSessionService: ICourseSessionService,
     @Inject(ICourseAssignmentService)
-    private readonly courseAssignmentService: ICourseAssignmentService
+    private readonly courseAssignmentService: ICourseAssignmentService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService
   ) {}
 
   @ApiOperation({
@@ -122,8 +126,11 @@ export class InstructorCourseController {
       throw new AppException(Errors.TOTAL_SESSIONS_OF_COURSE_INVALID)
     }
     // validate assignments from 1 to 3
+    const [assignmentsCountMin, assignmentsCountMax] = Array(
+      (await this.settingService.findByKey(SettingKey.AssignmentsCountRange)).value
+    ) || [1, 3]
     const assignmentsCount = createCourseDto.sessions.filter((session) => session.assignments.length === 1).length
-    if (assignmentsCount < 1 || assignmentsCount > 3) {
+    if (assignmentsCount < Number(assignmentsCountMin) || assignmentsCount > Number(assignmentsCountMax)) {
       throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
     }
 
