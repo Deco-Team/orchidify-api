@@ -204,17 +204,6 @@ export class CourseService implements ICourseService {
         //       }
         //     }
         //   }
-          // assignmentsCount: {
-          //   $reduce: {
-          //     input: {
-          //       $ifNull: ['$assignments', []]
-          //     },
-          //     initialValue: 0,
-          //     in: {
-          //       $add: ['$$value', 1]
-          //     }
-          //   }
-          // }
       //   }
       // },
       {
@@ -225,6 +214,7 @@ export class CourseService implements ICourseService {
           price: 1,
           level: 1,
           type: 1,
+          duration: 1,
           thumbnail: 1,
           status: 1,
           learnerLimit: 1,
@@ -235,7 +225,6 @@ export class CourseService implements ICourseService {
           createdAt: 1,
           updatedAt: 1,
           // sessionsCount: 1,
-          // assignmentsCount: 1
         }
       },
       {
