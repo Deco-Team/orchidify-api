@@ -1,6 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { BaseSettingDto } from './base.setting.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
+import { SettingKey } from '@setting/contracts/constant'
+import { IsEnum } from 'class-validator'
+
+export class QuerySettingDto {
+  @ApiProperty({
+    enum: SettingKey
+  })
+  @IsEnum(SettingKey)
+  key: SettingKey
+}
 
 class SettingListItemResponse extends BaseSettingDto {}
 class SettingListResponse extends PaginateResponse(SettingListItemResponse) {}

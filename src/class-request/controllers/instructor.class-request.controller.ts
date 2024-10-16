@@ -38,6 +38,8 @@ import { Types } from 'mongoose'
 import { ICourseService } from '@course/services/course.service'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import { HelperService } from '@common/services/helper.service'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
 
 @ApiTags('ClassRequest - Instructor')
 @ApiBearerAuth()
@@ -53,6 +55,8 @@ export class InstructorClassRequestController {
     private readonly courseService: ICourseService,
     @Inject(IGardenTimesheetService)
     private readonly gardenTimesheetService: IGardenTimesheetService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService,
     private readonly helperService: HelperService
   ) {}
 
@@ -107,8 +111,10 @@ export class InstructorClassRequestController {
     if (!isValidWeekdays) throw new AppException(Errors.WEEKDAYS_OF_CLASS_INVALID)
 
     // BR-39: Instructors can only create 10 class requests per day.
+    const createClassRequestLimit =
+      Number((await this.settingService.findByKey(SettingKey.CreateClassRequestLimitPerDay)).value) || 10
     const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date())
-    if (classRequestsCount > 10) throw new AppException(Errors.CREATE_CLASS_REQUEST_LIMIT)
+    if (classRequestsCount > createClassRequestLimit) throw new AppException(Errors.CREATE_CLASS_REQUEST_LIMIT)
 
     // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
     const course = await this.courseService.findById(createPublishClassRequestDto.courseId.toString(), ['+sessions'])

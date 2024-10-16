@@ -14,7 +14,7 @@ export type SettingDocument = HydratedDocument<Setting>
   toJSON: {
     transform(doc, ret) {
       delete ret.__v
-    },
+    }
   }
 })
 export class Setting {
@@ -28,7 +28,7 @@ export class Setting {
   key: string
 
   @Prop({ type: Types.Map, required: true })
-  value: Record<string, any>;
+  value: Record<string, any> | number | Array<number | String>
 
   @Prop({ type: Boolean, required: true, default: true })
   enabled: boolean

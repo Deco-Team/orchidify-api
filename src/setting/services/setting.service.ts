@@ -3,6 +3,7 @@ import { ISettingRepository } from '@setting/repositories/setting.repository'
 import { Setting, SettingDocument } from '@setting/schemas/setting.schema'
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
 import * as _ from 'lodash'
+import { SettingKey } from '@setting/contracts/constant'
 
 export const ISettingService = Symbol('ISettingService')
 
@@ -13,7 +14,7 @@ export interface ISettingService {
     populates?: Array<PopulateOptions>
   ): Promise<SettingDocument>
   findByKey(
-    key: string,
+    key: SettingKey,
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<SettingDocument>
@@ -46,7 +47,7 @@ export class SettingService implements ISettingService {
     return setting
   }
 
-  public async findByKey(key: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>) {
+  public async findByKey(key: SettingKey, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>) {
     const setting = await this.settingRepository.findOne({
       conditions: {
         key

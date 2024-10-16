@@ -73,6 +73,9 @@ class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_P
 
   @ApiProperty({ type: PublicCourseInstructorDto })
   instructor: PublicCourseInstructorDto
+
+  @ApiProperty({ type: Number })
+  classesCount: number
 }
 class PublicCourseListResponse extends PaginateResponse(PublicCourseListItemResponse) {}
 export class PublishCourseListDataResponse extends DataResponse(PublicCourseListResponse) {}
