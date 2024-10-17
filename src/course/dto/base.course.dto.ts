@@ -43,7 +43,7 @@ export class BaseCourseDto {
 
   @ApiProperty({ type: Number, example: 500_000 })
   @IsNumber()
-  @Min(0)
+  @Min(1_000)
   @Max(10_000_000)
   price: number
 

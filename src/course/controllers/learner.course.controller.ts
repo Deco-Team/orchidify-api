@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Query, Param, UseGuards } from '@nestjs/common'
+import { Controller, Get, Inject, Query, Param, UseGuards, Req } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -21,6 +21,7 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { Types } from 'mongoose'
 
 @ApiTags('Course - Viewer/Learner')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -50,16 +51,24 @@ export class CourseController {
   @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
   @Roles(UserRole.LEARNER)
   @Get(':id([0-9a-f]{24})')
-  async getDetail(@Param('id') courseId: string) {
+  async getDetail(@Req() req, @Param('id') courseId: string) {
+    const { _id } = _.get(req, 'user')
     const course = await this.courseService.findById(courseId, PUBLIC_COURSE_DETAIL_PROJECTION, [
       {
         path: 'classes',
         select: PUBLIC_COURSE_CLASS_DETAIL_PROJECTION,
         match: { status: ClassStatus.PUBLISHED },
-        populate: {
-          path: 'garden',
-          select: ['_id', 'name']
-        }
+        populate: [
+          {
+            path: 'learnerClass',
+            select: ['_id'],
+            match: { learnerId: new Types.ObjectId(_id) }
+          },
+          {
+            path: 'garden',
+            select: ['_id', 'name']
+          }
+        ]
       },
       {
         path: 'instructor',

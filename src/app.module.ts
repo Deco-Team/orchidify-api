@@ -25,6 +25,7 @@ import { GardenTimesheetModule } from '@garden-timesheet/garden-timesheet.module
 import { CourseModule } from '@course/course.module'
 import { ClassRequestModule } from '@class-request/class-request.module'
 import { SettingModule } from '@setting/setting.module'
+import { TransactionModule } from '@transaction/transaction.module'
 
 @Module({
   imports: [
@@ -132,6 +133,10 @@ import { SettingModule } from '@setting/setting.module'
         path: 'class-requests',
         module: ClassRequestModule
       },
+      {
+        path: 'transactions',
+        module: TransactionModule
+      }
     ]),
     TerminusModule.forRoot({
       errorLogStyle: 'pretty'
@@ -149,7 +154,8 @@ import { SettingModule } from '@setting/setting.module'
     CourseModule,
     GardenTimesheetModule,
     AuthModule,
-    ClassRequestModule
+    ClassRequestModule,
+    TransactionModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -54,8 +54,8 @@
       "@i18n/*": [
         "src/i18n/*"
       ],
-      "@payment/*": [
-        "src/payment/*"
+      "@transaction/*": [
+        "src/transaction/*"
       ],
       "@review/*": [
         "src/review/*"

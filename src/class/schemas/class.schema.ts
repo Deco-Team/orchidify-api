@@ -138,3 +138,10 @@ ClassSchema.virtual('instructor', {
   foreignField: '_id',
   justOne: true
 })
+
+ClassSchema.virtual('learnerClass', {
+  ref: 'LearnerClass',
+  localField: '_id',
+  foreignField: 'classId',
+  justOne: true
+})
