@@ -298,6 +298,9 @@ export class CourseService implements ICourseService {
         }
       },
       {
+        $sort: pagination.sort
+      },
+      {
         $facet: {
           docs: [
             {
