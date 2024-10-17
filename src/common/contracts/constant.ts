@@ -66,6 +66,14 @@ export enum ClassStatus {
   DELETED = 'DELETED'
 }
 
+export enum LearnerClassStatus {
+  ENROLLED = 'ENROLLED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELED = 'CANCELED',
+  DELETED = 'DELETED'
+}
+
 export enum GardenTimesheetStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE'
@@ -90,6 +98,16 @@ export enum ClassRequestStatus {
   REJECTED = 'REJECTED',
   CANCELED = 'CANCELED'
 }
+
+export enum TransactionStatus {
+  DRAFT = 'DRAFT',
+  CAPTURED = 'CAPTURED',
+  ERROR = 'ERROR',
+  CANCELED = 'CANCELED',
+  DELETED = 'DELETED',
+  REFUNDED = 'REFUNDED'
+}
+
 
 export enum ClassRequestType {
   PUBLISH_CLASS = 'PUBLISH_CLASS'

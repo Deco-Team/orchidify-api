@@ -195,6 +195,16 @@ export const Errors = {
     message: 'Số buổi học trong tuần của lớp học không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  CLASS_STATUS_INVALID: {
+    error: 'CLASS_STATUS_INVALID',
+    message: 'Trạng thái của lớp học không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CLASS_LEARNER_LIMIT: {
+    error: 'CLASS_LEARNER_LIMIT',
+    message: 'Số lượng học viên trong lớp đã đủ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Session
@@ -264,5 +274,23 @@ export const Errors = {
     error: 'GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST',
     message: 'Vườn đã chọn không phù hợp với yêu cầu khóa học.',
     httpStatus: HttpStatus.BAD_REQUEST
-  }
+  },
+
+  /**
+   * LearnClass
+   */
+  LEARNER_CLASS_EXISTED: {
+    error: 'LEARNER_CLASS_EXISTED',
+    message: 'Bạn đã tham gia vào lớp học này.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
+   * Transaction
+   */
+  TRANSACTION_NOT_FOUND: {
+    error: 'TRANSACTION_NOT_FOUND',
+    message: 'Không tìm thấy giao dịch.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }

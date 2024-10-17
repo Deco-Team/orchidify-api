@@ -143,7 +143,7 @@
       "^@recruitment/(.*)$": "<rootDir>/recruitment/$1",
       "^@seeds/(.*)$": "<rootDir>/seeds/$1",
       "^@i18n/(.*)$": "<rootDir>/i18n/$1",
-      "^@payment/(.*)$": "<rootDir>/payment/$1",
+      "^@transaction/(.*)$": "<rootDir>/transaction/$1",
       "^@review/(.*)$": "<rootDir>/review/$1",
       "^@setting/(.*)$": "<rootDir>/setting/$1",
       "^@course/(.*)$": "<rootDir>/course/$1",

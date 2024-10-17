@@ -12,6 +12,7 @@ import { BaseClassDto } from '@class/dto/base.class.dto'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
 
 export class QueryCourseDto {
   @ApiPropertyOptional({
@@ -82,9 +83,13 @@ export class PublishCourseListDataResponse extends DataResponse(PublicCourseList
 
 class PublicCourseClassGardenDto extends PickType(BaseGardenDto, ['_id', 'name']) {}
 class PublicCourseSessionDto extends PickType(BaseSessionDto, ['_id', 'title']) {}
+class PublicCourseLearnerClassDto extends PickType(BaseLearnerDto, ['_id']) {}
 class PublicCourseClassDto extends PickType(BaseClassDto, PUBLIC_COURSE_CLASS_DETAIL_PROJECTION) {
   @ApiProperty({ type: PublicCourseClassGardenDto })
-  garden: BaseGardenDto
+  garden: PublicCourseClassGardenDto
+
+  @ApiPropertyOptional({ type: PublicCourseLearnerClassDto })
+  learnerClass: PublicCourseLearnerClassDto
 }
 class PublicCourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {
   @ApiProperty({ type: PublicCourseInstructorDto })
@@ -94,6 +99,6 @@ class PublicCourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_P
   sessions: BaseSessionDto[]
 
   @ApiProperty({ type: PublicCourseClassDto, isArray: true })
-  classes: BaseClassDto
+  classes: PublicCourseClassDto
 }
 export class PublicCourseDetailDataResponse extends DataResponse(PublicCourseDetailResponse) {}
