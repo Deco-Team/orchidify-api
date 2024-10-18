@@ -64,10 +64,13 @@ class CourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECT
 class CourseListResponse extends PaginateResponse(CourseListItemResponse) {}
 export class CourseListDataResponse extends DataResponse(CourseListResponse) {}
 
-class CourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {}
+class PublicCourseInstructorDto extends PickType(BaseInstructorDto, PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
+class CourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {
+  @ApiProperty({ type: PublicCourseInstructorDto })
+  instructor: PublicCourseInstructorDto
+}
 export class CourseDetailDataResponse extends DataResponse(CourseDetailResponse) {}
 
-class PublicCourseInstructorDto extends PickType(BaseInstructorDto, PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
 class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {
   // @ApiProperty({ type: Number })
   // sessionsCount: number

@@ -14,14 +14,11 @@ import { Pagination, PaginationParams } from '@common/decorators/pagination.deco
 import { ICourseService } from '@course/services/course.service'
 import { ICourseSessionService } from '@course/services/course-session.service'
 import { ICourseAssignmentService } from '@course/services/course-assignment.service'
-import {
-  CourseDetailDataResponse,
-  CourseListDataResponse,
-  StaffQueryCourseDto
-} from '@course/dto/view-course.dto'
+import { CourseDetailDataResponse, CourseListDataResponse, StaffQueryCourseDto } from '@course/dto/view-course.dto'
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { ViewCourseSessionDetailDataResponse } from '@course/dto/view-course-session.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
+import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 @ApiTags('Course - Management')
 @ApiBearerAuth()
@@ -57,7 +54,12 @@ export class ManagementCourseController {
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') courseId: string) {
-    const course = await this.courseService.findById(courseId, COURSE_DETAIL_PROJECTION)
+    const course = await this.courseService.findById(courseId, COURSE_DETAIL_PROJECTION, [
+      {
+        path: 'instructor',
+        select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+      }
+    ])
     if (
       !course ||
       course.isPublished === false ||
