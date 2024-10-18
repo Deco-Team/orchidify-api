@@ -61,6 +61,10 @@ export class ManagementClassController {
       {
         path: 'instructor',
         select: ['name']
+      },
+      {
+        path: 'course',
+        select: ['code']
       }
     ])
 

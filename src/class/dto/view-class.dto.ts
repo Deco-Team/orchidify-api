@@ -42,27 +42,42 @@ export class QueryClassDto {
   status: ClassStatus[]
 }
 
-class InstructorViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {}
+class ClassInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}
+class ClassGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
+class ClassCourseDetailResponse extends PickType(BaseClassDto, ['code']) {}
+class InstructorViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
+}
 class InstructorViewClassListResponse extends PaginateResponse(InstructorViewClassListItemResponse) {}
 export class InstructorViewClassListDataResponse extends DataResponse(InstructorViewClassListResponse) {}
 
-class ClassGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
 class InstructorViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_PROJECTION) {
   @ApiProperty({ type: ClassGardenDetailResponse })
   garden: ClassGardenDetailResponse
+
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
 }
 export class InstructorViewClassDetailDataResponse extends DataResponse(InstructorViewClassDetailResponse) {}
 
-class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {}
-class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {}
+class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {
+  
+}
+class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
+}
 export class StaffViewClassListDataResponse extends DataResponse(StaffViewClassListResponse) {}
 
-class ClassInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}
 class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_PROJECTION) {
   @ApiProperty({ type: ClassGardenDetailResponse })
   garden: ClassGardenDetailResponse
 
   @ApiProperty({ type: ClassInstructorDetailResponse })
   instructor: ClassInstructorDetailResponse
+
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
 }
 export class StaffViewClassDetailDataResponse extends DataResponse(StaffViewClassDetailResponse) {}

@@ -125,6 +125,12 @@ export class ClassService implements IClassService {
 
     return this.classRepository.model.paginate(filter, {
       ...pagination,
+      populate: [
+        {
+          path: 'course',
+          select: ['code']
+        }
+      ],
       projection
     })
   }
@@ -162,7 +168,13 @@ export class ClassService implements IClassService {
 
     return this.classRepository.model.paginate(filter, {
       ...pagination,
-      projection
+      projection,
+      populate: [
+        {
+          path: 'course',
+          select: ['code']
+        }
+      ]
     })
   }
 

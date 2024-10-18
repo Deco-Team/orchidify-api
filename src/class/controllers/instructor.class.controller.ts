@@ -62,6 +62,10 @@ export class InstructorClassController {
       {
         path: 'garden',
         select: ['name']
+      },
+      {
+        path: 'course',
+        select: ['code']
       }
     ])
 

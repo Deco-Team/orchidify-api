@@ -14,6 +14,7 @@ export const CLASS_LIST_PROJECTION = [
   'weekdays',
   'slotNumbers',
   'rate',
+  'courseId',
   'createdAt',
   'updatedAt'
 ] as const
