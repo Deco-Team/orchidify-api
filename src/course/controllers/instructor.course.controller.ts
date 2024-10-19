@@ -126,11 +126,12 @@ export class InstructorCourseController {
       throw new AppException(Errors.TOTAL_SESSIONS_OF_COURSE_INVALID)
     }
     // validate assignments from 1 to 3
-    const [assignmentsCountMin, assignmentsCountMax] = Array(
-      (await this.settingService.findByKey(SettingKey.AssignmentsCountRange)).value
-    ) || [1, 3]
-    const assignmentsCount = createCourseDto.sessions.filter((session) => session?.assignments?.length === 1)?.length || 0
-    if (assignmentsCount < Number(assignmentsCountMin) || assignmentsCount > Number(assignmentsCountMax)) {
+    const assignmentsCountRange = (await this.settingService.findByKey(SettingKey.AssignmentsCountRange)).value || [
+      1, 3
+    ]
+    const assignmentsCount =
+      createCourseDto.sessions.filter((session) => session?.assignments?.length === 1)?.length || 0
+    if (assignmentsCount < Number(assignmentsCountRange[0]) || assignmentsCount > Number(assignmentsCountRange[1])) {
       throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
     }
 
