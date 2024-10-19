@@ -129,7 +129,7 @@ export class InstructorCourseController {
     const [assignmentsCountMin, assignmentsCountMax] = Array(
       (await this.settingService.findByKey(SettingKey.AssignmentsCountRange)).value
     ) || [1, 3]
-    const assignmentsCount = createCourseDto.sessions.filter((session) => session.assignments.length === 1).length
+    const assignmentsCount = createCourseDto.sessions.filter((session) => session?.assignments?.length === 1)?.length || 0
     if (assignmentsCount < Number(assignmentsCountMin) || assignmentsCount > Number(assignmentsCountMax)) {
       throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
     }
