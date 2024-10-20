@@ -22,6 +22,8 @@ import { IAssignmentService } from '@class/services/assignment.service'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 import { ISessionService } from '@class/services/session.service'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
+import { ILearnerClassService } from '@class/services/learner-class.service'
+import { Types } from 'mongoose'
 
 @ApiTags('Class - Instructor')
 @ApiBearerAuth()
@@ -36,7 +38,9 @@ export class InstructorClassController {
     @Inject(ISessionService)
     private readonly sessionService: ISessionService,
     @Inject(IAssignmentService)
-    private readonly assignmentService: IAssignmentService
+    private readonly assignmentService: IAssignmentService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService
   ) {}
 
   @ApiOperation({
@@ -58,19 +62,22 @@ export class InstructorClassController {
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Req() req, @Param('id') classId: string) {
     const { _id } = _.get(req, 'user')
-    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION, [
-      {
-        path: 'garden',
-        select: ['name']
-      },
-      {
-        path: 'course',
-        select: ['code']
-      }
+    const [courseClass, learnerClass] = await Promise.all([
+      this.classService.findById(classId, CLASS_DETAIL_PROJECTION, [
+        {
+          path: 'garden',
+          select: ['name']
+        },
+        {
+          path: 'course',
+          select: ['code']
+        }
+      ]),
+      this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, undefined, [{ path: 'learner' }])
     ])
-
     if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
-    return courseClass
+
+    return { ...courseClass.toJSON(), learners: learnerClass?.map((learnerClass) => learnerClass?.['learner']) }
   }
 
   @ApiOperation({
