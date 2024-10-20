@@ -7,6 +7,7 @@ import { Transform } from 'class-transformer'
 import { CLASS_DETAIL_PROJECTION, CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
+import { LearnerDetailResponse } from '@learner/dto/view-learner.dto'
 
 export class QueryClassDto {
   @ApiPropertyOptional({
@@ -58,12 +59,13 @@ class InstructorViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DET
 
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
+
+  @ApiPropertyOptional({ type: LearnerDetailResponse, isArray: true })
+  learners: LearnerDetailResponse[]
 }
 export class InstructorViewClassDetailDataResponse extends DataResponse(InstructorViewClassDetailResponse) {}
 
-class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {
-  
-}
+class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {}
 class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
@@ -79,5 +81,8 @@ class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_P
 
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
+
+  @ApiPropertyOptional({ type: LearnerDetailResponse, isArray: true })
+  learners: LearnerDetailResponse[]
 }
 export class StaffViewClassDetailDataResponse extends DataResponse(StaffViewClassDetailResponse) {}

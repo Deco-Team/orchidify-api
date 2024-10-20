@@ -19,11 +19,16 @@ export interface ILearnerClassService {
     payload: UpdateQuery<LearnerClass>,
     options?: QueryOptions | undefined
   ): Promise<LearnerClassDocument>
-  find(
+  findOneBy(
     conditions: FilterQuery<LearnerClass>,
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<LearnerClassDocument>
+  findMany(
+    conditions: FilterQuery<LearnerClassDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<LearnerClassDocument[]>
 }
 
 @Injectable()
@@ -54,7 +59,7 @@ export class LearnerClassService implements ILearnerClassService {
     return learnerClass
   }
 
-  public async find(
+  public async findOneBy(
     conditions: FilterQuery<LearnerClassDocument>,
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
@@ -65,6 +70,19 @@ export class LearnerClassService implements ILearnerClassService {
       populates
     })
     return learnerClass
+  }
+
+  public async findMany(
+    conditions: FilterQuery<LearnerClassDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const learnerClasses = await this.classRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return learnerClasses
   }
 
   public update(

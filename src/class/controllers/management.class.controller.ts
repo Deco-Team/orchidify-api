@@ -12,12 +12,18 @@ import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IClassService } from '@class/services/class.service'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
-import { QueryClassDto, StaffViewClassDetailDataResponse, StaffViewClassListDataResponse } from '@class/dto/view-class.dto'
+import {
+  QueryClassDto,
+  StaffViewClassDetailDataResponse,
+  StaffViewClassListDataResponse
+} from '@class/dto/view-class.dto'
 import { CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { IAssignmentService } from '@class/services/assignment.service'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 import { ISessionService } from '@class/services/session.service'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
+import { Types } from 'mongoose'
+import { ILearnerClassService } from '@class/services/learner-class.service'
 
 @ApiTags('Class - Management')
 @ApiBearerAuth()
@@ -31,7 +37,9 @@ export class ManagementClassController {
     @Inject(ISessionService)
     private readonly sessionService: ISessionService,
     @Inject(IAssignmentService)
-    private readonly assignmentService: IAssignmentService
+    private readonly assignmentService: IAssignmentService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService
   ) {}
 
   @ApiOperation({
@@ -53,23 +61,26 @@ export class ManagementClassController {
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') classId: string) {
-    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION, [
-      {
-        path: 'garden',
-        select: ['name']
-      },
-      {
-        path: 'instructor',
-        select: ['name']
-      },
-      {
-        path: 'course',
-        select: ['code']
-      }
+    const [courseClass, learnerClass] = await Promise.all([
+      this.classService.findById(classId, CLASS_DETAIL_PROJECTION, [
+        {
+          path: 'garden',
+          select: ['name']
+        },
+        {
+          path: 'instructor',
+          select: ['name']
+        },
+        {
+          path: 'course',
+          select: ['code']
+        }
+      ]),
+      this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, undefined, [{ path: 'learners' }])
     ])
 
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
-    return courseClass
+    return { ...courseClass.toJSON(), learners: learnerClass?.['learners'] ?? [] }
   }
 
   @ApiOperation({

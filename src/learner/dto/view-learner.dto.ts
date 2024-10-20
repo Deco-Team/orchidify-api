@@ -39,7 +39,7 @@ export class QueryLearnerDto {
 class LearnerProfileResponse extends PickType(BaseLearnerDto, LEARNER_PROFILE_PROJECTION) {}
 export class LearnerProfileDataResponse extends DataResponse(LearnerProfileResponse) {}
 
-class LearnerDetailResponse extends PickType(BaseLearnerDto, LEARNER_DETAIL_PROJECTION) {}
+export class LearnerDetailResponse extends PickType(BaseLearnerDto, LEARNER_DETAIL_PROJECTION) {}
 export class LearnerDetailDataResponse extends DataResponse(LearnerDetailResponse) {}
 
 class LearnerListItemResponse extends PickType(BaseLearnerDto, LEARNER_LIST_PROJECTION) {}

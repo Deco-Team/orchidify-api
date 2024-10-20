@@ -228,7 +228,7 @@ export class ClassService implements IClassService {
     const [learner, courseClass, learnerClass] = await Promise.all([
       this.learnerService.findById(learnerId?.toString()),
       this.findById(classId?.toString()),
-      this.learnerClassService.find({ learnerId, classId })
+      this.learnerClassService.findOneBy({ learnerId, classId })
     ])
     if (learner.status === LearnerStatus.UNVERIFIED) throw new AppException(Errors.UNVERIFIED_ACCOUNT)
     if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
