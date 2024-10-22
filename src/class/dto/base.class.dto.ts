@@ -86,8 +86,8 @@ export class BaseClassDto {
 
   @ApiProperty({ type: BaseSessionDto, isArray: true })
   @IsArray()
-  @ArrayMinSize(3)
-  @ArrayMaxSize(10)
+  @ArrayMinSize(2)
+  @ArrayMaxSize(24)
   @Type(() => BaseSessionDto)
   @ValidateNested({ each: true })
   sessions: BaseSessionDto[]
