@@ -152,6 +152,20 @@ export class InstructorCourseController {
   @ApiErrorResponse([Errors.COURSE_NOT_FOUND, Errors.CAN_NOT_UPDATE_COURSE])
   @Put(':id([0-9a-f]{24})')
   async update(@Req() req, @Param('id') courseId: string, @Body() updateCourseDto: UpdateCourseDto) {
+    // validate sessionsCount = 2 * duration
+    if (updateCourseDto.sessions.length !== 2 * updateCourseDto.duration) {
+      throw new AppException(Errors.TOTAL_SESSIONS_OF_COURSE_INVALID)
+    }
+    // validate assignments from 1 to 3
+    const assignmentsCountRange = (await this.settingService.findByKey(SettingKey.AssignmentsCountRange)).value || [
+      1, 3
+    ]
+    const assignmentsCount =
+      updateCourseDto.sessions.filter((session) => session?.assignments?.length === 1)?.length || 0
+    if (assignmentsCount < Number(assignmentsCountRange[0]) || assignmentsCount > Number(assignmentsCountRange[1])) {
+      throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
+    }
+
     const { _id } = _.get(req, 'user')
     const course = await this.courseService.findById(courseId)
 
@@ -159,6 +173,9 @@ export class InstructorCourseController {
       throw new AppException(Errors.COURSE_NOT_FOUND)
     if (course.status !== CourseStatus.DRAFT) throw new AppException(Errors.CAN_NOT_UPDATE_COURSE)
 
+    updateCourseDto.sessions = updateCourseDto.sessions.map((session, index) => {
+      return { ...session, sessionNumber: index + 1 }
+    })
     await this.courseService.update(
       {
         _id: courseId

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param, Req } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -13,11 +13,12 @@ import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IClassService } from '@class/services/class.service'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import {
+  GardenManagerViewClassDetailDataResponse,
   QueryClassDto,
   StaffViewClassDetailDataResponse,
   StaffViewClassListDataResponse
 } from '@class/dto/view-class.dto'
-import { CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
+import { CLASS_DETAIL_PROJECTION, GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { IAssignmentService } from '@class/services/assignment.service'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 import { ISessionService } from '@class/services/session.service'
@@ -109,5 +110,19 @@ export class ManagementClassController {
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
     return assignment
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.GARDEN_MANAGER}] View Class Toolkit Requirements `
+  })
+  @ApiOkResponse({ type: GardenManagerViewClassDetailDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND])
+  @Roles(UserRole.GARDEN_MANAGER)
+  @Get(':id([0-9a-f]{24})/gardenRequiredToolkits')
+  async getClassToolkitRequirements(@Param('id') classId: string) {
+    const courseClass = await this.classService.findById(classId, GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION)
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    return courseClass
   }
 }

@@ -4,7 +4,11 @@ import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builde
 import { IsOptional, IsString, MaxLength } from 'class-validator'
 import { ClassStatus, CourseLevel } from '@common/contracts/constant'
 import { Transform } from 'class-transformer'
-import { CLASS_DETAIL_PROJECTION, CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
+import {
+  CLASS_DETAIL_PROJECTION,
+  CLASS_LIST_PROJECTION,
+  GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION
+} from '@src/class/contracts/constant'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 import { LearnerDetailResponse } from '@learner/dto/view-learner.dto'
@@ -86,3 +90,9 @@ class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_P
   learners: LearnerDetailResponse[]
 }
 export class StaffViewClassDetailDataResponse extends DataResponse(StaffViewClassDetailResponse) {}
+
+class GardenManagerViewClassDetailResponse extends PickType(
+  BaseClassDto,
+  GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION
+) {}
+export class GardenManagerViewClassDetailDataResponse extends DataResponse(GardenManagerViewClassDetailResponse) {}

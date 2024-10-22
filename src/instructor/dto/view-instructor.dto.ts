@@ -1,7 +1,7 @@
 import { ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseInstructorDto } from './base.instructor.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
-import { INSTRUCTOR_DETAIL_PROJECTION, INSTRUCTOR_LIST_PROJECTION, INSTRUCTOR_PROFILE_PROJECTION } from '@instructor/contracts/constant'
+import { INSTRUCTOR_DETAIL_PROJECTION, INSTRUCTOR_LIST_PROJECTION, INSTRUCTOR_PROFILE_PROJECTION, VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { IsOptional, IsString, MaxLength } from 'class-validator'
 import { InstructorStatus } from '@common/contracts/constant'
 import { Transform } from 'class-transformer'
@@ -41,3 +41,7 @@ export class InstructorDetailDataResponse extends DataResponse(InstructorDetailR
 class InstructorListItemResponse extends PickType(BaseInstructorDto, INSTRUCTOR_LIST_PROJECTION) {}
 class InstructorListResponse extends PaginateResponse(InstructorListItemResponse) {}
 export class InstructorListDataResponse extends DataResponse(InstructorListResponse) {}
+
+
+class ViewerViewInstructorDetailResponse extends PickType(BaseInstructorDto, VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION) {}
+export class ViewerViewInstructorDetailDataResponse extends DataResponse(ViewerViewInstructorDetailResponse) {}

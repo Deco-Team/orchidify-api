@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  ValidateIf,
   ValidateNested
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
@@ -64,3 +65,5 @@ export class CreateSessionDto extends PickType(BaseSessionDto, ['title', 'descri
   @ValidateNested({ each: true })
   assignments: CreateAssignmentDto[]
 }
+
+export class UpdateSessionDto extends CreateSessionDto {}

@@ -61,3 +61,16 @@ export const PUBLIC_COURSE_CLASS_DETAIL_PROJECTION = [
   'slotNumbers',
   'gardenId'
 ] as const
+
+export const GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION = [
+  '_id',
+  'code',
+  'title',
+  // 'thumbnail',
+  // 'learnerLimit',
+  // 'learnerQuantity',
+  'gardenRequiredToolkits',
+  // 'instructorId',
+  // 'gardenId',
+  // 'courseId',
+] as const
