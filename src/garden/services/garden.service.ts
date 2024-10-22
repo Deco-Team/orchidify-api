@@ -24,6 +24,11 @@ export interface IGardenService {
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<GardenDocument>
+  findOneBy(
+    conditions: FilterQuery<Garden>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<GardenDocument>
   update(
     conditions: FilterQuery<Garden>,
     payload: UpdateQuery<Garden>,
@@ -72,6 +77,19 @@ export class GardenService implements IGardenService {
       conditions: {
         _id: gardenId
       },
+      projection,
+      populates
+    })
+    return garden
+  }
+
+  public async findOneBy(
+    conditions: FilterQuery<Garden>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const garden = await this.gardenRepository.findOne({
+      conditions,
       projection,
       populates
     })

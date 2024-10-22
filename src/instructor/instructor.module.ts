@@ -5,10 +5,11 @@ import { IInstructorRepository, InstructorRepository } from '@src/instructor/rep
 import { IInstructorService, InstructorService } from '@src/instructor/services/instructor.service'
 import { InstructorController } from './controllers/instructor.controller'
 import { ManagementInstructorController } from './controllers/management.instructor.controller'
+import { LearnerInstructorController } from './controllers/learner.instructor.controller'
 
 @Module({
   imports: [MongooseModule.forFeature([{ name: Instructor.name, schema: InstructorSchema }])],
-  controllers: [InstructorController, ManagementInstructorController],
+  controllers: [InstructorController, ManagementInstructorController, LearnerInstructorController],
   providers: [
     {
       provide: IInstructorService,

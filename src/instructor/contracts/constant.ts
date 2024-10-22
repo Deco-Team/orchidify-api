@@ -43,3 +43,18 @@ export const INSTRUCTOR_LIST_PROJECTION = [
 ] as const
 
 export const PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'] as const
+
+export const VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION = [
+  '_id',
+  'name',
+  'phone',
+  'email',
+  'dateOfBirth',
+  'certificates',
+  'bio',
+  'idCardPhoto',
+  'avatar',
+  'status',
+  'createdAt',
+  'updatedAt'
+] as const
