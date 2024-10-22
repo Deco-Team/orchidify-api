@@ -77,11 +77,11 @@ export class ManagementClassController {
           select: ['code']
         }
       ]),
-      this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, undefined, [{ path: 'learners' }])
+      this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, undefined, [{ path: 'learner' }])
     ])
 
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
-    return { ...courseClass.toJSON(), learners: learnerClass?.['learners'] ?? [] }
+    return { ...courseClass.toJSON(), learners: learnerClass?.map((learnerClass) => learnerClass?.['learner']) }
   }
 
   @ApiOperation({
