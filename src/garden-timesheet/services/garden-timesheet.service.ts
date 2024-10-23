@@ -178,7 +178,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
         ]
       }
     })
-    return this.transformDataToCalendar(timesheets)
+    return this.transformDataToTeachingCalendar(timesheets, instructorId)
   }
 
   public async viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse> {
@@ -446,6 +446,19 @@ export class GardenTimesheetService implements IGardenTimesheetService {
             _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
             calendars.push(slot)
           }
+        }
+      }
+    }
+    return calendars
+  }
+
+  private transformDataToTeachingCalendar(timesheets: GardenTimesheetDocument[], instructorId: string) {
+    const calendars = []
+    for (const timesheet of timesheets) {
+      for (const slot of timesheet.slots) {
+        if (slot.status === SlotStatus.NOT_AVAILABLE && slot.instructorId.toString() === instructorId) {
+          _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
+          calendars.push(slot)
         }
       }
     }
