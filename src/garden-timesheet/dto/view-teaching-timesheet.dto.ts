@@ -1,25 +1,31 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsEnum, IsMongoId } from 'class-validator'
-import { TimesheetType } from '@common/contracts/constant'
+import { SlotNumber, TimesheetType } from '@common/contracts/constant'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
+import { BaseSlotMetadataDto } from './slot.dto'
 
-export class QueryAllGardenTimesheetDto {
+export class QueryTeachingTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
   @FutureMaxMonth(12)
   @PastMaxMonth(24)
   date: Date
 
-  @ApiProperty({ enum: [TimesheetType.WEEK] })
-  @IsEnum([TimesheetType.WEEK])
+  @ApiProperty({ enum: TimesheetType })
+  @IsEnum(TimesheetType)
   type: TimesheetType
+
+  instructorId: string
 }
 
-export class ViewAllGardenTimesheetItemResponse {
+export class ViewTeachingTimesheetItemResponse {
   @ApiProperty({ type: String })
   @IsMongoId()
   _id: string
+
+  @ApiPropertyOptional({ type: Number, enum: SlotNumber })
+  slotNumber: SlotNumber
 
   @ApiProperty({ type: Date })
   start: Date
@@ -33,14 +39,11 @@ export class ViewAllGardenTimesheetItemResponse {
   @ApiPropertyOptional({ type: String })
   classId: string
 
-  // @ApiProperty({ type: Date })
-  // createdAt: Date
-
-  // @ApiProperty({ type: Date })
-  // updatedAt: Date
+  @ApiPropertyOptional({ type: BaseSlotMetadataDto })
+  metadata: BaseSlotMetadataDto
 }
-class ViewAllGardenTimesheetListResponse {
-  @ApiProperty({ type: ViewAllGardenTimesheetItemResponse, isArray: true })
-  docs: ViewAllGardenTimesheetItemResponse[]
+class ViewTeachingTimesheetListResponse {
+  @ApiProperty({ type: ViewTeachingTimesheetItemResponse, isArray: true })
+  docs: ViewTeachingTimesheetItemResponse[]
 }
-export class ViewAllGardenTimesheetListDataResponse extends DataResponse(ViewAllGardenTimesheetListResponse) {}
+export class ViewTeachingTimesheetListDataResponse extends DataResponse(ViewTeachingTimesheetListResponse) {}

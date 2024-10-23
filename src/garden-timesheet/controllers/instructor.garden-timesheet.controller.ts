@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Req } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 import { ErrorResponse } from '@common/contracts/dto'
@@ -8,9 +8,9 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import {
-  QueryAllGardenTimesheetDto,
-  ViewAllGardenTimesheetListDataResponse
-} from '@garden-timesheet/dto/view-all-garden-timesheet.dto'
+  QueryTeachingTimesheetDto,
+  ViewTeachingTimesheetListDataResponse
+} from '@garden-timesheet/dto/view-teaching-timesheet.dto'
 import {
   QueryAvailableTimeDto,
   ViewAvailableTimeDataResponse
@@ -42,12 +42,14 @@ export class InstructorGardenTimesheetController {
   }
 
   @ApiOperation({
-    summary: `View All Garden Timesheet List`
+    summary: `View Teaching Timesheet List`
   })
-  @ApiOkResponse({ type: ViewAllGardenTimesheetListDataResponse })
-  @Get()
-  async viewAllGardenTimesheet(@Query() queryAllGardenTimesheetDto: QueryAllGardenTimesheetDto) {
-    const docs = await this.gardenTimesheetService.viewAllGardenTimesheetList(queryAllGardenTimesheetDto)
+  @ApiOkResponse({ type: ViewTeachingTimesheetListDataResponse })
+  @Get('teaching-timesheet')
+  async viewTeachingTimesheet(@Req() req, @Query() queryTeachingTimesheetDto: QueryTeachingTimesheetDto) {
+    const { _id } = _.get(req, 'user')
+    queryTeachingTimesheetDto.instructorId = _id
+    const docs = await this.gardenTimesheetService.viewTeachingTimesheet(queryTeachingTimesheetDto)
     return { docs }
   }
 }

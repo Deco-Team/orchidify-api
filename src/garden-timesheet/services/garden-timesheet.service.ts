@@ -18,7 +18,7 @@ import { VN_TIMEZONE } from '@src/config'
 import { CreateGardenTimesheetDto } from '@garden-timesheet/dto/create-garden-timesheet.dto'
 import { AppLogger } from '@src/common/services/app-logger.service'
 import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
-import { QueryAllGardenTimesheetDto } from '@garden-timesheet/dto/view-all-garden-timesheet.dto'
+import { QueryTeachingTimesheetDto } from '@garden-timesheet/dto/view-teaching-timesheet.dto'
 import { QueryAvailableTimeDto, ViewAvailableTimeResponse } from '@garden-timesheet/dto/view-available-timesheet.dto'
 import { Slot } from '@garden-timesheet/schemas/slot.schema'
 import { Garden } from '@garden/schemas/garden.schema'
@@ -46,7 +46,7 @@ export interface IGardenTimesheetService {
     queryGardenTimesheetDto: QueryGardenTimesheetDto,
     garden: Garden
   ): Promise<GardenTimesheetDocument[]>
-  viewAllGardenTimesheetList(queryAllGardenTimesheetDto: QueryAllGardenTimesheetDto): Promise<GardenTimesheetDocument[]>
+  viewTeachingTimesheet(queryTeachingTimesheetDto: QueryTeachingTimesheetDto): Promise<GardenTimesheetDocument[]>
   viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse>
   generateSlotsForClass(
     params: {
@@ -147,84 +147,38 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     return this.transformDataToCalendar(timesheets)
   }
 
-  public async viewAllGardenTimesheetList(
-    queryAllGardenTimesheetDto: QueryAllGardenTimesheetDto
+  public async viewTeachingTimesheet(
+    queryTeachingTimesheetDto: QueryTeachingTimesheetDto
   ): Promise<GardenTimesheetDocument[]> {
-    const { type, date } = queryAllGardenTimesheetDto
+    const { type, instructorId, date } = queryTeachingTimesheetDto
     const dateMoment = moment(date).tz(VN_TIMEZONE)
-    this.appLogger.log(`viewAllGardenTimesheetList: type=${type}, date=${date}`)
-
-    await this.generateAllTimesheetOfMonth(dateMoment.toDate())
+    this.appLogger.log(`viewTeachingTimesheet: type=${type}, instructorId=${instructorId}, date=${date}`)
 
     let fromDate: Date, toDate: Date
-    // if (type === TimesheetType.MONTH) {
-    //   fromDate = dateMoment.clone().startOf('month').toDate()
-    //   toDate = dateMoment.clone().endOf('month').toDate()
-    // } else if (type === TimesheetType.WEEK) {
-    //   fromDate = dateMoment.clone().startOf('isoWeek').toDate()
-    //   toDate = dateMoment.clone().endOf('isoWeek').toDate()
-    // }
-    fromDate = dateMoment.clone().startOf('isoWeek').toDate()
-    toDate = dateMoment.clone().endOf('isoWeek').toDate()
+    if (type === TimesheetType.MONTH) {
+      fromDate = dateMoment.clone().startOf('month').toDate()
+      toDate = dateMoment.clone().endOf('month').toDate()
+    } else if (type === TimesheetType.WEEK) {
+      fromDate = dateMoment.clone().startOf('isoWeek').toDate()
+      toDate = dateMoment.clone().endOf('isoWeek').toDate()
+    }
 
-    const dateTimesheets = await this.gardenTimesheetRepository.model.aggregate([
-      {
-        $match: {
-          date: {
-            $gte: fromDate,
-            $lte: toDate
-          },
-          $or: [
-            {
-              status: GardenTimesheetStatus.INACTIVE
-            },
-            {
-              'slots.status': SlotStatus.NOT_AVAILABLE
-            }
-          ]
-        }
-      },
-      {
-        $group: {
-          _id: '$date',
-          timesheets: {
-            $push: '$$ROOT'
+    const timesheets = await this.gardenTimesheetRepository.findMany({
+      projection: VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
+      options: { lean: true },
+      conditions: {
+        date: {
+          $gte: fromDate,
+          $lte: toDate
+        },
+        $or: [
+          {
+            'slots.instructorId': new Types.ObjectId(instructorId)
           }
-        }
+        ]
       }
-    ])
-
-    // let unavailableTimeOfDates = []
-    // let unavailableTime = SLOT_NUMBERS
-    // for (const dateTimesheet of dateTimesheets) {
-    //   const groupTimesheets = _.groupBy(dateTimesheet.timesheets, 'status')
-    //   const activeGroupTimesheets = _.get(groupTimesheets, GardenTimesheetStatus.ACTIVE)
-    //   if (!activeGroupTimesheets || activeGroupTimesheets?.length === 0) {
-    //     unavailableTimeOfDates.push({ date: dateTimesheet._id })
-    //     continue
-    //   }
-
-    //   for (const gardenTimesheet of activeGroupTimesheets as GardenTimesheet[]) {
-    //     let unavailableSlots = []
-    //     const groupSlots = _.groupBy(gardenTimesheet.slots, 'slotNumber')
-    //     SLOT_NUMBERS.forEach((slotNumber) => {
-    //       if (
-    //         _.get(groupSlots, slotNumber) &&
-    //         _.get(groupSlots, slotNumber)?.length === gardenTimesheet.gardenMaxClass
-    //       ) {
-    //         unavailableSlots.push(slotNumber)
-    //       }
-    //     })
-    //     unavailableTimeOfDates.push({ unavailableSlots, date: dateTimesheet._id })
-    //     unavailableTime = _.intersection(unavailableTime, unavailableSlots)
-    //   }
-    // }
-
-    // this.appLogger.log(`unavailableTimeOfDates=${JSON.stringify(unavailableTimeOfDates)}`)
-    // this.appLogger.log(`unavailableTime=${unavailableTime}`)
-
-    // return dateTimesheets
-    return this.transformDataToCalendar(dateTimesheets)
+    })
+    return this.transformDataToCalendar(timesheets)
   }
 
   public async viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse> {
