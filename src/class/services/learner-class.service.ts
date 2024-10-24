@@ -167,6 +167,21 @@ export class LearnerClassService implements ILearnerClassService {
               $match: classFilter
             },
             {
+              $lookup: {
+                from: 'instructors',
+                localField: 'instructorId',
+                foreignField: '_id',
+                as: 'instructors'
+              }
+            },
+            {
+              $addFields: {
+                instructor: {
+                  $arrayElemAt: ['$instructors', 0]
+                }
+              }
+            },
+            {
               $project: {
                 _id: 1,
                 code: 1,
@@ -175,7 +190,10 @@ export class LearnerClassService implements ILearnerClassService {
                 type: 1,
                 thumbnail: 1,
                 status: 1,
-                progress: 1
+                progress: 1,
+                instructor: {
+                  name: 1
+                }
               }
             }
           ]
@@ -207,7 +225,7 @@ export class LearnerClassService implements ILearnerClassService {
           ],
           list: [
             {
-              $replaceWith: "$class"
+              $replaceWith: '$class'
             },
             {
               $sort: sort

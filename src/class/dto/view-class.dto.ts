@@ -104,11 +104,11 @@ class GardenManagerViewClassDetailResponse extends PickType(
 export class GardenManagerViewClassDetailDataResponse extends DataResponse(GardenManagerViewClassDetailResponse) {}
 
 // Learner - My Classes
-class LearnerViewMyClassListItemResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_LIST_PROJECTION) {}
-class LearnerViewMyClassListResponse extends PaginateResponse(LearnerViewMyClassListItemResponse) {
-  @ApiProperty({ type: ClassCourseDetailResponse })
-  course: ClassCourseDetailResponse
+class LearnerViewMyClassListItemResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_LIST_PROJECTION) {
+  @ApiProperty({ type: ClassInstructorDetailResponse })
+  instructor: ClassInstructorDetailResponse
 }
+class LearnerViewMyClassListResponse extends PaginateResponse(LearnerViewMyClassListItemResponse) {}
 export class LearnerViewMyClassListDataResponse extends DataResponse(LearnerViewMyClassListResponse) {}
 
 class LearnerViewMyClassDetailResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION) {
