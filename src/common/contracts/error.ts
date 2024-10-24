@@ -293,4 +293,13 @@ export const Errors = {
     message: 'Không tìm thấy giao dịch.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+
+   /**
+   * Slot
+   */
+   SLOT_NOT_FOUND: {
+    error: 'SLOT_NOT_FOUND',
+    message: 'Không tìm thấy tiết học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }

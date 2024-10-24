@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Req, Param } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 import { ErrorResponse } from '@common/contracts/dto'
@@ -17,6 +17,8 @@ import {
 } from '@garden-timesheet/dto/view-available-timesheet.dto'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
+import { AppException } from '@common/exceptions/app.exception'
+import { ViewSlotDto } from '@garden-timesheet/dto/slot.dto'
 
 @ApiTags('GardenTimesheet - Instructor')
 @ApiBearerAuth()
@@ -51,5 +53,19 @@ export class InstructorGardenTimesheetController {
     queryTeachingTimesheetDto.instructorId = _id
     const docs = await this.gardenTimesheetService.viewTeachingTimesheet(queryTeachingTimesheetDto)
     return { docs }
+  }
+
+  @ApiOperation({
+    summary: `View Slot Detail`
+  })
+  @ApiOkResponse({ type: ViewSlotDto })
+  @ApiErrorResponse([Errors.SLOT_NOT_FOUND])
+  @Get('slots/:slotId([0-9a-f]{24})')
+  async getSlotDetail(@Req() req, @Param('slotId') slotId: string) {
+    const { _id: instructorId } = _.get(req, 'user')
+    const slot = await this.gardenTimesheetService.findSlotBy({ slotId, instructorId })
+
+    if (!slot) throw new AppException(Errors.SLOT_NOT_FOUND)
+    return slot
   }
 }
