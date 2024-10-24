@@ -15,6 +15,7 @@ import { IGardenService } from '@garden/services/garden.service'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
+import { QueryInstructorTimesheetDto, ViewTeachingTimesheetListDataResponse } from '@garden-timesheet/dto/view-teaching-timesheet.dto'
 
 @ApiTags('GardenTimesheet - Management')
 @ApiBearerAuth()
@@ -64,4 +65,15 @@ export class ManagementGardenTimesheetController {
   // if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
   // return new SuccessResponse(true)
   // }
+
+  @ApiOperation({
+    summary: `View Instructor Timesheet List`
+  })
+  @ApiOkResponse({ type: ViewTeachingTimesheetListDataResponse })
+  @Roles(UserRole.STAFF)
+  @Get('instructor-timesheet')
+  async viewInstructorTimesheet(@Query() queryTeachingTimesheetDto: QueryInstructorTimesheetDto) {
+    const docs = await this.gardenTimesheetService.viewTeachingTimesheet(queryTeachingTimesheetDto)
+    return { docs }
+  }
 }
