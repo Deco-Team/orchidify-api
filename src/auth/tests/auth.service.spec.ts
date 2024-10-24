@@ -26,6 +26,8 @@ import { UserToken } from '@auth/schemas/user-token.schema'
 import { OtpDocument } from '@auth/schemas/otp.schema'
 import { InstructorDocument } from '@instructor/schemas/instructor.schema'
 import { RecruitmentDocument } from '@recruitment/schemas/recruitment.schema'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingDocument } from '@setting/schemas/setting.schema'
 
 describe('AuthService', () => {
   let authService: AuthService
@@ -40,6 +42,7 @@ describe('AuthService', () => {
   let helperServiceMock: HelperService
   let configServiceMock: ConfigService
   let notificationAdapterMock: NotificationAdapter
+  let settingServiceMock: ISettingService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -102,7 +105,13 @@ describe('AuthService', () => {
           }
         },
         { provide: ConfigService, useValue: { get: jest.fn() } },
-        { provide: NotificationAdapter, useValue: { sendMail: jest.fn() } }
+        { provide: NotificationAdapter, useValue: { sendMail: jest.fn() } },
+        {
+          provide: ISettingService,
+          useValue: {
+            findByKey: jest.fn()
+          }
+        }
       ]
     }).compile()
 
@@ -118,6 +127,7 @@ describe('AuthService', () => {
     helperServiceMock = module.get<HelperService>(HelperService)
     configServiceMock = module.get<ConfigService>(ConfigService)
     notificationAdapterMock = module.get<NotificationAdapter>(NotificationAdapter)
+    settingServiceMock = module.get<ISettingService>(ISettingService)
   })
 
   describe('login', () => {
@@ -493,6 +503,7 @@ describe('AuthService', () => {
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
+      jest.spyOn(settingServiceMock, 'findByKey').mockResolvedValue({ value: 5 } as SettingDocument)
       jest.spyOn(otpServiceMock, 'findByUserIdAndRole').mockResolvedValue({
         __v: 5
         // updatedAt: new Date(Date.now() - 10000) // 10 seconds ago
@@ -518,6 +529,7 @@ describe('AuthService', () => {
         save: () => {}
         // updatedAt: new Date(Date.now() - 10000) // 10 seconds ago
       } as OtpDocument)
+      jest.spyOn(settingServiceMock, 'findByKey').mockResolvedValue({ value: 5 } as SettingDocument)
 
       const result = await authService.resendOtpByLearner(learnerResendOtpDto)
 
