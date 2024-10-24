@@ -345,7 +345,7 @@ export class ClassRequestService implements IClassRequestService {
         classData['learnerQuantity'] = 0
         classData['gardenId'] = new Types.ObjectId(gardenId)
         classData['courseId'] = classRequest.courseId
-        classData['progress'] = new BaseProgressDto(_.get(classRequest, ['metadata.sessions'])?.length ?? 0, 0)
+        classData['progress'] = new BaseProgressDto(_.get(classData, ['duration']) * 2, 0)
         const createdClass = await this.classService.create(classData, { session })
 
         // gen slots for class
