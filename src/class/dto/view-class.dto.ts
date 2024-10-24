@@ -7,7 +7,9 @@ import { Transform } from 'class-transformer'
 import {
   CLASS_DETAIL_PROJECTION,
   CLASS_LIST_PROJECTION,
-  GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION
+  GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION,
+  LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION,
+  LEARNER_VIEW_MY_CLASS_LIST_PROJECTION
 } from '@src/class/contracts/constant'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
@@ -50,6 +52,8 @@ export class QueryClassDto {
 class ClassInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}
 class ClassGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
 class ClassCourseDetailResponse extends PickType(BaseClassDto, ['code']) {}
+
+// Instructor
 class InstructorViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
@@ -69,6 +73,7 @@ class InstructorViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DET
 }
 export class InstructorViewClassDetailDataResponse extends DataResponse(InstructorViewClassDetailResponse) {}
 
+// Staff
 class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {}
 class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {
   @ApiProperty({ type: ClassCourseDetailResponse })
@@ -91,8 +96,27 @@ class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_P
 }
 export class StaffViewClassDetailDataResponse extends DataResponse(StaffViewClassDetailResponse) {}
 
+// GardenManager
 class GardenManagerViewClassDetailResponse extends PickType(
   BaseClassDto,
   GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION
 ) {}
 export class GardenManagerViewClassDetailDataResponse extends DataResponse(GardenManagerViewClassDetailResponse) {}
+
+// Learner - My Classes
+class LearnerViewMyClassListItemResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_LIST_PROJECTION) {}
+class LearnerViewMyClassListResponse extends PaginateResponse(LearnerViewMyClassListItemResponse) {
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
+}
+export class LearnerViewMyClassListDataResponse extends DataResponse(LearnerViewMyClassListResponse) {}
+
+class LearnerViewMyClassDetailResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION) {
+  @ApiProperty({ type: ClassGardenDetailResponse })
+  garden: ClassGardenDetailResponse
+
+  @ApiProperty({ type: ClassInstructorDetailResponse })
+  instructor: ClassInstructorDetailResponse
+}
+export class LearnerViewMyClassDetailDataResponse extends DataResponse(LearnerViewMyClassDetailResponse) {}
+

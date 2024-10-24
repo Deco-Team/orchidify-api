@@ -58,4 +58,30 @@ export class HelperService {
 
     return validWeekdayTuples.some((tuple) => weekdays[0] === tuple[0] && weekdays[1] === tuple[1])
   }
+
+  convertDataToPaging({
+    docs,
+    totalDocs,
+    limit,
+    page
+  }: {
+    docs: Array<any>
+    totalDocs: number
+    limit: number
+    page: number
+  }) {
+    const totalPages = totalDocs < limit ? 1 : Math.ceil(totalDocs / limit)
+    return {
+      docs,
+      totalDocs,
+      limit,
+      page,
+      totalPages,
+      pagingCounter: null,
+      hasPrevPage: page > totalPages,
+      hasNextPage: page < totalPages,
+      prevPage: page - 1 === 0 ? null : page - 1,
+      nextPage: page < totalPages ? page + 1 : null
+    }
+  }
 }

@@ -85,7 +85,7 @@ export class ManagementClassController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] View Lesson Detail`
+    summary: `[${UserRole.STAFF}] View Session Detail`
   })
   @ApiOkResponse({ type: ViewSessionDetailDataResponse })
   @ApiErrorResponse([Errors.SESSION_NOT_FOUND])

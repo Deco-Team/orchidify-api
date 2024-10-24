@@ -176,7 +176,7 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
           await this.learnerClassService.create(
             {
               enrollDate: new Date(),
-              status: LearnerClassStatus.ENROLLED,
+              // status: LearnerClassStatus.ENROLLED,
               transactionId: transaction._id,
               learnerId: new Types.ObjectId(learnerId),
               classId: new Types.ObjectId(classId)
