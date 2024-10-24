@@ -50,8 +50,8 @@ export class QueryClassDto {
 }
 
 class ClassInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}
-class ClassGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
-class ClassCourseDetailResponse extends PickType(BaseClassDto, ['code']) {}
+export class ClassGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
+export class ClassCourseDetailResponse extends PickType(BaseClassDto, ['code']) {}
 
 // Instructor
 class InstructorViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {

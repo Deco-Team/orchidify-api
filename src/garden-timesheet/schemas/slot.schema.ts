@@ -41,9 +41,12 @@ export class Slot {
 
   @Prop({ type: Types.ObjectId, ref: Class.name })
   classId: Types.ObjectId
-  
+
   @Prop({ type: Types.Map })
-  metadata: Record<string, any>;
+  metadata: Record<string, any>
+
+  @Prop({ type: Boolean, default: false })
+  hasTakeAttendance: boolean
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)

@@ -17,7 +17,10 @@ import {
 import { VN_TIMEZONE } from '@src/config'
 import { CreateGardenTimesheetDto } from '@garden-timesheet/dto/create-garden-timesheet.dto'
 import { AppLogger } from '@src/common/services/app-logger.service'
-import { VIEW_GARDEN_TIMESHEET_LIST_PROJECTION } from '@garden-timesheet/contracts/constant'
+import {
+  SLOT_CLASS_DETAIL_PROJECTION,
+  VIEW_GARDEN_TIMESHEET_LIST_PROJECTION
+} from '@garden-timesheet/contracts/constant'
 import { QueryTeachingTimesheetDto } from '@garden-timesheet/dto/view-teaching-timesheet.dto'
 import { QueryAvailableTimeDto, ViewAvailableTimeResponse } from '@garden-timesheet/dto/view-available-timesheet.dto'
 import { Slot } from '@garden-timesheet/schemas/slot.schema'
@@ -28,6 +31,7 @@ import { HelperService } from '@common/services/helper.service'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { Course } from '@course/schemas/course.schema'
+import { IClassService } from '@class/services/class.service'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -62,6 +66,7 @@ export interface IGardenTimesheetService {
     },
     options?: QueryOptions | undefined
   ): Promise<boolean>
+  findSlotBy(params: { slotId: string; instructorId?: string }): Promise<Slot>
 }
 
 @Injectable()
@@ -72,7 +77,9 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     private readonly gardenTimesheetRepository: IGardenTimesheetRepository,
     @Inject(IGardenRepository)
     private readonly gardenRepository: IGardenRepository,
-    private readonly helperService: HelperService
+    private readonly helperService: HelperService,
+    @Inject(IClassService)
+    private readonly classService: IClassService
   ) {}
 
   public async findById(
@@ -88,6 +95,39 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       populates
     })
     return gardenTimesheet
+  }
+
+  public async findSlotBy(params: { slotId: string; instructorId?: string }) {
+    const { slotId, instructorId } = params
+    const conditions = { 'slots._id': new Types.ObjectId(slotId) }
+    if (instructorId) conditions['slots.instructorId'] = new Types.ObjectId(instructorId)
+
+    const gardenTimesheet = await this.gardenTimesheetRepository.findOne({
+      conditions,
+      options: { lean: true }
+    })
+    if (!gardenTimesheet) return null
+
+    const slot = gardenTimesheet?.slots.find((slot) => slot._id.toString() === slotId)
+    const [garden, courseClass] = await Promise.all([
+      this.gardenRepository.findOne({
+        conditions: {
+          _id: gardenTimesheet.gardenId
+        },
+        projection: ['name']
+      }),
+      this.classService.findById(slot.classId.toString(), SLOT_CLASS_DETAIL_PROJECTION, [
+        { path: 'course', select: ['code'] }
+      ])
+    ])
+
+    return {
+      ...slot,
+      createdAt: gardenTimesheet['createdAt'],
+      updatedAt: gardenTimesheet['updatedAt'],
+      garden,
+      class: courseClass
+    }
   }
 
   public update(
@@ -171,11 +211,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
           $gte: fromDate,
           $lte: toDate
         },
-        $or: [
-          {
-            'slots.instructorId': new Types.ObjectId(instructorId)
-          }
-        ]
+        'slots.instructorId': new Types.ObjectId(instructorId)
       }
     })
     return this.transformDataToTeachingCalendar(timesheets, instructorId)

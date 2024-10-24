@@ -5,6 +5,8 @@ import { SlotNumber, SlotStatus } from '@common/contracts/constant'
 import { Types } from 'mongoose'
 import { VN_TIMEZONE } from '@src/config'
 import { BaseClassDto } from '@class/dto/base.class.dto'
+import { ClassCourseDetailResponse, ClassGardenDetailResponse } from '@class/dto/view-class.dto'
+import { SLOT_CLASS_DETAIL_PROJECTION } from '@garden-timesheet/contracts/constant'
 
 export class BaseSlotMetadataDto extends PickType(BaseClassDto, ['code', 'title']) {
   @ApiProperty({ type: Number })
@@ -44,6 +46,9 @@ export class BaseSlotDto {
 
   @ApiPropertyOptional({ type: BaseSlotMetadataDto })
   metadata: BaseSlotMetadataDto
+
+  @ApiPropertyOptional({ type: Boolean })
+  hasTakeAttendance: boolean
 }
 
 export class CreateSlotDto extends PickType(BaseSlotDto, [
@@ -91,4 +96,22 @@ export class CreateSlotDto extends PickType(BaseSlotDto, [
         break
     }
   }
+}
+
+class SlotClassDetailResponse extends PickType(BaseClassDto, SLOT_CLASS_DETAIL_PROJECTION) {
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
+}
+export class ViewSlotDto extends BaseSlotDto {
+  @ApiProperty({ type: ClassGardenDetailResponse })
+  garden: ClassGardenDetailResponse
+
+  @ApiProperty({ type: SlotClassDetailResponse })
+  class: SlotClassDetailResponse
+
+  @ApiProperty({ type: Date })
+  createdAt: Date
+
+  @ApiProperty({ type: Date })
+  updatedAt: Date
 }

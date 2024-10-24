@@ -50,3 +50,4 @@ export class GardenTimesheet {
 export const GardenTimesheetSchema = SchemaFactory.createForClass(GardenTimesheet)
 GardenTimesheetSchema.plugin(paginate)
 GardenTimesheetSchema.index({ date: 1, status: 1, gardenId: 1 }, { unique: true })
+GardenTimesheetSchema.index({ 'slots._id': 1, 'slots.instructorId': 1, date: 1 })
