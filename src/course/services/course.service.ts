@@ -9,6 +9,7 @@ import { COURSE_LIST_PROJECTION } from '@course/contracts/constant'
 import { QueryCourseDto, PublicQueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto'
 import { CourseLevel } from '@src/common/contracts/constant'
 import * as _ from 'lodash'
+import { HelperService } from '@common/services/helper.service'
 
 export const ICourseService = Symbol('ICourseService')
 
@@ -34,7 +35,8 @@ export interface ICourseService {
 export class CourseService implements ICourseService {
   constructor(
     @Inject(ICourseRepository)
-    private readonly courseRepository: ICourseRepository
+    private readonly courseRepository: ICourseRepository,
+    private readonly helperService: HelperService
   ) {}
 
   public async create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined) {
@@ -155,6 +157,7 @@ export class CourseService implements ICourseService {
 
   async listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto) {
     const { title, type, level } = queryCourseDto
+    const { sort, limit, page } = pagination
     const aggregateMatch = []
 
     let textSearch = ''
@@ -189,7 +192,7 @@ export class CourseService implements ICourseService {
       })
     }
 
-    const [result] = await this.courseRepository.model.aggregate([
+    const result = await this.courseRepository.model.aggregate([
       ...aggregateMatch,
       // {
       // $addFields: {
@@ -298,40 +301,34 @@ export class CourseService implements ICourseService {
         }
       },
       {
-        $sort: pagination.sort
+        $sort: sort
       },
       {
         $facet: {
-          docs: [
+          list: [
             {
-              $skip: (pagination.page - 1) * 10
+              $skip: (page - 1) * limit
             },
             {
-              $limit: pagination.limit
+              $limit: limit
             }
           ],
-          totalCount: [
+          count: [
             {
-              $count: 'count'
+              $count: 'totalDocs'
             }
           ]
         }
-      },
-      {
-        $project: {
-          docs: 1,
-          totalDocs: {
-            $arrayElemAt: ['$totalCount.count', 0]
-          }
-        }
       }
     ])
-    return {
-      ...result,
-      totalDocs: result?.totalDocs ?? 0,
-      limit: pagination.limit,
-      page: pagination.page
-    }
+
+    const totalDocs = _.get(result, '[0].count[0].totalDocs', 0)
+    return this.helperService.convertDataToPaging({
+      docs: result[0].list,
+      totalDocs,
+      limit,
+      page
+    })
   }
 
   async findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]> {
