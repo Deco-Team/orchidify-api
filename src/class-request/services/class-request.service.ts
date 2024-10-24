@@ -20,6 +20,7 @@ import { IGardenTimesheetService } from '@garden-timesheet/services/garden-times
 import { AppLogger } from '@common/services/app-logger.service'
 import { IClassService } from '@class/services/class.service'
 import { InjectConnection } from '@nestjs/mongoose'
+import { BaseProgressDto } from '@class/dto/progress.dto'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -344,6 +345,7 @@ export class ClassRequestService implements IClassRequestService {
         classData['learnerQuantity'] = 0
         classData['gardenId'] = new Types.ObjectId(gardenId)
         classData['courseId'] = classRequest.courseId
+        classData['progress'] = new BaseProgressDto(_.get(classRequest, ['metadata.sessions'])?.length ?? 0, 0)
         const createdClass = await this.classService.create(classData, { session })
 
         // gen slots for class

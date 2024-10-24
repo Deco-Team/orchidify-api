@@ -48,6 +48,7 @@ export const CLASS_DETAIL_PROJECTION = [
   'updatedAt'
 ] as const
 
+// Viewer
 export const PUBLIC_COURSE_CLASS_DETAIL_PROJECTION = [
   '_id',
   'code',
@@ -62,6 +63,7 @@ export const PUBLIC_COURSE_CLASS_DETAIL_PROJECTION = [
   'gardenId'
 ] as const
 
+// Garden Manager
 export const GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION = [
   '_id',
   'code',
@@ -73,4 +75,46 @@ export const GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION = [
   // 'instructorId',
   // 'gardenId',
   // 'courseId',
+] as const
+
+// Learner
+export const LEARNER_VIEW_MY_CLASS_LIST_PROJECTION = [
+  '_id',
+  'code',
+  'title',
+  'level',
+  'type',
+  'thumbnail',
+  'status',
+  'progress',
+] as const
+
+export const LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION = [
+  '_id',
+  'code',
+  'title',
+  'description',
+  'startDate',
+  'price',
+  'level',
+  'type',
+  'duration',
+  'thumbnail',
+  'media',
+  'sessions',
+  'status',
+  'histories',
+  'learnerLimit',
+  'learnerQuantity',
+  'weekdays',
+  'slotNumbers',
+  'rate',
+  'cancelReason',
+  'gardenRequiredToolkits',
+  'instructorId',
+  'gardenId',
+  'courseId',
+  'progress',
+  'createdAt',
+  'updatedAt'
 ] as const

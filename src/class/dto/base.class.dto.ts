@@ -22,6 +22,7 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { ClassStatusHistory } from '@src/class/schemas/class.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from './session.dto'
+import { BaseProgressDto } from './progress.dto'
 
 export class BaseClassDto {
   @ApiProperty({ type: String })
@@ -142,6 +143,9 @@ export class BaseClassDto {
 
   @ApiProperty({ type: String })
   courseId: string
+
+  @ApiProperty({ type: BaseProgressDto })
+  progress: BaseProgressDto
 
   @ApiProperty({ type: Date })
   createdAt: Date

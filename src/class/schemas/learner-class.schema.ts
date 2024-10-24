@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
-import { LearnerClassStatus } from '@src/common/contracts/constant'
+// import { LearnerClassStatus } from '@src/common/contracts/constant'
 import { Transaction } from '@transaction/schemas/transaction.schema'
 import { Learner } from '@learner/schemas/learner.schema'
 import { Class } from './class.schema'
@@ -32,11 +32,11 @@ export class LearnerClass {
   @Prop({ type: Date, required: true })
   enrollDate: Date
 
-  @Prop({ type: Number, required: true, default: 0 })
-  progress: number
+  // @Prop({ type: Number, required: true, default: 0 })
+  // progress: number
 
-  @Prop({ enum: LearnerClassStatus, required: true })
-  status: LearnerClassStatus
+  // @Prop({ enum: LearnerClassStatus, required: true })
+  // status: LearnerClassStatus
 
   @Prop({ type: Date })
   finishDate: Date
@@ -53,7 +53,7 @@ export class LearnerClass {
 
 export const LearnerClassSchema = SchemaFactory.createForClass(LearnerClass)
 LearnerClassSchema.plugin(paginate)
-// LearnerClassSchema.index({ title: 'text', type: 'text' })
+LearnerClassSchema.index({ learnerId: 1, classId: 1 })
 
 LearnerClassSchema.virtual('learner', {
   ref: 'Learner',

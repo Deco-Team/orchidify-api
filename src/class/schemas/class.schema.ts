@@ -26,6 +26,17 @@ export class ClassStatusHistory {
   userRole: UserRole
 }
 
+export class Progress {
+  @Prop({ type: Number, required: true })
+  total: number
+
+  @Prop({ type: Number, required: true, default: 0 })
+  completed: number
+
+  @Prop({ type: Number, required: true, default: 0 })
+  percentage: number
+}
+
 @Schema({
   collection: 'classes',
   timestamps: {
@@ -119,6 +130,9 @@ export class Class {
 
   @Prop({ type: Types.ObjectId, ref: Course.name, required: true })
   courseId: Types.ObjectId
+
+  @Prop({ type: Progress, required: true })
+  progress: Progress
 }
 
 export const ClassSchema = SchemaFactory.createForClass(Class)

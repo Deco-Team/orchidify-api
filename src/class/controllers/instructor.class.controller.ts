@@ -81,7 +81,7 @@ export class InstructorClassController {
   }
 
   @ApiOperation({
-    summary: `View Lesson Detail`
+    summary: `View Session Detail`
   })
   @ApiOkResponse({ type: ViewSessionDetailDataResponse })
   @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
