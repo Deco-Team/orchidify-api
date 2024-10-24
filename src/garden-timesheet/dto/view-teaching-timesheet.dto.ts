@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsEnum, IsMongoId } from 'class-validator'
 import { SlotNumber, TimesheetType } from '@common/contracts/constant'
@@ -6,7 +6,7 @@ import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
 import { BaseSlotMetadataDto } from './slot.dto'
 
-export class QueryTeachingTimesheetDto {
+export class QueryInstructorTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
   @FutureMaxMonth(12)
   @PastMaxMonth(24)
@@ -16,6 +16,12 @@ export class QueryTeachingTimesheetDto {
   @IsEnum(TimesheetType)
   type: TimesheetType
 
+  @ApiProperty({ type: String })
+  @IsMongoId()
+  instructorId: string
+}
+
+export class QueryTeachingTimesheetDto extends PickType(QueryInstructorTimesheetDto, ['date', 'type']) {
   instructorId: string
 }
 
