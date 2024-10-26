@@ -96,6 +96,12 @@ jobs:
           echo DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} >> .env
           echo DISCORD_WEBHOOK_TOKEN=${{ secrets.DISCORD_WEBHOOK_TOKEN }} >> .env
 
+          echo REDIS_HOST=${{ secrets.REDIS_HOST }} >> .env
+          echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
+          echo REDIS_USERNAME=${{ secrets.REDIS_USERNAME }} >> .env
+          echo REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }} >> .env
+          echo REDIS_DB=${{ secrets.REDIS_DB }} >> .env
+
       - name: Deploy
         run: pm2 restart orchidify-api
 
