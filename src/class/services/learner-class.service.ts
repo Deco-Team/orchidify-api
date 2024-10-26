@@ -109,7 +109,7 @@ export class LearnerClassService implements ILearnerClassService {
     queryClassDto: QueryClassDto,
     projection = LEARNER_VIEW_MY_CLASS_LIST_PROJECTION
   ) {
-    const { title, type, level, status } = queryClassDto
+    const { title, type, level, status, fromPrice, toPrice } = queryClassDto
     const { sort, limit, page } = pagination
     const learnerClassFilter: Record<string, any> = {
       learnerId: new Types.ObjectId(learnerId)
@@ -140,6 +140,13 @@ export class LearnerClassService implements ILearnerClassService {
     if (validStatus?.length > 0) {
       classFilter['status'] = {
         $in: validStatus
+      }
+    }
+
+    if (fromPrice !== undefined && toPrice !== undefined) {
+      classFilter['price'] = {
+        $gte: fromPrice,
+        $lte: toPrice
       }
     }
 
@@ -204,7 +211,8 @@ export class LearnerClassService implements ILearnerClassService {
           progress: 1,
           instructor: {
             name: 1
-          }
+          },
+          price: 1
         }
       },
       {

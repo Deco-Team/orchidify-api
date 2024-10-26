@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseClassDto } from './base.class.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
-import { IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
 import { ClassStatus, CourseLevel } from '@common/contracts/constant'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
   CLASS_DETAIL_PROJECTION,
   CLASS_LIST_PROJECTION,
@@ -47,6 +47,22 @@ export class QueryClassDto {
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
   status: ClassStatus[]
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1_000)
+  @Max(10_000_000)
+  fromPrice: number
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1_000)
+  @Max(10_000_000)
+  toPrice: number
 }
 
 class ClassInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}

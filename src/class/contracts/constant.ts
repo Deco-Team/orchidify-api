@@ -87,6 +87,7 @@ export const LEARNER_VIEW_MY_CLASS_LIST_PROJECTION = [
   'thumbnail',
   'status',
   'progress',
+  'price'
 ] as const
 
 export const LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION = [
