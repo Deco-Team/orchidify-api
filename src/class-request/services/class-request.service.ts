@@ -5,7 +5,7 @@ import { IClassRequestRepository } from '@src/class-request/repositories/class-r
 import { ClassRequest, ClassRequestDocument } from '@src/class-request/schemas/class-request.schema'
 import { Connection, FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreatePublishClassRequestDto } from '@class-request/dto/create-publish-class-request.dto'
-import { ClassRequestStatus, ClassRequestType, ClassStatus, CourseStatus } from '@common/contracts/constant'
+import { ClassRequestStatus, ClassRequestType, ClassStatus, CourseStatus, Weekday } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { CLASS_REQUEST_LIST_PROJECTION } from '@src/class-request/contracts/constant'
 import { QueryClassRequestDto } from '@src/class-request/dto/view-class-request.dto'
@@ -21,6 +21,10 @@ import { AppLogger } from '@common/services/app-logger.service'
 import { IClassService } from '@class/services/class.service'
 import { InjectConnection } from '@nestjs/mongoose'
 import { BaseProgressDto } from '@class/dto/progress.dto'
+import { IQueueProducerService } from '@queue/services/queue-producer.service'
+import { JobName, QueueName } from '@queue/contracts/constant'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -44,6 +48,7 @@ export interface IClassRequestService {
   findManyByCreatedByAndStatus(createdBy: string, status?: ClassRequestStatus[]): Promise<ClassRequestDocument[]>
   countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>
   cancelPublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>
+  expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>
   approvePublishClassRequest(
     classRequestId: string,
     approvePublishClassRequestDto: ApprovePublishClassRequestDto,
@@ -68,13 +73,19 @@ export class ClassRequestService implements IClassRequestService {
     private readonly gardenTimesheetService: IGardenTimesheetService,
     @Inject(IClassService)
     private readonly classService: IClassService,
-    @InjectConnection() readonly connection: Connection
+    @InjectConnection() readonly connection: Connection,
+    @Inject(IQueueProducerService)
+    private readonly queueProducerService: IQueueProducerService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService
   ) {}
   public async createPublishClassRequest(
     createPublishClassRequestDto: CreatePublishClassRequestDto,
     options?: SaveOptions | undefined
   ) {
     const classRequest = await this.classRequestRepository.create(createPublishClassRequestDto, options)
+    this.addClassRequestAutoExpiredJob(classRequest)
+
     return classRequest
   }
 
@@ -367,6 +378,7 @@ export class ClassRequestService implements IClassRequestService {
     } finally {
       await session.endSession()
     }
+    // TODO: send notification
     return new SuccessResponse(true)
   }
 
@@ -426,6 +438,107 @@ export class ClassRequestService implements IClassRequestService {
     } finally {
       await session.endSession()
     }
+    // TODO: send notification
     return new SuccessResponse(true)
+  }
+
+  async expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse> {
+    const { _id, role } = userAuth
+
+    // validate class request
+    const classRequest = await this.findById(classRequestId)
+    if (!classRequest || classRequest.type !== ClassRequestType.PUBLISH_CLASS)
+      throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
+    if (classRequest.status !== ClassRequestStatus.PENDING) throw new AppException(Errors.CLASS_REQUEST_STATUS_INVALID)
+
+    // validate course
+    const course = await this.courseService.findById(classRequest.courseId?.toString())
+    if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
+    if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
+
+    // Execute in transaction
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        // update class request
+        await this.update(
+          { _id: classRequestId },
+          {
+            $set: {
+              status: ClassRequestStatus.EXPIRED
+            },
+            $push: {
+              histories: {
+                status: ClassRequestStatus.EXPIRED,
+                timestamp: new Date(),
+                userId: new Types.ObjectId(_id),
+                userRole: role
+              }
+            }
+          },
+          { session }
+        )
+        // update course
+        await this.courseService.update(
+          { _id: classRequest.courseId },
+          {
+            $set: {
+              status: course.isPublished ? CourseStatus.ACTIVE : CourseStatus.DRAFT
+            }
+          },
+          { session }
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
+    // TODO: send notification
+    return new SuccessResponse(true)
+  }
+
+  async getExpiredAt(date: Date): Promise<Date> {
+    const classRequestAutoExpiration = await this.settingService.findByKey(SettingKey.ClassRequestAutoExpiration)
+    const dateMoment = moment.tz(date, VN_TIMEZONE)
+    const expiredDate = dateMoment.clone().add(Number(classRequestAutoExpiration.value) || 2, 'day')
+    let expiredAt = expiredDate.clone()
+    
+    // check in weekdays
+    let currentDate = dateMoment.clone()
+    while (currentDate.isSameOrBefore(expiredDate)) {
+      // Sunday: isoWeekday=7
+      if(currentDate.clone().isoWeekday() === 7) {
+        expiredAt.add(1, 'day')
+      }
+      currentDate.add(1, 'day')
+    }
+
+    return expiredAt.toDate()
+  }
+
+  getDelayTimeByMilliseconds(expiredAt: Date): number {
+    const delayTime = moment.tz(expiredAt, VN_TIMEZONE).diff(moment().tz(VN_TIMEZONE), 'milliseconds')
+    return delayTime > 0 ? delayTime : 0
+  }
+
+  async addClassRequestAutoExpiredJob(classRequest: ClassRequest) {
+    try {
+      const expiredAt = await this.getExpiredAt(classRequest['createdAt'])
+      const delayTime = this.getDelayTimeByMilliseconds(expiredAt)
+
+      await this.queueProducerService.addJob(
+        QueueName.CLASS_REQUEST,
+        JobName.ClassRequestAutoExpired,
+        {
+          classRequestId: classRequest._id,
+          expiredAt
+        },
+        {
+          delay: delayTime,
+          jobId: classRequest._id.toString()
+        }
+      )
+    } catch (err) {
+      this.appLogger.log(err)
+    }
   }
 }

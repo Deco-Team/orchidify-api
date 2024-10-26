@@ -108,7 +108,6 @@ export enum TransactionStatus {
   REFUNDED = 'REFUNDED'
 }
 
-
 export enum ClassRequestType {
   PUBLISH_CLASS = 'PUBLISH_CLASS'
 }
@@ -130,4 +129,4 @@ export enum SlotNumber {
   FOUR = 4
 }
 
-export const SLOT_NUMBERS = [1,2,3,4]
+export const SLOT_NUMBERS = [1, 2, 3, 4]

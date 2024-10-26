@@ -26,6 +26,7 @@ import { CourseModule } from '@course/course.module'
 import { ClassRequestModule } from '@class-request/class-request.module'
 import { SettingModule } from '@setting/setting.module'
 import { TransactionModule } from '@transaction/transaction.module'
+import { QueueModule } from './queue/queue.module'
 
 @Module({
   imports: [
@@ -48,7 +49,8 @@ import { TransactionModule } from '@transaction/transaction.module'
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration]
+      load: [configuration],
+      cache: true
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
@@ -155,7 +157,8 @@ import { TransactionModule } from '@transaction/transaction.module'
     GardenTimesheetModule,
     AuthModule,
     ClassRequestModule,
-    TransactionModule
+    TransactionModule,
+    QueueModule
   ],
   controllers: [AppController],
   providers: [AppService]

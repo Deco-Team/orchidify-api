@@ -40,6 +40,13 @@ export default () => ({
     webhookId: process.env.DISCORD_WEBHOOK_ID,
     webhookToken: process.env.DISCORD_WEBHOOK_TOKEN,
   },
+  redis: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT || 6379),
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD,
+    db: Number(process.env.REDIS_DB || 0),
+  },
   NODE_ENV: process.env.NODE_ENV,
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'accessSecret',
   JWT_ACCESS_EXPIRATION: Number(process.env.JWT_ACCESS_EXPIRATION) || 864000, // seconds

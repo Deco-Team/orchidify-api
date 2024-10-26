@@ -75,7 +75,7 @@ export class ErrorResponse {
 }
 
 export class UserAuth {
-  _id: string
+  _id?: string
 
   role: UserRole
 }
