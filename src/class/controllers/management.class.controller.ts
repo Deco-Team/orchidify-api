@@ -120,7 +120,16 @@ export class ManagementClassController {
   @Roles(UserRole.GARDEN_MANAGER)
   @Get(':id([0-9a-f]{24})/gardenRequiredToolkits')
   async getClassToolkitRequirements(@Param('id') classId: string) {
-    const courseClass = await this.classService.findById(classId, GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION)
+    const courseClass = await this.classService.findById(classId, GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION, [
+      {
+        path: 'instructor',
+        select: ['name']
+      },
+      {
+        path: 'course',
+        select: ['code']
+      }
+    ])
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
 
     return courseClass

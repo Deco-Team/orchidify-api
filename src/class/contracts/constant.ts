@@ -72,9 +72,9 @@ export const GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION = [
   // 'learnerLimit',
   // 'learnerQuantity',
   'gardenRequiredToolkits',
-  // 'instructorId',
+  'instructorId',
   // 'gardenId',
-  // 'courseId',
+  'courseId',
 ] as const
 
 // Learner

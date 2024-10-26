@@ -97,10 +97,13 @@ class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_P
 export class StaffViewClassDetailDataResponse extends DataResponse(StaffViewClassDetailResponse) {}
 
 // GardenManager
-class GardenManagerViewClassDetailResponse extends PickType(
-  BaseClassDto,
-  GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION
-) {}
+class GardenManagerViewClassDetailResponse extends PickType(BaseClassDto, GARDEN_MANAGER_VIEW_CLASS_DETAIL_PROJECTION) {
+  @ApiProperty({ type: ClassInstructorDetailResponse })
+  instructor: ClassInstructorDetailResponse
+
+  @ApiProperty({ type: ClassCourseDetailResponse })
+  course: ClassCourseDetailResponse
+}
 export class GardenManagerViewClassDetailDataResponse extends DataResponse(GardenManagerViewClassDetailResponse) {}
 
 // Learner - My Classes
@@ -119,4 +122,3 @@ class LearnerViewMyClassDetailResponse extends PickType(BaseClassDto, LEARNER_VI
   instructor: ClassInstructorDetailResponse
 }
 export class LearnerViewMyClassDetailDataResponse extends DataResponse(LearnerViewMyClassDetailResponse) {}
-
