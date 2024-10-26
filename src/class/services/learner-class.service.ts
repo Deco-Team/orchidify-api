@@ -9,6 +9,7 @@ import { QueryClassDto } from '@class/dto/view-class.dto'
 import { ClassStatus, CourseLevel } from '@common/contracts/constant'
 import { LEARNER_VIEW_MY_CLASS_LIST_PROJECTION } from '@class/contracts/constant'
 import { HelperService } from '@common/services/helper.service'
+import { IClassRepository } from '@class/repositories/class.repository'
 
 export const ILearnerClassService = Symbol('ILearnerClassService')
 
@@ -42,6 +43,8 @@ export class LearnerClassService implements ILearnerClassService {
   constructor(
     @Inject(ILearnerClassRepository)
     private readonly learnerClassRepository: ILearnerClassRepository,
+    @Inject(IClassRepository)
+    private readonly classRepository: IClassRepository,
     @InjectConnection() readonly connection: Connection,
     private readonly helperService: HelperService
   ) {}
@@ -111,8 +114,16 @@ export class LearnerClassService implements ILearnerClassService {
     const learnerClassFilter: Record<string, any> = {
       learnerId: new Types.ObjectId(learnerId)
     }
-
     const classFilter: Record<string, any> = {}
+
+    let textSearch = ''
+    if (title) textSearch += title.trim()
+    if (type) textSearch += ' ' + type.trim()
+    if (textSearch) {
+      classFilter['$text'] = {
+        $search: textSearch.trim()
+      }
+    }
 
     const validLevel = level?.filter((level) =>
       [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
@@ -132,88 +143,68 @@ export class LearnerClassService implements ILearnerClassService {
       }
     }
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += ' ' + type.trim()
-    if (textSearch) {
-      classFilter['$text'] = {
-        $search: textSearch.trim()
-      }
-    }
-
-    // return this.learnerClassRepository.model.paginate(learnerClassFilter, {
-    //   ...pagination,
-    //   populate: [
-    //     {
-    //       path: 'class',
-    //       select: LEARNER_VIEW_MY_CLASS_LIST_PROJECTION,
-    //       match: classFilter
-    //     }
-    //   ]
-    // projection
-    // })
-    const learnerClasses = await this.learnerClassRepository.model.aggregate([
+    const classes = await this.classRepository.model.aggregate([
       {
-        $match: learnerClassFilter
+        $match: classFilter
       },
       {
         $lookup: {
-          from: 'classes',
-          localField: 'classId',
-          foreignField: '_id',
-          as: 'classes',
+          from: 'learner-classes',
+          localField: '_id',
+          foreignField: 'classId',
+          as: 'learnerClasses',
           pipeline: [
             {
-              $match: classFilter
-            },
-            {
-              $lookup: {
-                from: 'instructors',
-                localField: 'instructorId',
-                foreignField: '_id',
-                as: 'instructors'
-              }
-            },
-            {
-              $addFields: {
-                instructor: {
-                  $arrayElemAt: ['$instructors', 0]
-                }
-              }
-            },
-            {
-              $project: {
-                _id: 1,
-                code: 1,
-                title: 1,
-                level: 1,
-                type: 1,
-                thumbnail: 1,
-                status: 1,
-                progress: 1,
-                instructor: {
-                  name: 1
-                }
-              }
+              $match: learnerClassFilter
             }
           ]
         }
       },
       {
         $match: {
-          classes: { $ne: [] }
+          learnerClasses: { $ne: [] }
         }
       },
       {
         $addFields: {
-          class: {
-            $arrayElemAt: ['$classes', 0]
+          learnerClass: {
+            $arrayElemAt: ['$learnerClasses', 0]
           }
         }
       },
       {
         $project: {
-          classes: 0
+          learnerClasses: 0
+        }
+      },
+      {
+        $lookup: {
+          from: 'instructors',
+          localField: 'instructorId',
+          foreignField: '_id',
+          as: 'instructors'
+        }
+      },
+      {
+        $addFields: {
+          instructor: {
+            $arrayElemAt: ['$instructors', 0]
+          }
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          code: 1,
+          title: 1,
+          level: 1,
+          type: 1,
+          thumbnail: 1,
+          status: 1,
+          progress: 1,
+          instructor: {
+            name: 1
+          }
         }
       },
       {
@@ -224,9 +215,6 @@ export class LearnerClassService implements ILearnerClassService {
             }
           ],
           list: [
-            {
-              $replaceWith: '$class'
-            },
             {
               $sort: sort
             },
@@ -240,9 +228,9 @@ export class LearnerClassService implements ILearnerClassService {
         }
       }
     ])
-    const totalDocs = _.get(learnerClasses, '[0].count[0].totalDocs', 0)
+    const totalDocs = _.get(classes, '[0].count[0].totalDocs', 0)
     return this.helperService.convertDataToPaging({
-      docs: learnerClasses[0].list,
+      docs: classes[0].list,
       totalDocs,
       limit,
       page

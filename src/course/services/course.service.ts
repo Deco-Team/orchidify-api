@@ -194,21 +194,6 @@ export class CourseService implements ICourseService {
 
     const result = await this.courseRepository.model.aggregate([
       ...aggregateMatch,
-      // {
-      // $addFields: {
-      //   sessionsCount: {
-      //     $reduce: {
-      //       input: {
-      //         $ifNull: ['$sessions', []]
-      //       },
-      //       initialValue: 0,
-      //       in: {
-      //         $add: ['$$value', 1]
-      //       }
-      //     }
-      //   }
-      //   }
-      // },
       {
         $project: {
           _id: 1,
@@ -227,7 +212,6 @@ export class CourseService implements ICourseService {
           isPublished: 1,
           createdAt: 1,
           updatedAt: 1
-          // sessionsCount: 1,
         }
       },
       {
