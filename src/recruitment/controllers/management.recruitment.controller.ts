@@ -1,18 +1,8 @@
-import { Controller, Get, UseGuards, Inject, Query, Param } from '@nestjs/common'
-import {
-  ApiBadRequestResponse,
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiQuery,
-  ApiTags
-} from '@nestjs/swagger'
+import { Controller, Get, UseGuards, Inject, Query, Param, Patch, Req, Body } from '@nestjs/common'
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import {
-  ErrorResponse,
-  PaginationQuery,
-} from '@common/contracts/dto'
+import { ErrorResponse, PaginationQuery, SuccessDataResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { RecruitmentStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
@@ -28,6 +18,9 @@ import {
   QueryRecruitmentDto
 } from '@recruitment/dto/view-recruitment.dto'
 import { RECRUITMENT_DETAIL_PROJECTION } from '@recruitment/contracts/constant'
+import { ProcessRecruitmentApplicationDto } from '@recruitment/dto/process-recruitment-application.dto'
+import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto'
+import { RejectRecruitmentProcessDto } from '@recruitment/dto/reject-recruitment-process.dto'
 
 @ApiTags('Recruitment - Management')
 @ApiBearerAuth()
@@ -37,7 +30,7 @@ import { RECRUITMENT_DETAIL_PROJECTION } from '@recruitment/contracts/constant'
 export class ManagementRecruitmentController {
   constructor(
     @Inject(IRecruitmentService)
-    private readonly recruitmentService: IRecruitmentService,
+    private readonly recruitmentService: IRecruitmentService
   ) {}
 
   @ApiOperation({
@@ -63,5 +56,57 @@ export class ManagementRecruitmentController {
     if (!recruitment) throw new AppException(Errors.RECRUITMENT_NOT_FOUND)
 
     return recruitment
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Process Recruitment Application (change status to ${RecruitmentStatus.INTERVIEWING})`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.RECRUITMENT_NOT_FOUND, Errors.RECRUITMENT_STATUS_INVALID])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/process-application')
+  async processApplication(
+    @Req() req,
+    @Param('id') recruitmentId: string,
+    @Body() processRecruitmentApplicationDto: ProcessRecruitmentApplicationDto
+  ) {
+    const user = _.get(req, 'user')
+    return this.recruitmentService.processRecruitmentApplication(recruitmentId, processRecruitmentApplicationDto, user)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Process Recruitment Interview (change status to ${RecruitmentStatus.SELECTED})`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.RECRUITMENT_NOT_FOUND,
+    Errors.RECRUITMENT_STATUS_INVALID,
+    Errors.RECRUITMENT_IS_IN_CHARGED_BY_ANOTHER_STAFF
+  ])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/process-interview')
+  async processInterview(@Req() req, @Param('id') recruitmentId: string) {
+    const user = _.get(req, 'user')
+    return this.recruitmentService.processRecruitmentInterview(recruitmentId, user)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Reject Recruitment Process`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.CLASS_REQUEST_NOT_FOUND,
+    Errors.CLASS_REQUEST_STATUS_INVALID,
+    Errors.RECRUITMENT_IS_IN_CHARGED_BY_ANOTHER_STAFF
+  ])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/reject-process')
+  async reject(
+    @Req() req,
+    @Param('id') recruitmentId: string,
+    @Body() rejectRecruitmentProcessDto: RejectRecruitmentProcessDto
+  ) {
+    const user = _.get(req, 'user')
+    return this.recruitmentService.rejectRecruitmentProcess(recruitmentId, rejectRecruitmentProcessDto, user)
   }
 }
