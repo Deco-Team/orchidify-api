@@ -253,7 +253,7 @@ export class ClassService implements IClassService {
             const createMomoPaymentDto: CreateMomoPaymentDto = {
               partnerName: 'ORCHIDIFY',
               orderInfo,
-              redirectUrl: `${this.configService.get('WEB_URL')}/my-classes`,
+              redirectUrl: `${this.configService.get('WEB_URL')}/payment`,
               ipnUrl: `${this.configService.get('SERVER_URL')}/transactions/payment/webhook/momo`,
               requestType,
               amount: courseClass.price,

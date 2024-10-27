@@ -1,9 +1,9 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseCourseDto } from './base.course.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
-import { IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
 import { CourseStatus } from '@common/contracts/constant'
-import { Transform } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import { COURSE_LIST_PROJECTION, COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
@@ -58,7 +58,23 @@ export class StaffQueryCourseDto extends QueryCourseDto {
   status: CourseStatus[]
 }
 
-export class PublicQueryCourseDto extends PickType(QueryCourseDto, ['title', 'type', 'level']) {}
+export class PublicQueryCourseDto extends PickType(QueryCourseDto, ['title', 'type', 'level']) {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1_000)
+  @Max(10_000_000)
+  fromPrice: number
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1_000)
+  @Max(10_000_000)
+  toPrice: number
+}
 
 class CourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {}
 class CourseListResponse extends PaginateResponse(CourseListItemResponse) {}

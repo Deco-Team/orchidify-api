@@ -156,7 +156,7 @@ export class CourseService implements ICourseService {
   }
 
   async listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto) {
-    const { title, type, level } = queryCourseDto
+    const { title, type, level, fromPrice, toPrice } = queryCourseDto
     const { sort, limit, page } = pagination
     const aggregateMatch = []
 
@@ -187,6 +187,17 @@ export class CourseService implements ICourseService {
         $match: {
           level: {
             $in: validLevel
+          }
+        }
+      })
+    }
+
+    if (fromPrice !== undefined && toPrice !== undefined) {
+      aggregateMatch.push({
+        $match: {
+          price: {
+            $gte: fromPrice,
+            $lte: toPrice
           }
         }
       })
