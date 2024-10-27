@@ -33,6 +33,7 @@ import {
 } from '@class/dto/view-class.dto'
 import { ILearnerClassService } from '@class/services/learner-class.service'
 import { LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
+import { MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -112,7 +113,7 @@ export class LearnerClassController {
             },
             {
               path: 'instructor',
-              select: ['name']
+              select: MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION
             }
           ]
         }

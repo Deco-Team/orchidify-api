@@ -87,9 +87,7 @@ export class CourseService implements ICourseService {
       }
     }
 
-    const validStatus = status?.filter((status) =>
-      [CourseStatus.DRAFT, CourseStatus.ACTIVE].includes(status)
-    )
+    const validStatus = status?.filter((status) => [CourseStatus.DRAFT, CourseStatus.ACTIVE].includes(status))
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus
@@ -162,12 +160,12 @@ export class CourseService implements ICourseService {
 
     let textSearch = ''
     if (title) textSearch += title.trim()
-    if (type) textSearch += ' ' + type.trim()
-    if (textSearch) {
+    if (type) textSearch += (' ' + type.trim()).trim()
+    if (!!textSearch) {
       aggregateMatch.push({
         $match: {
           $text: {
-            $search: textSearch.trim()
+            $search: textSearch
           }
         }
       })

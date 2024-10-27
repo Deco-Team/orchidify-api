@@ -44,6 +44,8 @@ export const INSTRUCTOR_LIST_PROJECTION = [
 
 export const PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'] as const
 
+export const MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'] as const
+
 export const VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION = [
   '_id',
   'name',

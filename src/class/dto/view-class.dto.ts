@@ -14,6 +14,7 @@ import {
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 import { LearnerDetailResponse } from '@learner/dto/view-learner.dto'
+import { MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 export class QueryClassDto {
   @ApiPropertyOptional({
@@ -130,11 +131,12 @@ class LearnerViewMyClassListItemResponse extends PickType(BaseClassDto, LEARNER_
 class LearnerViewMyClassListResponse extends PaginateResponse(LearnerViewMyClassListItemResponse) {}
 export class LearnerViewMyClassListDataResponse extends DataResponse(LearnerViewMyClassListResponse) {}
 
+class MyClassInstructorDetailResponse extends PickType(BaseInstructorDto, MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION) {}
 class LearnerViewMyClassDetailResponse extends PickType(BaseClassDto, LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION) {
   @ApiProperty({ type: ClassGardenDetailResponse })
   garden: ClassGardenDetailResponse
 
-  @ApiProperty({ type: ClassInstructorDetailResponse })
-  instructor: ClassInstructorDetailResponse
+  @ApiProperty({ type: MyClassInstructorDetailResponse })
+  instructor: MyClassInstructorDetailResponse
 }
 export class LearnerViewMyClassDetailDataResponse extends DataResponse(LearnerViewMyClassDetailResponse) {}

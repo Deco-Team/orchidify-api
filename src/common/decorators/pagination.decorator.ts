@@ -28,9 +28,13 @@ export const handlePagination: (request: any) => PaginationParams = (request) =>
     const result = {}
     const sortFields = paginationParams.sort.split('_')
     sortFields.forEach((item) => {
+      if (!item) return
       const sortType = item.indexOf('.asc') !== -1 ? '.asc' : '.desc'
       result[item.replace(sortType, '')] = sortType === '.asc' ? 1 : -1
     })
+    if (_.isEmpty(result)) {
+      result['createdAt'] = -1
+    }
     paginationParams.sort = result
   }
   return paginationParams
