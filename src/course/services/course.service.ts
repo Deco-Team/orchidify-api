@@ -88,7 +88,7 @@ export class CourseService implements ICourseService {
     }
 
     const validStatus = status?.filter((status) =>
-      [CourseStatus.DRAFT, CourseStatus.REQUESTING, CourseStatus.ACTIVE].includes(status)
+      [CourseStatus.DRAFT, CourseStatus.ACTIVE].includes(status)
     )
     if (validStatus?.length > 0) {
       filter['status'] = {
@@ -119,7 +119,7 @@ export class CourseService implements ICourseService {
     const { title, type, level, status } = queryCourseDto
     const filter: Record<string, any> = {
       status: {
-        $in: [CourseStatus.REQUESTING, CourseStatus.ACTIVE]
+        $in: [CourseStatus.ACTIVE]
       },
       isPublished: true
     }
@@ -133,7 +133,7 @@ export class CourseService implements ICourseService {
       }
     }
 
-    const validStatus = status?.filter((status) => [CourseStatus.REQUESTING, CourseStatus.ACTIVE].includes(status))
+    const validStatus = status?.filter((status) => [CourseStatus.ACTIVE].includes(status))
     if (validStatus?.length > 0) {
       filter['status'] = {
         $in: validStatus

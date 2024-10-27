@@ -44,6 +44,11 @@ export interface IClassRequestService {
     options?: QueryOptions | undefined
   ): Promise<ClassRequestDocument>
   list(pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto)
+  findMany(
+    conditions: FilterQuery<ClassRequestDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<ClassRequestDocument[]>
   findManyByStatus(status: ClassRequestStatus[]): Promise<ClassRequestDocument[]>
   findManyByCreatedByAndStatus(createdBy: string, status?: ClassRequestStatus[]): Promise<ClassRequestDocument[]>
   countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>
@@ -152,6 +157,19 @@ export class ClassRequestService implements IClassRequestService {
     })
   }
 
+  public async findMany(
+    conditions: FilterQuery<ClassRequestDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const classRequests = await this.classRequestRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return classRequests
+  }
+
   async findManyByStatus(status: ClassRequestStatus[]): Promise<ClassRequestDocument[]> {
     const classRequests = await this.classRequestRepository.findMany({
       conditions: {
@@ -206,7 +224,7 @@ export class ClassRequestService implements IClassRequestService {
     // validate course
     const course = await this.courseService.findById(classRequest.courseId?.toString())
     if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
+    if (course.status === CourseStatus.DELETED) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // Execute in transaction
     const session = await this.connection.startSession()
@@ -226,16 +244,6 @@ export class ClassRequestService implements IClassRequestService {
                 userId: new Types.ObjectId(_id),
                 userRole: role
               }
-            }
-          },
-          { session }
-        )
-        // update course
-        await this.courseService.update(
-          { _id: classRequest.courseId },
-          {
-            $set: {
-              status: course.isPublished ? CourseStatus.ACTIVE : CourseStatus.DRAFT
             }
           },
           { session }
@@ -263,7 +271,7 @@ export class ClassRequestService implements IClassRequestService {
     // validate course
     const course = await this.courseService.findById(classRequest.courseId?.toString(), ['+sessions'])
     if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
+    if (course.status === CourseStatus.DELETED) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // validate gardenId fit with time of class request
     const { startDate, duration, weekdays, slotNumbers } = classRequest?.metadata
@@ -399,7 +407,7 @@ export class ClassRequestService implements IClassRequestService {
     // validate course
     const course = await this.courseService.findById(classRequest.courseId?.toString())
     if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
+    if (course.status === CourseStatus.DELETED) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // Execute in transaction
     const session = await this.connection.startSession()
@@ -424,16 +432,6 @@ export class ClassRequestService implements IClassRequestService {
           },
           { session }
         )
-        // update course
-        await this.courseService.update(
-          { _id: classRequest.courseId },
-          {
-            $set: {
-              status: course.isPublished ? CourseStatus.ACTIVE : CourseStatus.DRAFT
-            }
-          },
-          { session }
-        )
       })
     } finally {
       await session.endSession()
@@ -454,7 +452,7 @@ export class ClassRequestService implements IClassRequestService {
     // validate course
     const course = await this.courseService.findById(classRequest.courseId?.toString())
     if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.REQUESTING) throw new AppException(Errors.COURSE_STATUS_INVALID)
+    if (course.status === CourseStatus.DELETED) throw new AppException(Errors.COURSE_STATUS_INVALID)
 
     // Execute in transaction
     const session = await this.connection.startSession()
@@ -474,16 +472,6 @@ export class ClassRequestService implements IClassRequestService {
                 userId: new Types.ObjectId(_id),
                 userRole: role
               }
-            }
-          },
-          { session }
-        )
-        // update course
-        await this.courseService.update(
-          { _id: classRequest.courseId },
-          {
-            $set: {
-              status: course.isPublished ? CourseStatus.ACTIVE : CourseStatus.DRAFT
             }
           },
           { session }

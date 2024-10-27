@@ -53,7 +53,6 @@ export enum RecruitmentStatus {
 
 export enum CourseStatus {
   DRAFT = 'DRAFT',
-  REQUESTING = 'REQUESTING',
   ACTIVE = 'ACTIVE',
   DELETED = 'DELETED'
 }

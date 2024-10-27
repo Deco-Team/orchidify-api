@@ -63,7 +63,7 @@ export class ManagementCourseController {
     if (
       !course ||
       course.isPublished === false ||
-      [CourseStatus.ACTIVE, CourseStatus.REQUESTING].includes(course.status) === false
+      [CourseStatus.ACTIVE].includes(course.status) === false
     )
       throw new AppException(Errors.COURSE_NOT_FOUND)
     return course

@@ -116,11 +116,16 @@ export class InstructorClassRequestController {
     const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date())
     if (classRequestsCount > createClassRequestLimit) throw new AppException(Errors.CREATE_CLASS_REQUEST_LIMIT)
 
-    // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
     const course = await this.courseService.findById(createPublishClassRequestDto.courseId.toString(), ['+sessions'])
-    if (!course || course.instructorId.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
-    if ([CourseStatus.REQUESTING, CourseStatus.DELETED].includes(course.status))
-      throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
+    if (!course || course.status === CourseStatus.DELETED || course.instructorId.toString() !== _id)
+      throw new AppException(Errors.COURSE_NOT_FOUND)
+
+    // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
+    const pendingClassRequests = await this.classRequestService.findMany({
+      courseId: course._id,
+      status: ClassRequestStatus.PENDING
+    })
+    if (pendingClassRequests.length > 0) throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
 
     // validate slots with startDate, weekdays
     const { duration } = course
@@ -151,14 +156,6 @@ export class InstructorClassRequestController {
       startDate,
       ...course.toObject()
     }
-
-    // Update course to REQUESTING
-    await this.courseService.update(
-      { _id: createPublishClassRequestDto.courseId },
-      {
-        status: CourseStatus.REQUESTING
-      }
-    )
 
     // Create class request with status PENDING
     const classRequest = await this.classRequestService.createPublishClassRequest(createPublishClassRequestDto)

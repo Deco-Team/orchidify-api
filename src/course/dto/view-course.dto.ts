@@ -40,7 +40,7 @@ export class QueryCourseDto {
   level: CourseLevel[]
 
   @ApiPropertyOptional({
-    enum: [CourseStatus.DRAFT, CourseStatus.ACTIVE, CourseStatus.REQUESTING],
+    enum: [CourseStatus.DRAFT, CourseStatus.ACTIVE],
     isArray: true
   })
   @IsOptional()
@@ -50,7 +50,7 @@ export class QueryCourseDto {
 
 export class StaffQueryCourseDto extends QueryCourseDto {
   @ApiPropertyOptional({
-    enum: [CourseStatus.ACTIVE, CourseStatus.REQUESTING],
+    enum: [CourseStatus.ACTIVE],
     isArray: true
   })
   @IsOptional()
