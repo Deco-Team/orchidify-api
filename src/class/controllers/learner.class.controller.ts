@@ -34,6 +34,8 @@ import {
 import { ILearnerClassService } from '@class/services/learner-class.service'
 import { LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
+import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -124,35 +126,35 @@ export class LearnerClassController {
     return learnerClass?.['class']
   }
 
-  // @ApiOperation({
-  //   summary: `View My Session Detail`
-  // })
-  // @ApiOkResponse({ type: ViewSessionDetailDataResponse })
-  // @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
-  // @Get('my-classes/:classId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})')
-  // async getLessonDetail(@Req() req, @Param('classId') classId: string, @Param('sessionId') sessionId: string) {
-  //   const { _id: instructorId } = _.get(req, 'user')
-  //   const session = await this.sessionService.findOneBy({ sessionId, classId, instructorId })
+  @ApiOperation({
+    summary: `View My Session Detail`
+  })
+  @ApiOkResponse({ type: ViewSessionDetailDataResponse })
+  @ApiErrorResponse([Errors.SESSION_NOT_FOUND])
+  @Get('my-classes/:classId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})')
+  async getLessonDetail(@Req() req, @Param('classId') classId: string, @Param('sessionId') sessionId: string) {
+    const { _id: learnerId } = _.get(req, 'user')
+    const session = await this.sessionService.findMySession({ sessionId, classId, learnerId })
 
-  //   if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
-  //   return session
-  // }
+    if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
+    return session
+  }
 
-  // @ApiOperation({
-  //   summary: `View My Assignment Detail`
-  // })
-  // @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
-  // @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
-  // @Get('my-classes/:classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
-  // async getAssignmentDetail(
-  //   @Req() req,
-  //   @Param('classId') classId: string,
-  //   @Param('assignmentId') assignmentId: string
-  // ) {
-  //   const { _id: instructorId } = _.get(req, 'user')
-  //   const assignment = await this.assignmentService.findOneBy({ assignmentId, classId, instructorId })
+  @ApiOperation({
+    summary: `View My Assignment Detail`
+  })
+  @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
+  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
+  @Get('my-classes/:classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
+  async getAssignmentDetail(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('assignmentId') assignmentId: string
+  ) {
+    const { _id: learnerId } = _.get(req, 'user')
+    const assignment = await this.assignmentService.findOneBy({ assignmentId, classId })
 
-  //   if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
-  //   return assignment
-  // }
+    if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
+    return assignment
+  }
 }
