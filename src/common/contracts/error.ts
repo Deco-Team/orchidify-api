@@ -246,6 +246,16 @@ export const Errors = {
     message: 'Thông tin ứng tuyển không tồn tại.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+  RECRUITMENT_STATUS_INVALID: {
+    error: 'RECRUITMENT_STATUS_INVALID',
+    message: 'Trạng thái của đơn ứng tuyển không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  RECRUITMENT_IS_IN_CHARGED_BY_ANOTHER_STAFF: {
+    error: 'RECRUITMENT_IS_IN_CHARGED_BY_ANOTHER_STAFF',
+    message: 'Đơn ứng tuyển đang được xử lý bởi nhân viên khác.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Class Request

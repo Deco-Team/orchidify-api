@@ -85,7 +85,7 @@ export class ManagementInstructorController {
   @Roles(UserRole.STAFF)
   @Patch('/:id([0-9a-f]{24})/deactivate')
   async deactivate(@Param('id') instructorId: string) {
-    // TODO: BR-21 Cannot deactivate an instructor whose class is published or in progress.
+    // BR-21 Cannot deactivate an instructor whose class is published or in progress.
     const classes = await this.classService.findManyByInstructorIdAndStatus(instructorId, [
       ClassStatus.PUBLISHED,
       ClassStatus.IN_PROGRESS
