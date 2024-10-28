@@ -104,6 +104,11 @@ export const Errors = {
     message: 'Giảng viên đang có lớp học đang được mở hoặc đang diễn ra.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  INSTRUCTOR_HAS_NO_SELECTED_APPLICATIONS: {
+    error: 'INSTRUCTOR_HAS_NO_SELECTED_APPLICATIONS',
+    message: 'Hồ sơ của giảng viên chưa được duyệt bởi tuyển dụng.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Garden Manager
