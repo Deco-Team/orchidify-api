@@ -7,11 +7,14 @@ import { QueryInstructorDto } from '@instructor/dto/view-instructor.dto'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { INSTRUCTOR_LIST_PROJECTION } from '@instructor/contracts/constant'
 import { InstructorStatus } from '@common/contracts/constant'
+import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto'
+import { HelperService } from '@common/services/helper.service'
+import { NotificationAdapter } from '@common/adapters/notification.adapter'
 
 export const IInstructorService = Symbol('IInstructorService')
 
 export interface IInstructorService extends IAuthUserService {
-  create(instructor: any, options?: SaveOptions | undefined): Promise<InstructorDocument>
+  create(createInstructorDto: CreateInstructorDto, options?: SaveOptions | undefined): Promise<InstructorDocument>
   findById(instructorId: string, projection?: string | Record<string, any>): Promise<InstructorDocument>
   findByEmail(email: string, projection?: string | Record<string, any>): Promise<InstructorDocument>
   update(
@@ -26,11 +29,28 @@ export interface IInstructorService extends IAuthUserService {
 export class InstructorService implements IInstructorService {
   constructor(
     @Inject(IInstructorRepository)
-    private readonly instructorRepository: IInstructorRepository
+    private readonly instructorRepository: IInstructorRepository,
+    private readonly helperService: HelperService,
+    private readonly notificationAdapter: NotificationAdapter
   ) {}
 
-  public create(instructor: any, options?: SaveOptions | undefined) {
-    return this.instructorRepository.create(instructor, options)
+  public async create(createInstructorDto: CreateInstructorDto, options?: SaveOptions | undefined) {
+    const password = this.helperService.generateRandomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789')
+    const hashPassword = await this.helperService.hashPassword(password)
+    createInstructorDto['password'] = hashPassword
+    const instructor = await this.instructorRepository.create(createInstructorDto, options)
+
+    this.notificationAdapter.sendMail({
+      to: instructor.email,
+      subject: `[Orchidify] Login Information`,
+      template: 'instructor/add-instructor',
+      context: {
+        email: instructor.email,
+        name: instructor.name,
+        password
+      }
+    })
+    return instructor
   }
 
   public async findById(instructorId: string, projection?: string | Record<string, any>) {
