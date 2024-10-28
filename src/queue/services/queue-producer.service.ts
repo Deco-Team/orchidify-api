@@ -1,7 +1,8 @@
 import { AppLogger } from '@common/services/app-logger.service'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Injectable, OnModuleInit } from '@nestjs/common'
-import { JobName, QueueName } from '@queue/contracts/constant'
+import { JobName, JobSchedulerKey, QueueName } from '@queue/contracts/constant'
+import { VN_TIMEZONE } from '@src/config'
 import { Job, JobsOptions, Queue } from 'bullmq'
 
 export const IQueueProducerService = Symbol('IQueueProducerService')
@@ -25,6 +26,8 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
   ) {}
 
   async onModuleInit() {
+    await this.scheduleUpdateClassStatusJob()
+
     // Inject all queue to queueMap
     this.queueMap = new Map<QueueName, Queue>()
     this.queueMap.set(QueueName.CLASS_REQUEST, this.classRequestQueue)
@@ -38,17 +41,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
     }
     this.appLogger.log(`Redis service is ready....`)
 
-    this.appLogger.debug(
-      `Queue: ${QueueName.CLASS_REQUEST}: Delayed Jobs Count = ${await this.classRequestQueue.getDelayedCount()}`
-    )
-    this.appLogger.debug(
-      `Queue: ${QueueName.PAYOUT_REQUEST}: Delayed Jobs Count = ${await this.payoutRequestQueue.getDelayedCount()}`
-    )
-    this.appLogger.debug(
-      `Queue: ${QueueName.RECRUITMENT}: Delayed Jobs Count = ${await this.recruitmentQueue.getDelayedCount()}`
-    )
-    this.appLogger.debug(`Queue: ${QueueName.CLASS}: Delayed Jobs Count = ${await this.classQueue.getDelayedCount()}`)
-    this.appLogger.debug(`Queue: ${QueueName.SLOT}: Delayed Jobs Count = ${await this.slotQueue.getDelayedCount()}`)
+    this.countDelayedJobs()
   }
 
   async addJob(queueName: QueueName, jobName: JobName, data: any, opts?: JobsOptions): Promise<Job> {
@@ -66,13 +59,39 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
   }
 
   async getJob(queueName: QueueName, jobId: string): Promise<Job | null> {
-    return this.queueMap.get(QueueName[queueName]).getJob(jobId);
+    return this.queueMap.get(QueueName[queueName]).getJob(jobId)
   }
 
   async removeJob(queueName: QueueName, jobId: string): Promise<void> {
-    this.appLogger.debug(
-      `Remove Job: jobId: ${jobId} from queue: ${queueName}`,
-    );
+    this.appLogger.debug(`Remove Job: jobId: ${jobId} from queue: ${queueName}`)
     await this.queueMap.get(QueueName[queueName]).remove(jobId)
+  }
+
+  private async countDelayedJobs() {
+    this.appLogger.debug(
+      `Queue: ${QueueName.PAYOUT_REQUEST}: Delayed Jobs Count = ${await this.payoutRequestQueue.getDelayedCount()}`
+    )
+    this.appLogger.debug(
+      `Queue: ${QueueName.RECRUITMENT}: Delayed Jobs Count = ${await this.recruitmentQueue.getDelayedCount()}`
+    )
+    this.appLogger.debug(`Queue: ${QueueName.CLASS}: Delayed Jobs Count = ${await this.classQueue.getDelayedCount()}`)
+    this.appLogger.debug(`Queue: ${QueueName.SLOT}: Delayed Jobs Count = ${await this.slotQueue.getDelayedCount()}`)
+  }
+
+  private async scheduleUpdateClassStatusJob(): Promise<void> {
+    this.appLogger.debug(
+      `Queue: ${QueueName.CLASS}: Scheduler Jobs Count = ${await this.classQueue.getJobSchedulers()}`
+    )
+
+    await this.classQueue.upsertJobScheduler(
+      JobSchedulerKey.UpdateClassStatusScheduler,
+      {
+        pattern: '0 0 * * *',
+        tz: VN_TIMEZONE
+      },
+      {
+        name: JobName.UpdateClassStatusInProgress
+      }
+    )
   }
 }

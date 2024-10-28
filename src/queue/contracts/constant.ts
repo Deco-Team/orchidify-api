@@ -7,5 +7,10 @@ export enum QueueName {
 }
 
 export enum JobName {
-  ClassRequestAutoExpired = 'ClassRequestAutoExpired'
+  ClassRequestAutoExpired = 'ClassRequestAutoExpired',
+  UpdateClassStatusInProgress = 'UpdateClassStatusInProgress'
+}
+
+export enum JobSchedulerKey {
+  UpdateClassStatusScheduler = 'UpdateClassStatusScheduler'
 }

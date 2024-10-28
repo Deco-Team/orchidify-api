@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
+import * as moment from 'moment-timezone'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsInt, Max, Min } from 'class-validator'
 import { SlotNumber, Weekday } from '@common/contracts/constant'
@@ -6,11 +7,13 @@ import { FutureMinMonth } from '@common/validators/future-min-month.validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { Transform, Type } from 'class-transformer'
 import { Types } from 'mongoose'
+import { VN_TIMEZONE } from '@src/config'
 
 export class QueryAvailableTimeDto {
   @ApiProperty({ type: Date })
   @FutureMinMonth(1)
   @FutureMaxMonth(3)
+  @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).startOf('date')))
   startDate: Date
 
   @ApiProperty({ type: Number })
