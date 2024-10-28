@@ -441,7 +441,7 @@ export class ClassRequestService implements IClassRequestService {
   }
 
   async expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse> {
-    const { _id, role } = userAuth
+    const { role } = userAuth
 
     // validate class request
     const classRequest = await this.findById(classRequestId)
@@ -469,7 +469,6 @@ export class ClassRequestService implements IClassRequestService {
               histories: {
                 status: ClassRequestStatus.EXPIRED,
                 timestamp: new Date(),
-                userId: new Types.ObjectId(_id),
                 userRole: role
               }
             }

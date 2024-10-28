@@ -5,6 +5,7 @@ import { ConnectionOptions } from 'bullmq'
 import { QueueName } from './contracts/constant'
 import { ClassRequestQueueConsumer } from './services/class-request.queue-consumer'
 import { IQueueProducerService, QueueProducerService } from './services/queue-producer.service'
+import { ClassQueueConsumer } from './services/class.queue-consumer'
 
 @Global()
 @Module({
@@ -40,6 +41,7 @@ import { IQueueProducerService, QueueProducerService } from './services/queue-pr
   controllers: [],
   providers: [
     ClassRequestQueueConsumer,
+    ClassQueueConsumer,
     {
       provide: IQueueProducerService,
       useClass: QueueProducerService
