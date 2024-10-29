@@ -129,3 +129,10 @@ export enum SlotNumber {
 }
 
 export const SLOT_NUMBERS = [1, 2, 3, 4]
+
+
+export enum SubmissionStatus {
+  NOT_SUBMITTED  = 'NOT_SUBMITTED',
+  SUBMITTED = 'SUBMITTED',
+  GRADED = 'GRADED'
+}

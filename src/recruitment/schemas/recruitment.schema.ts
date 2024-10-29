@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
 import { RecruitmentStatus, UserRole } from '@common/contracts/constant'
+import { Staff } from '@staff/schemas/staff.schema'
 
 class ApplicationInfo {
   @Prop({ type: String })
@@ -74,8 +75,8 @@ export class Recruitment {
   @Prop({ type: String })
   rejectReason: string
 
-  @Prop({ type: Types.ObjectId })
-  handledBy: Types.ObjectId
+  @Prop({ type: Types.ObjectId, ref: Staff.name })
+  handledBy: Types.ObjectId | Staff
 }
 
 export const RecruitmentSchema = SchemaFactory.createForClass(Recruitment)

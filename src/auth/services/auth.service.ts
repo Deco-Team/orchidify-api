@@ -240,10 +240,11 @@ export class AuthService implements IAuthService {
     this.notificationAdapter.sendMail({
       to: instructorRegisterDto.email,
       subject: `[Orchidify] Confirmation of receipt of application`,
-      template: 'instructor/register-success',
+      template: 'viewer/register-instructor-success',
       context: {
         name: instructorRegisterDto.name,
-        daysToRespond: 2
+        // TODO: save setting
+        daysToRespond: 7
       }
     })
 
