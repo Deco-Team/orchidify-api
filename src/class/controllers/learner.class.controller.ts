@@ -10,9 +10,9 @@ import {
 } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
+import { ErrorResponse, IDDataResponse, IDResponse, PaginationQuery } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { UserRole } from '@common/contracts/constant'
+import { SubmissionStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { Errors } from '@common/contracts/error'
@@ -36,6 +36,8 @@ import { LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION } from '@class/contracts/consta
 import { MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
+import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
+import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -52,7 +54,9 @@ export class LearnerClassController {
     @Inject(IAssignmentService)
     private readonly assignmentService: IAssignmentService,
     @Inject(ILearnerClassService)
-    private readonly learnerClassService: ILearnerClassService
+    private readonly learnerClassService: ILearnerClassService,
+    @Inject(IAssignmentSubmissionService)
+    private readonly assignmentSubmissionService: IAssignmentSubmissionService
   ) {}
 
   @ApiOperation({
@@ -152,9 +156,38 @@ export class LearnerClassController {
     @Param('assignmentId') assignmentId: string
   ) {
     const { _id: learnerId } = _.get(req, 'user')
-    const assignment = await this.assignmentService.findOneBy({ assignmentId, classId })
+    const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
     return assignment
+  }
+
+  @ApiOperation({
+    summary: `Submit Assignment`
+  })
+  @ApiOkResponse({ type: IDDataResponse })
+  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND, Errors.ASSIGNMENT_SUBMITTED])
+  @Post(':classId([0-9a-f]{24})/submit-assignment')
+  async submitAssignment(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Body() createAssignmentSubmissionDto: CreateAssignmentSubmissionDto
+  ) {
+    const { _id: learnerId } = _.get(req, 'user')
+    const { assignmentId } = createAssignmentSubmissionDto
+    const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
+    if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
+
+    const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
+      assignmentId,
+      learnerId
+    })
+    if (existedSubmission)
+      throw new AppException(Errors.ASSIGNMENT_SUBMITTED)
+
+    createAssignmentSubmissionDto.learnerId = learnerId
+    const submission = await this.assignmentSubmissionService.create(createAssignmentSubmissionDto)
+
+    return new IDResponse(submission._id)
   }
 }

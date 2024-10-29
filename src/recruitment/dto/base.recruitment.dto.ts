@@ -2,6 +2,7 @@ import { IsEnum, IsMongoId, IsOptional, IsString, IsUrl } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { RecruitmentStatus, UserRole } from '@common/contracts/constant'
 import { Types } from 'mongoose'
+import { Staff } from '@staff/schemas/staff.schema'
 
 export class ApplicationInfoDto {
   @ApiProperty({ type: String })
@@ -60,7 +61,7 @@ export class BaseRecruitmentDto {
 
   @ApiProperty({ type: String })
   @IsMongoId()
-  handledBy: Types.ObjectId
+  handledBy: Types.ObjectId | Staff
 
   @ApiProperty({ type: Date })
   createdAt: Date

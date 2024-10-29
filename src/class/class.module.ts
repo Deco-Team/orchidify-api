@@ -13,13 +13,20 @@ import { LearnerClassController } from './controllers/learner.class.controller'
 import { LearnerClass, LearnerClassSchema } from './schemas/learner-class.schema'
 import { ILearnerClassService, LearnerClassService } from './services/learner-class.service'
 import { ILearnerClassRepository, LearnerClassRepository } from './repositories/learner-class.repository'
+import { AssignmentSubmission, AssignmentSubmissionSchema } from './schemas/assignment-submission.schema'
+import { AssignmentSubmissionService, IAssignmentSubmissionService } from './services/assignment-submission.service'
+import {
+  AssignmentSubmissionRepository,
+  IAssignmentSubmissionRepository
+} from './repositories/assignment-submission.repository'
 
 @Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Class.name, schema: ClassSchema },
-      { name: LearnerClass.name, schema: LearnerClassSchema }
+      { name: LearnerClass.name, schema: LearnerClassSchema },
+      { name: AssignmentSubmission.name, schema: AssignmentSubmissionSchema }
     ]),
     GardenModule,
     LearnerModule
@@ -49,6 +56,14 @@ import { ILearnerClassRepository, LearnerClassRepository } from './repositories/
     {
       provide: ILearnerClassRepository,
       useClass: LearnerClassRepository
+    },
+    {
+      provide: IAssignmentSubmissionService,
+      useClass: AssignmentSubmissionService
+    },
+    {
+      provide: IAssignmentSubmissionRepository,
+      useClass: AssignmentSubmissionRepository
     }
   ],
   exports: [
@@ -60,6 +75,10 @@ import { ILearnerClassRepository, LearnerClassRepository } from './repositories/
       provide: ILearnerClassService,
       useClass: LearnerClassService
     },
+    {
+      provide: IAssignmentSubmissionService,
+      useClass: AssignmentSubmissionService
+    }
   ]
 })
 export class ClassModule {}

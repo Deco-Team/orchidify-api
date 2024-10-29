@@ -56,7 +56,13 @@ export class RecruitmentService implements IRecruitmentService {
       conditions: {
         _id: recruitmentId
       },
-      projection
+      projection,
+      populates: [
+        {
+          path: 'handledBy',
+          select: ['name']
+        }
+      ]
     })
     return recruitment
   }
@@ -128,7 +134,13 @@ export class RecruitmentService implements IRecruitmentService {
 
     return this.recruitmentRepository.model.paginate(filter, {
       ...pagination,
-      projection
+      projection,
+      populate: [
+        {
+          path: 'handledBy',
+          select: ['name']
+        }
+      ]
     })
   }
 
@@ -241,6 +253,7 @@ export class RecruitmentService implements IRecruitmentService {
       {
         $set: {
           status: RecruitmentStatus.REJECTED,
+          handledBy: new Types.ObjectId(_id),
           rejectReason
         },
         $push: {

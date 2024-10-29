@@ -230,6 +230,15 @@ export const Errors = {
   },
 
   /**
+   * Assignment Submission
+   */
+  ASSIGNMENT_SUBMITTED: {
+    error: 'ASSIGNMENT_SUBMITTED',
+    message: 'Bạn đã nộp bài tập.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
    * Staff
    */
   STAFF_NOT_FOUND: {

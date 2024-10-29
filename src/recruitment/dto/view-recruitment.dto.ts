@@ -1,10 +1,12 @@
-import { ApiPropertyOptional, PickType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseRecruitmentDto } from './base.recruitment.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
 import { RECRUITMENT_DETAIL_PROJECTION, RECRUITMENT_LIST_PROJECTION } from '@recruitment/contracts/constant'
 import { IsOptional, IsString, MaxLength } from 'class-validator'
 import { RecruitmentStatus } from '@common/contracts/constant'
 import { Transform } from 'class-transformer'
+import { BaseStaffDto } from '@staff/dto/base.staff.dto'
+import { Staff } from '@staff/schemas/staff.schema'
 
 export class QueryRecruitmentDto {
   @ApiPropertyOptional({
@@ -38,9 +40,16 @@ export class QueryRecruitmentDto {
   status: RecruitmentStatus[]
 }
 
-class RecruitmentDetailResponse extends PickType(BaseRecruitmentDto, RECRUITMENT_DETAIL_PROJECTION) {}
+class RecruitmentHandledByDto extends PickType(BaseStaffDto, ['_id', 'name']) {}
+class RecruitmentDetailResponse extends PickType(BaseRecruitmentDto, RECRUITMENT_DETAIL_PROJECTION) {
+  @ApiProperty({ type: RecruitmentHandledByDto })
+  handledBy: Staff
+}
 export class RecruitmentDetailDataResponse extends DataResponse(RecruitmentDetailResponse) {}
 
-class RecruitmentListItemResponse extends PickType(BaseRecruitmentDto, RECRUITMENT_LIST_PROJECTION) {}
+class RecruitmentListItemResponse extends PickType(BaseRecruitmentDto, RECRUITMENT_LIST_PROJECTION) {
+  @ApiProperty({ type: RecruitmentHandledByDto })
+  handledBy: Staff
+}
 class RecruitmentListResponse extends PaginateResponse(RecruitmentListItemResponse) {}
 export class RecruitmentListDataResponse extends DataResponse(RecruitmentListResponse) {}
