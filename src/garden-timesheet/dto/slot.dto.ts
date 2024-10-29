@@ -48,7 +48,7 @@ export class BaseSlotDto {
   metadata: BaseSlotMetadataDto
 
   @ApiPropertyOptional({ type: Boolean })
-  hasTakeAttendance: boolean
+  hasTakenAttendance: boolean
 }
 
 export class CreateSlotDto extends PickType(BaseSlotDto, [

@@ -5,6 +5,7 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { Assignment } from './assignment.schema'
 import { Learner } from '@learner/schemas/learner.schema'
 import { SubmissionStatus } from '@common/contracts/constant'
+import { Class } from './class.schema'
 
 export type AssignmentSubmissionDocument = HydratedDocument<AssignmentSubmission>
 
@@ -42,6 +43,9 @@ export class AssignmentSubmission {
 
   @Prop({ type: Types.ObjectId, ref: Assignment.name, required: true })
   assignmentId: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Class.name, required: true })
+  classId: Types.ObjectId
 
   @Prop({ type: Types.ObjectId, ref: Learner.name, required: true })
   learnerId: Types.ObjectId

@@ -48,6 +48,10 @@ export class BaseAssignmentSubmissionDto {
 
   @ApiProperty({ type: String })
   @IsMongoId()
+  classId: string
+
+  @ApiProperty({ type: String })
+  @IsMongoId()
   learnerId: string
 }
 
@@ -56,4 +60,5 @@ export class CreateAssignmentSubmissionDto extends PickType(BaseAssignmentSubmis
   'attachments'
 ]) {
   learnerId: string
+  classId: string
 }

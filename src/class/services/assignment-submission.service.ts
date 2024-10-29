@@ -24,13 +24,14 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
   ) {}
 
   public async create(createAssignmentSubmissionDto: CreateAssignmentSubmissionDto, options?: SaveOptions | undefined) {
-    const { assignmentId, learnerId } = createAssignmentSubmissionDto
+    const { assignmentId, learnerId, classId } = createAssignmentSubmissionDto
 
     const assignmentSubmission = await this.assignmentSubmissionRepository.create(
       {
         ...createAssignmentSubmissionDto,
         assignmentId: new Types.ObjectId(assignmentId),
         learnerId: new Types.ObjectId(learnerId),
+        classId: new Types.ObjectId(classId),
         status: SubmissionStatus.SUBMITTED
       },
       options

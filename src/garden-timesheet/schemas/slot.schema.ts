@@ -46,7 +46,7 @@ export class Slot {
   metadata: Record<string, any>
 
   @Prop({ type: Boolean, default: false })
-  hasTakeAttendance: boolean
+  hasTakenAttendance: boolean
 }
 
 export const SlotSchema = SchemaFactory.createForClass(Slot)

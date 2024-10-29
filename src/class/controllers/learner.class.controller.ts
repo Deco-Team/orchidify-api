@@ -185,6 +185,7 @@ export class LearnerClassController {
     if (existedSubmission)
       throw new AppException(Errors.ASSIGNMENT_SUBMITTED)
 
+    createAssignmentSubmissionDto.classId = classId
     createAssignmentSubmissionDto.learnerId = learnerId
     const submission = await this.assignmentSubmissionService.create(createAssignmentSubmissionDto)
 
