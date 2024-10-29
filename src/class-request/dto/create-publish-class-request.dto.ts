@@ -12,7 +12,7 @@ export class CreatePublishClassRequestDto extends PickType(BaseClassRequestDto, 
   @ApiProperty({ type: Date })
   @FutureMinMonth(1)
   @FutureMaxMonth(3)
-  @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).startOf('date')))
+  @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).startOf('date').toISOString()))
   startDate: Date
 
   @ApiProperty({ enum: Weekday, isArray: true })
