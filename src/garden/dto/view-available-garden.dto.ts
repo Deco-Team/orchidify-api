@@ -11,7 +11,7 @@ import { Types } from 'mongoose'
 
 export class QueryAvailableGardenDto {
   @ApiProperty({ type: Date })
-  @FutureMinMonth(1)
+  // @FutureMinMonth(1)
   @FutureMaxMonth(3)
   startDate: Date
 

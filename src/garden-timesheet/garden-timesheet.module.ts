@@ -6,11 +6,16 @@ import { GardenTimesheet, GardenTimesheetSchema } from './schemas/garden-timeshe
 import { GardenTimesheetService, IGardenTimesheetService } from './services/garden-timesheet.service'
 import { GardenTimesheetRepository, IGardenTimesheetRepository } from './repositories/garden-timesheet.repository'
 import { InstructorGardenTimesheetController } from './controllers/instructor.garden-timesheet.controller'
+import { LearnerGardenTimesheetController } from './controllers/learner.garden-timesheet.controller'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: GardenTimesheet.name, schema: GardenTimesheetSchema }]), GardenModule],
-  controllers: [ManagementGardenTimesheetController, InstructorGardenTimesheetController],
+  controllers: [
+    ManagementGardenTimesheetController,
+    InstructorGardenTimesheetController,
+    LearnerGardenTimesheetController
+  ],
   providers: [
     {
       provide: IGardenTimesheetService,
