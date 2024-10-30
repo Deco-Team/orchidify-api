@@ -69,13 +69,12 @@ export class LearnerClassController {
     Errors.CLASS_NOT_FOUND,
     Errors.CLASS_STATUS_INVALID,
     Errors.CLASS_LEARNER_LIMIT,
-    Errors.LEARNER_CLASS_EXISTED
+    Errors.LEARNER_CLASS_EXISTED,
+    Errors.CLASS_TIMESHEET_INVALID
   ])
   @Post('enroll/:id([0-9a-f]{24})')
   async enrollClass(@Req() req, @Param('id') classId: string, @Body() enrollClassDto: EnrollClassDto) {
     const { _id } = _.get(req, 'user')
-
-    // TODO: validate timesheet of learner before enroll
 
     const createMomoPaymentResponse = await this.classService.enrollClass({
       classId: new Types.ObjectId(classId),
@@ -182,8 +181,7 @@ export class LearnerClassController {
       assignmentId,
       learnerId
     })
-    if (existedSubmission)
-      throw new AppException(Errors.ASSIGNMENT_SUBMITTED)
+    if (existedSubmission) throw new AppException(Errors.ASSIGNMENT_SUBMITTED)
 
     createAssignmentSubmissionDto.classId = classId
     createAssignmentSubmissionDto.learnerId = learnerId

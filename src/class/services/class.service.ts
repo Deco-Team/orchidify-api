@@ -1,10 +1,19 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
+import * as moment from 'moment-timezone'
 import { IClassRepository } from '@src/class/repositories/class.repository'
 import { Class, ClassDocument } from '@src/class/schemas/class.schema'
 import { Connection, FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreateClassDto } from '@class/dto/create-class.dto'
-import { ClassStatus, CourseLevel, LearnerStatus, TransactionStatus, UserRole } from '@common/contracts/constant'
+import {
+  ClassStatus,
+  CourseLevel,
+  LearnerStatus,
+  SlotNumber,
+  SlotStatus,
+  TransactionStatus,
+  UserRole
+} from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
 import { QueryClassDto } from '@src/class/dto/view-class.dto'
@@ -20,6 +29,9 @@ import { ILearnerService } from '@learner/services/learner.service'
 import { ITransactionService } from '@transaction/services/transaction.service'
 import { BasePaymentDto } from '@transaction/dto/base.transaction.dto'
 import { ILearnerClassService } from './learner-class.service'
+import { VN_TIMEZONE } from '@src/config'
+import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
+import { GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
 
 export const IClassService = Symbol('IClassService')
 
@@ -58,7 +70,9 @@ export class ClassService implements IClassService {
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
     @Inject(ILearnerClassService)
-    private readonly learnerClassService: ILearnerClassService
+    private readonly learnerClassService: ILearnerClassService,
+    @Inject(IGardenTimesheetService)
+    private readonly gardenTimesheetService: IGardenTimesheetService
   ) {}
 
   public async create(createClassDto: CreateClassDto, options?: SaveOptions | undefined) {
@@ -228,7 +242,10 @@ export class ClassService implements IClassService {
     const [learner, courseClass, learnerClass] = await Promise.all([
       this.learnerService.findById(learnerId?.toString()),
       this.findById(classId?.toString()),
-      this.learnerClassService.findOneBy({ learnerId: new Types.ObjectId(learnerId), classId: new Types.ObjectId(classId) })
+      this.learnerClassService.findOneBy({
+        learnerId: new Types.ObjectId(learnerId),
+        classId: new Types.ObjectId(classId)
+      })
     ])
     if (learner.status === LearnerStatus.UNVERIFIED) throw new AppException(Errors.UNVERIFIED_ACCOUNT)
     if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
@@ -236,6 +253,9 @@ export class ClassService implements IClassService {
     if (courseClass.status !== ClassStatus.PUBLISHED) throw new AppException(Errors.CLASS_STATUS_INVALID)
     if (courseClass.learnerQuantity >= courseClass.learnerLimit) throw new AppException(Errors.CLASS_LEARNER_LIMIT)
     if (learnerClass) throw new AppException(Errors.LEARNER_CLASS_EXISTED)
+
+    // Check duplicate timesheet with enrolled class
+    await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() })
 
     // Execute in transaction
     const session = await this.connection.startSession()
@@ -309,5 +329,61 @@ export class ClassService implements IClassService {
     } finally {
       await session.endSession()
     }
+  }
+
+  private async checkDuplicateTimesheetWithMyClasses(params: { courseClass: Class; learnerId: string }) {
+    const { courseClass, learnerId } = params
+
+    const { startDate, duration, weekdays, slotNumbers } = courseClass
+    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
+
+    const classDates = []
+    let currentDate = startOfDate.clone()
+    while (currentDate.isSameOrBefore(endOfDate)) {
+      for (let weekday of weekdays) {
+        const searchDate = currentDate.clone().isoWeekday(weekday)
+        if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
+          classDates.push(searchDate.toDate())
+        }
+      }
+      currentDate.add(1, 'week')
+    }
+
+    const learnerClasses = await this.learnerClassService.findMany({
+      learnerId: new Types.ObjectId(learnerId)
+    })
+    const classIds = learnerClasses.map((learnerClass) => learnerClass.classId)
+
+    const timesheets = await this.gardenTimesheetService.findMany({
+      date: { $in: classDates },
+      'slots.classId': {
+        $in: classIds
+      }
+    })
+
+    const notAvailableSlots = this.getNotAvailableSlots(
+      timesheets,
+      classIds.map((classId) => classId.toString()),
+      slotNumbers
+    )
+    if (notAvailableSlots.length > 0) throw new AppException(Errors.CLASS_TIMESHEET_INVALID)
+  }
+
+  private getNotAvailableSlots(timesheets: GardenTimesheetDocument[], classIds: string[], slotNumbers: SlotNumber[]) {
+    const calendars = []
+    for (const timesheet of timesheets) {
+      for (const slot of timesheet.slots) {
+        if (
+          slot.status === SlotStatus.NOT_AVAILABLE &&
+          classIds.includes(slot.classId.toString()) &&
+          slotNumbers.includes(slot.slotNumber)
+        ) {
+          _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
+          calendars.push(slot)
+        }
+      }
+    }
+    return calendars
   }
 }

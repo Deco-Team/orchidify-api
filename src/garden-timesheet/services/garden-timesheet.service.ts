@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common'
+import { Injectable, Inject, forwardRef } from '@nestjs/common'
 import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import { IGardenTimesheetRepository } from '@garden-timesheet/repositories/garden-timesheet.repository'
@@ -32,6 +32,8 @@ import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { Course } from '@course/schemas/course.schema'
 import { IClassService } from '@class/services/class.service'
+import { QueryMyTimesheetDto } from '@garden-timesheet/dto/view-my-timesheet.dto'
+import { ILearnerClassService } from '@class/services/learner-class.service'
 
 export const IGardenTimesheetService = Symbol('IGardenTimesheetService')
 
@@ -51,6 +53,7 @@ export interface IGardenTimesheetService {
     garden: Garden
   ): Promise<GardenTimesheetDocument[]>
   viewTeachingTimesheet(queryTeachingTimesheetDto: QueryTeachingTimesheetDto): Promise<GardenTimesheetDocument[]>
+  viewMyTimesheet(queryMyTimesheetDto: QueryMyTimesheetDto): Promise<GardenTimesheetDocument[]>
   viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse>
   generateSlotsForClass(
     params: {
@@ -67,6 +70,11 @@ export interface IGardenTimesheetService {
     options?: QueryOptions | undefined
   ): Promise<boolean>
   findSlotBy(params: { slotId: string; instructorId?: string }): Promise<Slot>
+  findMany(
+    conditions: FilterQuery<GardenTimesheetDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<GardenTimesheetDocument[]>
 }
 
 @Injectable()
@@ -78,8 +86,10 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     @Inject(IGardenRepository)
     private readonly gardenRepository: IGardenRepository,
     private readonly helperService: HelperService,
-    @Inject(IClassService)
-    private readonly classService: IClassService
+    @Inject(forwardRef(() => IClassService))
+    private readonly classService: IClassService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService
   ) {}
 
   public async findById(
@@ -215,6 +225,45 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       }
     })
     return this.transformDataToTeachingCalendar(timesheets, instructorId)
+  }
+
+  public async viewMyTimesheet(queryMyTimesheetDto: QueryMyTimesheetDto): Promise<GardenTimesheetDocument[]> {
+    const { type, learnerId, date } = queryMyTimesheetDto
+    const dateMoment = moment(date).tz(VN_TIMEZONE)
+    this.appLogger.log(`viewMyTimesheet: type=${type}, learnerId=${learnerId}, date=${date}`)
+
+    let fromDate: Date, toDate: Date
+    if (type === TimesheetType.MONTH) {
+      fromDate = dateMoment.clone().startOf('month').toDate()
+      toDate = dateMoment.clone().endOf('month').toDate()
+    } else if (type === TimesheetType.WEEK) {
+      fromDate = dateMoment.clone().startOf('isoWeek').toDate()
+      toDate = dateMoment.clone().endOf('isoWeek').toDate()
+    }
+
+    // get classes that learner had enrolled
+    const learnerClasses = await this.learnerClassService.findMany({
+      learnerId: new Types.ObjectId(learnerId)
+    })
+    const classIds = learnerClasses.map((learnerClass) => learnerClass.classId)
+
+    const timesheets = await this.gardenTimesheetRepository.findMany({
+      projection: VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
+      options: { lean: true },
+      conditions: {
+        date: {
+          $gte: fromDate,
+          $lte: toDate
+        },
+        'slots.classId': {
+          $in: classIds
+        }
+      }
+    })
+    return this.transformDataToMyCalendar(
+      timesheets,
+      classIds.map((classId) => classId.toString())
+    )
   }
 
   public async viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse> {
@@ -359,7 +408,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     while (currentDate.isSameOrBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const classDate = currentDate.clone().isoWeekday(weekday)
-        if (classDate.isSameOrAfter(startOfDate) && classDate.isSameOrBefore(endOfDate)) {
+        if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
           classDates.push(classDate.toDate())
         }
       }
@@ -402,6 +451,19 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     })
     await Promise.all(updateGardenTimesheetPromises)
     return true
+  }
+
+  public async findMany(
+    conditions: FilterQuery<GardenTimesheetDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const gardenTimesheets = await this.gardenTimesheetRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return gardenTimesheets
   }
 
   private async generateTimesheetOfMonth(gardenId: string, date: Date, gardenMaxClass: number) {
@@ -493,6 +555,19 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     for (const timesheet of timesheets) {
       for (const slot of timesheet.slots) {
         if (slot.status === SlotStatus.NOT_AVAILABLE && slot.instructorId.toString() === instructorId) {
+          _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
+          calendars.push(slot)
+        }
+      }
+    }
+    return calendars
+  }
+
+  private transformDataToMyCalendar(timesheets: GardenTimesheetDocument[], classIds: string[]) {
+    const calendars = []
+    for (const timesheet of timesheets) {
+      for (const slot of timesheet.slots) {
+        if (slot.status === SlotStatus.NOT_AVAILABLE && classIds.includes(slot.classId.toString())) {
           _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
           calendars.push(slot)
         }

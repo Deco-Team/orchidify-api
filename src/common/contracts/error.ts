@@ -210,6 +210,11 @@ export const Errors = {
     message: 'Số lượng học viên trong lớp đã đủ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  CLASS_TIMESHEET_INVALID: {
+    error: 'CLASS_TIMESHEET_INVALID',
+    message: 'Thời gian học của lớp trùng với thời gian học của bạn.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Session
