@@ -5,6 +5,7 @@ import { SaveOptions, Types } from 'mongoose'
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { IAssignmentSubmissionRepository } from '@class/repositories/assignment-submission.repository'
 import { SubmissionStatus } from '@common/contracts/constant'
+import { ILearnerClassRepository } from '@class/repositories/learner-class.repository'
 
 export const IAssignmentSubmissionService = Symbol('IAssignmentSubmissionService')
 
@@ -14,13 +15,16 @@ export interface IAssignmentSubmissionService {
     options?: SaveOptions | undefined
   ): Promise<AssignmentSubmission>
   findMyAssignmentSubmission(params: { assignmentId: string; learnerId: string }): Promise<AssignmentSubmission>
+  list(querySubmissionDto: { classId: string; assignmentId: string })
 }
 
 @Injectable()
 export class AssignmentSubmissionService implements IAssignmentSubmissionService {
   constructor(
     @Inject(IAssignmentSubmissionRepository)
-    private readonly assignmentSubmissionRepository: IAssignmentSubmissionRepository
+    private readonly assignmentSubmissionRepository: IAssignmentSubmissionRepository,
+    @Inject(ILearnerClassRepository)
+    private readonly learnerClassRepository: ILearnerClassRepository
   ) {}
 
   public async create(createAssignmentSubmissionDto: CreateAssignmentSubmissionDto, options?: SaveOptions | undefined) {
@@ -50,5 +54,86 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
     })
 
     return assignmentSubmission
+  }
+
+  async list(querySubmissionDto: { classId: string; assignmentId: string }) {
+    const { classId, assignmentId } = querySubmissionDto
+    const submissions = await this.learnerClassRepository.model.aggregate([
+      {
+        $match: {
+          classId: new Types.ObjectId(classId)
+        }
+      },
+      {
+        $project: {
+          learnerId: 1,
+          classId: 1
+        }
+      },
+      {
+        $lookup: {
+          from: 'assignment-submissions',
+          localField: 'classId',
+          foreignField: 'classId',
+          as: 'submissions',
+          let: {
+            learnerId: '$learnerId',
+            classId: '$classId'
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ['$learnerId', '$$learnerId']
+                    },
+                    {
+                      $eq: ['$classId', '$$classId']
+                    },
+                    {
+                      $eq: ['$assignmentId', new Types.ObjectId(assignmentId)]
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: 'learners',
+          localField: 'learnerId',
+          foreignField: '_id',
+          as: 'learners',
+          pipeline: [
+            {
+              $project: {
+                name: 1,
+                email: 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $addFields: {
+          learner: {
+            $arrayElemAt: ['$learners', 0]
+          },
+          submission: {
+            $arrayElemAt: ['$submissions', 0]
+          }
+        }
+      },
+      {
+        $project: {
+          submissions: 0,
+          learners: 0
+        }
+      }
+    ])
+    return { docs: submissions }
   }
 }
