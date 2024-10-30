@@ -53,3 +53,10 @@ export class AssignmentSubmission {
 
 export const AssignmentSubmissionSchema = SchemaFactory.createForClass(AssignmentSubmission)
 AssignmentSubmissionSchema.index({ assignmentId: 1, learnerId: 1 })
+
+AssignmentSubmissionSchema.virtual('learner', {
+  ref: 'Learner',
+  localField: 'learnerId',
+  foreignField: '_id',
+  justOne: true
+})

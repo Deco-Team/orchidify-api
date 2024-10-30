@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsInt,
   IsMongoId,
+  IsOptional,
   IsString,
   Max,
   MaxLength,
@@ -33,7 +34,8 @@ export class BaseAssignmentSubmissionDto {
   @Max(10)
   point: number
 
-  @ApiProperty({ type: String, example: 'Assignment submission feedback' })
+  @ApiPropertyOptional({ type: String, example: 'Assignment submission feedback' })
+  @IsOptional()
   @IsString()
   @MaxLength(500)
   feedback: string
@@ -68,3 +70,5 @@ export class CreateAssignmentSubmissionDto extends PickType(BaseAssignmentSubmis
   learnerId: string
   classId: string
 }
+
+export class GradeAssignmentSubmissionDto extends PickType(BaseAssignmentSubmissionDto, ['point', 'feedback']) {}

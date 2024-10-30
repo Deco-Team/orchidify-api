@@ -1,11 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
 import { AssignmentSubmission } from '@src/class/schemas/assignment-submission.schema'
-import { SaveOptions, Types } from 'mongoose'
+import { FilterQuery, PopulateOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { IAssignmentSubmissionRepository } from '@class/repositories/assignment-submission.repository'
 import { SubmissionStatus } from '@common/contracts/constant'
 import { ILearnerClassRepository } from '@class/repositories/learner-class.repository'
+import { QueryOptions } from 'mongoose'
 
 export const IAssignmentSubmissionService = Symbol('IAssignmentSubmissionService')
 
@@ -13,6 +14,16 @@ export interface IAssignmentSubmissionService {
   create(
     createAssignmentSubmissionDto: CreateAssignmentSubmissionDto,
     options?: SaveOptions | undefined
+  ): Promise<AssignmentSubmission>
+  update(
+    conditions: FilterQuery<AssignmentSubmission>,
+    payload: UpdateQuery<AssignmentSubmission>,
+    options?: QueryOptions | undefined
+  ): Promise<AssignmentSubmission>
+  findById(
+    classId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
   ): Promise<AssignmentSubmission>
   findMyAssignmentSubmission(params: { assignmentId: string; learnerId: string }): Promise<AssignmentSubmission>
   list(querySubmissionDto: { classId: string; assignmentId: string })
@@ -41,6 +52,25 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
       options
     )
     return assignmentSubmission
+  }
+
+  public update(conditions: FilterQuery<AssignmentSubmission>, payload: UpdateQuery<AssignmentSubmission>, options?: QueryOptions | undefined) {
+    return this.assignmentSubmissionRepository.findOneAndUpdate(conditions, payload, options)
+  }
+
+  public async findById(
+    submissionId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const submission = await this.assignmentSubmissionRepository.findOne({
+      conditions: {
+        _id: submissionId
+      },
+      projection,
+      populates
+    })
+    return submission
   }
 
   public async findMyAssignmentSubmission(params: { assignmentId: string; learnerId: string }) {
