@@ -232,9 +232,19 @@ export const Errors = {
   /**
    * Assignment Submission
    */
+  ASSIGNMENT_SUBMISSION_NOT_FOUND: {
+    error: 'ASSIGNMENT_SUBMISSION_NOT_FOUND',
+    message: 'Không tìm thấy bài làm.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
   ASSIGNMENT_SUBMITTED: {
     error: 'ASSIGNMENT_SUBMITTED',
     message: 'Bạn đã nộp bài tập.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  ASSIGNMENT_SUBMISSION_GRADED: {
+    error: 'ASSIGNMENT_SUBMISSION_GRADED',
+    message: 'Bài tập đã được chấm.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 

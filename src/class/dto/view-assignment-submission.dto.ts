@@ -17,3 +17,9 @@ class AssignmentSubmissionListResponse {
   docs: AssignmentSubmissionItemResponse[]
 }
 export class AssignmentSubmissionListDataResponse extends DataResponse(AssignmentSubmissionListResponse) {}
+
+class ViewAssignmentSubmissionDetailResponse extends BaseAssignmentSubmissionDto {
+  @ApiProperty({ type: SubmissionLearnerDetailResponse })
+  learner: SubmissionLearnerDetailResponse
+}
+export class ViewAssignmentSubmissionDetailDataResponse extends DataResponse(ViewAssignmentSubmissionDetailResponse) {}

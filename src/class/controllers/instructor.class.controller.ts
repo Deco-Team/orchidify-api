@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param, Req, Post, Body } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
+import { ErrorResponse, PaginationQuery, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { UserRole } from '@common/contracts/constant'
+import { SubmissionStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -26,6 +26,7 @@ import { ILearnerClassService } from '@class/services/learner-class.service'
 import { Types } from 'mongoose'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 import { AssignmentSubmissionListDataResponse } from '@class/dto/view-assignment-submission.dto'
+import { GradeAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 
 @ApiTags('Class - Instructor')
 @ApiBearerAuth()
@@ -133,5 +134,73 @@ export class InstructorClassController {
     if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
 
     return await this.assignmentSubmissionService.list({ classId, assignmentId })
+  }
+
+  @ApiOperation({
+    summary: `View Assignment Submission Detail`
+  })
+  @ApiOkResponse({ type: AssignmentSubmissionListDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.ASSIGNMENT_SUBMISSION_NOT_FOUND])
+  @Get(':classId([0-9a-f]{24})/assignment-submissions/:submissionId([0-9a-f]{24})')
+  async getAssignmentSubmissionDetail(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('submissionId') submissionId: string
+  ) {
+    const { _id } = _.get(req, 'user')
+
+    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION)
+    if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    const submission = await this.assignmentSubmissionService.findById(submissionId, undefined, [
+      {
+        path: 'learner',
+        select: ['_id', 'name', 'email']
+      }
+    ])
+    if (!submission || submission.classId?.toString() !== classId)
+      throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_FOUND)
+
+    return submission
+  }
+
+  @ApiOperation({
+    summary: `Grade Assignment Submission`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.CLASS_NOT_FOUND,
+    Errors.ASSIGNMENT_SUBMISSION_NOT_FOUND,
+    Errors.ASSIGNMENT_SUBMISSION_GRADED
+  ])
+  @Post(':classId([0-9a-f]{24})/assignment-submissions/:submissionId([0-9a-f]{24})/grade')
+  async gradeAssignmentSubmission(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('submissionId') submissionId: string,
+    @Body() gradeAssignmentSubmissionDto: GradeAssignmentSubmissionDto
+  ) {
+    const { _id } = _.get(req, 'user')
+
+    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION)
+    if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    const submission = await this.assignmentSubmissionService.findById(submissionId)
+    if (!submission || submission.classId?.toString() !== classId)
+      throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_FOUND)
+
+    // check already graded or not
+    if (submission.point !== undefined) throw new AppException(Errors.ASSIGNMENT_SUBMISSION_GRADED)
+
+    const { point, feedback } = gradeAssignmentSubmissionDto
+    await this.assignmentSubmissionService.update(
+      { _id: submissionId },
+      {
+        point,
+        feedback,
+        status: SubmissionStatus.GRADED
+      }
+    )
+    return new SuccessResponse(true)
   }
 }
