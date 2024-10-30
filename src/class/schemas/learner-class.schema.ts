@@ -68,3 +68,10 @@ LearnerClassSchema.virtual('class', {
   foreignField: '_id',
   justOne: true
 })
+
+LearnerClassSchema.virtual('submission', {
+  ref: 'AssignmentSubmission',
+  localField: 'classId',
+  foreignField: 'classId',
+  justOne: true
+})

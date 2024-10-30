@@ -53,6 +53,12 @@ export class BaseAssignmentSubmissionDto {
   @ApiProperty({ type: String })
   @IsMongoId()
   learnerId: string
+
+  @ApiProperty({ type: Date })
+  createdAt: Date
+
+  @ApiProperty({ type: Date })
+  updatedAt: Date
 }
 
 export class CreateAssignmentSubmissionDto extends PickType(BaseAssignmentSubmissionDto, [

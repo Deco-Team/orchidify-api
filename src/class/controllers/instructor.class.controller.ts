@@ -24,6 +24,8 @@ import { ISessionService } from '@class/services/session.service'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
 import { ILearnerClassService } from '@class/services/learner-class.service'
 import { Types } from 'mongoose'
+import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
+import { AssignmentSubmissionListDataResponse } from '@class/dto/view-assignment-submission.dto'
 
 @ApiTags('Class - Instructor')
 @ApiBearerAuth()
@@ -40,7 +42,9 @@ export class InstructorClassController {
     @Inject(IAssignmentService)
     private readonly assignmentService: IAssignmentService,
     @Inject(ILearnerClassService)
-    private readonly learnerClassService: ILearnerClassService
+    private readonly learnerClassService: ILearnerClassService,
+    @Inject(IAssignmentSubmissionService)
+    private readonly assignmentSubmissionService: IAssignmentSubmissionService
   ) {}
 
   @ApiOperation({
@@ -110,5 +114,24 @@ export class InstructorClassController {
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
     return assignment
+  }
+
+  @ApiOperation({
+    summary: `View Assignment Submission List`
+  })
+  @ApiOkResponse({ type: AssignmentSubmissionListDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND])
+  @Get(':classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})/submissions')
+  async listAssignmentSubmission(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('assignmentId') assignmentId: string
+  ) {
+    const { _id } = _.get(req, 'user')
+
+    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION)
+    if (!courseClass || courseClass.instructorId?.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    return await this.assignmentSubmissionService.list({ classId, assignmentId })
   }
 }
