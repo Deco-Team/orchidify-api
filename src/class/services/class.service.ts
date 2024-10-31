@@ -52,6 +52,11 @@ export interface IClassService {
   findManyByStatus(status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByInstructorIdAndStatus(instructorId: string, status: ClassStatus[]): Promise<ClassDocument[]>
   findManyByGardenIdAndStatus(gardenId: string, status: ClassStatus[]): Promise<ClassDocument[]>
+  findMany(
+    conditions: FilterQuery<ClassDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<ClassDocument[]>
   generateCode(): Promise<string>
   enrollClass(enrollClassDto: EnrollClassDto): Promise<CreateMomoPaymentResponse>
 }
@@ -223,6 +228,19 @@ export class ClassService implements IClassService {
           $in: status
         }
       }
+    })
+    return courseClasses
+  }
+
+  public async findMany(
+    conditions: FilterQuery<ClassDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const courseClasses = await this.classRepository.findMany({
+      conditions,
+      projection,
+      populates
     })
     return courseClasses
   }

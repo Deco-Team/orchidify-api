@@ -7,10 +7,18 @@ export enum QueueName {
 }
 
 export enum JobName {
+  // Class Request
   ClassRequestAutoExpired = 'ClassRequestAutoExpired',
-  UpdateClassStatusInProgress = 'UpdateClassStatusInProgress'
+  // Class
+  UpdateClassStatusInProgress = 'UpdateClassStatusInProgress',
+  UpdateClassProgressEndSlot = 'UpdateClassProgressEndSlot'
 }
 
 export enum JobSchedulerKey {
-  UpdateClassStatusScheduler = 'UpdateClassStatusScheduler'
+  // Class
+  UpdateClassStatusScheduler = 'UpdateClassStatusScheduler',
+  UpdateClassProgressEndSlot1Scheduler = 'UpdateClassProgressEndSlot1Scheduler',
+  UpdateClassProgressEndSlot2Scheduler = 'UpdateClassProgressEndSlot2Scheduler',
+  UpdateClassProgressEndSlot3Scheduler = 'UpdateClassProgressEndSlot3Scheduler',
+  UpdateClassProgressEndSlot4Scheduler = 'UpdateClassProgressEndSlot4Scheduler'
 }
