@@ -38,7 +38,9 @@ export class InstructorGardenTimesheetController {
   @ApiOkResponse({ type: ViewAvailableTimeDataResponse })
   @ApiErrorResponse([Errors.WEEKDAYS_OF_CLASS_INVALID])
   @Get('available-time')
-  async viewAvailableTime(@Query() queryAvailableTimeDto: QueryAvailableTimeDto) {
+  async viewAvailableTime(@Req() req, @Query() queryAvailableTimeDto: QueryAvailableTimeDto) {
+    const { _id } = _.get(req, 'user')
+    queryAvailableTimeDto.instructorId = _id
     const result = await this.gardenTimesheetService.viewAvailableTime(queryAvailableTimeDto)
     return result
   }

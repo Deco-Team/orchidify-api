@@ -285,7 +285,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     while (currentDate.isSameOrBefore(endOfDate)) {
       for (let weekday of weekdays) {
         const searchDate = currentDate.clone().isoWeekday(weekday)
-        if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
+        if (searchDate.isSameOrAfter(startOfDate) && searchDate.isBefore(endOfDate)) {
           searchDates.push(searchDate.toDate())
         }
       }
@@ -351,6 +351,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
 
     let availableTimeOfGardens = []
     let availableTime = []
+    let notAvailableSlots = new Set()
     for (const availableGroupGardenTimesheet of availableGroupGardenTimesheets) {
       let availableGardenSlots = SLOT_NUMBERS
       for (const gardenTimesheet of availableGroupGardenTimesheet.timesheets as GardenTimesheet[]) {
@@ -364,6 +365,9 @@ export class GardenTimesheetService implements IGardenTimesheetService {
               groupSlot &&
               groupSlot?.length > 0 &&
               groupSlot.find((slot) => slot.instructorId?.toString() === instructorId?.toString()) !== undefined
+            if (isSlotBusyByInstructor) {
+              notAvailableSlots.add(slotNumber)
+            }
 
             if (!groupSlot || groupSlot?.length < gardenTimesheet.gardenMaxClass || !isSlotBusyByInstructor) {
               tempAvailableGardenSlots.push(slotNumber)
@@ -376,9 +380,14 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       availableTime = [...new Set([...availableTime, ...availableGardenSlots])]
     }
 
+    const notAvailableSlotsByInstructor = [...notAvailableSlots] as SlotNumber[]
+    availableTime = availableTime.filter((slotNumber) => [...notAvailableSlots].includes(slotNumber) === false)
+
+    this.appLogger.log(`notAvailableSlotsByInstructor=${notAvailableSlotsByInstructor}`)
     this.appLogger.log(`availableTimeOfDates=${JSON.stringify(availableTimeOfGardens)}`)
     this.appLogger.log(`availableTime=${availableTime}`)
-    return { slotNumbers: availableTime, availableTimeOfGardens }
+
+    return { slotNumbers: availableTime, availableTimeOfGardens, notAvailableSlotsByInstructor }
   }
 
   async generateSlotsForClass(
