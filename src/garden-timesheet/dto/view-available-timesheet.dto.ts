@@ -44,5 +44,7 @@ export class ViewAvailableTimeResponse {
   slotNumbers: SlotNumber[]
 
   availableTimeOfGardens?: AvailableTimeOfGardens[]
+
+  notAvailableSlotsByInstructor?: SlotNumber[]
 }
 export class ViewAvailableTimeDataResponse extends DataResponse(ViewAvailableTimeResponse) {}
