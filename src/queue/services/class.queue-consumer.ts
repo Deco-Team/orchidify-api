@@ -1,5 +1,5 @@
 import * as moment from 'moment-timezone'
-import { ClassStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, SlotNumber, SlotStatus, UserRole } from '@common/contracts/constant'
 import { AppLogger } from '@common/services/app-logger.service'
 import { Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject } from '@nestjs/common'
@@ -7,13 +7,16 @@ import { JobName, QueueName } from '@queue/contracts/constant'
 import { Job } from 'bullmq'
 import { VN_TIMEZONE } from '@src/config'
 import { IClassService } from '@class/services/class.service'
+import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
   private readonly appLogger = new AppLogger(ClassQueueConsumer.name)
   constructor(
     @Inject(IClassService)
-    private readonly classService: IClassService
+    private readonly classService: IClassService,
+    @Inject(IGardenTimesheetService)
+    private readonly gardenTimesheetService: IGardenTimesheetService
   ) {
     super()
   }
@@ -24,6 +27,9 @@ export class ClassQueueConsumer extends WorkerHost {
       switch (job.name) {
         case JobName.UpdateClassStatusInProgress: {
           return await this.updateClassStatusInProgress(job)
+        }
+        case JobName.UpdateClassProgressEndSlot: {
+          return await this.updateClassProgressEndSlot(job)
         }
         default:
       }
@@ -73,6 +79,83 @@ export class ClassQueueConsumer extends WorkerHost {
     } catch (error) {
       this.appLogger.error(
         `[updateClassStatusInProgress]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(
+          job.data
+        )}, error=${error}`
+      )
+      return false
+    }
+  }
+
+  async updateClassProgressEndSlot(job: Job) {
+    const { slotNumber } = job.data
+    this.appLogger.debug(
+      `[updateClassProgressEndSlot]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`
+    )
+
+    try {
+      this.appLogger.log(`[updateClassProgressEndSlot]: Start update class progress... id=${job.id}`)
+
+      const startOfDate = moment().tz(VN_TIMEZONE).startOf('date')
+      let start, end: Date
+      switch (slotNumber) {
+        case SlotNumber.ONE:
+          start = startOfDate.clone().add(7, 'hour').toDate()
+          end = startOfDate.clone().add(9, 'hour').toDate()
+          break
+        case SlotNumber.TWO:
+          start = startOfDate.clone().add(9, 'hour').add(30, 'minute').toDate()
+          end = startOfDate.clone().add(11, 'hour').add(30, 'minute').toDate()
+          break
+        case SlotNumber.THREE:
+          start = startOfDate.clone().add(13, 'hour').toDate()
+          end = startOfDate.clone().add(15, 'hour').toDate()
+          break
+        case SlotNumber.FOUR:
+          start = startOfDate.clone().add(15, 'hour').add(30, 'minute').toDate()
+          end = startOfDate.clone().add(17, 'hour').add(30, 'minute').toDate()
+          break
+      }
+
+      const timesheets = await this.gardenTimesheetService.findMany({
+        'slots.start': start,
+        'slots.end': end
+      })
+
+      const classIds = new Set()
+      for (const timesheet of timesheets) {
+        for (const slot of timesheet.slots) {
+          if (slot.status === SlotStatus.NOT_AVAILABLE && slot.slotNumber === slotNumber) {
+            classIds.add(slot.classId)
+          }
+        }
+      }
+      const courseClasses = await this.classService.findMany({
+        _id: {
+          $in: [...classIds]
+        }
+      })
+
+      const updateClassProgressPromises = []
+      courseClasses.forEach((courseClass) => {
+        const completed = courseClass.progress.completed + 1
+        const total = courseClass.progress.total
+        const percentage = Math.round((completed / total) * 100)
+        updateClassProgressPromises.push(
+          this.classService.update(
+            { _id: courseClass._id },
+            {
+              $set: { progress: { completed, total, percentage } }
+            }
+          )
+        )
+      })
+      await Promise.all(updateClassProgressPromises)
+
+      this.appLogger.log(`[updateClassProgressEndSlot]: End update class progress... id=${job.id}`)
+      return { status: true, numbersOfUpdatedClass: classIds.size }
+    } catch (error) {
+      this.appLogger.error(
+        `[updateClassProgressEndSlot]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(
           job.data
         )}, error=${error}`
       )

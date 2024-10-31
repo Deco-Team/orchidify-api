@@ -1,3 +1,4 @@
+import { SlotNumber } from '@common/contracts/constant'
 import { AppLogger } from '@common/services/app-logger.service'
 import { InjectQueue } from '@nestjs/bullmq'
 import { Injectable, OnModuleInit } from '@nestjs/common'
@@ -27,6 +28,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
 
   async onModuleInit() {
     await this.scheduleUpdateClassStatusJob()
+    await this.scheduleUpdateClassProgressJob()
 
     // Inject all queue to queueMap
     this.queueMap = new Map<QueueName, Queue>()
@@ -42,6 +44,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
     this.appLogger.log(`Redis service is ready....`)
 
     this.countDelayedJobs()
+    this.countJobSchedulers()
   }
 
   async addJob(queueName: QueueName, jobName: JobName, data: any, opts?: JobsOptions): Promise<Job> {
@@ -78,11 +81,13 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
     this.appLogger.debug(`Queue: ${QueueName.SLOT}: Delayed Jobs Count = ${await this.slotQueue.getDelayedCount()}`)
   }
 
-  private async scheduleUpdateClassStatusJob(): Promise<void> {
+  private async countJobSchedulers() {
     this.appLogger.debug(
-      `Queue: ${QueueName.CLASS}: Scheduler Jobs Count = ${await this.classQueue.getJobSchedulers()}`
+      `Queue: ${QueueName.CLASS}: Scheduler Jobs Count = ${(await this.classQueue.getJobSchedulers()).length}`
     )
+  }
 
+  private async scheduleUpdateClassStatusJob(): Promise<void> {
     await this.classQueue.upsertJobScheduler(
       JobSchedulerKey.UpdateClassStatusScheduler,
       {
@@ -93,5 +98,62 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
         name: JobName.UpdateClassStatusInProgress
       }
     )
+  }
+
+  private async scheduleUpdateClassProgressJob(): Promise<void> {
+    await Promise.all([
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.UpdateClassProgressEndSlot1Scheduler,
+        {
+          pattern: '0 9 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.UpdateClassProgressEndSlot,
+          data: {
+            slotNumber: SlotNumber.ONE
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.UpdateClassProgressEndSlot2Scheduler,
+        {
+          pattern: '30 11 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.UpdateClassProgressEndSlot,
+          data: {
+            slotNumber: SlotNumber.TWO
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.UpdateClassProgressEndSlot3Scheduler,
+        {
+          pattern: '0 15 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.UpdateClassProgressEndSlot,
+          data: {
+            slotNumber: SlotNumber.THREE
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.UpdateClassProgressEndSlot4Scheduler,
+        {
+          pattern: '30 17 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.UpdateClassProgressEndSlot,
+          data: {
+            slotNumber: SlotNumber.FOUR
+          }
+        }
+      )
+    ])
   }
 }
