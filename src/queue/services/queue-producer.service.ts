@@ -27,9 +27,11 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
   ) {}
 
   async onModuleInit() {
-    await this.scheduleUpdateClassStatusJob()
-    await this.scheduleUpdateClassProgressJob()
-
+    if (process.env.NODE_ENV !== 'local') {
+      await this.scheduleUpdateClassStatusJob()
+      await this.scheduleUpdateClassProgressJob()
+    }
+    
     // Inject all queue to queueMap
     this.queueMap = new Map<QueueName, Queue>()
     this.queueMap.set(QueueName.CLASS_REQUEST, this.classRequestQueue)

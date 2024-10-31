@@ -132,7 +132,12 @@ export const SLOT_NUMBERS = [1, 2, 3, 4]
 
 
 export enum SubmissionStatus {
-  NOT_SUBMITTED  = 'NOT_SUBMITTED',
   SUBMITTED = 'SUBMITTED',
   GRADED = 'GRADED'
+}
+
+export enum AttendanceStatus {
+  NOT_YET = 'NOT_YET',
+  PRESENT = 'PRESENT',
+  ABSENT = 'ABSENT'
 }
