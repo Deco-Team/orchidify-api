@@ -3,7 +3,7 @@ import { DataResponse } from '@common/contracts/openapi-builder'
 import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
 import { BaseAssignmentSubmissionDto } from './assignment-submission.dto'
 
-class SubmissionLearnerDetailResponse extends PickType(BaseLearnerDto, ['_id', 'name', 'email']) {}
+class SubmissionLearnerDetailResponse extends PickType(BaseLearnerDto, ['_id', 'name', 'email', 'avatar']) {}
 
 class AssignmentSubmissionItemResponse {
   @ApiProperty({ type: SubmissionLearnerDetailResponse })

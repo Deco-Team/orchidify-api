@@ -54,7 +54,11 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
     return assignmentSubmission
   }
 
-  public update(conditions: FilterQuery<AssignmentSubmission>, payload: UpdateQuery<AssignmentSubmission>, options?: QueryOptions | undefined) {
+  public update(
+    conditions: FilterQuery<AssignmentSubmission>,
+    payload: UpdateQuery<AssignmentSubmission>,
+    options?: QueryOptions | undefined
+  ) {
     return this.assignmentSubmissionRepository.findOneAndUpdate(conditions, payload, options)
   }
 
@@ -141,7 +145,8 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
             {
               $project: {
                 name: 1,
-                email: 1
+                email: 1,
+                avatar: 1,
               }
             }
           ]

@@ -155,7 +155,7 @@ export class InstructorClassController {
     const submission = await this.assignmentSubmissionService.findById(submissionId, undefined, [
       {
         path: 'learner',
-        select: ['_id', 'name', 'email']
+        select: ['_id', 'name', 'email', 'avatar']
       }
     ])
     if (!submission || submission.classId?.toString() !== classId)
