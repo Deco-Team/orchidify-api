@@ -53,5 +53,6 @@ AttendanceSchema.index({ slotId: 1, learnerId: 1 })
 AttendanceSchema.virtual('learner', {
   ref: 'Learner',
   localField: 'learnerId',
-  foreignField: '_id'
+  foreignField: '_id',
+  justOne: true
 })
