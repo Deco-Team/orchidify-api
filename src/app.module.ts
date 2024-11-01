@@ -27,6 +27,7 @@ import { ClassRequestModule } from '@class-request/class-request.module'
 import { SettingModule } from '@setting/setting.module'
 import { TransactionModule } from '@transaction/transaction.module'
 import { QueueModule } from './queue/queue.module'
+import { AttendanceModule } from '@attendance/attendance.module'
 
 @Module({
   imports: [
@@ -138,6 +139,10 @@ import { QueueModule } from './queue/queue.module'
       {
         path: 'transactions',
         module: TransactionModule
+      },
+      {
+        path: 'attendances',
+        module: AttendanceModule
       }
     ]),
     TerminusModule.forRoot({
@@ -158,7 +163,8 @@ import { QueueModule } from './queue/queue.module'
     AuthModule,
     ClassRequestModule,
     TransactionModule,
-    QueueModule
+    QueueModule,
+    AttendanceModule
   ],
   controllers: [AppController],
   providers: [AppService]

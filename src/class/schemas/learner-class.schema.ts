@@ -20,6 +20,9 @@ export type LearnerClassDocument = HydratedDocument<LearnerClass>
       delete ret.__v
     },
     virtuals: true
+  },
+  toObject: {
+    virtuals: true
   }
 })
 export class LearnerClass {
@@ -31,12 +34,6 @@ export class LearnerClass {
 
   @Prop({ type: Date, required: true })
   enrollDate: Date
-
-  // @Prop({ type: Number, required: true, default: 0 })
-  // progress: number
-
-  // @Prop({ enum: LearnerClassStatus, required: true })
-  // status: LearnerClassStatus
 
   @Prop({ type: Date })
   finishDate: Date

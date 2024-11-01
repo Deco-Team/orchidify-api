@@ -78,6 +78,9 @@
       "@queue/*": [
         "src/queue/*"
       ],
+      "@attendance/*": [
+        "src/attendance/*"
+      ],
       "@src/*": [
         "src/*"
       ]

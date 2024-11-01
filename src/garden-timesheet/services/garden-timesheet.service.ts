@@ -43,6 +43,11 @@ export interface IGardenTimesheetService {
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<GardenTimesheetDocument>
+  findOneBy(
+    conditions: FilterQuery<GardenTimesheet>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<GardenTimesheetDocument>
   update(
     conditions: FilterQuery<GardenTimesheet>,
     payload: UpdateQuery<GardenTimesheet>,
@@ -106,6 +111,20 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     })
     return gardenTimesheet
   }
+
+  public async findOneBy(
+    conditions: FilterQuery<GardenTimesheet>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const gardenTimesheet = await this.gardenTimesheetRepository.findOne({
+      conditions,
+      projection,
+      populates
+    })
+    return gardenTimesheet
+  }
+
 
   public async findSlotBy(params: { slotId: string; instructorId?: string }) {
     const { slotId, instructorId } = params
