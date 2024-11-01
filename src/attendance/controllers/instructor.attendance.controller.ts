@@ -128,14 +128,14 @@ export class InstructorAttendanceController {
     const slot = gardenTimesheet?.slots.find((slot) => slot._id.toString() === slotId)
     if (!slot) throw new AppException(Errors.SLOT_NOT_FOUND)
 
-    const nowMoment = moment().tz(VN_TIMEZONE)
-    // BR-46: Instructors can take attendance when the slots start.
-    const startOfSlot = moment(slot.start).tz(VN_TIMEZONE)
-    if (nowMoment.isBefore(startOfSlot)) throw new AppException(Errors.NOT_TIME_TO_TAKE_ATTENDANCE)
+    // const nowMoment = moment().tz(VN_TIMEZONE)
+    // // BR-46: Instructors can take attendance when the slots start.
+    // const startOfSlot = moment(slot.start).tz(VN_TIMEZONE)
+    // if (nowMoment.isBefore(startOfSlot)) throw new AppException(Errors.NOT_TIME_TO_TAKE_ATTENDANCE)
 
-    // BR-47: Instructors can only update the attendance until the end of the day
-    const endOfDate = startOfSlot.clone().endOf('date')
-    if (nowMoment.isAfter(endOfDate)) throw new AppException(Errors.TAKE_ATTENDANCE_IS_OVER)
+    // // BR-47: Instructors can only update the attendance until the end of the day
+    // const endOfDate = startOfSlot.clone().endOf('date')
+    // if (nowMoment.isAfter(endOfDate)) throw new AppException(Errors.TAKE_ATTENDANCE_IS_OVER)
 
     // check learner in class
     const learnerClasses = await this.learnerClassService.findMany(
