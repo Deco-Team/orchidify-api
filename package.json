@@ -153,6 +153,7 @@
       "^@garden-timesheet/(.*)$": "<rootDir>/garden-timesheet/$1",
       "^@class-request/(.*)$": "<rootDir>/class-request/$1",
       "^@queue/(.*)$": "<rootDir>/queue/$1",
+      "^@attendance/(.*)$": "<rootDir>/attendance/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }

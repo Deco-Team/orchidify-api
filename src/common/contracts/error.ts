@@ -341,4 +341,23 @@ export const Errors = {
     message: 'Không tìm thấy tiết học.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+
+   /**
+   * Attendance
+   */
+   NUMBER_OF_ATTENDANCES_INVALID: {
+    error: 'NUMBER_OF_ATTENDANCES_INVALID',
+    message: 'Số lượng điểm danh không đúng.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  NOT_TIME_TO_TAKE_ATTENDANCE: {
+    error: 'NOT_TIME_TO_TAKE_ATTENDANCE',
+    message: 'Chưa tới giờ điểm danh. Vui lòng quay lại sau.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  TAKE_ATTENDANCE_IS_OVER: {
+    error: 'TAKE_ATTENDANCE_IS_OVER',
+    message: 'Đã hết thời gian điểm danh.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 }
