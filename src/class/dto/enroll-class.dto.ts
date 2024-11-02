@@ -5,10 +5,14 @@ import { Types } from 'mongoose'
 
 export class EnrollClassDto {
   classId: Types.ObjectId
-  paymentMethod: PaymentMethod = PaymentMethod.MOMO
   learnerId: Types.ObjectId
 
-  @ApiPropertyOptional({ type: String, enum: ['captureWallet', 'payWithMethod'] })
+  @ApiPropertyOptional({ type: String, enum: PaymentMethod, example: PaymentMethod.STRIPE })
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  paymentMethod?: PaymentMethod = PaymentMethod.STRIPE
+
+  // @ApiPropertyOptional({ type: String, enum: ['captureWallet', 'payWithMethod'] })
   @IsOptional()
   @IsEnum(['captureWallet', 'payWithMethod'])
   requestType?: string

@@ -28,7 +28,7 @@ export class Setting {
   key: string
 
   @Prop({ type: Types.Map, required: true })
-  value: Record<string, any> | number | Array<number | String>
+  value: string | Record<string, any> | number | Array<number | String>
 
   @Prop({ type: Boolean, required: true, default: true })
   enabled: boolean

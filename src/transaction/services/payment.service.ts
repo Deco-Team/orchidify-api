@@ -16,6 +16,8 @@ import { Transaction } from '@src/transaction/schemas/transaction.schema'
 import { PayOSPaymentStrategy } from '@src/transaction/strategies/payos.strategy'
 import { WebhookType as PayOSWebhookData } from '@payos/node/lib/type'
 import { ZaloPayPaymentStrategy } from '@src/transaction/strategies/zalopay.strategy'
+import { StripePaymentStrategy } from '@transaction/strategies/stripe.strategy'
+import { QueryStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
 
 export const IPaymentService = Symbol('IPaymentService')
 
@@ -23,7 +25,7 @@ export interface IPaymentService {
   setStrategy(paymentMethod: PaymentMethod): void
   verifyPaymentWebhookData(webhookData: any): any
   createTransaction(createPaymentDto: any): any
-  getTransaction(queryPaymentDto: QueryMomoPaymentDto): any
+  getTransaction(queryPaymentDto: QueryMomoPaymentDto | QueryStripePaymentDto): any
   refundTransaction(refundPaymentDto: RefundMomoPaymentDto): any
   getRefundTransaction(queryPaymentDto: QueryMomoPaymentDto): any
   getPaymentList(filter: any, paginationParams: PaginationParams): Promise<any>
@@ -40,7 +42,8 @@ export class PaymentService implements IPaymentService {
     private readonly transactionRepository: ITransactionRepository,
     private readonly momoPaymentStrategy: MomoPaymentStrategy,
     private readonly zaloPayPaymentStrategy: ZaloPayPaymentStrategy,
-    private readonly payOSPaymentStrategy: PayOSPaymentStrategy
+    private readonly payOSPaymentStrategy: PayOSPaymentStrategy,
+    private readonly stripePaymentStrategy: StripePaymentStrategy
   ) {}
 
   public setStrategy(paymentMethod: PaymentMethod) {
@@ -52,8 +55,11 @@ export class PaymentService implements IPaymentService {
         this.strategy = this.zaloPayPaymentStrategy
         break
       case PaymentMethod.PAY_OS:
-      default:
         this.strategy = this.payOSPaymentStrategy
+        break
+      case PaymentMethod.STRIPE:
+      default:
+        this.strategy = this.stripePaymentStrategy
         break
     }
   }

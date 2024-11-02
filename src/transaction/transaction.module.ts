@@ -1,4 +1,4 @@
-import { forwardRef, Global, Module } from '@nestjs/common'
+import { Global, Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 import { PaymentController } from '@src/transaction/controllers/payment.controller'
 import { Transaction, TransactionSchema } from '@src/transaction/schemas/transaction.schema'
@@ -9,8 +9,8 @@ import { ZaloPayPaymentStrategy } from '@src/transaction/strategies/zalopay.stra
 import { MomoPaymentStrategy } from '@src/transaction/strategies/momo.strategy'
 import { PayOSPaymentStrategy } from '@src/transaction/strategies/payos.strategy'
 import { ITransactionService, TransactionService } from './services/transaction.service'
-import { ClassModule } from '@class/class.module'
 import { LearnerModule } from '@learner/learner.module'
+import { StripePaymentStrategy } from './strategies/stripe.strategy'
 
 @Global()
 @Module({
@@ -35,7 +35,8 @@ import { LearnerModule } from '@learner/learner.module'
     },
     ZaloPayPaymentStrategy,
     MomoPaymentStrategy,
-    PayOSPaymentStrategy
+    PayOSPaymentStrategy,
+    StripePaymentStrategy
   ],
   exports: [
     {

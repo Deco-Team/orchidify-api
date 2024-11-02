@@ -28,24 +28,28 @@ export default () => ({
     payos: {
       clientId: process.env.PAYOS_CLIENT_ID,
       apiKey: process.env.PAYOS_API_KEY,
-      checksumKey: process.env.PAYOS_CHECKSUM_KEY,
+      checksumKey: process.env.PAYOS_CHECKSUM_KEY
     },
+    stripe: {
+      apiKey: process.env.STRIPE_API_KEY,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+    }
   },
   cloudinary: {
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    api_secret: process.env.CLOUDINARY_API_SECRET
   },
   discord: {
     webhookId: process.env.DISCORD_WEBHOOK_ID,
-    webhookToken: process.env.DISCORD_WEBHOOK_TOKEN,
+    webhookToken: process.env.DISCORD_WEBHOOK_TOKEN
   },
   redis: {
     host: process.env.REDIS_HOST,
     port: Number(process.env.REDIS_PORT || 6379),
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
-    db: Number(process.env.REDIS_DB || 0),
+    db: Number(process.env.REDIS_DB || 0)
   },
   NODE_ENV: process.env.NODE_ENV,
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'accessSecret',
