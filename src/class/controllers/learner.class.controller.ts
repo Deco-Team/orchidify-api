@@ -3,10 +3,12 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
-  ApiTags
+  ApiTags,
+  refs
 } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -38,6 +40,7 @@ import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
 import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto'
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
+import { CreateStripePaymentDataResponse } from '@transaction/dto/stripe-payment.dto'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -62,7 +65,10 @@ export class LearnerClassController {
   @ApiOperation({
     summary: `Enroll Class`
   })
-  @ApiCreatedResponse({ type: CreateMomoPaymentDataResponse })
+  @ApiExtraModels(CreateStripePaymentDataResponse, CreateMomoPaymentDataResponse)
+  @ApiCreatedResponse({
+    schema: { anyOf: refs(CreateStripePaymentDataResponse, CreateMomoPaymentDataResponse) },
+  })
   @ApiErrorResponse([
     Errors.UNVERIFIED_ACCOUNT,
     Errors.INACTIVE_ACCOUNT,
@@ -76,13 +82,13 @@ export class LearnerClassController {
   async enrollClass(@Req() req, @Param('id') classId: string, @Body() enrollClassDto: EnrollClassDto) {
     const { _id } = _.get(req, 'user')
 
-    const createMomoPaymentResponse = await this.classService.enrollClass({
+    const createPaymentResponse = await this.classService.enrollClass({
       classId: new Types.ObjectId(classId),
-      paymentMethod: PaymentMethod.MOMO,
+      paymentMethod: enrollClassDto.paymentMethod || PaymentMethod.STRIPE,
       learnerId: _id,
       requestType: enrollClassDto.requestType
     })
-    return createMomoPaymentResponse
+    return createPaymentResponse
   }
 
   @ApiOperation({

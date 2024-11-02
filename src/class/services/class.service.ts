@@ -3,7 +3,16 @@ import * as _ from 'lodash'
 import * as moment from 'moment-timezone'
 import { IClassRepository } from '@src/class/repositories/class.repository'
 import { Class, ClassDocument } from '@src/class/schemas/class.schema'
-import { Connection, FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
+import {
+  ClientSession,
+  Connection,
+  FilterQuery,
+  PopulateOptions,
+  QueryOptions,
+  SaveOptions,
+  Types,
+  UpdateQuery
+} from 'mongoose'
 import { CreateClassDto } from '@class/dto/create-class.dto'
 import {
   ClassStatus,
@@ -32,6 +41,7 @@ import { ILearnerClassService } from './learner-class.service'
 import { VN_TIMEZONE } from '@src/config'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import { GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
+import { CreateStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
 
 export const IClassService = Symbol('IClassService')
 
@@ -275,16 +285,17 @@ export class ClassService implements IClassService {
     // Check duplicate timesheet with enrolled class
     await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() })
 
+    const MAX_VALUE = 9_007_199_254_740_991
+    const MIM_VALUE = 1_000_000_000_000_000
+    const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE))
+    const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`
+
     // Execute in transaction
     const session = await this.connection.startSession()
-    let paymentResponse: CreateMomoPaymentResponse
+    let paymentResponse
     try {
       await session.withTransaction(async () => {
         // 2. Process transaction
-        const MAX_VALUE = 9_007_199_254_740_991
-        const MIM_VALUE = 1_000_000_000_000_000
-        const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE))
-        const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`
         switch (paymentMethod) {
           case PaymentMethod.MOMO:
             this.paymentService.setStrategy(PaymentMethod.MOMO)
@@ -302,46 +313,39 @@ export class ClassService implements IClassService {
               lang: 'vi',
               orderExpireTime: 30
             }
-            paymentResponse = await this.paymentService.createTransaction(createMomoPaymentDto)
+            paymentResponse = await this.processPaymentWithMomo({
+              createMomoPaymentDto,
+              orderInfo,
+              courseClass,
+              orderCode,
+              learnerId,
+              paymentMethod,
+              session
+            })
             break
           case PaymentMethod.ZALO_PAY:
           case PaymentMethod.PAY_OS:
+          case PaymentMethod.STRIPE:
           default:
+            this.paymentService.setStrategy(PaymentMethod.STRIPE)
+            const createStripePaymentDto: CreateStripePaymentDto = {
+              customerEmail: learner.email,
+              description: orderInfo,
+              amount: courseClass.price,
+              // orderId: orderCode.toString(),
+              metadata: { classId: classId.toString(), learnerId: learnerId.toString(), orderCode }
+            }
+            paymentResponse = await this.processPaymentWithStripe({
+              createStripePaymentDto,
+              orderInfo,
+              courseClass,
+              orderCode,
+              learnerId,
+              paymentMethod,
+              session
+            })
             break
         }
-
-        // 3. Create transaction
-        const transaction = await this.paymentService.getTransaction({
-          orderId: paymentResponse.orderId,
-          requestId: paymentResponse.requestId,
-          lang: 'vi'
-        })
-        const paymentPayload = {
-          id: transaction?.transId?.toString(),
-          code: orderCode.toString(),
-          createdAt: new Date(),
-          status: transaction?.resultCode?.toString(),
-          ...transaction
-        }
-        const payment: BasePaymentDto = {
-          ...paymentPayload,
-          histories: [paymentPayload]
-        }
-        await this.transactionService.create(
-          {
-            type: TransactionType.PAYMENT,
-            paymentMethod,
-            amount: courseClass.price,
-            debitAccount: { userId: learnerId, userRole: UserRole.LEARNER },
-            creditAccount: { userRole: 'SYSTEM' as UserRole },
-            description: orderInfo,
-            status: TransactionStatus.DRAFT,
-            payment
-          },
-          {
-            session
-          }
-        )
       })
       return paymentResponse
     } finally {
@@ -403,5 +407,96 @@ export class ClassService implements IClassService {
       }
     }
     return calendars
+  }
+
+  private async processPaymentWithMomo(params: {
+    createMomoPaymentDto: CreateMomoPaymentDto
+    orderInfo: string
+    courseClass: Class
+    orderCode: number
+    learnerId: Types.ObjectId
+    paymentMethod: PaymentMethod
+    session: ClientSession
+  }) {
+    const { createMomoPaymentDto, orderInfo, courseClass, orderCode, learnerId, paymentMethod, session } = params
+    const paymentResponse: CreateMomoPaymentResponse = await this.paymentService.createTransaction(createMomoPaymentDto)
+
+    // 3. Create transaction
+    const transaction = await this.paymentService.getTransaction({
+      orderId: paymentResponse.orderId,
+      requestId: paymentResponse.requestId,
+      lang: 'vi'
+    })
+    const paymentPayload = {
+      id: transaction?.transId?.toString(),
+      code: orderCode.toString(),
+      createdAt: new Date(),
+      status: transaction?.resultCode?.toString(),
+      ...transaction
+    }
+    const payment: BasePaymentDto = {
+      ...paymentPayload,
+      histories: [paymentPayload]
+    }
+    await this.transactionService.create(
+      {
+        type: TransactionType.PAYMENT,
+        paymentMethod,
+        amount: courseClass.price,
+        debitAccount: { userId: learnerId, userRole: UserRole.LEARNER },
+        creditAccount: { userRole: 'SYSTEM' as UserRole },
+        description: orderInfo,
+        status: TransactionStatus.DRAFT,
+        payment
+      },
+      {
+        session
+      }
+    )
+    return paymentResponse
+  }
+
+  private async processPaymentWithStripe(params: {
+    createStripePaymentDto: CreateStripePaymentDto
+    orderInfo: string
+    courseClass: Class
+    orderCode: number
+    learnerId: Types.ObjectId
+    paymentMethod: PaymentMethod
+    session: ClientSession
+  }) {
+    const { createStripePaymentDto, orderInfo, courseClass, orderCode, learnerId, paymentMethod, session } = params
+    const paymentResponse = await this.paymentService.createTransaction(createStripePaymentDto)
+    // 3. Create transaction
+    const transaction = await this.paymentService.getTransaction({
+      id: paymentResponse?.id
+    })
+    const paymentPayload = {
+      id: transaction?.id,
+      code: orderCode.toString(),
+      createdAt: new Date(),
+      status: transaction?.status,
+      ...transaction
+    }
+    const payment: BasePaymentDto = {
+      ...paymentPayload,
+      histories: [paymentPayload]
+    }
+    await this.transactionService.create(
+      {
+        type: TransactionType.PAYMENT,
+        paymentMethod,
+        amount: courseClass.price,
+        debitAccount: { userId: learnerId, userRole: UserRole.LEARNER },
+        creditAccount: { userRole: 'SYSTEM' as UserRole },
+        description: orderInfo,
+        status: TransactionStatus.DRAFT,
+        payment
+      },
+      {
+        session
+      }
+    )
+    return paymentResponse
   }
 }

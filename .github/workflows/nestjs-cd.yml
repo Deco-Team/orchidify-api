@@ -91,6 +91,9 @@ jobs:
           echo ZALOPAY_KEY2=${{ secrets.ZALOPAY_KEY2 }} >> .env
           echo ZALOPAY_ENDPOINT=${{ vars.ZALOPAY_ENDPOINT }} >> .env
 
+          echo STRIPE_API_KEY=${{ secrets.STRIPE_API_KEY }} >> .env
+          echo STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }} >> .env
+
           echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> .env
 
           echo DISCORD_WEBHOOK_ID=${{ secrets.DISCORD_WEBHOOK_ID }} >> .env

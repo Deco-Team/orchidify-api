@@ -17,9 +17,12 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node'
 import { DiscordService } from '@common/services/discord.service'
 import { json } from 'express'
 import mongoose from 'mongoose'
+import * as express from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true
+  })
 
   // Sentry
   if (process.env.NODE_ENV === 'production') {
@@ -90,6 +93,7 @@ async function bootstrap() {
     /ngrok-free/,
     /orchidify.tech/
   ]
+  app.use('/transactions/payment/webhook/stripe', express.raw({ type: "*/*" }));
   app.use('/media/upload/base64', json({ limit: '60mb' }))
   app.use(json({ limit: '500kb' }))
   app.enableCors({ origin: origins })

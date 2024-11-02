@@ -1,7 +1,8 @@
 export enum PaymentMethod {
   PAY_OS = 'PAY_OS',
   MOMO = 'MOMO',
-  ZALO_PAY = 'ZALO_PAY'
+  ZALO_PAY = 'ZALO_PAY',
+  STRIPE = 'STRIPE'
 }
 
 export enum TransactionType {
@@ -26,4 +27,9 @@ export enum PayOSStatus {
   PROCESSING = 'PROCESSING',
   PAID = 'PAID',
   CANCELLED = 'CANCELLED'
+}
+
+export enum StripeStatus {
+  SUCCEEDED = 'succeeded',
+  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
 }
