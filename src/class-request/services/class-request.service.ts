@@ -252,6 +252,7 @@ export class ClassRequestService implements IClassRequestService {
     } finally {
       await session.endSession()
     }
+    this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
 
@@ -387,6 +388,7 @@ export class ClassRequestService implements IClassRequestService {
       await session.endSession()
     }
     // TODO: send notification
+    this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
 
@@ -437,6 +439,7 @@ export class ClassRequestService implements IClassRequestService {
       await session.endSession()
     }
     // TODO: send notification
+    this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
 

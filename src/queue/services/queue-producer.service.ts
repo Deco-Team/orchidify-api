@@ -31,7 +31,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
       await this.scheduleUpdateClassStatusJob()
       await this.scheduleUpdateClassProgressJob()
     }
-    
+
     // Inject all queue to queueMap
     this.queueMap = new Map<QueueName, Queue>()
     this.queueMap.set(QueueName.CLASS_REQUEST, this.classRequestQueue)
@@ -68,8 +68,12 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
   }
 
   async removeJob(queueName: QueueName, jobId: string): Promise<void> {
-    this.appLogger.debug(`Remove Job: jobId: ${jobId} from queue: ${queueName}`)
-    await this.queueMap.get(QueueName[queueName]).remove(jobId)
+    try {
+      this.appLogger.debug(`Remove Job: jobId: ${jobId} from queue: ${queueName}`)
+      await this.queueMap.get(QueueName[queueName]).remove(jobId)
+    } catch (error) {
+      this.appLogger.error(`Remove Job: [error] ${JSON.stringify(error)}`)
+    }
   }
 
   private async countDelayedJobs() {

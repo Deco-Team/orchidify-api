@@ -15,9 +15,7 @@ import {
   IDDataResponse,
   IDResponse,
   PaginationQuery,
-  SuccessDataResponse,
-  SuccessResponse
-} from '@common/contracts/dto'
+  SuccessDataResponse} from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { ClassRequestStatus, ClassRequestType, CourseStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
