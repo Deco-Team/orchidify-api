@@ -92,7 +92,7 @@ describe('AuthService', () => {
           useValue: {
             create: jest.fn(),
             update: jest.fn(),
-            findByApplicationEmailAndStatus: jest.fn()
+            findOneByApplicationEmailAndStatus: jest.fn()
           }
         },
         { provide: JwtService, useValue: { sign: jest.fn() } },
@@ -567,13 +567,11 @@ describe('AuthService', () => {
       }
 
       jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findByApplicationEmailAndStatus').mockResolvedValue([
-        {
-          _id: new Types.ObjectId().toString(),
-          applicationInfo: instructorRegisterDto,
-          status: RecruitmentStatus.PENDING
-        } as RecruitmentDocument
-      ])
+      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue({
+        _id: new Types.ObjectId().toString(),
+        applicationInfo: instructorRegisterDto,
+        status: RecruitmentStatus.PENDING
+      } as RecruitmentDocument)
 
       await expect(authService.registerByInstructor(instructorRegisterDto)).rejects.toThrow(
         new AppException(Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS)
@@ -590,7 +588,7 @@ describe('AuthService', () => {
       }
 
       jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findByApplicationEmailAndStatus').mockResolvedValue([])
+      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue(null)
       jest.spyOn(recruitmentServiceMock, 'create').mockRejectedValue(new Error('Recruitment creation failed'))
 
       await expect(authService.registerByInstructor(instructorRegisterDto)).rejects.toThrow(
@@ -608,7 +606,7 @@ describe('AuthService', () => {
       }
 
       jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findByApplicationEmailAndStatus').mockResolvedValue([])
+      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue(null)
       jest.spyOn(recruitmentServiceMock, 'create').mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         applicationInfo: instructorRegisterDto,

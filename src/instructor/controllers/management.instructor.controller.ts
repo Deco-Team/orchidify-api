@@ -94,7 +94,7 @@ export class ManagementInstructorController {
     if (existedInstructor) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
 
     //BR-19: Only email that is approved in recruitment is allowed to be used to add a new instructor.
-    const selectedRecruitment = await this.recruitmentService.findByApplicationEmailAndStatus(
+    const selectedRecruitment = await this.recruitmentService.findOneByApplicationEmailAndStatus(
       createInstructorDto.email,
       [RecruitmentStatus.SELECTED]
     )

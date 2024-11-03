@@ -26,7 +26,10 @@ export const IRecruitmentService = Symbol('IRecruitmentService')
 export interface IRecruitmentService {
   create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<RecruitmentDocument>
   findById(recruitmentId: string, projection?: string | Record<string, any>): Promise<RecruitmentDocument>
-  findByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument>
+  findOneByApplicationEmailAndStatus(
+    applicationEmail: string,
+    status: RecruitmentStatus[]
+  ): Promise<RecruitmentDocument>
   findByHandledByAndStatus(handledBy: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument[]>
   update(
     conditions: FilterQuery<Recruitment>,
@@ -85,7 +88,10 @@ export class RecruitmentService implements IRecruitmentService {
     return recruitment
   }
 
-  findByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument> {
+  findOneByApplicationEmailAndStatus(
+    applicationEmail: string,
+    status: RecruitmentStatus[]
+  ): Promise<RecruitmentDocument> {
     return this.recruitmentRepository.findOne({
       conditions: {
         'applicationInfo.email': applicationEmail,
