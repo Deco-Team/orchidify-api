@@ -25,6 +25,7 @@ import { IQueueProducerService } from '@queue/services/queue-producer.service'
 import { JobName, QueueName } from '@queue/contracts/constant'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { HelperService } from '@common/services/helper.service'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -82,7 +83,8 @@ export class ClassRequestService implements IClassRequestService {
     @Inject(IQueueProducerService)
     private readonly queueProducerService: IQueueProducerService,
     @Inject(ISettingService)
-    private readonly settingService: ISettingService
+    private readonly settingService: ISettingService,
+    private readonly helperService: HelperService
   ) {}
   public async createPublishClassRequest(
     createPublishClassRequestDto: CreatePublishClassRequestDto,
@@ -505,15 +507,10 @@ export class ClassRequestService implements IClassRequestService {
     return expiredAt.toDate()
   }
 
-  getDelayTimeByMilliseconds(expiredAt: Date): number {
-    const delayTime = moment.tz(expiredAt, VN_TIMEZONE).diff(moment().tz(VN_TIMEZONE), 'milliseconds')
-    return delayTime > 0 ? delayTime : 0
-  }
-
   async addClassRequestAutoExpiredJob(classRequest: ClassRequest) {
     try {
       const expiredAt = await this.getExpiredAt(classRequest['createdAt'])
-      const delayTime = this.getDelayTimeByMilliseconds(expiredAt)
+      const delayTime = this.helperService.getDiffTimeByMilliseconds(expiredAt)
 
       await this.queueProducerService.addJob(
         QueueName.CLASS_REQUEST,
@@ -528,7 +525,7 @@ export class ClassRequestService implements IClassRequestService {
         }
       )
     } catch (err) {
-      this.appLogger.log(err)
+      this.appLogger.error(JSON.stringify(err))
     }
   }
 }

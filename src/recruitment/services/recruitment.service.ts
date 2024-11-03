@@ -4,19 +4,27 @@ import { SuccessResponse, UserAuth } from '@common/contracts/dto'
 import { Errors } from '@common/contracts/error'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { AppException } from '@common/exceptions/app.exception'
+import { AppLogger } from '@common/services/app-logger.service'
+import { HelperService } from '@common/services/helper.service'
 import { Injectable, Inject } from '@nestjs/common'
+import { JobName, QueueName } from '@queue/contracts/constant'
+import { IQueueProducerService } from '@queue/services/queue-producer.service'
 import { RECRUITMENT_LIST_PROJECTION } from '@recruitment/contracts/constant'
 import { ProcessRecruitmentApplicationDto } from '@recruitment/dto/process-recruitment-application.dto'
 import { RejectRecruitmentProcessDto } from '@recruitment/dto/reject-recruitment-process.dto'
 import { QueryRecruitmentDto } from '@recruitment/dto/view-recruitment.dto'
 import { IRecruitmentRepository } from '@recruitment/repositories/recruitment.repository'
 import { Recruitment, RecruitmentDocument } from '@recruitment/schemas/recruitment.schema'
+import { SettingKey } from '@setting/contracts/constant'
+import { ISettingService } from '@setting/services/setting.service'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
 import { FilterQuery, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 
 export const IRecruitmentService = Symbol('IRecruitmentService')
 
 export interface IRecruitmentService {
-  create(recruitment: any, options?: SaveOptions | undefined): Promise<RecruitmentDocument>
+  create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<RecruitmentDocument>
   findById(recruitmentId: string, projection?: string | Record<string, any>): Promise<RecruitmentDocument>
   findByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument>
   findByHandledByAndStatus(handledBy: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument[]>
@@ -37,18 +45,28 @@ export interface IRecruitmentService {
     rejectRecruitmentProcessDto: RejectRecruitmentProcessDto,
     userAuth: UserAuth
   ): Promise<SuccessResponse>
+  expiredRecruitmentProcess(recruitmentId: string, userAuth: UserAuth): Promise<SuccessResponse>
 }
 
 @Injectable()
 export class RecruitmentService implements IRecruitmentService {
+  private readonly appLogger = new AppLogger(RecruitmentService.name)
   constructor(
+    private readonly notificationAdapter: NotificationAdapter,
+    private readonly helperService: HelperService,
     @Inject(IRecruitmentRepository)
     private readonly recruitmentRepository: IRecruitmentRepository,
-    private readonly notificationAdapter: NotificationAdapter
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService,
+    @Inject(IQueueProducerService)
+    private readonly queueProducerService: IQueueProducerService
   ) {}
 
-  public create(recruitment: any, options?: SaveOptions | undefined) {
-    return this.recruitmentRepository.create(recruitment, options)
+  public async create(createRecruitmentDto: any, options?: SaveOptions | undefined) {
+    const recruitment = await this.recruitmentRepository.create(createRecruitmentDto, options)
+
+    this.addAutoExpiredJobWhenCreateRecruitmentApplication(recruitment)
+    return recruitment
   }
 
   public async findById(recruitmentId: string, projection?: string | Record<string, any>) {
@@ -67,10 +85,7 @@ export class RecruitmentService implements IRecruitmentService {
     return recruitment
   }
 
-  findByApplicationEmailAndStatus(
-    applicationEmail: string,
-    status: RecruitmentStatus[]
-  ): Promise<RecruitmentDocument> {
+  findByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument> {
     return this.recruitmentRepository.findOne({
       conditions: {
         'applicationInfo.email': applicationEmail,
@@ -157,7 +172,7 @@ export class RecruitmentService implements IRecruitmentService {
     if (!recruitment) throw new AppException(Errors.RECRUITMENT_NOT_FOUND)
     if (recruitment.status !== RecruitmentStatus.PENDING) throw new AppException(Errors.RECRUITMENT_STATUS_INVALID)
 
-    await this.recruitmentRepository.findOneAndUpdate(
+    const newRecruitment = await this.recruitmentRepository.findOneAndUpdate(
       { _id: recruitmentId },
       {
         $set: {
@@ -173,7 +188,8 @@ export class RecruitmentService implements IRecruitmentService {
             userRole: role
           }
         }
-      }
+      },
+      { new: true }
     )
 
     // send notification
@@ -187,6 +203,8 @@ export class RecruitmentService implements IRecruitmentService {
         name: recruitment?.applicationInfo?.name
       }
     })
+
+    this.updateAutoExpiredJobWhenCreateRecruitmentApplication(newRecruitment)
     return new SuccessResponse(true)
   }
 
@@ -227,6 +245,8 @@ export class RecruitmentService implements IRecruitmentService {
         name: recruitment?.applicationInfo?.name
       }
     })
+
+    this.queueProducerService.removeJob(QueueName.RECRUITMENT, recruitment._id?.toString())
     return new SuccessResponse(true)
   }
 
@@ -279,6 +299,115 @@ export class RecruitmentService implements IRecruitmentService {
         name: recruitment?.applicationInfo?.name
       }
     })
+
+    await this.queueProducerService.removeJob(QueueName.RECRUITMENT, recruitment._id?.toString())
     return new SuccessResponse(true)
+  }
+
+  async expiredRecruitmentProcess(recruitmentId: string, userAuth: UserAuth): Promise<SuccessResponse> {
+    const { role } = userAuth
+
+    // validate recruitment
+    const recruitment = await this.findById(recruitmentId)
+    if (!recruitment) throw new AppException(Errors.RECRUITMENT_NOT_FOUND)
+    if ([RecruitmentStatus.PENDING, RecruitmentStatus.INTERVIEWING].includes(recruitment.status) === false)
+      throw new AppException(Errors.RECRUITMENT_STATUS_INVALID)
+
+    await this.recruitmentRepository.findOneAndUpdate(
+      { _id: recruitmentId },
+      {
+        $set: {
+          status: RecruitmentStatus.EXPIRED
+        },
+        $push: {
+          histories: {
+            status: RecruitmentStatus.EXPIRED,
+            timestamp: new Date(),
+            userRole: role
+          }
+        }
+      }
+    )
+
+    return new SuccessResponse(true)
+  }
+
+  private async getExpiredAt(
+    date: Date,
+    status: RecruitmentStatus.PENDING | RecruitmentStatus.INTERVIEWING
+  ): Promise<Date> {
+    const recruitmentProcessAutoExpiration = (
+      await this.settingService.findByKey(SettingKey.RecruitmentProcessAutoExpiration)
+    ).value || [7, 7]
+    const dateMoment = moment.tz(date, VN_TIMEZONE)
+
+    let expiredDate: moment.Moment
+    // BR-17: Recruitment for instructors must proceed within 14 work days (7 work days for verifying CV, 7 work days for interview and approval).
+    if (status === RecruitmentStatus.PENDING) {
+      expiredDate = dateMoment.clone().add(Number(recruitmentProcessAutoExpiration[0]) || 7, 'day')
+    } else {
+      expiredDate = dateMoment.clone().add(Number(recruitmentProcessAutoExpiration[1]) || 7, 'day')
+    }
+    let expiredAt = expiredDate.clone()
+
+    // check in weekdays
+    let currentDate = dateMoment.clone()
+    while (currentDate.isSameOrBefore(expiredDate)) {
+      // Sunday: isoWeekday=7
+      if (currentDate.clone().isoWeekday() === 7) {
+        expiredAt.add(1, 'day')
+      }
+      currentDate.add(1, 'day')
+    }
+
+    return expiredAt.toDate()
+  }
+
+  private async addAutoExpiredJobWhenCreateRecruitmentApplication(recruitment: Recruitment) {
+    try {
+      const expiredAt = await this.getExpiredAt(recruitment['createdAt'], RecruitmentStatus.PENDING)
+      const delayTime = this.helperService.getDiffTimeByMilliseconds(expiredAt)
+
+      await this.queueProducerService.addJob(
+        QueueName.RECRUITMENT,
+        JobName.RecruitmentAutoExpired,
+        {
+          recruitmentId: recruitment._id,
+          expiredAt
+        },
+        {
+          delay: delayTime,
+          jobId: recruitment._id.toString()
+        }
+      )
+    } catch (err) {
+      this.appLogger.error(JSON.stringify(err))
+    }
+  }
+
+  private async updateAutoExpiredJobWhenCreateRecruitmentApplication(recruitment: Recruitment) {
+    try {
+      // Remove old job
+      await this.queueProducerService.removeJob(QueueName.RECRUITMENT, recruitment._id?.toString())
+
+      // Add new job with new delay time
+      const expiredAt = await this.getExpiredAt(recruitment['updatedAt'], RecruitmentStatus.INTERVIEWING)
+      const delayTime = this.helperService.getDiffTimeByMilliseconds(expiredAt)
+
+      await this.queueProducerService.addJob(
+        QueueName.RECRUITMENT,
+        JobName.RecruitmentAutoExpired,
+        {
+          recruitmentId: recruitment._id,
+          expiredAt
+        },
+        {
+          delay: delayTime,
+          jobId: recruitment._id.toString()
+        }
+      )
+    } catch (err) {
+      this.appLogger.error(JSON.stringify(err))
+    }
   }
 }
