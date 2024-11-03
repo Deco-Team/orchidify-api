@@ -1,4 +1,4 @@
-import { IsEnum, IsMongoId, IsOptional, IsString, IsUrl } from 'class-validator'
+import { IsBoolean, IsEnum, IsMongoId, IsOptional, IsString, IsUrl } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { RecruitmentStatus, UserRole } from '@common/contracts/constant'
 import { Types } from 'mongoose'
@@ -58,6 +58,11 @@ export class BaseRecruitmentDto {
   @IsOptional()
   @IsString()
   rejectReason: string
+
+  @ApiPropertyOptional({ type: Boolean })
+  @IsOptional()
+  @IsBoolean()
+  isInstructorAdded: boolean
 
   @ApiProperty({ type: String })
   @IsMongoId()

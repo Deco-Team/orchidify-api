@@ -6,6 +6,7 @@ export const RECRUITMENT_DETAIL_PROJECTION = [
   'histories',
   'rejectReason',
   'handledBy',
+  'isInstructorAdded',
   'createdAt',
   'updatedAt'
 ] as const

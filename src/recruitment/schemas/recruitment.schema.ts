@@ -73,7 +73,10 @@ export class Recruitment {
   histories: RecruitmentStatusHistory[]
 
   @Prop({ type: String })
-  rejectReason: string
+  rejectReason: string 
+
+  @Prop({ type: Boolean })
+  isInstructorAdded: boolean
 
   @Prop({ type: Types.ObjectId, ref: Staff.name })
   handledBy: Types.ObjectId | Staff
