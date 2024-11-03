@@ -4,6 +4,8 @@ import { createHmac } from 'crypto'
 import * as bcrypt from 'bcrypt'
 import { Connection, ClientSession } from 'mongoose'
 import { Weekday } from '@common/contracts/constant'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
 
 @Injectable()
 export class HelperService {
@@ -83,5 +85,10 @@ export class HelperService {
       prevPage: page - 1 === 0 ? null : page - 1,
       nextPage: page < totalPages ? page + 1 : null
     }
+  }
+
+  getDiffTimeByMilliseconds(date: Date): number {
+    const diffTime = moment.tz(date, VN_TIMEZONE).diff(moment().tz(VN_TIMEZONE), 'milliseconds')
+    return diffTime > 0 ? diffTime : 0
   }
 }

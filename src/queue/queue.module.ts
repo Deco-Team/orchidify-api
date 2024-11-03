@@ -6,6 +6,8 @@ import { QueueName } from './contracts/constant'
 import { ClassRequestQueueConsumer } from './services/class-request.queue-consumer'
 import { IQueueProducerService, QueueProducerService } from './services/queue-producer.service'
 import { ClassQueueConsumer } from './services/class.queue-consumer'
+import { RecruitmentModule } from '@recruitment/recruitment.module'
+import { RecruitmentQueueConsumer } from './services/recruitment.queue-consumer'
 
 @Global()
 @Module({
@@ -36,12 +38,14 @@ import { ClassQueueConsumer } from './services/class.queue-consumer'
       {
         name: QueueName.SLOT
       }
-    )
+    ),
+    RecruitmentModule
   ],
   controllers: [],
   providers: [
     ClassRequestQueueConsumer,
     ClassQueueConsumer,
+    RecruitmentQueueConsumer,
     {
       provide: IQueueProducerService,
       useClass: QueueProducerService

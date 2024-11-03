@@ -6,4 +6,5 @@ export enum SettingKey {
   AssignmentsCountRange = 'AssignmentsCountRange',
   ClassRequestAutoExpiration = 'ClassRequestAutoExpiration',
   PayoutRequestAutoExpiration = 'PayoutRequestAutoExpiration',
+  RecruitmentProcessAutoExpiration = 'RecruitmentProcessAutoExpiration',
 }

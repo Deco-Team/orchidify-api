@@ -11,7 +11,9 @@ export enum JobName {
   ClassRequestAutoExpired = 'ClassRequestAutoExpired',
   // Class
   UpdateClassStatusInProgress = 'UpdateClassStatusInProgress',
-  UpdateClassProgressEndSlot = 'UpdateClassProgressEndSlot'
+  UpdateClassProgressEndSlot = 'UpdateClassProgressEndSlot',
+  // Recruitment
+  RecruitmentAutoExpired = 'RecruitmentAutoExpired'
 }
 
 export enum JobSchedulerKey {
