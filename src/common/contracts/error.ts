@@ -149,6 +149,20 @@ export const Errors = {
   },
 
   /**
+   * Garden Timesheet
+   */
+  GARDEN_TIMESHEET_NOT_FOUND: {
+    error: 'GARDEN_TIMESHEET_NOT_FOUND',
+    message: 'Thông tin lịch nhà vườn không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  CAN_NOT_UPDATE_GARDEN_TIMESHEET: {
+    error: 'CAN_NOT_UPDATE_GARDEN_TIMESHEET',
+    message: 'Không thể cập nhật lịch nhà vườn.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
    * Course
    */
   COURSE_NOT_FOUND: {

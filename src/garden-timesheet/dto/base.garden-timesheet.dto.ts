@@ -19,6 +19,7 @@ export class BaseGardenTimesheetDto {
   status: GardenTimesheetStatus
 
   @ApiProperty({ type: String })
+  @IsMongoId()
   gardenId: string | Types.ObjectId
 
   @ApiProperty({ type: BaseSlotDto, isArray: true })
