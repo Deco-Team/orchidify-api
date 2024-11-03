@@ -90,7 +90,7 @@ export class Course {
 
 export const CourseSchema = SchemaFactory.createForClass(Course)
 CourseSchema.plugin(paginate)
-CourseSchema.index({ title: 'text', type: 'text' })
+CourseSchema.index({ title: 'text' })
 
 CourseSchema.virtual('classes', {
   ref: 'Class',

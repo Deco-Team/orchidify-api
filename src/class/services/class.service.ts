@@ -143,13 +143,14 @@ export class ClassService implements IClassService {
       }
     }
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += ' ' + type.trim()
-    if (textSearch) {
+    if (title) {
       filter['$text'] = {
-        $search: textSearch.trim()
+        $search: title
       }
+    }
+
+    if (type) {
+      filter['type'] = type
     }
 
     return this.classRepository.model.paginate(filter, {
@@ -186,13 +187,14 @@ export class ClassService implements IClassService {
       }
     }
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += ' ' + type.trim()
-    if (textSearch) {
+    if (title) {
       filter['$text'] = {
-        $search: textSearch.trim()
+        $search: title
       }
+    }
+
+    if (type) {
+      filter['type'] = type
     }
 
     return this.classRepository.model.paginate(filter, {

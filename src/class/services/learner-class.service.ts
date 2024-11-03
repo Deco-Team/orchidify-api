@@ -116,13 +116,14 @@ export class LearnerClassService implements ILearnerClassService {
     }
     const classFilter: Record<string, any> = {}
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += ' ' + type.trim()
-    if (textSearch) {
+    if (title) {
       classFilter['$text'] = {
-        $search: textSearch.trim()
+        $search: title
       }
+    }
+
+    if (type) {
+      classFilter['type'] = type
     }
 
     const validLevel = level?.filter((level) =>

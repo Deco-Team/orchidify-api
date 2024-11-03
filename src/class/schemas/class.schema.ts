@@ -137,7 +137,7 @@ export class Class {
 
 export const ClassSchema = SchemaFactory.createForClass(Class)
 ClassSchema.plugin(paginate)
-ClassSchema.index({ title: 'text', type: 'text' })
+ClassSchema.index({ title: 'text' })
 
 ClassSchema.virtual('garden', {
   ref: 'Garden',
