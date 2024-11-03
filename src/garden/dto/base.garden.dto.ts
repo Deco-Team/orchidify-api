@@ -38,6 +38,11 @@ export class BaseGardenDto {
   @MaxLength(100)
   address: string
 
+  @ApiProperty({ type: String })
+  @IsNotEmpty()
+  @IsUrl()
+  addressLink: string
+
   @ApiProperty({ type: String, isArray: true })
   @IsArray()
   @IsUrl({}, { each: true })

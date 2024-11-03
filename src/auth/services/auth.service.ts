@@ -220,11 +220,11 @@ export class AuthService implements IAuthService {
     const existedInstructor = await this.instructorService.findByEmail(instructorRegisterDto.email)
     if (existedInstructor) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
 
-    const inProgressingRecruitments = await this.recruitmentService.findByApplicationEmailAndStatus(
+    const inProgressingRecruitment = await this.recruitmentService.findByApplicationEmailAndStatus(
       instructorRegisterDto.email,
       [RecruitmentStatus.PENDING, RecruitmentStatus.INTERVIEWING, RecruitmentStatus.SELECTED]
     )
-    if (inProgressingRecruitments?.length > 0) throw new AppException(Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS)
+    if (inProgressingRecruitment) throw new AppException(Errors.INSTRUCTOR_HAS_IN_PROGRESSING_APPLICATIONS)
 
     await this.recruitmentService.create({
       applicationInfo: instructorRegisterDto,
