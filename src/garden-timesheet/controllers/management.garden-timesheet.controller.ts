@@ -1,9 +1,9 @@
-import { Controller, Get, UseGuards, Inject, Query, Req, Put } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Req, Put, Body } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
-import { ErrorResponse, SuccessDataResponse } from '@common/contracts/dto'
+import { ErrorResponse, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { GardenStatus, UserRole } from '@common/contracts/constant'
+import { GardenStatus, GardenTimesheetStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
@@ -15,7 +15,12 @@ import { IGardenService } from '@garden/services/garden.service'
 import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
-import { QueryInstructorTimesheetDto, ViewTeachingTimesheetListDataResponse } from '@garden-timesheet/dto/view-teaching-timesheet.dto'
+import {
+  QueryInstructorTimesheetDto,
+  ViewTeachingTimesheetListDataResponse
+} from '@garden-timesheet/dto/view-teaching-timesheet.dto'
+import { UpdateGardenTimesheetDto } from '@garden-timesheet/dto/update-garden-timesheet.dto'
+import { Types } from 'mongoose'
 
 @ApiTags('GardenTimesheet - Management')
 @ApiBearerAuth()
@@ -48,24 +53,6 @@ export class ManagementGardenTimesheetController {
     return { docs }
   }
 
-  // @ApiOperation({
-  //   summary: `[${UserRole.STAFF}][${UserRole.GARDEN_MANAGER}] Update Garden Timesheet`
-  // })
-  // @ApiOkResponse({ type: SuccessDataResponse })
-  // @ApiErrorResponse([Errors.COURSE_NOT_FOUND])
-  // @Roles(UserRole.STAFF, UserRole.GARDEN_MANAGER)
-  // @Put(':id([0-9a-f]{24})')
-  // async updateGardenTimesheet(@Req() req,) {
-  // const { _id } = _.get(req, 'user')
-  // const course = await this.gardenTimesheetService.update(
-  //   { _id: courseId, status: CourseStatus.DRAFT, instructorId: new Types.ObjectId(_id) },
-  //   updateCourseDto
-  // )
-
-  // if (!course) throw new AppException(Errors.COURSE_NOT_FOUND)
-  // return new SuccessResponse(true)
-  // }
-
   @ApiOperation({
     summary: `View Instructor Timesheet List`
   })
@@ -75,5 +62,35 @@ export class ManagementGardenTimesheetController {
   async viewInstructorTimesheet(@Query() queryTeachingTimesheetDto: QueryInstructorTimesheetDto) {
     const docs = await this.gardenTimesheetService.viewTeachingTimesheet(queryTeachingTimesheetDto)
     return { docs }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Update Garden Timesheet`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.GARDEN_TIMESHEET_NOT_FOUND, Errors.CAN_NOT_UPDATE_GARDEN_TIMESHEET])
+  @Roles(UserRole.STAFF)
+  @Put()
+  async updateGardenTimesheet(@Body() updateGardenTimesheetDto: UpdateGardenTimesheetDto) {
+    const { date, gardenId, status } = updateGardenTimesheetDto
+
+    const gardenTimesheet = await this.gardenTimesheetService.findOneBy({
+      date: date,
+      gardenId: new Types.ObjectId(gardenId)
+    })
+    if (!gardenTimesheet) throw new AppException(Errors.GARDEN_TIMESHEET_NOT_FOUND)
+
+    // BR-27: Garden timesheet is not allowed to update the time that there is a course already scheduled.
+    if (gardenTimesheet.slots.length > 0 && status === GardenTimesheetStatus.INACTIVE)
+      throw new AppException(Errors.CAN_NOT_UPDATE_GARDEN_TIMESHEET)
+
+    await this.gardenTimesheetService.update(
+      { _id: gardenTimesheet._id },
+      {
+        $set: { status }
+      }
+    )
+
+    return new SuccessResponse(true)
   }
 }
