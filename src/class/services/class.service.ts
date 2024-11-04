@@ -42,6 +42,10 @@ import { VN_TIMEZONE } from '@src/config'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import { GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
 import { CreateStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
+import { UserAuth } from '@common/contracts/dto'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
+import { IInstructorService } from '@instructor/services/instructor.service'
 
 export const IClassService = Symbol('IClassService')
 
@@ -69,6 +73,7 @@ export interface IClassService {
   ): Promise<ClassDocument[]>
   generateCode(): Promise<string>
   enrollClass(enrollClassDto: EnrollClassDto): Promise<CreateMomoPaymentResponse>
+  completeClass(classId: string, userAuth: UserAuth): Promise<void>
 }
 
 @Injectable()
@@ -87,7 +92,11 @@ export class ClassService implements IClassService {
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
     @Inject(IGardenTimesheetService)
-    private readonly gardenTimesheetService: IGardenTimesheetService
+    private readonly gardenTimesheetService: IGardenTimesheetService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService,
+    @Inject(IInstructorService)
+    private readonly instructorService: IInstructorService
   ) {}
 
   public async create(createClassDto: CreateClassDto, options?: SaveOptions | undefined) {
@@ -500,5 +509,60 @@ export class ClassService implements IClassService {
       }
     )
     return paymentResponse
+  }
+
+  public async completeClass(classId: string, userAuth: UserAuth): Promise<void> {
+    const { _id, role } = userAuth
+    // Execute in transaction
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        // complete class
+        const courseClass = await this.update(
+          { _id: new Types.ObjectId(classId) },
+          {
+            $set: {
+              status: ClassStatus.COMPLETED
+            },
+            $push: {
+              histories: {
+                status: ClassStatus.COMPLETED,
+                timestamp: new Date(),
+                userId: new Types.ObjectId(_id),
+                userRole: role
+              }
+            }
+          },
+          { new: true }
+        )
+        // process salary for instructor
+        const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
+        const { price, instructorId, rate = 5 } = courseClass
+        // BR-53: Once the staff completes the class, the salary will be settled (transferred to the balance) for the instructor.
+        // If the quality is good (feedback rate >= 4), the instructor receives 100% salary.
+        // If the quality is fair (feedback rate >= 3), the instructor receives 70% salary.
+        // If the quality is average (feedback rate >= 2), the instructor receives 50% salary.
+        // If the quality is poor (feedback rate < 2), the instructor receives 30% salary.
+        // BR-54: Salary will be rounded down before being transferred to balance.
+        let salary: number = 0
+        if (rate >= 4) {
+          salary = Math.floor(price * (1 - commissionRate))
+        } else if (rate < 4 && rate >= 3) {
+          salary = Math.floor(price * (1 - commissionRate) * 0.7)
+        } else if (rate < 3 && rate >= 2) {
+          salary = Math.floor(price * (1 - commissionRate) * 0.5)
+        } else if (rate < 2) {
+          salary = Math.floor(price * (1 - commissionRate) * 0.3)
+        }
+        await this.instructorService.update(
+          { _id: instructorId },
+          {
+            $inc: { balance: salary }
+          }
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
   }
 }

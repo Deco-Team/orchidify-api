@@ -19,6 +19,7 @@ import {
   AssignmentSubmissionRepository,
   IAssignmentSubmissionRepository
 } from './repositories/assignment-submission.repository'
+import { InstructorModule } from '@instructor/instructor.module'
 
 @Global()
 @Module({
@@ -29,7 +30,8 @@ import {
       { name: AssignmentSubmission.name, schema: AssignmentSubmissionSchema }
     ]),
     GardenModule,
-    LearnerModule
+    LearnerModule,
+    InstructorModule
   ],
   controllers: [InstructorClassController, ManagementClassController, LearnerClassController],
   providers: [
