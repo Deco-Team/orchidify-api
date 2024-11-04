@@ -564,5 +564,7 @@ export class ClassService implements IClassService {
     } finally {
       await session.endSession()
     }
+
+    // send notification for instructor
   }
 }
