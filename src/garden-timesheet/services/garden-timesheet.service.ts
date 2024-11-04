@@ -151,9 +151,9 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     ])
 
     return {
-      ...slot,
       createdAt: gardenTimesheet['createdAt'],
       updatedAt: gardenTimesheet['updatedAt'],
+      ...slot,
       garden,
       class: courseClass
     }

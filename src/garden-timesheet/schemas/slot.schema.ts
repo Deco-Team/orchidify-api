@@ -9,7 +9,10 @@ import { Session } from '@class/schemas/session.schema'
 export type SlotDocument = HydratedDocument<Slot>
 
 @Schema({
-  timestamps: false
+  timestamps: {
+    createdAt: true,
+    updatedAt: true
+  },
 })
 export class Slot {
   constructor(id?: string) {
