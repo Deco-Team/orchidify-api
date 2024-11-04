@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param, Req, Patch } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
+import { ErrorResponse, PaginationQuery, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { UserRole } from '@common/contracts/constant'
+import { ClassStatus, SlotNumber, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -25,6 +25,8 @@ import { ISessionService } from '@class/services/session.service'
 import { ViewSessionDetailDataResponse } from '@class/dto/view-session.dto'
 import { Types } from 'mongoose'
 import { ILearnerClassService } from '@class/services/learner-class.service'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
 
 @ApiTags('Class - Management')
 @ApiBearerAuth()
@@ -133,5 +135,62 @@ export class ManagementClassController {
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
 
     return courseClass
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Complete Class`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.CLASS_STATUS_INVALID, Errors.CLASS_END_TIME_INVALID])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/complete')
+  async completeClass(@Req() req, @Param('id') classId: string) {
+    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION)
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    // check valid status
+    if (courseClass.status !== ClassStatus.IN_PROGRESS) throw new AppException(Errors.CLASS_STATUS_INVALID)
+
+    // check valid classEndDate
+    const { startDate, duration, weekdays, slotNumbers } = courseClass
+    const classEndTime = this.getClassEndTime({ startDate, duration, weekdays, slotNumbers })
+    if (moment().tz(VN_TIMEZONE).isBefore(classEndTime)) throw new AppException(Errors.CLASS_END_TIME_INVALID)
+
+    const user = _.get(req, 'user')
+    await this.classService.completeClass(classId, user)
+    return new SuccessResponse(true)
+  }
+
+  private getClassEndTime({ startDate, duration, weekdays, slotNumbers }): moment.Moment {
+    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
+
+    const classDates: moment.Moment[] = []
+    let currentDate = startOfDate.clone()
+    while (currentDate.isSameOrBefore(endOfDate)) {
+      for (let weekday of weekdays) {
+        const classDate = currentDate.clone().isoWeekday(weekday)
+        if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
+          classDates.push(classDate)
+        }
+      }
+      currentDate.add(1, 'week')
+    }
+    let classEndTime = classDates[classDates.length - 1]
+    switch (slotNumbers[0]) {
+      case SlotNumber.ONE:
+        classEndTime = classEndTime.clone().add(9, 'hour')
+        break
+      case SlotNumber.TWO:
+        classEndTime = classEndTime.clone().add(11, 'hour').add(30, 'minute')
+        break
+      case SlotNumber.THREE:
+        classEndTime = classEndTime.clone().add(15, 'hour')
+        break
+      case SlotNumber.FOUR:
+        classEndTime = classEndTime.clone().add(17, 'hour').add(30, 'minute')
+        break
+    }
+    return classEndTime
   }
 }
