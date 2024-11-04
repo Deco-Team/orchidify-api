@@ -7,8 +7,8 @@ export class LearnerRegisterDto extends PickType(BaseLearnerDto, [
   'name',
   'email',
   'password',
-  'dateOfBirth',
-  'phone'
+  // 'dateOfBirth',
+  // 'phone'
 ]) {}
 
 export class LearnerVerifyAccountDto extends EmailDto {

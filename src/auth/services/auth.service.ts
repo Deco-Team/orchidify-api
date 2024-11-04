@@ -137,8 +137,8 @@ export class AuthService implements IAuthService {
     const learner = await this.learnerService.create({
       name: learnerRegisterDto.name,
       email: learnerRegisterDto.email,
-      dateOfBirth: learnerRegisterDto.dateOfBirth,
-      phone: learnerRegisterDto.phone,
+      // dateOfBirth: learnerRegisterDto.dateOfBirth,
+      // phone: learnerRegisterDto.phone,
       status: LearnerStatus.UNVERIFIED,
       password
     })
