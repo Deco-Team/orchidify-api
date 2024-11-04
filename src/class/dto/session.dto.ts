@@ -2,12 +2,12 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsMongoId,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
-  ValidateIf,
   ValidateNested
 } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
@@ -17,12 +17,19 @@ import { MediaResourceType } from '@media/contracts/constant'
 import { ArrayMediaMaxSize } from '@common/validators/array-media-max-size.validator'
 import { BaseAssignmentDto, CreateAssignmentDto } from './assignment.dto'
 
+export class SessionMediaDto extends BaseMediaDto {
+  @ApiPropertyOptional({ type: Boolean })
+  @IsOptional()
+  @IsBoolean()
+  isAddedLater: boolean
+}
+
 export class BaseSessionDto {
   @ApiProperty({ type: String })
   @IsOptional()
   @IsMongoId()
   _id: string
-  
+
   @ApiProperty({ type: Number })
   sessionNumber: number
 
@@ -37,13 +44,13 @@ export class BaseSessionDto {
   @MaxLength(500)
   description: string
 
-  @ApiProperty({ type: BaseMediaDto, isArray: true })
+  @ApiProperty({ type: SessionMediaDto, isArray: true })
   @IsArray()
   @ArrayMediaMaxSize(1, MediaResourceType.video)
   @ArrayMediaMaxSize(10, MediaResourceType.image)
-  @Type(() => BaseMediaDto)
+  @Type(() => SessionMediaDto)
   @ValidateNested({ each: true })
-  media: BaseMediaDto[]
+  media: SessionMediaDto[]
 
   @ApiPropertyOptional({ type: BaseAssignmentDto, isArray: true })
   @IsOptional()
@@ -55,7 +62,15 @@ export class BaseSessionDto {
   assignments: BaseAssignmentDto[]
 }
 
-export class CreateSessionDto extends PickType(BaseSessionDto, ['title', 'description', 'media']) {
+export class CreateSessionDto extends PickType(BaseSessionDto, ['title', 'description']) {
+  @ApiProperty({ type: BaseMediaDto, isArray: true })
+  @IsArray()
+  @ArrayMediaMaxSize(1, MediaResourceType.video)
+  @ArrayMediaMaxSize(10, MediaResourceType.image)
+  @Type(() => BaseMediaDto)
+  @ValidateNested({ each: true })
+  media: BaseMediaDto[]
+
   @ApiPropertyOptional({ type: CreateAssignmentDto, isArray: true })
   @IsOptional()
   @IsArray()
@@ -67,3 +82,13 @@ export class CreateSessionDto extends PickType(BaseSessionDto, ['title', 'descri
 }
 
 export class UpdateSessionDto extends CreateSessionDto {}
+
+export class UploadSessionResourcesDto {
+  @ApiProperty({ type: SessionMediaDto, isArray: true })
+  @IsArray()
+  @ArrayMediaMaxSize(1, MediaResourceType.video)
+  @ArrayMediaMaxSize(2, MediaResourceType.image)
+  @Type(() => SessionMediaDto)
+  @ValidateNested({ each: true })
+  media: SessionMediaDto[]
+}

@@ -229,6 +229,11 @@ export const Errors = {
     message: 'Thời gian học của lớp trùng với thời gian học của bạn.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  CLASS_NOT_START_YET: {
+    error: 'CLASS_NOT_START_YET',
+    message: 'Lớp học chưa bắt đầu. Vui lòng quay lại sau.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
   CLASS_END_TIME_INVALID: {
     error: 'CLASS_END_TIME_INVALID',
     message: 'Chưa đến thời gian kết thúc lớp học.',

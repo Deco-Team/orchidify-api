@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req, Post, Body } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param, Req, Post, Body, Patch } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
 import { ErrorResponse, PaginationQuery, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { SubmissionStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, SubmissionStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -27,6 +27,7 @@ import { Types } from 'mongoose'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 import { AssignmentSubmissionListDataResponse } from '@class/dto/view-assignment-submission.dto'
 import { GradeAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
+import { UploadSessionResourcesDto } from '@class/dto/session.dto'
 
 @ApiTags('Class - Instructor')
 @ApiBearerAuth()
@@ -201,6 +202,50 @@ export class InstructorClassController {
         status: SubmissionStatus.GRADED
       }
     )
+    return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `Upload Session Resources`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.SESSION_NOT_FOUND, Errors.CLASS_NOT_START_YET])
+  @Patch(':classId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})/upload-resources')
+  async uploadSessionResources(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('sessionId') sessionId: string,
+    @Body() uploadSessionResourcesDto: UploadSessionResourcesDto
+  ) {
+    const { _id: instructorId } = _.get(req, 'user')
+
+    const courseClass = await this.classService.findById(classId, '+sessions')
+    if (!courseClass || courseClass.instructorId.toString() !== instructorId)
+      throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    // BR-44: After the class starts, instructors can upload more session’s resources.
+    if (courseClass.status !== ClassStatus.IN_PROGRESS) throw new AppException(Errors.CLASS_NOT_START_YET)
+
+    const session = courseClass?.sessions.find((session) => session._id.toString() === sessionId)
+    if (!session) throw new AppException(Errors.SESSION_NOT_FOUND)
+
+    const originalMedia = session.media.filter((media) => media.isAddedLater !== true)
+
+    // BR-45: Instructors can only delete  session’s resources that were added after the class started.
+    // @ArrayMediaMaxSize(1, MediaResourceType.video)
+    // @ArrayMediaMaxSize(10, MediaResourceType.image)
+
+    const additionalMedia = uploadSessionResourcesDto.media.map((media) => ({ ...media, isAddedLater: true }))
+
+    await this.classService.update(
+      { 'sessions._id': new Types.ObjectId(sessionId) },
+      {
+        $set: {
+          'sessions.$.media': [...originalMedia, ...additionalMedia]
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 }
