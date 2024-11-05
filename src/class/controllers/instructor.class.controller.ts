@@ -231,10 +231,6 @@ export class InstructorClassController {
 
     const originalMedia = session.media.filter((media) => media.isAddedLater !== true)
 
-    // BR-45: Instructors can only delete  session’s resources that were added after the class started.
-    // @ArrayMediaMaxSize(1, MediaResourceType.video)
-    // @ArrayMediaMaxSize(10, MediaResourceType.image)
-
     const additionalMedia = uploadSessionResourcesDto.media.map((media) => ({ ...media, isAddedLater: true }))
 
     await this.classService.update(
