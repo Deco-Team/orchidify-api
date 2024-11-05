@@ -28,6 +28,7 @@ import { SettingModule } from '@setting/setting.module'
 import { TransactionModule } from '@transaction/transaction.module'
 import { QueueModule } from './queue/queue.module'
 import { AttendanceModule } from '@attendance/attendance.module'
+import { PayoutRequestModule } from '@payout-request/payout-request.module'
 
 @Module({
   imports: [
@@ -137,6 +138,10 @@ import { AttendanceModule } from '@attendance/attendance.module'
         module: ClassRequestModule
       },
       {
+        path: 'payout-requests',
+        module: PayoutRequestModule
+      },
+      {
         path: 'transactions',
         module: TransactionModule
       },
@@ -162,6 +167,7 @@ import { AttendanceModule } from '@attendance/attendance.module'
     GardenTimesheetModule,
     AuthModule,
     ClassRequestModule,
+    PayoutRequestModule,
     TransactionModule,
     QueueModule,
     AttendanceModule

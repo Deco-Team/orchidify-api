@@ -141,3 +141,11 @@ export enum AttendanceStatus {
   PRESENT = 'PRESENT',
   ABSENT = 'ABSENT'
 }
+
+export enum PayoutRequestStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  EXPIRED = 'EXPIRED',
+  REJECTED = 'REJECTED',
+  CANCELED = 'CANCELED'
+}

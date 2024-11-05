@@ -44,7 +44,12 @@ export interface IClassRequestService {
     payload: UpdateQuery<ClassRequest>,
     options?: QueryOptions | undefined
   ): Promise<ClassRequestDocument>
-  list(pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto)
+  list(
+    pagination: PaginationParams,
+    queryClassRequestDto: QueryClassRequestDto,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  )
   findMany(
     conditions: FilterQuery<ClassRequestDocument>,
     projection?: Record<string, any>,
@@ -122,7 +127,8 @@ export class ClassRequestService implements IClassRequestService {
   async list(
     pagination: PaginationParams,
     queryClassRequestDto: QueryClassRequestDto,
-    projection = CLASS_REQUEST_LIST_PROJECTION
+    projection = CLASS_REQUEST_LIST_PROJECTION,
+    populates?: Array<PopulateOptions>
   ) {
     const { type, status, createdBy } = queryClassRequestDto
     const filter: Record<string, any> = {}
@@ -155,7 +161,8 @@ export class ClassRequestService implements IClassRequestService {
 
     return this.classRequestRepository.model.paginate(filter, {
       ...pagination,
-      projection: ['-metadata.sessions', '-metadata.media', '-histories']
+      projection: ['-metadata.sessions', '-metadata.media', '-histories'],
+      populate: populates
     })
   }
 
@@ -493,12 +500,12 @@ export class ClassRequestService implements IClassRequestService {
     const dateMoment = moment.tz(date, VN_TIMEZONE)
     const expiredDate = dateMoment.clone().add(Number(classRequestAutoExpiration.value) || 2, 'day')
     let expiredAt = expiredDate.clone()
-    
+
     // check in weekdays
     let currentDate = dateMoment.clone()
     while (currentDate.isSameOrBefore(expiredDate)) {
       // Sunday: isoWeekday=7
-      if(currentDate.clone().isoWeekday() === 7) {
+      if (currentDate.clone().isoWeekday() === 7) {
         expiredAt.add(1, 'day')
       }
       currentDate.add(1, 'day')
