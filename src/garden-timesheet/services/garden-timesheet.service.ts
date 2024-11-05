@@ -362,15 +362,44 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     this.appLogger.debug(`groupGardenTimesheets.length=${groupGardenTimesheets.length}`)
     this.appLogger.debug(`totalNumberOfDays=${duration * weekdays.length}`)
     this.appLogger.debug(`searchDates.length=${searchDates.length}`)
-    const availableGroupGardenTimesheets = groupGardenTimesheets.filter(
-      (groupGardenTimesheet) => groupGardenTimesheet.count === searchDates.length
-    )
+    
+    const availableGroupGardenTimesheets = []
+    const unavailableGroupGardenTimesheets = []
+    groupGardenTimesheets.forEach((groupGardenTimesheet) => {
+      if (groupGardenTimesheet.count === searchDates.length) {
+        availableGroupGardenTimesheets.push(groupGardenTimesheet)
+      } else {
+        unavailableGroupGardenTimesheets.push(groupGardenTimesheet)
+      }
+    })
+
     if (availableGroupGardenTimesheets.length === 0) return { slotNumbers: [] }
     this.appLogger.debug(`availableGroupGardenTimesheets.length=${availableGroupGardenTimesheets.length}`)
 
     let availableTimeOfGardens = []
     let availableTime = []
     let notAvailableSlots = new Set()
+
+    for (const unavailableGroupGardenTimesheet of unavailableGroupGardenTimesheets) {
+      for (const gardenTimesheet of unavailableGroupGardenTimesheet.timesheets as GardenTimesheet[]) {
+        const slots = gardenTimesheet.slots as Slot[]
+        if (slots?.length !== 0) {
+          const groupSlots = _.groupBy(slots, 'slotNumber')
+          SLOT_NUMBERS.forEach((slotNumber) => {
+            const groupSlot = _.get(groupSlots, slotNumber)
+            const isSlotBusyByInstructor =
+              groupSlot &&
+              groupSlot?.length > 0 &&
+              groupSlot.find((slot) => slot.instructorId?.toString() === instructorId?.toString()) !== undefined
+
+            if (isSlotBusyByInstructor) {
+              notAvailableSlots.add(slotNumber)
+            }
+          })
+        }
+      }
+    }
+
     for (const availableGroupGardenTimesheet of availableGroupGardenTimesheets) {
       let availableGardenSlots = SLOT_NUMBERS
       for (const gardenTimesheet of availableGroupGardenTimesheet.timesheets as GardenTimesheet[]) {
