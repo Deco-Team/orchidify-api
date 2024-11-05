@@ -5,32 +5,31 @@ import { Transaction, TransactionDocument } from '@src/transaction/schemas/trans
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { TransactionStatus } from '@common/contracts/constant'
-import { MongoServerError } from 'mongodb'
-import { AppException } from '@common/exceptions/app.exception'
-import { Errors } from '@common/contracts/error'
 import { AppLogger } from '@common/services/app-logger.service'
 import { CreateTransactionDto } from '@transaction/dto/create-transaction.dto'
+import { QueryTransactionDto } from '@transaction/dto/view-transaction.dto'
+import { PaymentMethod, TRANSACTION_LIST_PROJECTION, TransactionType } from '@transaction/contracts/constant'
 
 export const ITransactionService = Symbol('ITransactionService')
 
 export interface ITransactionService {
   create(createTransactionDto: CreateTransactionDto, options?: SaveOptions | undefined): Promise<TransactionDocument>
-  // findById(
-  //   transactionId: string,
-  //   projection?: string | Record<string, any>,
-  //   populates?: Array<PopulateOptions>
-  // ): Promise<TransactionDocument>
-  // update(
-  //   conditions: FilterQuery<Transaction>,
-  //   payload: UpdateQuery<Transaction>,
-  //   options?: QueryOptions | undefined
-  // ): Promise<TransactionDocument>
-  // list(
-  //   pagination: PaginationParams,
-  //   queryTransactionDto: QueryTransactionDto,
-  //   projection?: string | Record<string, any>,
-  //   populate?: Array<PopulateOptions>
-  // )
+  findById(
+    transactionId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<TransactionDocument>
+  update(
+    conditions: FilterQuery<Transaction>,
+    payload: UpdateQuery<Transaction>,
+    options?: QueryOptions | undefined
+  ): Promise<TransactionDocument>
+  list(
+    pagination: PaginationParams,
+    queryTransactionDto: QueryTransactionDto,
+    projection?: string | Record<string, any>,
+    populate?: Array<PopulateOptions>
+  )
 }
 
 @Injectable()
@@ -68,40 +67,55 @@ export class TransactionService implements ITransactionService {
     return await this.transactionRepository.findOneAndUpdate(conditions, payload, options)
   }
 
-  // async list(
-  //   pagination: PaginationParams,
-  //   queryCourseDto: QueryTransactionDto,
-  //   projection = GARDEN_LIST_PROJECTION,
-  //   populate?: Array<PopulateOptions>
-  // ) {
-  //   const { name, address, status, transactionManagerId } = queryCourseDto
-  //   const filter: Record<string, any> = {}
-  //   if (transactionManagerId) {
-  //     filter['transactionManagerId'] = transactionManagerId
-  //   }
+  async list(
+    pagination: PaginationParams,
+    queryTransactionDto: QueryTransactionDto,
+    projection = TRANSACTION_LIST_PROJECTION,
+    populate?: Array<PopulateOptions>
+  ) {
+    const { type, paymentMethod, status, fromAmount, toAmount } = queryTransactionDto
+    const filter: Record<string, any> = {
+      status: {
+        $in: [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED]
+      }
+    }
 
-  //   const validStatus = status?.filter((status) =>
-  //     [TransactionStatus.ACTIVE, TransactionStatus.INACTIVE].includes(status)
-  //   )
-  //   if (validStatus?.length > 0) {
-  //     filter['status'] = {
-  //       $in: validStatus
-  //     }
-  //   }
+    const validType = type?.filter((type) => [TransactionType.PAYMENT, TransactionType.PAYOUT].includes(type))
+    if (validType?.length > 0) {
+      filter['type'] = {
+        $in: validType
+      }
+    }
 
-  //   let textSearch = ''
-  //   if (name) textSearch += name.trim()
-  //   if (address) textSearch += ' ' + address.trim()
-  //   if (textSearch) {
-  //     filter['$text'] = {
-  //       $search: textSearch.trim()
-  //     }
-  //   }
+    const validPaymentMethod = paymentMethod?.filter((paymentMethod) =>
+      [PaymentMethod.STRIPE, PaymentMethod.MOMO].includes(paymentMethod)
+    )
+    if (validPaymentMethod?.length > 0) {
+      filter['paymentMethod'] = {
+        $in: validPaymentMethod
+      }
+    }
 
-  //   return this.transactionRepository.model.paginate(filter, {
-  //     ...pagination,
-  //     projection,
-  //     populate
-  //   })
-  // }
+    const validStatus = status?.filter((status) =>
+      [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED].includes(status)
+    )
+    if (validStatus?.length > 0) {
+      filter['status'] = {
+        $in: validStatus
+      }
+    }
+
+    if (fromAmount !== undefined && toAmount !== undefined) {
+      filter['amount'] = {
+        $gte: fromAmount,
+        $lte: toAmount
+      }
+    }
+
+    return this.transactionRepository.model.paginate(filter, {
+      ...pagination,
+      projection,
+      populate
+    })
+  }
 }
