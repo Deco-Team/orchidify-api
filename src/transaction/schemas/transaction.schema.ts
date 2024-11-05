@@ -72,10 +72,7 @@ export class Transaction {
   @Prop({ enum: TransactionType, required: true })
   type: TransactionType
 
-  @Prop({
-    enum: PaymentMethod,
-    required: true
-  })
+  @Prop({ enum: PaymentMethod })
   paymentMethod: PaymentMethod
 
   @Prop({ type: Number, required: true })

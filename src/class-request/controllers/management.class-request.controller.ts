@@ -20,6 +20,7 @@ import {
 import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
 import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto'
 import { ApprovePublishClassRequestDto } from '@class-request/dto/approve-publish-class-request.dto'
+import { CLASS_LIST_PROJECTION } from '@class/contracts/constant'
 
 @ApiTags('ClassRequest - Management')
 @ApiBearerAuth()
@@ -40,7 +41,12 @@ export class ManagementClassRequestController {
   @Roles(UserRole.STAFF)
   @Get()
   async list(@Pagination() pagination: PaginationParams, @Query() queryClassRequestDto: QueryClassRequestDto) {
-    return await this.classRequestService.list(pagination, queryClassRequestDto)
+    return await this.classRequestService.list(pagination, queryClassRequestDto, CLASS_LIST_PROJECTION, [
+      {
+        path: 'createdBy',
+        select: ['_id', 'name', 'email', 'idCardPhoto', 'avatar']
+      }
+    ])
   }
 
   @ApiOperation({

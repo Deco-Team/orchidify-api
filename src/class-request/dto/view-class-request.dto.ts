@@ -53,8 +53,15 @@ export class InstructorViewClassRequestDetailDataResponse extends DataResponse(
 ) {}
 
 // Management
-export class StaffViewClassRequestListDataResponse extends InstructorViewClassRequestListDataResponse {}
-class ClassRequestCreatedByDto extends PickType(BaseInstructorDto, ['_id', 'name', 'phone', 'email', 'idCardPhoto', 'avatar']) {}
+class ClassRequestCreatedByDto extends PickType(BaseInstructorDto, ['_id', 'name', 'email', 'idCardPhoto', 'avatar']) {}
+
+class StaffViewClassRequestListItemResponse extends PickType(BaseClassRequestDto, CLASS_REQUEST_LIST_PROJECTION) {
+  @ApiProperty({ type: ClassRequestCreatedByDto })
+  createdBy: Types.ObjectId | BaseInstructorDto
+}
+class StaffViewClassRequestListResponse extends PaginateResponse(StaffViewClassRequestListItemResponse) {}
+export class StaffViewClassRequestListDataResponse extends DataResponse(StaffViewClassRequestListResponse) {}
+
 class StaffViewClassRequestDetailResponse extends InstructorViewClassRequestDetailResponse {
   @ApiProperty({ type: ClassRequestCreatedByDto })
   createdBy: Types.ObjectId | BaseInstructorDto

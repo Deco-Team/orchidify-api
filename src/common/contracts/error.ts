@@ -384,4 +384,28 @@ export const Errors = {
     message: 'Đã hết thời gian điểm danh.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+
+  /**
+   * Payout Request
+   */
+  PAYOUT_REQUEST_NOT_FOUND: {
+    error: 'PAYOUT_REQUEST_NOT_FOUND',
+    message: 'Không tìm thấy yêu cầu rút tiền.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  PAYOUT_REQUEST_STATUS_INVALID: {
+    error: 'PAYOUT_REQUEST_STATUS_INVALID',
+    message: 'Trạng thái của yêu cầu rút tiền không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CREATE_PAYOUT_REQUEST_LIMIT: {
+    error: 'CREATE_PAYOUT_REQUEST_LIMIT',
+    message: 'Bạn đã đạt số lượng tạo yêu cầu rút tiền trong ngày.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST: {
+    error: 'NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST',
+    message: 'Số dư không đủ để tạo yêu cầu rút tiền.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 }

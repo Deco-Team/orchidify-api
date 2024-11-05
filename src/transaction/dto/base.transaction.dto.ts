@@ -9,7 +9,7 @@ import {
   Min,
   ValidateNested
 } from 'class-validator'
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { TransactionStatus, UserRole } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { PaymentMethod, TransactionType } from '@src/transaction/contracts/constant'
@@ -54,7 +54,7 @@ export class BasePayoutDto {
   status: string
 
   // @ApiProperty({ type: BasePayoutDto, isArray: true })
-  histories: BasePayoutDto[]
+  histories?: BasePayoutDto[]
 }
 
 export class BaseTransactionDto {
@@ -66,9 +66,10 @@ export class BaseTransactionDto {
   @IsEnum(TransactionType)
   type: TransactionType
 
-  @ApiProperty({ type: String, enum: PaymentMethod })
+  @ApiPropertyOptional({ type: String, enum: PaymentMethod })
+  @IsOptional()
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod
+  paymentMethod?: PaymentMethod
 
   @ApiProperty({ type: Number, example: 500_000 })
   @IsNumber()
