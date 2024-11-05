@@ -36,7 +36,7 @@ export class BasePaymentDto {
   @ApiProperty({ type: String })
   status: string
 
-  @ApiProperty({ type: BasePaymentDto, isArray: true })
+  // @ApiProperty({ type: BasePaymentDto, isArray: true })
   histories?: BasePaymentDto[]
 }
 
@@ -53,7 +53,7 @@ export class BasePayoutDto {
   @ApiProperty({ type: String })
   status: string
 
-  @ApiProperty({ type: BasePayoutDto, isArray: true })
+  // @ApiProperty({ type: BasePayoutDto, isArray: true })
   histories: BasePayoutDto[]
 }
 

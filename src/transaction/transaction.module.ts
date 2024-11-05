@@ -11,6 +11,7 @@ import { PayOSPaymentStrategy } from '@src/transaction/strategies/payos.strategy
 import { ITransactionService, TransactionService } from './services/transaction.service'
 import { LearnerModule } from '@learner/learner.module'
 import { StripePaymentStrategy } from './strategies/stripe.strategy'
+import { TransactionController } from './controllers/transaction.controller'
 
 @Global()
 @Module({
@@ -19,7 +20,7 @@ import { StripePaymentStrategy } from './strategies/stripe.strategy'
     HttpModule,
     LearnerModule
   ],
-  controllers: [PaymentController],
+  controllers: [PaymentController, TransactionController],
   providers: [
     {
       provide: IPaymentService,

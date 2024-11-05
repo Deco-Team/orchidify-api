@@ -33,3 +33,32 @@ export enum StripeStatus {
   SUCCEEDED = 'succeeded',
   REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
 }
+
+
+export const TRANSACTION_LIST_PROJECTION = [
+  '_id',
+  'type',
+  'paymentMethod',
+  'amount',
+  'debitAccount',
+  'creditAccount',
+  'description',
+  'status',
+  'createdAt',
+  'updatedAt'
+] as const
+
+export const TRANSACTION_DETAIL_PROJECTION = [
+  '_id',
+  'type',
+  'paymentMethod',
+  'amount',
+  'debitAccount',
+  'creditAccount',
+  'description',
+  'status',
+  'payment',
+  'payout',
+  'createdAt',
+  'updatedAt'
+] as const
