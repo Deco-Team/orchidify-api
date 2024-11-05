@@ -302,8 +302,6 @@ describe('AuthService', () => {
       const learnerRegisterDto: LearnerRegisterDto = {
         name: 'John Doe',
         email: 'existing@email.com',
-        dateOfBirth: new Date(),
-        phone: '1234567890',
         password: 'password'
       }
 
@@ -321,8 +319,6 @@ describe('AuthService', () => {
       const learnerRegisterDto: LearnerRegisterDto = {
         name: 'John Doe',
         email: 'valid@email.com',
-        dateOfBirth: new Date(),
-        phone: '1234567890',
         password: 'password'
       }
 
@@ -342,8 +338,6 @@ describe('AuthService', () => {
       const learnerRegisterDto: LearnerRegisterDto = {
         name: 'John Doe',
         email: 'valid@email.com',
-        dateOfBirth: new Date(),
-        phone: '1234567890',
         password: 'password'
       }
 

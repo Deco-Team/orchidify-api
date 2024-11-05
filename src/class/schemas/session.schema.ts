@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument } from 'mongoose'
 import { Transform } from 'class-transformer'
-import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { Assignment, AssignmentSchema } from './assignment.schema'
+import { SessionMediaDto } from '@class/dto/session.dto'
 
 export type SessionDocument = HydratedDocument<Session>
 
@@ -25,8 +25,8 @@ export class Session {
   @Prop({ type: String, required: true })
   description: string
 
-  @Prop({ type: [BaseMediaDto], required: true })
-  media: BaseMediaDto[]
+  @Prop({ type: [SessionMediaDto], required: true })
+  media: SessionMediaDto[]
   
   @Prop({ type: [AssignmentSchema] })
   assignments: Assignment[]
