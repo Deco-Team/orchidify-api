@@ -12,6 +12,7 @@ export enum JobName {
   // Class
   UpdateClassStatusInProgress = 'UpdateClassStatusInProgress',
   UpdateClassProgressEndSlot = 'UpdateClassProgressEndSlot',
+  ClassAutoCompleted = 'ClassAutoCompleted',
   // Recruitment
   RecruitmentAutoExpired = 'RecruitmentAutoExpired',
   // Payout Request
@@ -24,5 +25,6 @@ export enum JobSchedulerKey {
   UpdateClassProgressEndSlot1Scheduler = 'UpdateClassProgressEndSlot1Scheduler',
   UpdateClassProgressEndSlot2Scheduler = 'UpdateClassProgressEndSlot2Scheduler',
   UpdateClassProgressEndSlot3Scheduler = 'UpdateClassProgressEndSlot3Scheduler',
-  UpdateClassProgressEndSlot4Scheduler = 'UpdateClassProgressEndSlot4Scheduler'
+  UpdateClassProgressEndSlot4Scheduler = 'UpdateClassProgressEndSlot4Scheduler',
+  CompleteClassScheduler = 'CompleteClassScheduler',
 }

@@ -8,6 +8,8 @@ import { Job } from 'bullmq'
 import { VN_TIMEZONE } from '@src/config'
 import { IClassService } from '@class/services/class.service'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
+import { ISettingService } from '@setting/services/setting.service'
+import { SettingKey } from '@setting/contracts/constant'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
@@ -16,7 +18,9 @@ export class ClassQueueConsumer extends WorkerHost {
     @Inject(IClassService)
     private readonly classService: IClassService,
     @Inject(IGardenTimesheetService)
-    private readonly gardenTimesheetService: IGardenTimesheetService
+    private readonly gardenTimesheetService: IGardenTimesheetService,
+    @Inject(ISettingService)
+    private readonly settingService: ISettingService
   ) {
     super()
   }
@@ -30,6 +34,9 @@ export class ClassQueueConsumer extends WorkerHost {
         }
         case JobName.UpdateClassProgressEndSlot: {
           return await this.updateClassProgressEndSlot(job)
+        }
+        case JobName.ClassAutoCompleted: {
+          return await this.completeClassAutomatically(job)
         }
         default:
       }
@@ -156,6 +163,45 @@ export class ClassQueueConsumer extends WorkerHost {
     } catch (error) {
       this.appLogger.error(
         `[updateClassProgressEndSlot]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(
+          job.data
+        )}, error=${error}`
+      )
+      return false
+    }
+  }
+
+  async completeClassAutomatically(job: Job) {
+    this.appLogger.debug(
+      `[completeClassAutomatically]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`
+    )
+
+    try {
+      this.appLogger.log(`[completeClassAutomatically]: Start complete class ... id=${job.id}`)
+
+      const startOfDate = moment().tz(VN_TIMEZONE).startOf('date')
+      const classAutoCompleteAfterDay =
+        Number((await this.settingService.findByKey(SettingKey.ClassAutoCompleteAfterDay)).value) || 5
+
+      const courseClasses = await this.classService.findMany({
+        status: ClassStatus.IN_PROGRESS
+      })
+
+      const completeClassPromises = []
+      courseClasses.forEach((courseClass) => {
+        const { startDate, duration, weekdays } = courseClass
+        const classEndTime = this.classService.getClassEndTime({ startDate, duration, weekdays })
+
+        if (classEndTime.clone().add(classAutoCompleteAfterDay, 'day').isSameOrAfter(startOfDate)) {
+          completeClassPromises.push(this.classService.completeClass(courseClass._id, { role: 'SYSTEM' as UserRole }))
+        }
+      })
+      await Promise.all(completeClassPromises)
+
+      this.appLogger.log(`[completeClassAutomatically]: End complete class... id=${job.id}`)
+      return { status: true, numbersOfCompletedClass: completeClassPromises.length }
+    } catch (error) {
+      this.appLogger.error(
+        `[completeClassAutomatically]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(
           job.data
         )}, error=${error}`
       )

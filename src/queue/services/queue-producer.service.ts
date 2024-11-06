@@ -30,6 +30,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
     if (process.env.NODE_ENV !== 'local') {
       await this.scheduleUpdateClassStatusJob()
       await this.scheduleUpdateClassProgressJob()
+      await this.scheduleAutoCompleteClassJob()
     }
 
     // Inject all queue to queueMap
@@ -161,5 +162,18 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
         }
       )
     ])
+  }
+
+  private async scheduleAutoCompleteClassJob(): Promise<void> {
+    await this.classQueue.upsertJobScheduler(
+      JobSchedulerKey.CompleteClassScheduler,
+      {
+        pattern: '0 6 * * *',
+        tz: VN_TIMEZONE
+      },
+      {
+        name: JobName.ClassAutoCompleted
+      }
+    )
   }
 }

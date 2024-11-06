@@ -54,7 +54,8 @@ class PayoutRequestCreatedByDto extends PickType(BaseInstructorDto, [
   'phone',
   'email',
   'idCardPhoto',
-  'avatar'
+  'avatar',
+  'paymentInfo'
 ]) {}
 
 class StaffViewPayoutRequestListItemResponse extends PickType(BasePayoutRequestDto, PAYOUT_REQUEST_LIST_PROJECTION) {

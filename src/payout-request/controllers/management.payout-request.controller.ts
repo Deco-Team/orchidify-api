@@ -42,7 +42,7 @@ export class ManagementPayoutRequestController {
     return await this.payoutRequestService.list(pagination, queryPayoutRequestDto, PAYOUT_REQUEST_LIST_PROJECTION, [
       {
         path: 'createdBy',
-        select: ['_id', 'name', 'email', 'idCardPhoto', 'avatar']
+        select: ['_id', 'name', 'email', 'idCardPhoto', 'avatar', 'paymentInfo']
       }
     ])
   }
@@ -55,15 +55,15 @@ export class ManagementPayoutRequestController {
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') payoutRequestId: string) {
-    const classRequest = await this.payoutRequestService.findById(payoutRequestId, PAYOUT_REQUEST_DETAIL_PROJECTION, [
+    const payoutRequest = await this.payoutRequestService.findById(payoutRequestId, PAYOUT_REQUEST_DETAIL_PROJECTION, [
       {
         path: 'createdBy',
-        select: ['_id', 'name', 'phone', 'email', 'idCardPhoto', 'avatar']
+        select: ['_id', 'name', 'email', 'idCardPhoto', 'avatar', 'paymentInfo']
       }
     ])
 
-    if (!classRequest) throw new AppException(Errors.PAYOUT_REQUEST_NOT_FOUND)
-    return classRequest
+    if (!payoutRequest) throw new AppException(Errors.PAYOUT_REQUEST_NOT_FOUND)
+    return payoutRequest
   }
 
   @ApiOperation({
