@@ -17,7 +17,6 @@ import { Pagination, PaginationParams } from '@common/decorators/pagination.deco
 @ApiBearerAuth()
 @ApiBadRequestResponse({ type: ErrorResponse })
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
-@Roles(UserRole.STAFF)
 @Controller('management')
 export class ManagementFeedbackController {
   constructor(
@@ -26,10 +25,11 @@ export class ManagementFeedbackController {
   ) {}
 
   @ApiOperation({
-    summary: `View Course's Feedback List`
+    summary: `[${UserRole.STAFF}] View Course's Feedback List`
   })
   @ApiQuery({ type: PaginationQuery })
   @ApiOkResponse({ type: CourseFeedbackListDataResponse })
+  @Roles(UserRole.STAFF)
   @Get('courses/:courseId([0-9a-f]{24})')
   async listCourseFeedback(
     @Param('courseId') courseId: string,
@@ -46,9 +46,10 @@ export class ManagementFeedbackController {
   }
 
   @ApiOperation({
-    summary: `View Class's Feedback List`
+    summary: `[${UserRole.STAFF}] View Class's Feedback List`
   })
   @ApiOkResponse({ type: ClassFeedbackListDataResponse })
+  @Roles(UserRole.STAFF)
   @Get('classes/:classId([0-9a-f]{24})')
   async listClassFeedback(@Param('classId') classId: string, @Query() queryFeedbackDto: QueryFeedbackDto) {
     const { rate } = queryFeedbackDto
