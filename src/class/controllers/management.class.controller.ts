@@ -153,44 +153,11 @@ export class ManagementClassController {
 
     // check valid classEndDate
     const { startDate, duration, weekdays, slotNumbers } = courseClass
-    const classEndTime = this.getClassEndTime({ startDate, duration, weekdays, slotNumbers })
+    const classEndTime = this.classService.getClassEndTime({ startDate, duration, weekdays, slotNumbers })
     if (moment().tz(VN_TIMEZONE).isBefore(classEndTime)) throw new AppException(Errors.CLASS_END_TIME_INVALID)
 
     const user = _.get(req, 'user')
     await this.classService.completeClass(classId, user)
     return new SuccessResponse(true)
-  }
-
-  private getClassEndTime({ startDate, duration, weekdays, slotNumbers }): moment.Moment {
-    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
-    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
-
-    const classDates: moment.Moment[] = []
-    let currentDate = startOfDate.clone()
-    while (currentDate.isSameOrBefore(endOfDate)) {
-      for (let weekday of weekdays) {
-        const classDate = currentDate.clone().isoWeekday(weekday)
-        if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
-          classDates.push(classDate)
-        }
-      }
-      currentDate.add(1, 'week')
-    }
-    let classEndTime = classDates[classDates.length - 1]
-    switch (slotNumbers[0]) {
-      case SlotNumber.ONE:
-        classEndTime = classEndTime.clone().add(9, 'hour')
-        break
-      case SlotNumber.TWO:
-        classEndTime = classEndTime.clone().add(11, 'hour').add(30, 'minute')
-        break
-      case SlotNumber.THREE:
-        classEndTime = classEndTime.clone().add(15, 'hour')
-        break
-      case SlotNumber.FOUR:
-        classEndTime = classEndTime.clone().add(17, 'hour').add(30, 'minute')
-        break
-    }
-    return classEndTime
   }
 }

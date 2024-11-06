@@ -21,7 +21,8 @@ import {
   SlotNumber,
   SlotStatus,
   TransactionStatus,
-  UserRole
+  UserRole,
+  Weekday
 } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
@@ -74,6 +75,12 @@ export interface IClassService {
   generateCode(): Promise<string>
   enrollClass(enrollClassDto: EnrollClassDto): Promise<CreateMomoPaymentResponse>
   completeClass(classId: string, userAuth: UserAuth): Promise<void>
+  getClassEndTime(params: {
+    startDate: Date
+    duration: number
+    weekdays: Weekday[]
+    slotNumbers?: SlotNumber[]
+  }): moment.Moment
 }
 
 @Injectable()
@@ -544,16 +551,16 @@ export class ClassService implements IClassService {
         // If the quality is average (feedback rate >= 2), the instructor receives 50% salary.
         // If the quality is poor (feedback rate < 2), the instructor receives 30% salary.
         // BR-54: Salary will be rounded down before being transferred to balance.
-        let salary: number = 0
-        if (rate >= 4) {
-          salary = Math.floor(price * (1 - commissionRate))
-        } else if (rate < 4 && rate >= 3) {
-          salary = Math.floor(price * (1 - commissionRate) * 0.7)
-        } else if (rate < 3 && rate >= 2) {
-          salary = Math.floor(price * (1 - commissionRate) * 0.5)
-        } else if (rate < 2) {
-          salary = Math.floor(price * (1 - commissionRate) * 0.3)
-        }
+        let salary: number = Math.floor(price * (1 - commissionRate))
+        // if (rate >= 4) {
+        //   salary = Math.floor(price * (1 - commissionRate))
+        // } else if (rate < 4 && rate >= 3) {
+        //   salary = Math.floor(price * (1 - commissionRate) * 0.7)
+        // } else if (rate < 3 && rate >= 2) {
+        //   salary = Math.floor(price * (1 - commissionRate) * 0.5)
+        // } else if (rate < 2) {
+        //   salary = Math.floor(price * (1 - commissionRate) * 0.3)
+        // }
         await this.instructorService.update(
           { _id: instructorId },
           {
@@ -566,5 +573,46 @@ export class ClassService implements IClassService {
     }
 
     // send notification for instructor
+  }
+
+  public getClassEndTime(params: {
+    startDate: Date
+    duration: number
+    weekdays: Weekday[]
+    slotNumbers?: SlotNumber[]
+  }): moment.Moment {
+    const { startDate, duration, weekdays, slotNumbers } = params
+    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
+
+    const classDates: moment.Moment[] = []
+    let currentDate = startOfDate.clone()
+    while (currentDate.isSameOrBefore(endOfDate)) {
+      for (let weekday of weekdays) {
+        const classDate = currentDate.clone().isoWeekday(weekday)
+        if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
+          classDates.push(classDate)
+        }
+      }
+      currentDate.add(1, 'week')
+    }
+    let classEndTime = classDates[classDates.length - 1]
+    if (!slotNumbers) return classEndTime
+
+    switch (slotNumbers[0]) {
+      case SlotNumber.ONE:
+        classEndTime = classEndTime.clone().add(9, 'hour')
+        break
+      case SlotNumber.TWO:
+        classEndTime = classEndTime.clone().add(11, 'hour').add(30, 'minute')
+        break
+      case SlotNumber.THREE:
+        classEndTime = classEndTime.clone().add(15, 'hour')
+        break
+      case SlotNumber.FOUR:
+        classEndTime = classEndTime.clone().add(17, 'hour').add(30, 'minute')
+        break
+    }
+    return classEndTime
   }
 }

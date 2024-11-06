@@ -8,6 +8,6 @@ export enum SettingKey {
   PayoutRequestAutoExpiration = 'PayoutRequestAutoExpiration',
   RecruitmentProcessAutoExpiration = 'RecruitmentProcessAutoExpiration',
   CommissionRate = 'CommissionRate',
-  
   CreatePayoutRequestLimitPerDay = 'CreatePayoutRequestLimitPerDay',
+  ClassAutoCompleteAfterDay = 'ClassAutoCompleteAfterDay',
 }
