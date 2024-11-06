@@ -21,6 +21,7 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseAssignmentDto } from '@src/class/dto/assignment.dto'
+import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto'
 
 export class BaseCourseDto {
   @ApiProperty({ type: String })
@@ -116,6 +117,9 @@ export class BaseCourseDto {
 
   @ApiPropertyOptional({ type: Boolean })
   isPublished: Boolean
+
+  @ApiPropertyOptional({ type: BaseRatingSummaryDto })
+  ratingSummary: BaseRatingSummaryDto
 
   @ApiProperty({ type: Date })
   createdAt: Date

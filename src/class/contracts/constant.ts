@@ -14,6 +14,7 @@ export const CLASS_LIST_PROJECTION = [
   'weekdays',
   'slotNumbers',
   'rate',
+  'ratingSummary',
   'courseId',
   'createdAt',
   'updatedAt'
@@ -39,6 +40,7 @@ export const CLASS_DETAIL_PROJECTION = [
   'weekdays',
   'slotNumbers',
   'rate',
+  'ratingSummary',
   'cancelReason',
   'gardenRequiredToolkits',
   'instructorId',
@@ -110,6 +112,7 @@ export const LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION = [
   'weekdays',
   'slotNumbers',
   'rate',
+  'ratingSummary',
   'cancelReason',
   'gardenRequiredToolkits',
   'instructorId',

@@ -156,6 +156,7 @@
       "^@payout-request/(.*)$": "<rootDir>/payout-request/$1",
       "^@queue/(.*)$": "<rootDir>/queue/$1",
       "^@attendance/(.*)$": "<rootDir>/attendance/$1",
+      "^@feedback/(.*)$": "<rootDir>/feedback/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }

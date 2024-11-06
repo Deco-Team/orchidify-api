@@ -29,6 +29,7 @@ import { TransactionModule } from '@transaction/transaction.module'
 import { QueueModule } from './queue/queue.module'
 import { AttendanceModule } from '@attendance/attendance.module'
 import { PayoutRequestModule } from '@payout-request/payout-request.module'
+import { FeedbackModule } from '@feedback/feedback.module'
 
 @Module({
   imports: [
@@ -148,6 +149,10 @@ import { PayoutRequestModule } from '@payout-request/payout-request.module'
       {
         path: 'attendances',
         module: AttendanceModule
+      },
+      {
+        path: 'feedbacks',
+        module: FeedbackModule
       }
     ]),
     TerminusModule.forRoot({
@@ -170,7 +175,8 @@ import { PayoutRequestModule } from '@payout-request/payout-request.module'
     PayoutRequestModule,
     TransactionModule,
     QueueModule,
-    AttendanceModule
+    AttendanceModule,
+    FeedbackModule
   ],
   controllers: [AppController],
   providers: [AppService]

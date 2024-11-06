@@ -23,6 +23,7 @@ import { ClassStatusHistory } from '@src/class/schemas/class.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from './session.dto'
 import { BaseProgressDto } from './progress.dto'
+import { BaseRatingSummaryDto } from './rating-summary.dto'
 
 export class BaseClassDto {
   @ApiProperty({ type: String })
@@ -146,6 +147,9 @@ export class BaseClassDto {
 
   @ApiProperty({ type: BaseProgressDto })
   progress: BaseProgressDto
+
+  @ApiPropertyOptional({ type: BaseRatingSummaryDto })
+  ratingSummary: BaseRatingSummaryDto
 
   @ApiProperty({ type: Date })
   createdAt: Date

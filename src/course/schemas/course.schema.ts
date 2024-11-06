@@ -7,6 +7,7 @@ import { Instructor } from '@instructor/schemas/instructor.schema'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { Session, SessionSchema } from '@class/schemas/session.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
+import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto'
 
 export type CourseDocument = HydratedDocument<Course>
 
@@ -86,6 +87,9 @@ export class Course {
 
   @Prop({ type: Boolean, default: false })
   isPublished: boolean
+
+  @Prop({ type: BaseRatingSummaryDto })
+  ratingSummary: BaseRatingSummaryDto
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course)

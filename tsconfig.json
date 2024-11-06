@@ -84,6 +84,9 @@
       "@payout-request/*": [
         "src/payout-request/*"
       ],
+      "@feedback/*": [
+        "src/feedback/*"
+      ],
       "@src/*": [
         "src/*"
       ]

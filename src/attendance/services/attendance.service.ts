@@ -13,7 +13,7 @@ export const IAttendanceService = Symbol('IAttendanceService')
 export interface IAttendanceService {
   create(takeAttendanceDto: TakeAttendanceDto, options?: SaveOptions | undefined): Promise<AttendanceDocument>
   findById(
-    gardenId: string,
+    attendanceId: string,
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<AttendanceDocument>
@@ -77,18 +77,18 @@ export class AttendanceService implements IAttendanceService {
   }
 
   public async findById(
-    gardenId: string,
+    attendanceId: string,
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ) {
-    const garden = await this.attendanceRepository.findOne({
+    const attendance = await this.attendanceRepository.findOne({
       conditions: {
-        _id: gardenId
+        _id: attendanceId
       },
       projection,
       populates
     })
-    return garden
+    return attendance
   }
 
   public async findOneBy(
@@ -96,12 +96,12 @@ export class AttendanceService implements IAttendanceService {
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ) {
-    const garden = await this.attendanceRepository.findOne({
+    const attendance = await this.attendanceRepository.findOne({
       conditions,
       projection,
       populates
     })
-    return garden
+    return attendance
   }
 
   public async findMany(

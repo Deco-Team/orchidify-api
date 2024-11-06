@@ -9,6 +9,7 @@ import { BaseMediaDto } from '@media/dto/base-media.dto'
 import { Session, SessionSchema } from './session.schema'
 import { CourseLevel } from '@src/common/contracts/constant'
 import { Course } from '@course/schemas/course.schema'
+import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto'
 
 export type ClassDocument = HydratedDocument<Class>
 
@@ -47,6 +48,9 @@ export class Progress {
     transform(doc, ret) {
       delete ret.__v
     },
+    virtuals: true
+  },
+  toObject: {
     virtuals: true
   }
 })
@@ -133,6 +137,9 @@ export class Class {
 
   @Prop({ type: Progress, required: true })
   progress: Progress
+
+  @Prop({ type: BaseRatingSummaryDto })
+  ratingSummary: BaseRatingSummaryDto
 }
 
 export const ClassSchema = SchemaFactory.createForClass(Class)
