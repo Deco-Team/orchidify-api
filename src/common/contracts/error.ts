@@ -239,6 +239,11 @@ export const Errors = {
     message: 'Chưa đến thời gian kết thúc lớp học.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  NOT_ENROLL_CLASS_YET: {
+    error: 'NOT_ENROLL_CLASS_YET',
+    message: 'Bạn chưa đăng ký lớp học này.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Session
@@ -406,6 +411,25 @@ export const Errors = {
   NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST: {
     error: 'NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST',
     message: 'Số dư không đủ để tạo yêu cầu rút tiền.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+
+  /**
+   * Feedback
+   */
+  FEEDBACK_NOT_OPEN_YET: {
+    error: 'FEEDBACK_NOT_OPEN_YET',
+    message: 'Chưa đến thời gian đánh giá lớp học.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  FEEDBACK_IS_OVER: {
+    error: 'FEEDBACK_IS_OVER',
+    message: 'Đã hết thời gian đánh giá lớp học.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  FEEDBACK_SUBMITTED: {
+    error: 'FEEDBACK_SUBMITTED',
+    message: 'Bạn đã gửi đánh giá.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 }
