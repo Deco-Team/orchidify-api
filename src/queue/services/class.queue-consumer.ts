@@ -191,7 +191,10 @@ export class ClassQueueConsumer extends WorkerHost {
         const { startDate, duration, weekdays } = courseClass
         const classEndTime = this.classService.getClassEndTime({ startDate, duration, weekdays })
 
-        if (classEndTime.clone().add(classAutoCompleteAfterDay, 'day').isSameOrAfter(startOfDate)) {
+        if (
+          classEndTime.isBefore(startOfDate) &&
+          classEndTime.clone().add(classAutoCompleteAfterDay, 'day').isSameOrAfter(startOfDate)
+        ) {
           completeClassPromises.push(this.classService.completeClass(courseClass._id, { role: 'SYSTEM' as UserRole }))
         }
       })

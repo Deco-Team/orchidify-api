@@ -209,7 +209,7 @@ export class InstructorClassController {
     summary: `Upload Session Resources`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.SESSION_NOT_FOUND, Errors.CLASS_NOT_START_YET])
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.SESSION_NOT_FOUND, Errors.CLASS_NOT_START_YET, Errors.CLASS_ENDED])
   @Patch(':classId([0-9a-f]{24})/sessions/:sessionId([0-9a-f]{24})/upload-resources')
   async uploadSessionResources(
     @Req() req,
@@ -224,6 +224,7 @@ export class InstructorClassController {
       throw new AppException(Errors.CLASS_NOT_FOUND)
 
     // BR-44: After the class starts, instructors can upload more session’s resources.
+    if (courseClass.status === ClassStatus.COMPLETED) throw new AppException(Errors.CLASS_ENDED)
     if (courseClass.status !== ClassStatus.IN_PROGRESS) throw new AppException(Errors.CLASS_NOT_START_YET)
 
     const session = courseClass?.sessions.find((session) => session._id.toString() === sessionId)
@@ -233,12 +234,21 @@ export class InstructorClassController {
 
     const additionalMedia = uploadSessionResourcesDto.media.map((media) => ({ ...media, isAddedLater: true }))
 
+    const media = [...originalMedia, ...additionalMedia]
+
     await this.classService.update(
-      { 'sessions._id': new Types.ObjectId(sessionId) },
+      { _id: new Types.ObjectId(classId) },
       {
         $set: {
-          'sessions.$.media': [...originalMedia, ...additionalMedia]
+          'sessions.$[i].media': media
         }
+      },
+      {
+        arrayFilters: [
+          {
+            'i._id': new Types.ObjectId(sessionId)
+          }
+        ]
       }
     )
 

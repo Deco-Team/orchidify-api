@@ -13,7 +13,7 @@ import {
 class ArrayMediaMaxSizeValidator implements ValidatorConstraintInterface {
   validate(value: BaseMediaDto[], validationArguments?: ValidationArguments): boolean {
     const { max, resource_type } = validationArguments.constraints[0]
-    const valueByType = value.filter((item: BaseMediaDto) => item.resource_type === resource_type)
+    const valueByType = value?.filter((item: BaseMediaDto) => item.resource_type === resource_type) || []
     return valueByType.length <= max
   }
 

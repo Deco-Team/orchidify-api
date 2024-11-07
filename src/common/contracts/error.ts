@@ -234,6 +234,11 @@ export const Errors = {
     message: 'Lớp học chưa bắt đầu. Vui lòng quay lại sau.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  CLASS_ENDED: {
+    error: 'CLASS_ENDED',
+    message: 'Lớp học đã kết thúc.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
   CLASS_END_TIME_INVALID: {
     error: 'CLASS_END_TIME_INVALID',
     message: 'Chưa đến thời gian kết thúc lớp học.',

@@ -13,7 +13,7 @@ import {
 class ArrayMediaMinSizeValidator implements ValidatorConstraintInterface {
   validate(value: BaseMediaDto[], validationArguments?: ValidationArguments): boolean {
     const { min, resource_type } = validationArguments.constraints[0]
-    const mediaByType = value.filter((item: BaseMediaDto) => item.resource_type === resource_type)
+    const mediaByType = value?.filter((item: BaseMediaDto) => item.resource_type === resource_type) || []
     return mediaByType.length >= min
   }
 
