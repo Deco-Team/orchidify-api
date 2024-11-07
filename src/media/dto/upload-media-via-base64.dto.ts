@@ -1,7 +1,7 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
-import { MediaType } from '@media/contracts/constant'
+import { MediaResourceType, MediaType } from '@media/contracts/constant'
 
 export class UploadMediaViaBase64Dto {
   @ApiProperty({ type: String, example: 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4...' })
@@ -32,6 +32,18 @@ class UploadMediaViaBase64ResponseDto {
   @ApiProperty({ type: String, example: 'images/jlhqjvxdqjshg9xtfvkt' })
   public_id: string
 
+  @ApiPropertyOptional({ type: String, example: 'jpg' })
+  format: string
+
+  @ApiProperty({ enum: MediaResourceType })
+  resource_type: string
+
+  @ApiPropertyOptional({ type: String, example: '2024-09-14T06:51:27Z' })
+  created_at: string
+
+  @ApiProperty({ enum: MediaType })
+  type: string
+
   @ApiProperty({
     type: String,
     example:
@@ -39,14 +51,8 @@ class UploadMediaViaBase64ResponseDto {
   })
   url: string
 
-  @ApiProperty({ type: String, example: 'jlhqjvxdqjshg9xtfvkt' })
-  display_name: string
-
-  @ApiProperty({ type: String, example: 'IMG_0207' })
-  original_filename: string
-
-  @ApiProperty({ type: String, example: 'JPG' })
-  original_extension: string
+  @ApiPropertyOptional({ type: String, example: 'images' })
+  asset_folder: string
 }
 
 export class UploadMediaViaBase64DataResponseDto extends DataResponse(UploadMediaViaBase64ResponseDto) {}

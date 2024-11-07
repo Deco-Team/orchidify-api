@@ -13,19 +13,9 @@ export class BaseMediaDto {
   @IsString()
   public_id: string
 
-  @ApiPropertyOptional({ type: String, example: 'jpg' })
-  @IsOptional()
-  @IsString()
-  format: string
-
   @ApiProperty({ enum: MediaResourceType })
   @IsEnum(MediaResourceType)
   resource_type: string
-
-  @ApiPropertyOptional({ type: String, example: '2024-09-14T06:51:27Z' })
-  @IsOptional()
-  @IsString()
-  created_at: string
 
   @ApiProperty({ enum: MediaType })
   @IsEnum(MediaType)
@@ -36,17 +26,27 @@ export class BaseMediaDto {
   @IsString()
   url: string
 
+  @ApiPropertyOptional({ type: String, example: 'jpg' })
+  @IsOptional()
+  @IsString()
+  format: string
+
+  @ApiPropertyOptional({ type: String, example: '2024-09-14T06:51:27Z' })
+  @IsOptional()
+  @IsString()
+  created_at: string
+
   @ApiPropertyOptional({ type: String, example: 'images' })
   @IsOptional()
   @IsString()
   asset_folder: string
 
-  @ApiProperty({ type: String, example: 'IMG_0207' })
+  @ApiPropertyOptional({ type: String, example: 'IMG_0207' })
   @IsOptional()
   @IsString()
   original_filename: string
 
-  @ApiProperty({ type: String, example: 'JPG' })
+  @ApiPropertyOptional({ type: String, example: 'JPG' })
   @IsOptional()
   @IsString()
   original_extension: string
