@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { IPaymentStrategy } from '@src/transaction/strategies/payment-strategy.interface'
 import {
+  CreateMomoPaymentDto,
   MomoPaymentResponseDto,
   QueryMomoPaymentDto,
   RefundMomoPaymentDto
@@ -8,7 +9,7 @@ import {
 import { MomoPaymentStrategy } from '@src/transaction/strategies/momo.strategy'
 import { InjectConnection } from '@nestjs/mongoose'
 import { Connection, FilterQuery } from 'mongoose'
-import { ITransactionRepository, TransactionRepository } from '@src/transaction/repositories/transaction.repository'
+import { ITransactionRepository } from '@src/transaction/repositories/transaction.repository'
 import { TransactionStatus } from '@common/contracts/constant'
 import { PaymentMethod } from '@src/transaction/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
@@ -17,7 +18,11 @@ import { PayOSPaymentStrategy } from '@src/transaction/strategies/payos.strategy
 import { WebhookType as PayOSWebhookData } from '@payos/node/lib/type'
 import { ZaloPayPaymentStrategy } from '@src/transaction/strategies/zalopay.strategy'
 import { StripePaymentStrategy } from '@transaction/strategies/stripe.strategy'
-import { QueryStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
+import {
+  CreateStripePaymentDto,
+  QueryStripePaymentDto,
+  RefundStripePaymentDto
+} from '@transaction/dto/stripe-payment.dto'
 
 export const IPaymentService = Symbol('IPaymentService')
 
@@ -26,7 +31,7 @@ export interface IPaymentService {
   verifyPaymentWebhookData(webhookData: any): any
   createTransaction(createPaymentDto: any): any
   getTransaction(queryPaymentDto: QueryMomoPaymentDto | QueryStripePaymentDto): any
-  refundTransaction(refundPaymentDto: RefundMomoPaymentDto): any
+  refundTransaction(refundPaymentDto: RefundMomoPaymentDto | RefundStripePaymentDto): any
   getRefundTransaction(queryPaymentDto: QueryMomoPaymentDto): any
   getPaymentList(filter: any, paginationParams: PaginationParams): Promise<any>
   processWebhook(webhookData: MomoPaymentResponseDto | PayOSWebhookData): Promise<any>
@@ -68,19 +73,19 @@ export class PaymentService implements IPaymentService {
     return this.strategy.verifyPaymentWebhookData(webhookData)
   }
 
-  public createTransaction(createPaymentDto: any) {
+  public createTransaction(createPaymentDto: CreateMomoPaymentDto | CreateStripePaymentDto) {
     return this.strategy.createTransaction(createPaymentDto)
   }
 
-  public getTransaction(queryPaymentDto: QueryMomoPaymentDto) {
+  public getTransaction(queryPaymentDto: QueryMomoPaymentDto | QueryStripePaymentDto) {
     return this.strategy.getTransaction(queryPaymentDto)
   }
 
-  public refundTransaction(refundPaymentDto: RefundMomoPaymentDto) {
+  public refundTransaction(refundPaymentDto: RefundMomoPaymentDto | RefundStripePaymentDto) {
     return this.strategy.refundTransaction(refundPaymentDto)
   }
 
-  public getRefundTransaction(queryPaymentDto: QueryMomoPaymentDto) {
+  public getRefundTransaction(queryPaymentDto: any) {
     return this.strategy.getRefundTransaction(queryPaymentDto)
   }
 

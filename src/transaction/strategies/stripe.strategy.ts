@@ -15,7 +15,11 @@ import { get } from 'lodash'
 import { Connection, Types } from 'mongoose'
 import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { ILearnerService } from '@learner/services/learner.service'
-import { CreateStripePaymentDto, QueryStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
+import {
+  CreateStripePaymentDto,
+  QueryStripePaymentDto,
+  RefundStripePaymentDto
+} from '@transaction/dto/stripe-payment.dto'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 
@@ -107,46 +111,18 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     return paymentIntent
   }
 
-  async refundTransaction(refundDto: any) {
-    // const { amount, description, orderId, requestId, transId } = refundDto
-    // const rawSignature = `accessKey=${this.config.accessKey}&amount=${amount}&description=${description}&orderId=${orderId}&partnerCode=${this.config.partnerCode}&requestId=${requestId}&transId=${transId}`
-    // const signature = this.helperService.createSignature(rawSignature, this.config.secretKey)
-    // refundDto.partnerCode = this.config.partnerCode
-    // refundDto.signature = signature
-    // const { data } = await firstValueFrom(
-    //   this.httpService.post(`${this.config.endpoint}/v2/gateway/api/refund`, refundDto).pipe(
-    //     catchError((error: AxiosError) => {
-    //       this.logger.error(error.response.data)
-    //       throw 'An error happened!'
-    //     })
-    //   )
-    // )
-    // console.log(data)
-    // return data
+  async refundTransaction(refundDto: RefundStripePaymentDto) {
+    const { id, amount, metadata } = refundDto
+    const refund = await this.stripe.refunds.create({
+      payment_intent: id,
+      amount,
+      metadata,
+      currency: 'vnd'
+    })
+    return refund
   }
 
-  async getRefundTransaction(queryDto: any) {
-    // const { orderId, requestId } = queryDto
-    // const rawSignature = `accessKey=${this.config.accessKey}&orderId=${orderId}&partnerCode=${this.config.partnerCode}&requestId=${requestId}`
-    // const signature = this.helperService.createSignature(rawSignature, this.config.secretKey)
-    // const body = {
-    //   partnerCode: this.config.partnerCode,
-    //   requestId,
-    //   orderId,
-    //   lang: 'vi',
-    //   signature
-    // }
-    // const { data } = await firstValueFrom(
-    //   this.httpService.post(`${this.config.endpoint}/v2/gateway/api/refund/query`, body).pipe(
-    //     catchError((error: AxiosError) => {
-    //       this.logger.error(error.response.data)
-    //       throw 'An error happened!'
-    //     })
-    //   )
-    // )
-    // console.log(data)
-    // return data
-  }
+  async getRefundTransaction(queryDto: any) {}
 
   async processWebhook(event: Stripe.Event) {
     // Handle the event

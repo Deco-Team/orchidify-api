@@ -54,7 +54,7 @@ export class TransactionController {
 
     if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
 
-    const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status'])
+    const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status', 'description', 'orderInfo'])
     const payout = _.pick(transaction.payout, ['id', 'code', 'createdAt', 'status'])
     return { ...transaction.toObject(), payment, payout }
   }

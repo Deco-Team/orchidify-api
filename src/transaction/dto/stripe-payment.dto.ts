@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import Stripe from 'stripe'
 
@@ -38,43 +38,17 @@ export class StripePaymentResponseDto {
   amount: number
 }
 
-// export class StripeRefundTransactionDto {
-//   @ApiProperty()
-//   orderId: string
-//   @ApiProperty()
-//   amount: number
-//   @ApiProperty()
-//   resultCode: number
-//   @ApiProperty()
-//   transId: number
-//   @ApiProperty()
-//   createdTime: number
-// }
-// export class RefundStripePaymentDto {
-//   @ApiProperty()
-//   partnerCode?: string
+export class RefundStripePaymentDto {
+  @ApiProperty()
+  id: string
 
-//   @ApiProperty()
-//   orderId: string
+  @ApiPropertyOptional({ type: Number })
+  amount?: number
 
-//   @ApiProperty()
-//   requestId: string
+  @ApiPropertyOptional({ type: Object })
+  metadata?: Stripe.Emptyable<Stripe.MetadataParam>;
+}
 
-//   @ApiProperty()
-//   amount: number
-
-//   @ApiProperty()
-//   transId: number
-
-//   @ApiProperty()
-//   lang: 'vi' | 'en'
-
-//   @ApiProperty()
-//   description?: string
-
-//   @ApiProperty()
-//   signature?: string
-// }
 // export class RefundStripePaymentResponseDto {
 //   @ApiProperty()
 //   partnerCode: string

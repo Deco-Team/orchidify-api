@@ -14,18 +14,6 @@ export class PaymentController {
     private readonly paymentService: IPaymentService
   ) {}
 
-  // @ApiOperation({
-  //   summary: 'Get transaction list of payment'
-  // })
-  // @Get()
-  // @Roles(UserRole.ADMIN)
-  // @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
-  // @ApiOkResponse({ type: PaymentPaginateResponseDto })
-  // @ApiQuery({ type: PaginationQuery })
-  // paginate(@Pagination() paginationParams: PaginationParams) {
-  //   return this.paymentService.getPaymentList({}, paginationParams)
-  // }
-
   @ApiOperation({
     summary: 'Webhook Handler for Instant Payment Notification (MOMO)'
   })

@@ -36,6 +36,12 @@ export class BasePaymentDto {
   @ApiProperty({ type: String })
   status: string
 
+  @ApiPropertyOptional({ type: String })
+  description?: string
+
+  @ApiPropertyOptional({ type: String })
+  orderInfo?: string
+
   // @ApiProperty({ type: BasePaymentDto, isArray: true })
   histories?: BasePaymentDto[]
 }
