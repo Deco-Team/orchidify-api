@@ -1,3 +1,5 @@
+export const FEEDBACK_LEANER_DETAIL = ['_id', 'name', 'avatar', 'phone', 'email', 'dateOfBirth'] as const
+
 export const FEEDBACK_LIST_PROJECTION = [
   '_id',
   'rate',
@@ -9,10 +11,10 @@ export const FEEDBACK_LIST_PROJECTION = [
 ] as const
 
 export const INSTRUCTOR_VIEW_FEEDBACK_LIST_PROJECTION = [
-    '_id',
-    'rate',
-    'comment',
-    'classId',
-    'createdAt',
-    'updatedAt'
-  ] as const
+  '_id',
+  'rate',
+  'comment',
+  'classId',
+  'createdAt',
+  'updatedAt'
+] as const

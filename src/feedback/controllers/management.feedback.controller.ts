@@ -10,7 +10,7 @@ import { RolesGuard } from '@auth/guards/roles.guard'
 import { IFeedbackService } from '@feedback/services/feedback.service'
 import { ClassFeedbackListDataResponse, CourseFeedbackListDataResponse, QueryFeedbackDto } from '@feedback/dto/view-feedback.dto'
 import { Types } from 'mongoose'
-import { FEEDBACK_LIST_PROJECTION } from '@feedback/contracts/constant'
+import { FEEDBACK_LEANER_DETAIL, FEEDBACK_LIST_PROJECTION } from '@feedback/contracts/constant'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 
 @ApiTags('Feedback - Management')
@@ -40,7 +40,7 @@ export class ManagementFeedbackController {
     return await this.feedbackService.list(pagination, queryFeedbackDto, FEEDBACK_LIST_PROJECTION, [
       {
         path: 'learner',
-        select: ['_id', 'name', 'avatar']
+        select: FEEDBACK_LEANER_DETAIL
       }
     ])
   }
@@ -63,7 +63,7 @@ export class ManagementFeedbackController {
     const feedbacks = await this.feedbackService.findMany(conditions, FEEDBACK_LIST_PROJECTION, [
       {
         path: 'learner',
-        select: ['_id', 'name', 'avatar']
+        select: FEEDBACK_LEANER_DETAIL
       }
     ])
     return { docs: feedbacks }

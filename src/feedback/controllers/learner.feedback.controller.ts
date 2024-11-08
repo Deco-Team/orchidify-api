@@ -26,7 +26,7 @@ import {
 } from '@feedback/dto/view-feedback.dto'
 import { Types } from 'mongoose'
 import { ILearnerClassService } from '@class/services/learner-class.service'
-import { FEEDBACK_LIST_PROJECTION } from '@feedback/contracts/constant'
+import { FEEDBACK_LEANER_DETAIL, FEEDBACK_LIST_PROJECTION } from '@feedback/contracts/constant'
 import { IClassService } from '@class/services/class.service'
 import { SendFeedbackDto } from '@feedback/dto/send-feedback.dto'
 import { VN_TIMEZONE } from '@src/config'
@@ -70,7 +70,7 @@ export class LearnerFeedbackController {
     return await this.feedbackService.list(pagination, queryFeedbackDto, FEEDBACK_LIST_PROJECTION, [
       {
         path: 'learner',
-        select: ['_id', 'name', 'avatar']
+        select: FEEDBACK_LEANER_DETAIL
       }
     ])
   }
@@ -92,7 +92,7 @@ export class LearnerFeedbackController {
     const feedbacks = await this.feedbackService.findMany(conditions, FEEDBACK_LIST_PROJECTION, [
       {
         path: 'learner',
-        select: ['_id', 'name', 'avatar']
+        select: FEEDBACK_LEANER_DETAIL
       }
     ])
     return { docs: feedbacks }
