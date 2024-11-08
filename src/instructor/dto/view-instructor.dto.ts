@@ -1,5 +1,5 @@
-import { ApiPropertyOptional, PickType } from '@nestjs/swagger'
-import { BaseInstructorDto } from './base.instructor.dto'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
+import { BaseInstructorDto, InstructorCertificateDto } from './base.instructor.dto'
 import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
 import { INSTRUCTOR_DETAIL_PROJECTION, INSTRUCTOR_LIST_PROJECTION, INSTRUCTOR_PROFILE_PROJECTION, VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { IsOptional, IsString, MaxLength } from 'class-validator'
@@ -8,6 +8,12 @@ import { Transform } from 'class-transformer'
 
 class InstructorProfileResponse extends PickType(BaseInstructorDto, INSTRUCTOR_PROFILE_PROJECTION) {}
 export class InstructorProfileDataResponse extends DataResponse(InstructorProfileResponse) {}
+
+class InstructorCertificationsResponse {
+  @ApiProperty({ type: InstructorCertificateDto, isArray: true })
+  docs: InstructorCertificateDto[]
+}
+export class InstructorCertificationsDataResponse extends DataResponse(InstructorCertificationsResponse) {}
 
 export class QueryInstructorDto {
   @ApiPropertyOptional({

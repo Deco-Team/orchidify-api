@@ -11,7 +11,10 @@ import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IInstructorService } from '@instructor/services/instructor.service'
-import { InstructorProfileDataResponse } from '@instructor/dto/view-instructor.dto'
+import {
+  InstructorCertificationsDataResponse,
+  InstructorProfileDataResponse
+} from '@instructor/dto/view-instructor.dto'
 import { INSTRUCTOR_PROFILE_PROJECTION } from '@instructor/contracts/constant'
 import { UpdateInstructorProfileDto } from '@instructor/dto/update-instructor-profile.dto'
 
@@ -39,6 +42,20 @@ export class InstructorController {
 
     if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
     return instructor
+  }
+
+  @ApiOperation({
+    summary: 'View instructor certifications'
+  })
+  @Get('certifications')
+  @ApiOkResponse({ type: InstructorCertificationsDataResponse })
+  @ApiErrorResponse([Errors.INSTRUCTOR_NOT_FOUND])
+  async viewCertifications(@Req() req) {
+    const { _id } = _.get(req, 'user')
+    const instructor = await this.instructorService.findById(_id, 'certificates')
+    if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
+
+    return { docs: _.get(instructor, 'certificates', []) }
   }
 
   @ApiOperation({
