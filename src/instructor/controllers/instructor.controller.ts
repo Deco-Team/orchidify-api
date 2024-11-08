@@ -11,7 +11,10 @@ import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IInstructorService } from '@instructor/services/instructor.service'
-import { InstructorCertificationsDataResponse, InstructorProfileDataResponse } from '@instructor/dto/view-instructor.dto'
+import {
+  InstructorCertificationsDataResponse,
+  InstructorProfileDataResponse
+} from '@instructor/dto/view-instructor.dto'
 import { INSTRUCTOR_PROFILE_PROJECTION } from '@instructor/contracts/constant'
 import { UpdateInstructorProfileDto } from '@instructor/dto/update-instructor-profile.dto'
 
@@ -52,7 +55,7 @@ export class InstructorController {
     const instructor = await this.instructorService.findById(_id, 'certificates')
     if (!instructor) throw new AppException(Errors.INSTRUCTOR_NOT_FOUND)
 
-    return _.get(instructor, 'certificates', [])
+    return { docs: _.get(instructor, 'certificates', []) }
   }
 
   @ApiOperation({
