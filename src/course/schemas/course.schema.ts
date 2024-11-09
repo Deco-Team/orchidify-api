@@ -86,7 +86,7 @@ export class Course {
   instructorId: Types.ObjectId
 
   @Prop({ type: Boolean, default: false })
-  isPublished: boolean
+  isRequesting: boolean
 
   @Prop({ type: BaseRatingSummaryDto })
   ratingSummary: BaseRatingSummaryDto

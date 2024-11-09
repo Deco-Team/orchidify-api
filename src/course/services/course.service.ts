@@ -120,7 +120,6 @@ export class CourseService implements ICourseService {
       status: {
         $in: [CourseStatus.ACTIVE]
       },
-      isPublished: true
     }
 
     const validLevel = level?.filter((level) =>
@@ -173,12 +172,6 @@ export class CourseService implements ICourseService {
       })
     }
 
-    aggregateMatch.push({
-      $match: {
-        isPublished: true
-      }
-    })
-
     const validLevel = level?.filter((level) =>
       [CourseLevel.BASIC, CourseLevel.INTERMEDIATE, CourseLevel.ADVANCED].includes(level)
     )
@@ -220,7 +213,7 @@ export class CourseService implements ICourseService {
           rate: 1,
           discount: 1,
           instructorId: 1,
-          isPublished: 1,
+          isRequesting: 1,
           createdAt: 1,
           updatedAt: 1
         }

@@ -33,7 +33,7 @@ export class CourseController {
   ) {}
 
   @ApiOperation({
-    summary: `[Viewer/Learner] View Course List`
+    summary: `[Viewer/${UserRole.LEARNER}] View Course List`
   })
   @ApiQuery({ type: PaginationQuery })
   @ApiOkResponse({ type: PublishCourseListDataResponse })
@@ -75,11 +75,7 @@ export class CourseController {
         select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
       }
     ])
-    if (
-      !course ||
-      course.isPublished === false ||
-      [CourseStatus.ACTIVE].includes(course.status) === false
-    )
+    if (!course || [CourseStatus.ACTIVE].includes(course.status) === false)
       throw new AppException(Errors.COURSE_NOT_FOUND)
     return course
   }

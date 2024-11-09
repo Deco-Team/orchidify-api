@@ -116,7 +116,7 @@ export class BaseCourseDto {
   instructorId: string
 
   @ApiPropertyOptional({ type: Boolean })
-  isPublished: Boolean
+  isRequesting: Boolean
 
   @ApiPropertyOptional({ type: BaseRatingSummaryDto })
   ratingSummary: BaseRatingSummaryDto

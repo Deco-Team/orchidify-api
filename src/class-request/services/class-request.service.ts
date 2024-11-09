@@ -96,6 +96,15 @@ export class ClassRequestService implements IClassRequestService {
     options?: SaveOptions | undefined
   ) {
     const classRequest = await this.classRequestRepository.create(createPublishClassRequestDto, options)
+    // update course
+    await this.courseService.update(
+      { _id: classRequest.courseId },
+      {
+        $set: {
+          isRequesting: true
+        }
+      }
+    )
     this.addClassRequestAutoExpiredJob(classRequest)
 
     return classRequest
@@ -337,7 +346,7 @@ export class ClassRequestService implements IClassRequestService {
           {
             $set: {
               status: CourseStatus.ACTIVE,
-              isPublished: true
+              isRequesting: false
             }
           },
           { session }
@@ -443,6 +452,17 @@ export class ClassRequestService implements IClassRequestService {
           },
           { session }
         )
+
+        // update course
+        await this.courseService.update(
+          { _id: classRequest.courseId },
+          {
+            $set: {
+              isRequesting: false
+            }
+          },
+          { session }
+        )
       })
     } finally {
       await session.endSession()
@@ -483,6 +503,17 @@ export class ClassRequestService implements IClassRequestService {
                 timestamp: new Date(),
                 userRole: role
               }
+            }
+          },
+          { session }
+        )
+
+        // update course
+        await this.courseService.update(
+          { _id: classRequest.courseId },
+          {
+            $set: {
+              isRequesting: false
             }
           },
           { session }

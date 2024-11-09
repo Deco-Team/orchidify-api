@@ -60,11 +60,7 @@ export class ManagementCourseController {
         select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
       }
     ])
-    if (
-      !course ||
-      course.isPublished === false ||
-      [CourseStatus.ACTIVE].includes(course.status) === false
-    )
+    if (!course || [CourseStatus.ACTIVE].includes(course.status) === false)
       throw new AppException(Errors.COURSE_NOT_FOUND)
     return course
   }

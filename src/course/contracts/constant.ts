@@ -13,7 +13,7 @@ export const COURSE_LIST_PROJECTION = [
   'ratingSummary',
   'discount',
   'instructorId',
-  'isPublished',
+  'isRequesting',
   'createdAt',
   'updatedAt'
 ] as const
@@ -37,7 +37,7 @@ export const COURSE_DETAIL_PROJECTION = [
   'discount',
   'gardenRequiredToolkits',
   'instructorId',
-  'isPublished',
+  'isRequesting',
   'createdAt',
   'updatedAt'
 ] as const
@@ -62,7 +62,7 @@ export const PUBLIC_COURSE_DETAIL_PROJECTION = [
   'discount',
   'gardenRequiredToolkits',
   'instructorId',
-  'isPublished',
+  'isRequesting',
   'createdAt',
   'updatedAt'
 ] as const

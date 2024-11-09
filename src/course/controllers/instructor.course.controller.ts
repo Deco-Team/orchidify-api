@@ -171,7 +171,8 @@ export class InstructorCourseController {
 
     if (!course || course.instructorId?.toString() !== _id || course.status === CourseStatus.DELETED)
       throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.DRAFT) throw new AppException(Errors.CAN_NOT_UPDATE_COURSE)
+    if (course.status !== CourseStatus.DRAFT || course.isRequesting === true)
+      throw new AppException(Errors.CAN_NOT_UPDATE_COURSE)
 
     updateCourseDto.sessions = updateCourseDto.sessions.map((session, index) => {
       return { ...session, sessionNumber: index + 1 }
@@ -197,7 +198,8 @@ export class InstructorCourseController {
 
     if (!course || course.instructorId?.toString() !== _id || course.status === CourseStatus.DELETED)
       throw new AppException(Errors.COURSE_NOT_FOUND)
-    if (course.status !== CourseStatus.DRAFT) throw new AppException(Errors.CAN_NOT_DELETE_COURSE)
+    if (course.status !== CourseStatus.DRAFT || course.isRequesting === true)
+      throw new AppException(Errors.CAN_NOT_DELETE_COURSE)
 
     await this.courseService.update({ _id: courseId }, { status: CourseStatus.DELETED })
 
