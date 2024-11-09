@@ -7,7 +7,7 @@ export enum PaymentMethod {
 
 export enum TransactionType {
   PAYMENT = 'PAYMENT',
-  PAYOUT = 'PAYOUT',
+  PAYOUT = 'PAYOUT'
 }
 
 export enum MomoResultCode {
@@ -31,9 +31,9 @@ export enum PayOSStatus {
 
 export enum StripeStatus {
   SUCCEEDED = 'succeeded',
-  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
+  PENDING = 'pending',
+  FAILED = 'failed'
 }
-
 
 export const TRANSACTION_LIST_PROJECTION = [
   '_id',

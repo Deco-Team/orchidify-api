@@ -1,5 +1,9 @@
-import { ApiProperty, PickType } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import { IsString, MaxLength } from 'class-validator'
-import { BasePayoutRequestDto } from './base.payout-request.dto'
 
-export class RejectPayoutRequestDto extends PickType(BasePayoutRequestDto, ['rejectReason']) {}
+export class RejectPayoutRequestDto {
+  @ApiProperty({ type: String, example: 'Payout Request reject reason' })
+  @IsString()
+  @MaxLength(500)
+  rejectReason: string
+}

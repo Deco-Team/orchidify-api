@@ -126,22 +126,23 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
 
   async processWebhook(event: Stripe.Event) {
     // Handle the event
-    let paymentIntent: Stripe.PaymentIntent
+    let charge: Stripe.Charge
     switch (event.type) {
-      case 'payment_intent.succeeded':
-        paymentIntent = event.data.object
-        this.logger.log(`PaymentIntent for ${paymentIntent.amount} was successful!`)
-        // Then define and call a method to handle the successful payment intent.
-        await this.handlePaymentIntentSucceeded(paymentIntent)
+      case 'charge.succeeded':
+        charge = event.data.object
+        this.logger.log(`Charge for ${charge.amount} was succeeded!`)
+        // Then define and call a method to handle the succeeded payment intent.
+        await this.handleChargeSucceeded(charge)
         break
-      case 'payment_intent.processing':
-        paymentIntent = event.data.object
-        this.logger.log(`PaymentIntent for ${paymentIntent.amount} was processing!`)
+      case 'charge.failed':
+        charge = event.data.object
+        this.logger.log(`Charge for ${charge.amount} was failed!`)
+        await this.handleChargeFailed(charge)
         break
-      case 'payment_intent.payment_failed':
-        paymentIntent = event.data.object
-        this.logger.log(`PaymentIntent for ${paymentIntent.amount} was failed!`)
-        await this.handlePaymentIntentFailed(paymentIntent)
+      case 'charge.refunded':
+        charge = event.data.object
+        this.logger.log(`Charge for ${charge.amount} was refunded!`)
+        await this.handleChargeRefunded(charge)
         break
       default:
         this.logger.error(`Unhandled event type ${event.type}.`)
@@ -179,16 +180,17 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     } catch (error) {}
   }
 
-  private async handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  private async handleChargeSucceeded(charge: Stripe.Charge) {
     // Execute in transaction
     const session = await this.connection.startSession()
     try {
       await session.withTransaction(async () => {
-        const paymentIntentId = get(paymentIntent, 'id')
-        this.logger.log(`handlePaymentIntentSucceeded: [start] paymentIntentId=${paymentIntentId}`)
-        const isPaymentSuccess = get(paymentIntent, 'status') === StripeStatus.SUCCEEDED
+        const chargeId = get(charge, 'id')
+        const paymentIntentId = get(charge, 'payment_intent')
+        this.logger.log(`handleChargeSucceeded: [start] chargeId=${chargeId}, paymentIntentId=${paymentIntentId}`)
+        const isPaymentSuccess = get(charge, 'status') === StripeStatus.SUCCEEDED
         if (isPaymentSuccess) {
-          this.logger.log('handlePaymentIntentSucceeded: payment SUCCESS')
+          this.logger.log('handleChargeSucceeded: payment SUCCESS')
           const transaction = await this.transactionRepository.findOne({
             conditions: {
               type: TransactionType.PAYMENT,
@@ -198,11 +200,10 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           })
           if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
           // 1. Fetch learnerId, classId from extraData => create learnerClass
-          const { learnerId, classId, orderCode } = get(paymentIntent, 'metadata')
+          const { learnerId, classId, orderCode } = get(charge, 'metadata')
           await this.learnerClassService.create(
             {
               enrollDate: new Date(),
-              // status: LearnerClassStatus.ENROLLED,
               transactionId: transaction._id,
               learnerId: new Types.ObjectId(learnerId),
               classId: new Types.ObjectId(classId)
@@ -221,11 +222,11 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           )
           // 3.  Update payment to transaction
           const paymentPayLoad = {
-            id: paymentIntent?.id,
+            id: charge?.id,
             code: orderCode,
             createdAt: new Date(),
             status: transaction?.status,
-            ...paymentIntent
+            ...charge
           }
           const newPayment: BasePaymentDto = {
             ...paymentPayLoad,
@@ -241,23 +242,26 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           )
           // 4. Send email/notification to learner
           this.sendNotificationWhenPaymentSuccess({ learnerId, classId })
-          // 5. Send notification to staff
+
+          // 5. TODO: Send notification to staff
         }
       })
-      this.logger.log('handlePaymentIntentSucceeded: [completed]')
+      this.logger.log('handleChargeSucceeded: [completed]')
       return true
     } finally {
       await session.endSession()
     }
   }
-  private async handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+
+  private async handleChargeFailed(charge: Stripe.Charge) {
     // Execute in transaction
     const session = await this.connection.startSession()
     try {
       await session.withTransaction(async () => {
-        const paymentIntentId = get(paymentIntent, 'id')
-        this.logger.log(`handlePaymentIntentFailed: [start] paymentIntentId=${paymentIntentId}`)
-        this.logger.log('handlePaymentIntentFailed: payment FAILED')
+        const chargeId = get(charge, 'id')
+        const paymentIntentId = get(charge, 'payment_intent')
+        this.logger.log(`handleChargeFailed: [start] chargeId=${chargeId}, paymentIntentId=${paymentIntentId}`)
+        this.logger.log('handleChargeFailed: payment FAILED')
         // 1.  Update payment to transaction
         const transaction = await this.transactionRepository.findOne({
           conditions: {
@@ -267,13 +271,13 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           }
         })
         if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
-        const { orderCode } = get(paymentIntent, 'metadata')
+        const { orderCode } = get(charge, 'metadata')
         const paymentPayLoad = {
-          id: paymentIntent?.id,
+          id: charge?.id,
           code: orderCode,
           createdAt: new Date(),
           status: transaction?.status,
-          ...paymentIntent
+          ...charge
         }
         const newPayment: BasePaymentDto = {
           ...paymentPayLoad,
@@ -288,7 +292,53 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           { session }
         )
       })
-      this.logger.log('handlePaymentIntentFailed: [completed]')
+      this.logger.log('handleChargeFailed: [completed]')
+      return true
+    } finally {
+      await session.endSession()
+    }
+  }
+
+  private async handleChargeRefunded(charge: Stripe.Charge) {
+    // Execute in transaction
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        const chargeId = get(charge, 'id')
+        const paymentIntentId = get(charge, 'payment_intent')
+        this.logger.log(`handleChargeRefunded: [start] chargeId=${chargeId}, paymentIntentId=${paymentIntentId}`)
+        this.logger.log('handleChargeRefunded: payment REFUNDED')
+        // 1.  Update payment to transaction
+        const transaction = await this.transactionRepository.findOne({
+          conditions: {
+            type: TransactionType.PAYMENT,
+            'payment.id': chargeId,
+            status: TransactionStatus.DRAFT
+          }
+        })
+        if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
+        const { orderCode } = get(charge, 'metadata')
+        const paymentPayLoad = {
+          id: charge?.id,
+          code: orderCode,
+          createdAt: new Date(),
+          status: transaction?.status,
+          ...charge
+        }
+        const newPayment: BasePaymentDto = {
+          ...paymentPayLoad,
+          histories: [...transaction.payment.histories, paymentPayLoad]
+        }
+        await this.transactionRepository.findOneAndUpdate(
+          { _id: transaction._id },
+          {
+            status: TransactionStatus.REFUNDED,
+            payment: newPayment
+          },
+          { session }
+        )
+      })
+      this.logger.log('handleChargeRefunded: [completed]')
       return true
     } finally {
       await session.endSession()
