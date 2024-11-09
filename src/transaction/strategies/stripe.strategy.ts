@@ -116,8 +116,7 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     const refund = await this.stripe.refunds.create({
       payment_intent: id,
       amount,
-      metadata,
-      currency: 'vnd'
+      metadata
     })
     return refund
   }
@@ -312,8 +311,8 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
         const transaction = await this.transactionRepository.findOne({
           conditions: {
             type: TransactionType.PAYMENT,
-            'payment.id': chargeId,
-            status: TransactionStatus.DRAFT
+            'payment.id': paymentIntentId,
+            status: TransactionStatus.CAPTURED
           }
         })
         if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)

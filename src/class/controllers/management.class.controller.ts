@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Param, Req, Patch } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Param, Req, Patch, Body } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
@@ -27,6 +27,7 @@ import { Types } from 'mongoose'
 import { ILearnerClassService } from '@class/services/learner-class.service'
 import { VN_TIMEZONE } from '@src/config'
 import * as moment from 'moment-timezone'
+import { CancelClassDto } from '@class/dto/cancel-class.dto'
 
 @ApiTags('Class - Management')
 @ApiBearerAuth()
@@ -158,6 +159,26 @@ export class ManagementClassController {
 
     const user = _.get(req, 'user')
     await this.classService.completeClass(classId, user)
+    return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Cancel Class`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.CLASS_STATUS_INVALID])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/cancel')
+  async cancelClass(@Req() req, @Param('id') classId: string, @Body() cancelClassDto: CancelClassDto) {
+    const courseClass = await this.classService.findById(classId, CLASS_DETAIL_PROJECTION)
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    // check valid status
+    if ([ClassStatus.PUBLISHED, ClassStatus.IN_PROGRESS].includes(courseClass.status) === false)
+      throw new AppException(Errors.CLASS_STATUS_INVALID)
+
+    const user = _.get(req, 'user')
+    await this.classService.cancelClass(classId, cancelClassDto, user)
     return new SuccessResponse(true)
   }
 }

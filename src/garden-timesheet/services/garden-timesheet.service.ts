@@ -3,7 +3,7 @@ import * as moment from 'moment-timezone'
 import * as _ from 'lodash'
 import { IGardenTimesheetRepository } from '@garden-timesheet/repositories/garden-timesheet.repository'
 import { GardenTimesheet, GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
-import { FilterQuery, PopulateOptions, QueryOptions, Types, UpdateQuery } from 'mongoose'
+import { FilterQuery, MongooseQueryOptions, PopulateOptions, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { QueryGardenTimesheetDto } from '@garden-timesheet/dto/view-garden-timesheet.dto'
 import {
   GardenStatus,
@@ -80,6 +80,11 @@ export interface IGardenTimesheetService {
     projection?: Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<GardenTimesheetDocument[]>
+  updateMany(
+    conditions: FilterQuery<GardenTimesheetDocument>,
+    payload: UpdateQuery<GardenTimesheetDocument>,
+    options?: import('mongodb').UpdateOptions | null
+  ): Promise<void>
 }
 
 @Injectable()
@@ -124,7 +129,6 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     })
     return gardenTimesheet
   }
-
 
   public async findSlotBy(params: { slotId: string; instructorId?: string }) {
     const { slotId, instructorId } = params
@@ -362,7 +366,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     this.appLogger.debug(`groupGardenTimesheets.length=${groupGardenTimesheets.length}`)
     this.appLogger.debug(`totalNumberOfDays=${duration * weekdays.length}`)
     this.appLogger.debug(`searchDates.length=${searchDates.length}`)
-    
+
     const availableGroupGardenTimesheets = []
     const unavailableGroupGardenTimesheets = []
     groupGardenTimesheets.forEach((groupGardenTimesheet) => {
@@ -521,6 +525,14 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       populates
     })
     return gardenTimesheets
+  }
+
+  public async updateMany(
+    conditions: FilterQuery<GardenTimesheetDocument>,
+    payload: UpdateQuery<GardenTimesheetDocument>,
+    options?: import('mongodb').UpdateOptions | null
+  ) {
+    await this.gardenTimesheetRepository.updateMany(conditions, payload, options)
   }
 
   private async generateTimesheetOfMonth(gardenId: string, date: Date, gardenMaxClass: number) {

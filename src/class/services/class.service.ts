@@ -17,6 +17,7 @@ import { CreateClassDto } from '@class/dto/create-class.dto'
 import {
   ClassStatus,
   CourseLevel,
+  GardenTimesheetStatus,
   LearnerStatus,
   SlotNumber,
   SlotStatus,
@@ -29,7 +30,7 @@ import { CLASS_LIST_PROJECTION } from '@src/class/contracts/constant'
 import { QueryClassDto } from '@src/class/dto/view-class.dto'
 import { InjectConnection } from '@nestjs/mongoose'
 import { CreateMomoPaymentDto, CreateMomoPaymentResponse } from '@src/transaction/dto/momo-payment.dto'
-import { PaymentMethod, TransactionType } from '@src/transaction/contracts/constant'
+import { PaymentMethod, StripeStatus, TransactionType } from '@src/transaction/contracts/constant'
 import { ConfigService } from '@nestjs/config'
 import { IPaymentService } from '@src/transaction/services/payment.service'
 import { EnrollClassDto } from '@class/dto/enroll-class.dto'
@@ -47,6 +48,7 @@ import { UserAuth } from '@common/contracts/dto'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { IInstructorService } from '@instructor/services/instructor.service'
+import { CancelClassDto } from '@class/dto/cancel-class.dto'
 
 export const IClassService = Symbol('IClassService')
 
@@ -75,6 +77,7 @@ export interface IClassService {
   generateCode(): Promise<string>
   enrollClass(enrollClassDto: EnrollClassDto): Promise<CreateMomoPaymentResponse>
   completeClass(classId: string, userAuth: UserAuth): Promise<void>
+  cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void>
   getClassEndTime(params: {
     startDate: Date
     duration: number
@@ -540,7 +543,7 @@ export class ClassService implements IClassService {
               }
             }
           },
-          { new: true }
+          { new: true, session }
         )
         // process salary for instructor
         const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
@@ -565,14 +568,15 @@ export class ClassService implements IClassService {
           { _id: instructorId },
           {
             $inc: { balance: salary }
-          }
+          },
+          { session }
         )
       })
     } finally {
       await session.endSession()
     }
 
-    // send notification for instructor
+    // TODO: send notification for instructor
   }
 
   public getClassEndTime(params: {
@@ -614,5 +618,121 @@ export class ClassService implements IClassService {
         break
     }
     return classEndTime
+  }
+
+  public async cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void> {
+    const { cancelReason } = cancelClassDto
+    const { _id, role } = userAuth
+    // Execute in transaction
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        // cancel class
+        const courseClass = await this.update(
+          { _id: new Types.ObjectId(classId) },
+          {
+            $set: {
+              status: ClassStatus.CANCELED,
+              cancelReason
+            },
+            $push: {
+              histories: {
+                status: ClassStatus.CANCELED,
+                timestamp: new Date(),
+                userId: new Types.ObjectId(_id),
+                userRole: role
+              }
+            }
+          },
+          { new: true, session }
+        )
+        // clear class timesheet
+        const { startDate, duration, weekdays, gardenId } = courseClass
+        const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+        const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
+        const searchDates = []
+        let currentDate = startOfDate.clone()
+        while (currentDate.isSameOrBefore(endOfDate)) {
+          for (let weekday of weekdays) {
+            const searchDate = currentDate.clone().isoWeekday(weekday)
+            if (searchDate.isSameOrAfter(startOfDate) && searchDate.isBefore(endOfDate)) {
+              searchDates.push(searchDate.toDate())
+            }
+          }
+          currentDate.add(1, 'week')
+        }
+
+        await this.gardenTimesheetService.updateMany(
+          {
+            date: {
+              $in: searchDates
+            },
+            status: GardenTimesheetStatus.ACTIVE,
+            gardenId: gardenId
+          },
+          {
+            $pull: {
+              slots: { classId: new Types.ObjectId(classId) }
+            }
+          },
+          { session }
+        )
+
+        // refund payment
+        // BR-15: When staff cancel an in-progress class or class that has enrolled learners, learners in that class will be refunded 100% of the class price including discount.
+        const learnerClasses = await this.learnerClassService.findMany(
+          { classId: new Types.ObjectId(classId) },
+          ['learnerId', 'transactionId', 'classId'],
+          [
+            {
+              path: 'transaction',
+              select: [
+                'paymentMethod',
+                'payment.id',
+                'payment.code',
+                'payment.status',
+                'payment.amount',
+                'payment.object',
+                'payment.payment_intent'
+              ]
+            }
+          ]
+        )
+        if (learnerClasses.length === 0) return
+
+        const refundTransactionPromises = []
+        learnerClasses.forEach((learnerClass) => {
+          if (_.get(learnerClass, 'transaction.paymentMethod') === PaymentMethod.STRIPE) {
+            this.paymentService.setStrategy(PaymentMethod.STRIPE)
+            if (_.get(learnerClass, 'transaction.payment.status') === StripeStatus.SUCCEEDED) {
+              const stripePaymentObject = _.get(learnerClass, 'transaction.payment.object')
+              let transactionId = ''
+              if (stripePaymentObject === 'payment_intent') {
+                transactionId = _.get(learnerClass, 'transaction.payment.id')
+              } else if (stripePaymentObject === 'charge') {
+                transactionId = _.get(learnerClass, 'transaction.payment.payment_intent')
+              }
+              refundTransactionPromises.push(
+                this.paymentService.refundTransaction({
+                  id: transactionId,
+                  amount: _.get(learnerClass, 'transaction.payment.amount'),
+                  metadata: {
+                    classId: classId.toString(),
+                    learnerId: _.get(learnerClass, 'learnerId').toString(),
+                    orderCode: _.get(learnerClass, 'transaction.payment.code')
+                  }
+                })
+              )
+            }
+          }
+        })
+        await Promise.all(refundTransactionPromises)
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    // TODO: send email for learners
+    // TODO: send notification for instructor
   }
 }

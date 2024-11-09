@@ -72,3 +72,10 @@ LearnerClassSchema.virtual('submission', {
   foreignField: 'classId',
   justOne: true
 })
+
+LearnerClassSchema.virtual('transaction', {
+  ref: 'Transaction',
+  localField: 'transactionId',
+  foreignField: '_id',
+  justOne: true
+})
