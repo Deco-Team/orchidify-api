@@ -67,7 +67,7 @@ export class LearnerClassController {
   })
   @ApiExtraModels(CreateStripePaymentDataResponse, CreateMomoPaymentDataResponse)
   @ApiCreatedResponse({
-    schema: { anyOf: refs(CreateStripePaymentDataResponse, CreateMomoPaymentDataResponse) },
+    schema: { anyOf: refs(CreateStripePaymentDataResponse, CreateMomoPaymentDataResponse) }
   })
   @ApiErrorResponse([
     Errors.UNVERIFIED_ACCOUNT,
@@ -164,7 +164,13 @@ export class LearnerClassController {
     const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
-    return assignment
+
+    // get my submission
+    const submission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
+      assignmentId: assignment._id,
+      learnerId: learnerId
+    })
+    return { ...assignment, submission }
   }
 
   @ApiOperation({
