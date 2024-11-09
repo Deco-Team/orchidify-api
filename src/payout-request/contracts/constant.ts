@@ -3,6 +3,7 @@ export const PAYOUT_REQUEST_LIST_PROJECTION = [
   'amount',
   'status',
   'rejectReason',
+  'description',
   'createdBy',
   'createdAt',
   'updatedAt'
