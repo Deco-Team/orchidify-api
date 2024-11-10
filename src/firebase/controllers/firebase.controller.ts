@@ -28,6 +28,7 @@ export class FirebaseController {
   @ApiOkResponse({ type: CreateCustomTokenFirebaseDataResponse })
   @Post('custom-token')
   async createCustomToken(@Req() req) {
-    return await this.firebaseService.createCustomToken(_.get(req, 'user'))
+    const token = await this.firebaseService.createCustomToken(_.get(req, 'user'))
+    return { token }
   }
 }
