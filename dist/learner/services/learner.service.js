@@ -74,6 +74,14 @@ let LearnerService = class LearnerService {
             projection
         });
     }
+    async findMany(conditions, projection, populates) {
+        const learners = await this.learnerRepository.findMany({
+            conditions,
+            projection,
+            populates
+        });
+        return learners;
+    }
 };
 exports.LearnerService = LearnerService;
 exports.LearnerService = LearnerService = __decorate([

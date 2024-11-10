@@ -42,7 +42,7 @@ export class InstructorService implements IInstructorService {
 
     this.notificationAdapter.sendMail({
       to: instructor.email,
-      subject: `[Orchidify] Login Information`,
+      subject: `[Orchidify] Thông tin đăng nhập`,
       template: 'instructor/add-instructor',
       context: {
         email: instructor.email,

@@ -29,7 +29,7 @@ import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { QueryLearnerDto } from '@learner/dto/view-learner.dto';
 import { ILearnerRepository } from '@src/learner/repositories/learner.repository';
 import { Learner, LearnerDocument } from '@src/learner/schemas/learner.schema';
-import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
 export declare const ILearnerService: unique symbol;
 export interface ILearnerService extends IAuthUserService {
     create(learner: any, options?: SaveOptions | undefined): Promise<LearnerDocument>;
@@ -37,6 +37,7 @@ export interface ILearnerService extends IAuthUserService {
     findByEmail(email: string, projection?: string | Record<string, any>): Promise<LearnerDocument>;
     update(conditions: FilterQuery<Learner>, payload: UpdateQuery<Learner>, options?: QueryOptions | undefined): Promise<LearnerDocument>;
     list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto): any;
+    findMany(conditions: FilterQuery<LearnerDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<LearnerDocument[]>;
 }
 export declare class LearnerService implements ILearnerService {
     private readonly learnerRepository;
@@ -60,4 +61,7 @@ export declare class LearnerService implements ILearnerService {
     }>> & import("mongoose").Document<unknown, {}, Learner> & Learner & Required<{
         _id: string;
     }>>>;
+    findMany(conditions: FilterQuery<LearnerDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<(import("mongoose").Document<unknown, {}, Learner> & Learner & Required<{
+        _id: string;
+    }>)[]>;
 }

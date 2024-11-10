@@ -34,11 +34,13 @@ const garden_timesheet_service_1 = require("../../garden-timesheet/services/gard
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_4 = require("../../setting/contracts/constant");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
+const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 exports.IClassService = Symbol('IClassService');
 let ClassService = class ClassService {
-    constructor(classRepository, connection, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
-        this.classRepository = classRepository;
+    constructor(notificationAdapter, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
+        this.notificationAdapter = notificationAdapter;
         this.connection = connection;
+        this.classRepository = classRepository;
         this.configService = configService;
         this.paymentService = paymentService;
         this.transactionService = transactionService;
@@ -443,10 +445,12 @@ let ClassService = class ClassService {
     async cancelClass(classId, cancelClassDto, userAuth) {
         const { cancelReason } = cancelClassDto;
         const { _id, role } = userAuth;
+        const refundTransactionLearnerIds = [];
+        let courseClass;
         const session = await this.connection.startSession();
         try {
             await session.withTransaction(async () => {
-                const courseClass = await this.update({ _id: new mongoose_1.Types.ObjectId(classId) }, {
+                courseClass = await this.update({ _id: new mongoose_1.Types.ObjectId(classId) }, {
                     $set: {
                         status: constant_1.ClassStatus.CANCELED,
                         cancelReason
@@ -523,6 +527,7 @@ let ClassService = class ClassService {
                                     orderCode: _.get(learnerClass, 'transaction.payment.code')
                                 }
                             }));
+                            refundTransactionLearnerIds.push(_.get(learnerClass, 'learnerId'));
                         }
                     }
                 });
@@ -532,21 +537,40 @@ let ClassService = class ClassService {
         finally {
             await session.endSession();
         }
+        this.sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass);
+    }
+    async sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass) {
+        const learners = await this.learnerService.findMany({
+            _id: { $in: refundTransactionLearnerIds }
+        });
+        const sendCancelClassEmailPromises = [];
+        learners.forEach((learner) => {
+            sendCancelClassEmailPromises.push(this.notificationAdapter.sendMail({
+                to: learner.email,
+                subject: `[Orchidify] Thông báo hủy lớp học`,
+                template: 'learner/cancel-class',
+                context: {
+                    name: learner.name,
+                    classTitle: courseClass.title
+                }
+            }));
+        });
+        Promise.all(sendCancelClassEmailPromises);
     }
 };
 exports.ClassService = ClassService;
 exports.ClassService = ClassService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(class_repository_1.IClassRepository)),
     __param(1, (0, mongoose_2.InjectConnection)()),
-    __param(3, (0, common_1.Inject)(payment_service_1.IPaymentService)),
-    __param(4, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
-    __param(5, (0, common_1.Inject)(learner_service_1.ILearnerService)),
-    __param(6, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
-    __param(7, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
-    __param(8, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __param(9, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
-    __metadata("design:paramtypes", [Object, mongoose_1.Connection,
-        config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
+    __param(2, (0, common_1.Inject)(class_repository_1.IClassRepository)),
+    __param(4, (0, common_1.Inject)(payment_service_1.IPaymentService)),
+    __param(5, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
+    __param(6, (0, common_1.Inject)(learner_service_1.ILearnerService)),
+    __param(7, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __param(8, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
+    __param(9, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(10, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
+    __metadata("design:paramtypes", [notification_adapter_1.NotificationAdapter,
+        mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
 ], ClassService);
 //# sourceMappingURL=class.service.js.map

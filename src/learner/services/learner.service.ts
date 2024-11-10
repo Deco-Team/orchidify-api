@@ -6,7 +6,7 @@ import { QueryLearnerDto } from '@learner/dto/view-learner.dto'
 import { Injectable, Inject } from '@nestjs/common'
 import { ILearnerRepository } from '@src/learner/repositories/learner.repository'
 import { Learner, LearnerDocument } from '@src/learner/schemas/learner.schema'
-import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose'
 
 export const ILearnerService = Symbol('ILearnerService')
 
@@ -20,6 +20,11 @@ export interface ILearnerService extends IAuthUserService {
     options?: QueryOptions | undefined
   ): Promise<LearnerDocument>
   list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto)
+  findMany(
+    conditions: FilterQuery<LearnerDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<LearnerDocument[]>
 }
 
 @Injectable()
@@ -87,5 +92,18 @@ export class LearnerService implements ILearnerService {
       ...pagination,
       projection
     })
+  }
+
+  public async findMany(
+    conditions: FilterQuery<LearnerDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const learners = await this.learnerRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return learners
   }
 }

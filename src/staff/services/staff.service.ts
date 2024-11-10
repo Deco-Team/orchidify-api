@@ -52,7 +52,7 @@ export class StaffService implements IStaffService {
 
     this.notificationAdapter.sendMail({
       to: staff.email,
-      subject: `[Orchidify] Login Information`,
+      subject: `[Orchidify] Thông tin đăng nhập`,
       template: 'management/add-staff',
       context: {
         email: staff.email,

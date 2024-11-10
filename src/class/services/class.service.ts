@@ -49,6 +49,7 @@ import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { IInstructorService } from '@instructor/services/instructor.service'
 import { CancelClassDto } from '@class/dto/cancel-class.dto'
+import { NotificationAdapter } from '@common/adapters/notification.adapter'
 
 export const IClassService = Symbol('IClassService')
 
@@ -89,9 +90,10 @@ export interface IClassService {
 @Injectable()
 export class ClassService implements IClassService {
   constructor(
+    private readonly notificationAdapter: NotificationAdapter,
+    @InjectConnection() readonly connection: Connection,
     @Inject(IClassRepository)
     private readonly classRepository: IClassRepository,
-    @InjectConnection() readonly connection: Connection,
     private readonly configService: ConfigService,
     @Inject(IPaymentService)
     private readonly paymentService: IPaymentService,
@@ -623,12 +625,14 @@ export class ClassService implements IClassService {
   public async cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void> {
     const { cancelReason } = cancelClassDto
     const { _id, role } = userAuth
+    const refundTransactionLearnerIds = []
+    let courseClass: Class
     // Execute in transaction
     const session = await this.connection.startSession()
     try {
       await session.withTransaction(async () => {
         // cancel class
-        const courseClass = await this.update(
+        courseClass = await this.update(
           { _id: new Types.ObjectId(classId) },
           {
             $set: {
@@ -723,6 +727,7 @@ export class ClassService implements IClassService {
                   }
                 })
               )
+              refundTransactionLearnerIds.push(_.get(learnerClass, 'learnerId'))
             }
           }
         })
@@ -732,7 +737,33 @@ export class ClassService implements IClassService {
       await session.endSession()
     }
 
-    // TODO: send email for learners
+    // send email for learners
+    this.sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass)
+
     // TODO: send notification for instructor
+  }
+
+  private async sendCancelClassNotificationForLearner(
+    refundTransactionLearnerIds: Types.ObjectId[],
+    courseClass: Class
+  ) {
+    const learners = await this.learnerService.findMany({
+      _id: { $in: refundTransactionLearnerIds }
+    })
+    const sendCancelClassEmailPromises = []
+    learners.forEach((learner) => {
+      sendCancelClassEmailPromises.push(
+        this.notificationAdapter.sendMail({
+          to: learner.email,
+          subject: `[Orchidify] Thông báo hủy lớp học`,
+          template: 'learner/cancel-class',
+          context: {
+            name: learner.name,
+            classTitle: courseClass.title
+          }
+        })
+      )
+    })
+    Promise.all(sendCancelClassEmailPromises)
   }
 }

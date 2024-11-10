@@ -44,6 +44,7 @@ import { UserAuth } from '@common/contracts/dto';
 import { ISettingService } from '@setting/services/setting.service';
 import { IInstructorService } from '@instructor/services/instructor.service';
 import { CancelClassDto } from '@class/dto/cancel-class.dto';
+import { NotificationAdapter } from '@common/adapters/notification.adapter';
 export declare const IClassService: unique symbol;
 export interface IClassService {
     create(courseClass: CreateClassDto, options?: SaveOptions | undefined): Promise<ClassDocument>;
@@ -67,8 +68,9 @@ export interface IClassService {
     }): moment.Moment;
 }
 export declare class ClassService implements IClassService {
-    private readonly classRepository;
+    private readonly notificationAdapter;
     readonly connection: Connection;
+    private readonly classRepository;
     private readonly configService;
     private readonly paymentService;
     private readonly transactionService;
@@ -77,7 +79,7 @@ export declare class ClassService implements IClassService {
     private readonly gardenTimesheetService;
     private readonly settingService;
     private readonly instructorService;
-    constructor(classRepository: IClassRepository, connection: Connection, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService);
+    constructor(notificationAdapter: NotificationAdapter, connection: Connection, classRepository: IClassRepository, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService);
     create(createClassDto: CreateClassDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>>;
@@ -119,4 +121,5 @@ export declare class ClassService implements IClassService {
         slotNumbers?: SlotNumber[];
     }): moment.Moment;
     cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void>;
+    private sendCancelClassNotificationForLearner;
 }
