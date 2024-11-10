@@ -87,6 +87,9 @@
       "@feedback/*": [
         "src/feedback/*"
       ],
+      "@firebase/*": [
+        "src/firebase/*"
+      ],
       "@src/*": [
         "src/*"
       ]

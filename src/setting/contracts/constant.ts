@@ -24,6 +24,7 @@ export enum SettingKey {
 
   // System
   CommissionRate = 'CommissionRate',
+  FirebaseConfig = 'FirebaseConfig',
 
   // Class
   ClassAutoCompleteAfterDay = 'ClassAutoCompleteAfterDay',

@@ -30,6 +30,7 @@ import { QueueModule } from './queue/queue.module'
 import { AttendanceModule } from '@attendance/attendance.module'
 import { PayoutRequestModule } from '@payout-request/payout-request.module'
 import { FeedbackModule } from '@feedback/feedback.module'
+import { FirebaseModule } from './firebase/firebase.module'
 
 @Module({
   imports: [
@@ -153,6 +154,10 @@ import { FeedbackModule } from '@feedback/feedback.module'
       {
         path: 'feedbacks',
         module: FeedbackModule
+      },
+      {
+        path: 'firebase',
+        module: FirebaseModule
       }
     ]),
     TerminusModule.forRoot({
@@ -176,7 +181,8 @@ import { FeedbackModule } from '@feedback/feedback.module'
     TransactionModule,
     QueueModule,
     AttendanceModule,
-    FeedbackModule
+    FeedbackModule,
+    FirebaseModule
   ],
   controllers: [AppController],
   providers: [AppService]
