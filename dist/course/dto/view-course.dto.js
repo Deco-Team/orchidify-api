@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PublicCourseDetailDataResponse = exports.PublishCourseListDataResponse = exports.CourseDetailDataResponse = exports.CourseListDataResponse = exports.PublicQueryCourseDto = exports.StaffQueryCourseDto = exports.QueryCourseDto = void 0;
+exports.PublicCourseDetailDataResponse = exports.PublishCourseListDataResponse = exports.CourseDetailDataResponse = exports.CourseListDataResponse = exports.CourseInstructorDto = exports.PublicQueryCourseDto = exports.StaffQueryCourseDto = exports.QueryCourseDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_course_dto_1 = require("./base.course.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -97,20 +97,25 @@ __decorate([
     (0, class_validator_1.Max)(10000000),
     __metadata("design:type", Number)
 ], PublicQueryCourseDto.prototype, "toPrice", void 0);
+class CourseInstructorDto extends (0, swagger_1.PickType)(base_instructor_dto_1.BaseInstructorDto, constant_5.COURSE_INSTRUCTOR_DETAIL_PROJECTION) {
+}
+exports.CourseInstructorDto = CourseInstructorDto;
 class CourseListItemResponse extends (0, swagger_1.PickType)(base_course_dto_1.BaseCourseDto, constant_2.COURSE_LIST_PROJECTION) {
 }
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: CourseInstructorDto }),
+    __metadata("design:type", CourseInstructorDto)
+], CourseListItemResponse.prototype, "instructor", void 0);
 class CourseListResponse extends (0, openapi_builder_1.PaginateResponse)(CourseListItemResponse) {
 }
 class CourseListDataResponse extends (0, openapi_builder_1.DataResponse)(CourseListResponse) {
 }
 exports.CourseListDataResponse = CourseListDataResponse;
-class PublicCourseInstructorDto extends (0, swagger_1.PickType)(base_instructor_dto_1.BaseInstructorDto, constant_5.PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {
-}
 class CourseDetailResponse extends (0, swagger_1.PickType)(base_course_dto_1.BaseCourseDto, constant_2.COURSE_DETAIL_PROJECTION) {
 }
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: PublicCourseInstructorDto }),
-    __metadata("design:type", PublicCourseInstructorDto)
+    (0, swagger_1.ApiProperty)({ type: CourseInstructorDto }),
+    __metadata("design:type", CourseInstructorDto)
 ], CourseDetailResponse.prototype, "instructor", void 0);
 class CourseDetailDataResponse extends (0, openapi_builder_1.DataResponse)(CourseDetailResponse) {
 }
@@ -118,8 +123,8 @@ exports.CourseDetailDataResponse = CourseDetailDataResponse;
 class PublicCourseListItemResponse extends (0, swagger_1.PickType)(base_course_dto_1.BaseCourseDto, constant_2.COURSE_LIST_PROJECTION) {
 }
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: PublicCourseInstructorDto }),
-    __metadata("design:type", PublicCourseInstructorDto)
+    (0, swagger_1.ApiProperty)({ type: CourseInstructorDto }),
+    __metadata("design:type", CourseInstructorDto)
 ], PublicCourseListItemResponse.prototype, "instructor", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Number }),
@@ -149,8 +154,8 @@ __decorate([
 class PublicCourseDetailResponse extends (0, swagger_1.PickType)(base_course_dto_1.BaseCourseDto, constant_2.COURSE_DETAIL_PROJECTION) {
 }
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: PublicCourseInstructorDto }),
-    __metadata("design:type", PublicCourseInstructorDto)
+    (0, swagger_1.ApiProperty)({ type: CourseInstructorDto }),
+    __metadata("design:type", CourseInstructorDto)
 ], PublicCourseDetailResponse.prototype, "instructor", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: PublicCourseSessionDto, isArray: true }),

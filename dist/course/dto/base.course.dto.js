@@ -102,6 +102,14 @@ __decorate([
     __metadata("design:type", Array)
 ], BaseCourseDto.prototype, "sessions", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String, isArray: true }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayMinSize)(2),
+    (0, class_validator_1.ArrayMaxSize)(3),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], BaseCourseDto.prototype, "childCourseIds", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Number, example: 20 }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(10),

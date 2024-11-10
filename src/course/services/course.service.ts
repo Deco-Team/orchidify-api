@@ -10,6 +10,7 @@ import { QueryCourseDto, PublicQueryCourseDto, StaffQueryCourseDto } from '@cour
 import { CourseLevel } from '@src/common/contracts/constant'
 import * as _ from 'lodash'
 import { HelperService } from '@common/services/helper.service'
+import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 export const ICourseService = Symbol('ICourseService')
 
@@ -29,6 +30,11 @@ export interface ICourseService {
   listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto)
   listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto)
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
+  findMany(
+    conditions: FilterQuery<CourseDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<CourseDocument[]>
 }
 
 @Injectable()
@@ -52,7 +58,8 @@ export class CourseService implements ICourseService {
   ) {
     const course = await this.courseRepository.findOne({
       conditions: {
-        _id: courseId
+        _id: courseId,
+        childCourseIds: []
       },
       projection,
       populates
@@ -75,7 +82,8 @@ export class CourseService implements ICourseService {
       instructorId: new Types.ObjectId(instructorId),
       status: {
         $ne: CourseStatus.DELETED
-      }
+      },
+      childCourseIds: []
     }
 
     const validLevel = level?.filter((level) =>
@@ -120,6 +128,7 @@ export class CourseService implements ICourseService {
       status: {
         $in: [CourseStatus.ACTIVE]
       },
+      childCourseIds: []
     }
 
     const validLevel = level?.filter((level) =>
@@ -150,7 +159,13 @@ export class CourseService implements ICourseService {
 
     return this.courseRepository.model.paginate(filter, {
       ...pagination,
-      projection
+      projection,
+      populate: [
+        {
+          path: 'instructor',
+          select: COURSE_INSTRUCTOR_DETAIL_PROJECTION
+        }
+      ]
     })
   }
 
@@ -195,6 +210,11 @@ export class CourseService implements ICourseService {
         }
       })
     }
+    aggregateMatch.push({
+      $match: {
+        childCourseIds: []
+      }
+    })
 
     const result = await this.courseRepository.model.aggregate([
       ...aggregateMatch,
@@ -324,8 +344,25 @@ export class CourseService implements ICourseService {
       conditions: {
         status: {
           $in: status
-        }
+        },
+        childCourseIds: []
       }
+    })
+    return courses
+  }
+
+  public async findMany(
+    conditions: FilterQuery<CourseDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const courses = await this.courseRepository.findMany({
+      conditions: {
+        ...conditions,
+        childCourseIds: []
+      },
+      projection,
+      populates
     })
     return courses
   }

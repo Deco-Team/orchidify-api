@@ -165,6 +165,21 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    CHILD_COURSE_COMBO_INVALID: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
+    COURSE_COMBO_NOT_FOUND: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
+    COURSE_COMBO_EXISTED: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     CLASS_NOT_FOUND: {
         error: string;
         message: string;

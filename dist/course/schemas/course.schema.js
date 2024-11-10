@@ -139,4 +139,9 @@ exports.CourseSchema.virtual('instructor', {
     foreignField: '_id',
     justOne: true
 });
+exports.CourseSchema.virtual('childCourses', {
+    ref: 'Course',
+    localField: 'childCourseIds',
+    foreignField: '_id'
+});
 //# sourceMappingURL=course.schema.js.map

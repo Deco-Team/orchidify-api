@@ -18,6 +18,9 @@ const garden_module_1 = require("../garden/garden.module");
 const course_schema_1 = require("./schemas/course.schema");
 const management_course_controller_1 = require("./controllers/management.course.controller");
 const learner_course_controller_1 = require("./controllers/learner.course.controller");
+const instructor_course_combo_controller_1 = require("./controllers/instructor.course-combo.controller");
+const course_combo_service_1 = require("./services/course-combo.service");
+const management_course_combo_controller_1 = require("./controllers/management.course-combo.controller");
 let CourseModule = class CourseModule {
 };
 exports.CourseModule = CourseModule;
@@ -25,11 +28,21 @@ exports.CourseModule = CourseModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [mongoose_1.MongooseModule.forFeature([{ name: course_schema_1.Course.name, schema: course_schema_1.CourseSchema }]), garden_module_1.GardenModule],
-        controllers: [instructor_course_controller_1.InstructorCourseController, management_course_controller_1.ManagementCourseController, learner_course_controller_1.CourseController],
+        controllers: [
+            instructor_course_controller_1.InstructorCourseController,
+            management_course_controller_1.ManagementCourseController,
+            learner_course_controller_1.CourseController,
+            instructor_course_combo_controller_1.InstructorCourseComboController,
+            management_course_combo_controller_1.ManagementCourseComboController
+        ],
         providers: [
             {
                 provide: course_service_1.ICourseService,
                 useClass: course_service_1.CourseService
+            },
+            {
+                provide: course_combo_service_1.ICourseComboService,
+                useClass: course_combo_service_1.CourseComboService
             },
             {
                 provide: course_session_service_1.ICourseSessionService,
@@ -48,6 +61,10 @@ exports.CourseModule = CourseModule = __decorate([
             {
                 provide: course_service_1.ICourseService,
                 useClass: course_service_1.CourseService
+            },
+            {
+                provide: course_combo_service_1.ICourseComboService,
+                useClass: course_combo_service_1.CourseComboService
             }
         ]
     })

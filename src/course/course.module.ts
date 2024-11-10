@@ -9,15 +9,28 @@ import { GardenModule } from '@garden/garden.module'
 import { Course, CourseSchema } from './schemas/course.schema'
 import { ManagementCourseController } from './controllers/management.course.controller'
 import { CourseController } from './controllers/learner.course.controller'
+import { InstructorCourseComboController } from './controllers/instructor.course-combo.controller'
+import { CourseComboService, ICourseComboService } from './services/course-combo.service'
+import { ManagementCourseComboController } from './controllers/management.course-combo.controller'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }]), GardenModule],
-  controllers: [InstructorCourseController, ManagementCourseController, CourseController],
+  controllers: [
+    InstructorCourseController,
+    ManagementCourseController,
+    CourseController,
+    InstructorCourseComboController,
+    ManagementCourseComboController
+  ],
   providers: [
     {
       provide: ICourseService,
       useClass: CourseService
+    },
+    {
+      provide: ICourseComboService,
+      useClass: CourseComboService
     },
     {
       provide: ICourseSessionService,
@@ -36,6 +49,10 @@ import { CourseController } from './controllers/learner.course.controller'
     {
       provide: ICourseService,
       useClass: CourseService
+    },
+    {
+      provide: ICourseComboService,
+      useClass: CourseComboService
     }
   ]
 })

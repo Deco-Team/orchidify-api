@@ -45,7 +45,7 @@ let ManagementCourseController = class ManagementCourseController {
         const course = await this.courseService.findById(courseId, constant_2.COURSE_DETAIL_PROJECTION, [
             {
                 path: 'instructor',
-                select: constant_3.PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+                select: constant_3.COURSE_INSTRUCTOR_DETAIL_PROJECTION
             }
         ]);
         if (!course || [constant_1.CourseStatus.ACTIVE].includes(course.status) === false)

@@ -59,7 +59,7 @@ let CourseController = class CourseController {
             },
             {
                 path: 'instructor',
-                select: constant_4.PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+                select: constant_4.COURSE_INSTRUCTOR_DETAIL_PROJECTION
             }
         ]);
         if (!course || [constant_1.CourseStatus.ACTIVE].includes(course.status) === false)

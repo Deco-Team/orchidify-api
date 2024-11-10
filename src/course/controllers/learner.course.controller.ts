@@ -10,7 +10,6 @@ import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import { ICourseService } from '@course/services/course.service'
 import {
-  CourseDetailDataResponse,
   PublicCourseDetailDataResponse,
   PublicQueryCourseDto,
   PublishCourseListDataResponse
@@ -20,7 +19,7 @@ import { Roles } from '@auth/decorators/roles.decorator'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
-import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { Types } from 'mongoose'
 
 @ApiTags('Course - Viewer/Learner')
@@ -72,7 +71,7 @@ export class CourseController {
       },
       {
         path: 'instructor',
-        select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+        select: COURSE_INSTRUCTOR_DETAIL_PROJECTION
       }
     ])
     if (!course || [CourseStatus.ACTIVE].includes(course.status) === false)

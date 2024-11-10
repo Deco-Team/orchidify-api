@@ -11,7 +11,7 @@ import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseClassDto } from '@class/dto/base.class.dto'
 import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
-import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
 
 export class QueryCourseDto {
@@ -76,14 +76,17 @@ export class PublicQueryCourseDto extends PickType(QueryCourseDto, ['title', 'ty
   toPrice: number
 }
 
-class CourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {}
+export class CourseInstructorDto extends PickType(BaseInstructorDto, COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
+class CourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_PROJECTION) {
+  @ApiProperty({ type: CourseInstructorDto })
+  instructor: CourseInstructorDto
+}
 class CourseListResponse extends PaginateResponse(CourseListItemResponse) {}
 export class CourseListDataResponse extends DataResponse(CourseListResponse) {}
 
-class PublicCourseInstructorDto extends PickType(BaseInstructorDto, PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION) {}
 class CourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {
-  @ApiProperty({ type: PublicCourseInstructorDto })
-  instructor: PublicCourseInstructorDto
+  @ApiProperty({ type: CourseInstructorDto })
+  instructor: CourseInstructorDto
 }
 export class CourseDetailDataResponse extends DataResponse(CourseDetailResponse) {}
 
@@ -91,8 +94,8 @@ class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_P
   // @ApiProperty({ type: Number })
   // sessionsCount: number
 
-  @ApiProperty({ type: PublicCourseInstructorDto })
-  instructor: PublicCourseInstructorDto
+  @ApiProperty({ type: CourseInstructorDto })
+  instructor: CourseInstructorDto
 
   @ApiProperty({ type: Number })
   classesCount: number
@@ -111,8 +114,8 @@ class PublicCourseClassDto extends PickType(BaseClassDto, PUBLIC_COURSE_CLASS_DE
   learnerClass: PublicCourseLearnerClassDto
 }
 class PublicCourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_PROJECTION) {
-  @ApiProperty({ type: PublicCourseInstructorDto })
-  instructor: PublicCourseInstructorDto
+  @ApiProperty({ type: CourseInstructorDto })
+  instructor: CourseInstructorDto
 
   @ApiProperty({ type: PublicCourseSessionDto, isArray: true })
   sessions: BaseSessionDto[]
