@@ -21,6 +21,7 @@ const constant_2 = require("../contracts/constant");
 const constant_3 = require("../../common/contracts/constant");
 const _ = require("lodash");
 const helper_service_1 = require("../../common/services/helper.service");
+const constant_4 = require("../../instructor/contracts/constant");
 exports.ICourseService = Symbol('ICourseService');
 let CourseService = class CourseService {
     constructor(courseRepository, helperService) {
@@ -35,7 +36,8 @@ let CourseService = class CourseService {
     async findById(courseId, projection, populates) {
         const course = await this.courseRepository.findOne({
             conditions: {
-                _id: courseId
+                _id: courseId,
+                childCourseIds: []
             },
             projection,
             populates
@@ -51,7 +53,8 @@ let CourseService = class CourseService {
             instructorId: new mongoose_1.Types.ObjectId(instructorId),
             status: {
                 $ne: constant_1.CourseStatus.DELETED
-            }
+            },
+            childCourseIds: []
         };
         const validLevel = level?.filter((level) => [constant_3.CourseLevel.BASIC, constant_3.CourseLevel.INTERMEDIATE, constant_3.CourseLevel.ADVANCED].includes(level));
         if (validLevel?.length > 0) {
@@ -84,6 +87,7 @@ let CourseService = class CourseService {
             status: {
                 $in: [constant_1.CourseStatus.ACTIVE]
             },
+            childCourseIds: []
         };
         const validLevel = level?.filter((level) => [constant_3.CourseLevel.BASIC, constant_3.CourseLevel.INTERMEDIATE, constant_3.CourseLevel.ADVANCED].includes(level));
         if (validLevel?.length > 0) {
@@ -107,7 +111,13 @@ let CourseService = class CourseService {
         }
         return this.courseRepository.model.paginate(filter, {
             ...pagination,
-            projection
+            projection,
+            populate: [
+                {
+                    path: 'instructor',
+                    select: constant_4.COURSE_INSTRUCTOR_DETAIL_PROJECTION
+                }
+            ]
         });
     }
     async listPublicCourses(pagination, queryCourseDto) {
@@ -148,6 +158,11 @@ let CourseService = class CourseService {
                 }
             });
         }
+        aggregateMatch.push({
+            $match: {
+                childCourseIds: []
+            }
+        });
         const result = await this.courseRepository.model.aggregate([
             ...aggregateMatch,
             {
@@ -274,8 +289,20 @@ let CourseService = class CourseService {
             conditions: {
                 status: {
                     $in: status
-                }
+                },
+                childCourseIds: []
             }
+        });
+        return courses;
+    }
+    async findMany(conditions, projection, populates) {
+        const courses = await this.courseRepository.findMany({
+            conditions: {
+                ...conditions,
+                childCourseIds: []
+            },
+            projection,
+            populates
         });
         return courses;
     }

@@ -18,7 +18,7 @@ import { CourseDetailDataResponse, CourseListDataResponse, StaffQueryCourseDto }
 import { COURSE_DETAIL_PROJECTION } from '@course/contracts/constant'
 import { ViewCourseSessionDetailDataResponse } from '@course/dto/view-course-session.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
-import { PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 
 @ApiTags('Course - Management')
 @ApiBearerAuth()
@@ -57,7 +57,7 @@ export class ManagementCourseController {
     const course = await this.courseService.findById(courseId, COURSE_DETAIL_PROJECTION, [
       {
         path: 'instructor',
-        select: PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION
+        select: COURSE_INSTRUCTOR_DETAIL_PROJECTION
       }
     ])
     if (!course || [CourseStatus.ACTIVE].includes(course.status) === false)

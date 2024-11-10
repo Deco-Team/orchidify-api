@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PUBLIC_COURSE_DETAIL_PROJECTION = exports.COURSE_DETAIL_PROJECTION = exports.COURSE_LIST_PROJECTION = void 0;
+exports.CHILD_COURSE_COMBO_DETAIL_PROJECTION = exports.COURSE_COMBO_DETAIL_PROJECTION = exports.COURSE_COMBO_LIST_PROJECTION = exports.PUBLIC_COURSE_DETAIL_PROJECTION = exports.COURSE_DETAIL_PROJECTION = exports.COURSE_LIST_PROJECTION = void 0;
 exports.COURSE_LIST_PROJECTION = [
     '_id',
     'code',
@@ -64,6 +64,44 @@ exports.PUBLIC_COURSE_DETAIL_PROJECTION = [
     'gardenRequiredToolkits',
     'instructorId',
     'isRequesting',
+    'createdAt',
+    'updatedAt'
+];
+exports.COURSE_COMBO_LIST_PROJECTION = [
+    '_id',
+    'code',
+    'title',
+    'status',
+    'childCourseIds',
+    'discount',
+    'instructorId',
+    'createdAt',
+    'updatedAt'
+];
+exports.COURSE_COMBO_DETAIL_PROJECTION = [
+    '_id',
+    'code',
+    'title',
+    'description',
+    'status',
+    'childCourseIds',
+    'discount',
+    'instructorId',
+    'createdAt',
+    'updatedAt'
+];
+exports.CHILD_COURSE_COMBO_DETAIL_PROJECTION = [
+    '_id',
+    'code',
+    'title',
+    'description',
+    'price',
+    'level',
+    'type',
+    'status',
+    'learnerLimit',
+    'rate',
+    'discount',
     'createdAt',
     'updatedAt'
 ];

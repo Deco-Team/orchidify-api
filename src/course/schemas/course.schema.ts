@@ -108,3 +108,9 @@ CourseSchema.virtual('instructor', {
   foreignField: '_id',
   justOne: true
 })
+
+CourseSchema.virtual('childCourses', {
+  ref: 'Course',
+  localField: 'childCourseIds',
+  foreignField: '_id'
+})

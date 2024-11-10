@@ -202,6 +202,25 @@ export const Errors = {
   },
 
   /**
+   * Course Combo
+   */
+  CHILD_COURSE_COMBO_INVALID: {
+    error: 'CHILD_COURSE_COMBO_INVALID',
+    message: 'Khóa học trong combo không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  COURSE_COMBO_NOT_FOUND: {
+    error: 'COURSE_COMBO_NOT_FOUND',
+    message: 'Không tìm thấy combo khóa học.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+  COURSE_COMBO_EXISTED: {
+    error: 'COURSE_COMBO_EXISTED',
+    message: 'Combo khóa học đã tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
+
+  /**
    * Class
    */
   CLASS_NOT_FOUND: {

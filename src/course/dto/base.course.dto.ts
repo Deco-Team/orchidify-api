@@ -22,6 +22,7 @@ import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseAssignmentDto } from '@src/class/dto/assignment.dto'
 import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto'
+import { Types } from 'mongoose'
 
 export class BaseCourseDto {
   @ApiProperty({ type: String })
@@ -91,6 +92,13 @@ export class BaseCourseDto {
   @Type(() => BaseSessionDto)
   @ValidateNested({ each: true })
   sessions: BaseSessionDto[]
+
+  @ApiProperty({ type: String, isArray: true })
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(3)
+  @IsMongoId({ each: true })
+  childCourseIds: string[] | Types.ObjectId[]
 
   @ApiProperty({ type: Number, example: 20 })
   @IsInt()

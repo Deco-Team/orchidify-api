@@ -42,7 +42,7 @@ export const INSTRUCTOR_LIST_PROJECTION = [
   'updatedAt'
 ] as const
 
-export const PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'] as const
+export const COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'email', 'idCardPhoto', 'avatar', 'bio'] as const
 
 export const MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'] as const
 

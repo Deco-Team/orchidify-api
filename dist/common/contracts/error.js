@@ -168,6 +168,21 @@ exports.Errors = {
         message: 'Tổng số lượng bài tập của khóa học không hợp lệ.',
         httpStatus: common_1.HttpStatus.BAD_REQUEST
     },
+    CHILD_COURSE_COMBO_INVALID: {
+        error: 'CHILD_COURSE_COMBO_INVALID',
+        message: 'Khóa học trong combo không hợp lệ.',
+        httpStatus: common_1.HttpStatus.BAD_REQUEST
+    },
+    COURSE_COMBO_NOT_FOUND: {
+        error: 'COURSE_COMBO_NOT_FOUND',
+        message: 'Không tìm thấy combo khóa học.',
+        httpStatus: common_1.HttpStatus.NOT_FOUND
+    },
+    COURSE_COMBO_EXISTED: {
+        error: 'COURSE_COMBO_EXISTED',
+        message: 'Combo khóa học đã tồn tại.',
+        httpStatus: common_1.HttpStatus.NOT_FOUND
+    },
     CLASS_NOT_FOUND: {
         error: 'CLASS_NOT_FOUND',
         message: 'Không tìm thấy lớp học.',

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION = exports.MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION = exports.PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION = exports.INSTRUCTOR_LIST_PROJECTION = exports.INSTRUCTOR_DETAIL_PROJECTION = exports.INSTRUCTOR_PROFILE_PROJECTION = void 0;
+exports.VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION = exports.MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION = exports.COURSE_INSTRUCTOR_DETAIL_PROJECTION = exports.INSTRUCTOR_LIST_PROJECTION = exports.INSTRUCTOR_DETAIL_PROJECTION = exports.INSTRUCTOR_PROFILE_PROJECTION = void 0;
 exports.INSTRUCTOR_PROFILE_PROJECTION = [
     '_id',
     'name',
@@ -42,7 +42,7 @@ exports.INSTRUCTOR_LIST_PROJECTION = [
     'createdAt',
     'updatedAt'
 ];
-exports.PUBLIC_COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'];
+exports.COURSE_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'email', 'idCardPhoto', 'avatar', 'bio'];
 exports.MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION = ['_id', 'name', 'idCardPhoto', 'avatar', 'bio'];
 exports.VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION = [
     '_id',

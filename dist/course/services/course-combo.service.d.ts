@@ -27,27 +27,22 @@
 import { ICourseRepository } from '@course/repositories/course.repository';
 import { Course, CourseDocument } from '@course/schemas/course.schema';
 import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
-import { CreateCourseDto } from '@course/dto/create-course.dto';
-import { CourseStatus } from '@common/contracts/constant';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
-import { QueryCourseDto, PublicQueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto';
-import { HelperService } from '@common/services/helper.service';
-export declare const ICourseService: unique symbol;
-export interface ICourseService {
-    create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined): Promise<CourseDocument>;
+import { CreateCourseComboDto } from '@course/dto/create-course-combo.dto';
+import { QueryCourseComboDto, StaffQueryCourseComboDto } from '@course/dto/view-course-combo.dto';
+export declare const ICourseComboService: unique symbol;
+export interface ICourseComboService {
+    create(createCourseComboDto: CreateCourseComboDto, options?: SaveOptions | undefined): Promise<CourseDocument>;
     findById(courseId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<CourseDocument>;
     update(conditions: FilterQuery<Course>, payload: UpdateQuery<Course>, options?: QueryOptions | undefined): Promise<CourseDocument>;
-    listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto): any;
-    listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto): any;
-    listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): any;
-    findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>;
+    listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseComboDto): any;
+    listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseComboDto): any;
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<CourseDocument[]>;
 }
-export declare class CourseService implements ICourseService {
+export declare class CourseComboService implements ICourseComboService {
     private readonly courseRepository;
-    private readonly helperService;
-    constructor(courseRepository: ICourseRepository, helperService: HelperService);
-    create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Course> & Course & Required<{
+    constructor(courseRepository: ICourseRepository);
+    create(createCourseComboDto: CreateCourseComboDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>>;
     findById(courseId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Course> & Course & Required<{
@@ -58,29 +53,16 @@ export declare class CourseService implements ICourseService {
     }>> & Omit<import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>, never>>;
-    listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto, projection?: readonly ["_id", "code", "title", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "rate", "ratingSummary", "discount", "instructorId", "isRequesting", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Course> & Course & Required<{
+    listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseComboDto, projection?: readonly ["_id", "code", "title", "status", "childCourseIds", "discount", "instructorId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>> & import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>>>;
-    listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto, projection?: readonly ["_id", "code", "title", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "rate", "ratingSummary", "discount", "instructorId", "isRequesting", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Course> & Course & Required<{
+    listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseComboDto, projection?: readonly ["_id", "code", "title", "status", "childCourseIds", "discount", "instructorId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>> & import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>>>;
-    listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<{
-        docs: any[];
-        totalDocs: number;
-        limit: number;
-        page: number;
-        totalPages: number;
-        pagingCounter: any;
-        hasPrevPage: boolean;
-        hasNextPage: boolean;
-        prevPage: number;
-        nextPage: number;
-    }>;
-    findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>;
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<(import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>)[]>;

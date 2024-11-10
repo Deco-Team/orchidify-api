@@ -21,35 +21,17 @@
 /// <reference types="mongoose/types/utility" />
 /// <reference types="mongoose/types/validation" />
 /// <reference types="mongoose/types/virtuals" />
+/// <reference types="mongoose" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
-import { CourseStatus } from '@common/contracts/constant';
-import { BaseMediaDto } from '@media/dto/base-media.dto';
-import { CourseLevel } from '@src/common/contracts/constant';
-import { BaseSessionDto } from '@class/dto/session.dto';
-import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto';
-import { Types } from 'mongoose';
-export declare class BaseCourseDto {
-    _id: string;
-    code: string;
-    title: string;
-    description: string;
-    price: number;
-    level: CourseLevel;
-    type: string[];
-    duration: number;
-    thumbnail: string;
-    media: BaseMediaDto[];
-    status: CourseStatus;
-    sessions: BaseSessionDto[];
-    childCourseIds: string[] | Types.ObjectId[];
-    learnerLimit: number;
-    rate: number;
-    discount: number;
-    gardenRequiredToolkits: string;
-    instructorId: string;
-    isRequesting: Boolean;
-    ratingSummary: BaseRatingSummaryDto;
-    createdAt: Date;
-    updatedAt: Date;
+import { PaginationParams } from '@common/decorators/pagination.decorator';
+import { ICourseComboService } from '@course/services/course-combo.service';
+import { StaffQueryCourseComboDto } from '@course/dto/view-course-combo.dto';
+export declare class ManagementCourseComboController {
+    private readonly courseComboService;
+    constructor(courseComboService: ICourseComboService);
+    list(pagination: PaginationParams, queryCourseDto: StaffQueryCourseComboDto): Promise<any>;
+    getDetail(courseId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/course.schema").Course> & import("../schemas/course.schema").Course & Required<{
+        _id: string;
+    }>>;
 }
