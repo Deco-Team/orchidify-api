@@ -1,0 +1,37 @@
+import { ClassStatus, SlotNumber, Weekday } from '@common/contracts/constant';
+import { BaseMediaDto } from '@media/dto/base-media.dto';
+import { ClassStatusHistory } from '@src/class/schemas/class.schema';
+import { CourseLevel } from '@src/common/contracts/constant';
+import { BaseSessionDto } from './session.dto';
+import { BaseProgressDto } from './progress.dto';
+import { BaseRatingSummaryDto } from './rating-summary.dto';
+export declare class BaseClassDto {
+    _id: string;
+    code: string;
+    title: string;
+    description: string;
+    startDate: Date;
+    price: number;
+    level: CourseLevel;
+    type: string[];
+    duration: number;
+    thumbnail: string;
+    media: BaseMediaDto[];
+    sessions: BaseSessionDto[];
+    status: ClassStatus;
+    histories: ClassStatusHistory[];
+    learnerLimit: number;
+    learnerQuantity: number;
+    weekdays: Weekday[];
+    slotNumbers: SlotNumber[];
+    rate: number;
+    cancelReason: string;
+    gardenRequiredToolkits: string;
+    instructorId: string;
+    gardenId: string;
+    courseId: string;
+    progress: BaseProgressDto;
+    ratingSummary: BaseRatingSummaryDto;
+    createdAt: Date;
+    updatedAt: Date;
+}

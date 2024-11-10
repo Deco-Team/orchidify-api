@@ -1,0 +1,1 @@
+{"version":3,"file":"constant.js","sourceRoot":"/","sources":["attendance/contracts/constant.ts"],"names":[],"mappings":";;;AAAa,QAAA,0BAA0B,GAAG,CAAC,KAAK,EAAE,QAAQ,EAAE,MAAM,EAAE,WAAW,EAAE,WAAW,EAAE,WAAW,CAAU,CAAA","sourcesContent":["export const ATTENDANCE_LIST_PROJECTION = ['_id', 'status', 'note', 'learnerId', 'createdAt', 'updatedAt'] as const\r\n"]}
