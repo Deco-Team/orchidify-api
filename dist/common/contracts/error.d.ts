@@ -165,6 +165,11 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     CHILD_COURSE_COMBO_INVALID: {
         error: string;
         message: string;
@@ -235,6 +240,11 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    ASSIGNMENT_DEADLINE_INVALID: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     ASSIGNMENT_SUBMISSION_NOT_FOUND: {
         error: string;
         message: string;
@@ -246,6 +256,16 @@ export declare const Errors: {
         httpStatus: HttpStatus;
     };
     ASSIGNMENT_SUBMISSION_GRADED: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
+    ASSIGNMENT_SUBMISSION_NOT_START_YET: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
+    ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER: {
         error: string;
         message: string;
         httpStatus: HttpStatus;

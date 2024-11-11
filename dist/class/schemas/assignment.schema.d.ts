@@ -32,6 +32,7 @@ export declare class Assignment {
     title: string;
     description: string;
     attachments: BaseMediaDto[];
+    deadline?: Date;
 }
 export declare const AssignmentSchema: import("mongoose").Schema<Assignment, import("mongoose").Model<Assignment, any, any, any, import("mongoose").Document<unknown, any, Assignment> & Assignment & Required<{
     _id: string;

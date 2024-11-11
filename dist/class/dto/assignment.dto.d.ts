@@ -4,8 +4,12 @@ export declare class BaseAssignmentDto {
     title: string;
     description: string;
     attachments: BaseMediaDto[];
+    deadline: Date;
 }
 declare const CreateAssignmentDto_base: import("@nestjs/common").Type<Pick<BaseAssignmentDto, "attachments" | "title" | "description">>;
 export declare class CreateAssignmentDto extends CreateAssignmentDto_base {
+}
+export declare class UpdateAssignmentDto {
+    deadline: Date;
 }
 export {};

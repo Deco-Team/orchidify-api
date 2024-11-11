@@ -14,7 +14,7 @@ import * as _ from 'lodash'
 
 import { ErrorResponse, IDDataResponse, IDResponse, PaginationQuery } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { SubmissionStatus, UserRole } from '@common/contracts/constant'
+import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { Errors } from '@common/contracts/error'
@@ -41,6 +41,8 @@ import { ViewAssignmentDetailDataResponse } from '@class/dto/view-assignment.dto
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 import { CreateStripePaymentDataResponse } from '@transaction/dto/stripe-payment.dto'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -177,7 +179,13 @@ export class LearnerClassController {
     summary: `Submit Assignment`
   })
   @ApiOkResponse({ type: IDDataResponse })
-  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND, Errors.ASSIGNMENT_SUBMITTED])
+  @ApiErrorResponse([
+    Errors.CLASS_NOT_FOUND,
+    Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET,
+    Errors.ASSIGNMENT_NOT_FOUND,
+    Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER,
+    Errors.ASSIGNMENT_SUBMITTED
+  ])
   @Post(':classId([0-9a-f]{24})/submit-assignment')
   async submitAssignment(
     @Req() req,
@@ -186,8 +194,25 @@ export class LearnerClassController {
   ) {
     const { _id: learnerId } = _.get(req, 'user')
     const { assignmentId } = createAssignmentSubmissionDto
+
+    const courseClass = await this.classService.findById(classId)
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    // BR-70: Learners are only allowed to submit assignments when the class starts.
+    const { startDate } = courseClass
+    const classStartDate = moment(startDate).tz(VN_TIMEZONE)
+    if (classStartDate.isBefore(moment().tz(VN_TIMEZONE)))
+      throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
+
     const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
+
+    // BR-71: Learners are only allowed to submit assignments before the deadline.
+    if (assignment.deadline) {
+      const assignmentDeadline = moment(assignment.deadline).tz(VN_TIMEZONE)
+      if (assignmentDeadline.isAfter(moment().tz(VN_TIMEZONE)))
+        throw new AppException(Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER)
+    }
 
     const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
       assignmentId,

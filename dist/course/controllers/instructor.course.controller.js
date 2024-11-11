@@ -80,6 +80,9 @@ let InstructorCourseController = class InstructorCourseController {
         if (assignmentsCount < Number(assignmentsCountRange[0]) || assignmentsCount > Number(assignmentsCountRange[1])) {
             throw new app_exception_1.AppException(error_1.Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID);
         }
+        const lastSession = createCourseDto.sessions.at(-1);
+        if (lastSession?.assignments?.length > 0)
+            throw new app_exception_1.AppException(error_1.Errors.LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS);
         const { _id } = _.get(req, 'user');
         createCourseDto['status'] = constant_1.CourseStatus.DRAFT;
         createCourseDto['instructorId'] = new mongoose_1.Types.ObjectId(_id);
@@ -186,6 +189,11 @@ __decorate([
         summary: `Create Course`
     }),
     (0, swagger_1.ApiCreatedResponse)({ type: dto_1.IDDataResponse }),
+    (0, api_response_decorator_1.ApiErrorResponse)([
+        error_1.Errors.TOTAL_SESSIONS_OF_COURSE_INVALID,
+        error_1.Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID,
+        error_1.Errors.LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS
+    ]),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),

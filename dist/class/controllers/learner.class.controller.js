@@ -41,6 +41,8 @@ const view_assignment_dto_1 = require("../dto/view-assignment.dto");
 const assignment_submission_dto_1 = require("../dto/assignment-submission.dto");
 const assignment_submission_service_1 = require("../services/assignment-submission.service");
 const stripe_payment_dto_1 = require("../../transaction/dto/stripe-payment.dto");
+const config_1 = require("../../config");
+const moment = require("moment-timezone");
 let LearnerClassController = class LearnerClassController {
     constructor(classService, sessionService, assignmentService, learnerClassService, assignmentSubmissionService) {
         this.classService = classService;
@@ -106,9 +108,21 @@ let LearnerClassController = class LearnerClassController {
     async submitAssignment(req, classId, createAssignmentSubmissionDto) {
         const { _id: learnerId } = _.get(req, 'user');
         const { assignmentId } = createAssignmentSubmissionDto;
+        const courseClass = await this.classService.findById(classId);
+        if (!courseClass)
+            throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
+        const { startDate } = courseClass;
+        const classStartDate = moment(startDate).tz(config_1.VN_TIMEZONE);
+        if (classStartDate.isBefore(moment().tz(config_1.VN_TIMEZONE)))
+            throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET);
         const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId });
         if (!assignment)
             throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_NOT_FOUND);
+        if (assignment.deadline) {
+            const assignmentDeadline = moment(assignment.deadline).tz(config_1.VN_TIMEZONE);
+            if (assignmentDeadline.isAfter(moment().tz(config_1.VN_TIMEZONE)))
+                throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER);
+        }
         const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
             assignmentId,
             learnerId
@@ -207,7 +221,13 @@ __decorate([
         summary: `Submit Assignment`
     }),
     (0, swagger_1.ApiOkResponse)({ type: dto_1.IDDataResponse }),
-    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.ASSIGNMENT_NOT_FOUND, error_1.Errors.ASSIGNMENT_SUBMITTED]),
+    (0, api_response_decorator_1.ApiErrorResponse)([
+        error_1.Errors.CLASS_NOT_FOUND,
+        error_1.Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET,
+        error_1.Errors.ASSIGNMENT_NOT_FOUND,
+        error_1.Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER,
+        error_1.Errors.ASSIGNMENT_SUBMITTED
+    ]),
     (0, common_1.Post)(':classId([0-9a-f]{24})/submit-assignment'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('classId')),

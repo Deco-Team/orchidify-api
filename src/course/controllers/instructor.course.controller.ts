@@ -36,7 +36,6 @@ import { ViewCourseSessionDetailDataResponse } from '@course/dto/view-course-ses
 import { CreateCourseDto } from '@course/dto/create-course.dto'
 import { UpdateCourseDto } from '@course/dto/update-course.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
-import { session } from 'passport'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 
@@ -119,6 +118,11 @@ export class InstructorCourseController {
     summary: `Create Course`
   })
   @ApiCreatedResponse({ type: IDDataResponse })
+  @ApiErrorResponse([
+    Errors.TOTAL_SESSIONS_OF_COURSE_INVALID,
+    Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID,
+    Errors.LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS
+  ])
   @Post()
   async create(@Req() req, @Body() createCourseDto: CreateCourseDto) {
     // validate sessionsCount = 2 * duration
@@ -134,6 +138,10 @@ export class InstructorCourseController {
     if (assignmentsCount < Number(assignmentsCountRange[0]) || assignmentsCount > Number(assignmentsCountRange[1])) {
       throw new AppException(Errors.TOTAL_ASSIGNMENTS_OF_COURSE_INVALID)
     }
+
+    // BR-72: Courses can not have assignments at the last session.
+    const lastSession = createCourseDto.sessions.at(-1)
+    if (lastSession?.assignments?.length > 0) throw new AppException(Errors.LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS)
 
     const { _id } = _.get(req, 'user')
     createCourseDto['status'] = CourseStatus.DRAFT

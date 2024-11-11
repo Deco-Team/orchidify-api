@@ -94,4 +94,5 @@ export declare class ClassRequestService implements IClassRequestService {
     expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     getExpiredAt(date: Date): Promise<Date>;
     addClassRequestAutoExpiredJob(classRequest: ClassRequest): Promise<void>;
+    private generateDeadlineClassAssignment;
 }

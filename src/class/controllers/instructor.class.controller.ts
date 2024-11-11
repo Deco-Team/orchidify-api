@@ -28,6 +28,7 @@ import { IAssignmentSubmissionService } from '@class/services/assignment-submiss
 import { AssignmentSubmissionListDataResponse } from '@class/dto/view-assignment-submission.dto'
 import { GradeAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { UploadSessionResourcesDto } from '@class/dto/session.dto'
+import { UpdateAssignmentDto } from '@class/dto/assignment.dto'
 
 @ApiTags('Class - Instructor')
 @ApiBearerAuth()
@@ -116,6 +117,24 @@ export class InstructorClassController {
 
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
     return assignment
+  }
+
+  @ApiOperation({
+    summary: `Update Assignment`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND, Errors.ASSIGNMENT_DEADLINE_INVALID])
+  @Patch(':classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
+  async updateAssignment(
+    @Req() req,
+    @Param('classId') classId: string,
+    @Param('assignmentId') assignmentId: string,
+    @Body() updateAssignmentDto: UpdateAssignmentDto
+  ) {
+    const { _id: instructorId } = _.get(req, 'user')
+    await this.assignmentService.updateAssignment({ assignmentId, classId, instructorId, updateAssignmentDto })
+
+    return new SuccessResponse(true)
   }
 
   @ApiOperation({

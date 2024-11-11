@@ -200,6 +200,11 @@ export const Errors = {
     message: 'Tổng số lượng bài tập của khóa học không hợp lệ.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS: {
+    error: 'LAST_SESSION_MUST_NOT_HAVE_ASSIGNMENTS',
+    message: 'Bài học cuối không được bao gồm bài tập.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Course Combo
@@ -286,6 +291,11 @@ export const Errors = {
     message: 'Không tìm thấy bài tập.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+  ASSIGNMENT_DEADLINE_INVALID: {
+    error: 'ASSIGNMENT_DEADLINE_INVALID',
+    message: 'Thời hạn nộp bài tập không hợp lệ.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Assignment Submission
@@ -303,6 +313,16 @@ export const Errors = {
   ASSIGNMENT_SUBMISSION_GRADED: {
     error: 'ASSIGNMENT_SUBMISSION_GRADED',
     message: 'Bài tập đã được chấm.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  ASSIGNMENT_SUBMISSION_NOT_START_YET: {
+    error: 'ASSIGNMENT_SUBMISSION_NOT_START_YET',
+    message: 'Chưa đến thời gian nộp bài tập. Vui lòng quay lại sau.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER: {
+    error: 'ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER',
+    message: 'Đã hết thời gian nộp bài tập.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 

@@ -26,6 +26,7 @@ import { JobName, QueueName } from '@queue/contracts/constant'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { HelperService } from '@common/services/helper.service'
+import { Session } from '@class/schemas/session.schema'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -384,6 +385,11 @@ export class ClassRequestService implements IClassRequestService {
         classData['gardenId'] = new Types.ObjectId(gardenId)
         classData['courseId'] = classRequest.courseId
         classData['progress'] = new BaseProgressDto(_.get(classData, ['duration']) * 2, 0)
+
+        // generate deadline for assignments
+        let sessions = _.get(classRequest, 'metadata.sessions') as Session[]
+        classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays })
+
         const createdClass = await this.classService.create(classData, { session })
 
         // gen slots for class
@@ -565,5 +571,41 @@ export class ClassRequestService implements IClassRequestService {
     } catch (err) {
       this.appLogger.error(JSON.stringify(err))
     }
+  }
+
+  private generateDeadlineClassAssignment(params: {
+    sessions: Session[]
+    startDate: Date
+    duration: number
+    weekdays: Weekday[]
+  }) {
+    const { sessions, startDate, duration, weekdays } = params
+    const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date')
+
+    const classDates = [] as Date[]
+    let currentDate = startOfDate.clone()
+    while (currentDate.isSameOrBefore(endOfDate)) {
+      for (let weekday of weekdays) {
+        const classDate = currentDate.clone().isoWeekday(weekday)
+        if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
+          classDates.push(classDate.toDate())
+        }
+      }
+      currentDate.add(1, 'week')
+    }
+    const classEndOfDate = moment(classDates[classDates.length - 1])
+      .tz(VN_TIMEZONE)
+      .endOf('date')
+
+    return sessions.map((session) => {
+      if (session?.assignments?.length > 0) {
+        const sessionStartDate = classDates[session.sessionNumber - 1]
+        const assignmentDeadline = moment(sessionStartDate).tz(VN_TIMEZONE).add(7, 'day').endOf('date')
+        const deadline = assignmentDeadline.isAfter(classEndOfDate) ? classEndOfDate : assignmentDeadline
+        session.assignments = session.assignments.map((assignment) => ({ ...assignment, deadline: deadline.toDate() }))
+      }
+      return session
+    })
   }
 }

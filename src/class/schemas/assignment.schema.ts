@@ -23,6 +23,9 @@ export class Assignment {
 
   @Prop({ type: [BaseMediaDto], required: true })
   attachments: BaseMediaDto[]
+
+  @Prop({ type: Date })
+  deadline?: Date
 }
 
 export const AssignmentSchema = SchemaFactory.createForClass(Assignment)

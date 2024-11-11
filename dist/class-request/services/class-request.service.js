@@ -265,6 +265,8 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 classData['gardenId'] = new mongoose_1.Types.ObjectId(gardenId);
                 classData['courseId'] = classRequest.courseId;
                 classData['progress'] = new progress_dto_1.BaseProgressDto(_.get(classData, ['duration']) * 2, 0);
+                let sessions = _.get(classRequest, 'metadata.sessions');
+                classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
                 const createdClass = await this.classService.create(classData, { session });
                 await this.gardenTimesheetService.generateSlotsForClass({
                     startDate,
@@ -396,6 +398,34 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         catch (err) {
             this.appLogger.error(JSON.stringify(err));
         }
+    }
+    generateDeadlineClassAssignment(params) {
+        const { sessions, startDate, duration, weekdays } = params;
+        const startOfDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
+        const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
+        const classDates = [];
+        let currentDate = startOfDate.clone();
+        while (currentDate.isSameOrBefore(endOfDate)) {
+            for (let weekday of weekdays) {
+                const classDate = currentDate.clone().isoWeekday(weekday);
+                if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
+                    classDates.push(classDate.toDate());
+                }
+            }
+            currentDate.add(1, 'week');
+        }
+        const classEndOfDate = moment(classDates[classDates.length - 1])
+            .tz(config_1.VN_TIMEZONE)
+            .endOf('date');
+        return sessions.map((session) => {
+            if (session?.assignments?.length > 0) {
+                const sessionStartDate = classDates[session.sessionNumber - 1];
+                const assignmentDeadline = moment(sessionStartDate).tz(config_1.VN_TIMEZONE).add(7, 'day').endOf('date');
+                const deadline = assignmentDeadline.isAfter(classEndOfDate) ? classEndOfDate : assignmentDeadline;
+                session.assignments = session.assignments.map((assignment) => ({ ...assignment, deadline: deadline.toDate() }));
+            }
+            return session;
+        });
     }
 };
 exports.ClassRequestService = ClassRequestService;

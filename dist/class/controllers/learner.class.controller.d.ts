@@ -25,6 +25,7 @@ export declare class LearnerClassController {
         title: string;
         description: string;
         attachments: import("../../media/dto/base-media.dto").BaseMediaDto[];
+        deadline?: Date;
     }>;
     submitAssignment(req: any, classId: string, createAssignmentSubmissionDto: CreateAssignmentSubmissionDto): Promise<IDResponse>;
 }

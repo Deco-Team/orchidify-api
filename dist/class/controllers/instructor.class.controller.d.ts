@@ -35,6 +35,7 @@ import { Types } from 'mongoose';
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service';
 import { GradeAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto';
 import { UploadSessionResourcesDto } from '@class/dto/session.dto';
+import { UpdateAssignmentDto } from '@class/dto/assignment.dto';
 export declare class InstructorClassController {
     private readonly classService;
     private readonly sessionService;
@@ -74,6 +75,7 @@ export declare class InstructorClassController {
     }>;
     getLessonDetail(req: any, classId: string, sessionId: string): Promise<import("../schemas/session.schema").Session>;
     getAssignmentDetail(req: any, classId: string, assignmentId: string): Promise<import("../schemas/assignment.schema").Assignment>;
+    updateAssignment(req: any, classId: string, assignmentId: string, updateAssignmentDto: UpdateAssignmentDto): Promise<SuccessResponse>;
     listAssignmentSubmission(req: any, classId: string, assignmentId: string): Promise<any>;
     getAssignmentSubmissionDetail(req: any, classId: string, submissionId: string): Promise<import("../schemas/assignment-submission.schema").AssignmentSubmission>;
     gradeAssignmentSubmission(req: any, classId: string, submissionId: string, gradeAssignmentSubmissionDto: GradeAssignmentSubmissionDto): Promise<SuccessResponse>;

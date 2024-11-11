@@ -15,8 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AssignmentService = exports.IAssignmentService = void 0;
 const common_1 = require("@nestjs/common");
 const _ = require("lodash");
+const moment = require("moment-timezone");
 const class_repository_1 = require("../repositories/class.repository");
 const mongoose_1 = require("mongoose");
+const app_exception_1 = require("../../common/exceptions/app.exception");
+const error_1 = require("../../common/contracts/error");
+const config_1 = require("../../config");
 exports.IAssignmentService = Symbol('IAssignmentService');
 let AssignmentService = class AssignmentService {
     constructor(classRepository) {
@@ -71,6 +75,68 @@ let AssignmentService = class AssignmentService {
         if (!assignment)
             return null;
         return assignment;
+    }
+    async updateAssignment(params) {
+        const { assignmentId, classId, instructorId, updateAssignmentDto } = params;
+        const conditions = { _id: classId };
+        if (instructorId)
+            conditions['instructorId'] = new mongoose_1.Types.ObjectId(instructorId);
+        const courseClass = await this.classRepository.findOne({
+            conditions,
+            projection: '+sessions',
+            options: { lean: true }
+        });
+        let assignment;
+        let classSession;
+        for (let session of courseClass.sessions) {
+            assignment = session?.assignments?.find((assignment) => assignment._id.toString() === assignmentId);
+            classSession = session;
+            if (assignment !== undefined)
+                break;
+        }
+        if (!assignment)
+            throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_NOT_FOUND);
+        const { deadline } = updateAssignmentDto;
+        const { startDate, duration, weekdays } = courseClass;
+        const startOfDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
+        const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
+        const classDates = [];
+        let currentDate = startOfDate.clone();
+        while (currentDate.isSameOrBefore(endOfDate)) {
+            for (let weekday of weekdays) {
+                const classDate = currentDate.clone().isoWeekday(weekday);
+                if (classDate.isSameOrAfter(startOfDate) && classDate.isBefore(endOfDate)) {
+                    classDates.push(classDate.toDate());
+                }
+            }
+            currentDate.add(1, 'week');
+        }
+        const classEndOfDate = moment(classDates[classDates.length - 1])
+            .tz(config_1.VN_TIMEZONE)
+            .endOf('date');
+        const sessionStartDate = moment(classDates[classSession.sessionNumber - 1])
+            .tz(config_1.VN_TIMEZONE)
+            .startOf('date');
+        const assignmentDeadline = moment(deadline).tz(config_1.VN_TIMEZONE).endOf('date');
+        if (assignmentDeadline.isAfter(classEndOfDate) || assignmentDeadline.isBefore(sessionStartDate))
+            throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_DEADLINE_INVALID);
+        classSession.assignments = classSession.assignments.map((assignment) => {
+            if (assignment._id.toString() === assignmentId) {
+                return { ...assignment, deadline: assignmentDeadline.toDate() };
+            }
+            return assignment;
+        });
+        await this.classRepository.findOneAndUpdate({ _id: new mongoose_1.Types.ObjectId(classId) }, {
+            $set: {
+                'sessions.$[i].assignments': classSession.assignments
+            }
+        }, {
+            arrayFilters: [
+                {
+                    'i._id': new mongoose_1.Types.ObjectId(classSession._id)
+                }
+            ]
+        });
     }
 };
 exports.AssignmentService = AssignmentService;

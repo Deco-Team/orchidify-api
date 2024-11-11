@@ -1,7 +1,19 @@
-import { ArrayMaxSize, IsArray, IsMongoId, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
-import { ApiProperty, PickType } from '@nestjs/swagger'
-import { Type } from 'class-transformer'
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsDateString,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  ValidateNested
+} from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
+import { Transform, Type } from 'class-transformer'
 import { BaseMediaDto } from '@media/dto/base-media.dto'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
 
 export class BaseAssignmentDto {
   @ApiProperty({ type: String })
@@ -26,6 +38,17 @@ export class BaseAssignmentDto {
   @Type(() => BaseMediaDto)
   @ValidateNested({ each: true })
   attachments: BaseMediaDto[]
+
+  @ApiPropertyOptional({ type: Date })
+  @IsDateString()
+  deadline: Date
 }
 
 export class CreateAssignmentDto extends PickType(BaseAssignmentDto, ['title', 'description', 'attachments']) {}
+
+export class UpdateAssignmentDto {
+  @ApiProperty({ type: Date })
+  @IsDateString()
+  @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).endOf('date').toISOString())) 
+  deadline: Date
+}

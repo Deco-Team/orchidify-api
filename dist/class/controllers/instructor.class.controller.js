@@ -38,6 +38,7 @@ const assignment_submission_service_1 = require("../services/assignment-submissi
 const view_assignment_submission_dto_1 = require("../dto/view-assignment-submission.dto");
 const assignment_submission_dto_1 = require("../dto/assignment-submission.dto");
 const session_dto_1 = require("../dto/session.dto");
+const assignment_dto_1 = require("../dto/assignment.dto");
 let InstructorClassController = class InstructorClassController {
     constructor(classService, sessionService, assignmentService, learnerClassService, assignmentSubmissionService) {
         this.classService = classService;
@@ -82,6 +83,11 @@ let InstructorClassController = class InstructorClassController {
         if (!assignment)
             throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_NOT_FOUND);
         return assignment;
+    }
+    async updateAssignment(req, classId, assignmentId, updateAssignmentDto) {
+        const { _id: instructorId } = _.get(req, 'user');
+        await this.assignmentService.updateAssignment({ assignmentId, classId, instructorId, updateAssignmentDto });
+        return new dto_1.SuccessResponse(true);
     }
     async listAssignmentSubmission(req, classId, assignmentId) {
         const { _id } = _.get(req, 'user');
@@ -208,6 +214,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", Promise)
 ], InstructorClassController.prototype, "getAssignmentDetail", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `Update Assignment`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: dto_1.SuccessDataResponse }),
+    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.ASSIGNMENT_NOT_FOUND, error_1.Errors.ASSIGNMENT_DEADLINE_INVALID]),
+    (0, common_1.Patch)(':classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('classId')),
+    __param(2, (0, common_1.Param)('assignmentId')),
+    __param(3, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, assignment_dto_1.UpdateAssignmentDto]),
+    __metadata("design:returntype", Promise)
+], InstructorClassController.prototype, "updateAssignment", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: `View Assignment Submission List`

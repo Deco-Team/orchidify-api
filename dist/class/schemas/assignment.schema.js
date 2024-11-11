@@ -35,6 +35,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: [base_media_dto_1.BaseMediaDto], required: true }),
     __metadata("design:type", Array)
 ], Assignment.prototype, "attachments", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Date }),
+    __metadata("design:type", Date)
+], Assignment.prototype, "deadline", void 0);
 exports.Assignment = Assignment = __decorate([
     (0, mongoose_1.Schema)({
         timestamps: false,
