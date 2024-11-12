@@ -116,16 +116,16 @@ class InstructorViewClassDetailDataResponse extends (0, openapi_builder_1.DataRe
 exports.InstructorViewClassDetailDataResponse = InstructorViewClassDetailDataResponse;
 class StaffViewClassListItemResponse extends (0, swagger_1.PickType)(base_class_dto_1.BaseClassDto, constant_2.CLASS_LIST_PROJECTION) {
 }
-class StaffViewClassListResponse extends (0, openapi_builder_1.PaginateResponse)(StaffViewClassListItemResponse) {
-}
 __decorate([
     (0, swagger_1.ApiProperty)({ type: ClassCourseDetailResponse }),
     __metadata("design:type", ClassCourseDetailResponse)
-], StaffViewClassListResponse.prototype, "course", void 0);
+], StaffViewClassListItemResponse.prototype, "course", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: ClassInstructorDetailResponse }),
     __metadata("design:type", ClassInstructorDetailResponse)
-], StaffViewClassListResponse.prototype, "instructor", void 0);
+], StaffViewClassListItemResponse.prototype, "instructor", void 0);
+class StaffViewClassListResponse extends (0, openapi_builder_1.PaginateResponse)(StaffViewClassListItemResponse) {
+}
 class StaffViewClassListDataResponse extends (0, openapi_builder_1.DataResponse)(StaffViewClassListResponse) {
 }
 exports.StaffViewClassListDataResponse = StaffViewClassListDataResponse;

@@ -57,6 +57,8 @@ export declare class InstructorViewClassDetailDataResponse extends InstructorVie
 }
 declare const StaffViewClassListItemResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "type" | "createdAt" | "title" | "thumbnail" | "updatedAt" | "_id" | "status" | "code" | "startDate" | "price" | "level" | "duration" | "learnerLimit" | "rate" | "instructorId" | "ratingSummary" | "courseId" | "learnerQuantity" | "weekdays" | "slotNumbers">>;
 declare class StaffViewClassListItemResponse extends StaffViewClassListItemResponse_base {
+    course: ClassCourseDetailResponse;
+    instructor: ClassInstructorDetailResponse;
 }
 declare const StaffViewClassListResponse_base: import("@nestjs/common").Type<{
     docs: (typeof StaffViewClassListItemResponse)[];
@@ -72,8 +74,6 @@ declare const StaffViewClassListResponse_base: import("@nestjs/common").Type<{
     nextPage?: number;
 }>;
 declare class StaffViewClassListResponse extends StaffViewClassListResponse_base {
-    course: ClassCourseDetailResponse;
-    instructor: ClassInstructorDetailResponse;
 }
 declare const StaffViewClassListDataResponse_base: import("@nestjs/common").Type<{
     data: typeof StaffViewClassListResponse;

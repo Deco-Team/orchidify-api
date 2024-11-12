@@ -228,7 +228,7 @@ export class ClassService implements IClassService {
         },
         {
           path: 'instructor',
-          select: ['code']
+          select: ['name']
         }
       ]
     })

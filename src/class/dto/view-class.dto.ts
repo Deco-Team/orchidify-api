@@ -91,14 +91,14 @@ class InstructorViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DET
 export class InstructorViewClassDetailDataResponse extends DataResponse(InstructorViewClassDetailResponse) {}
 
 // Staff
-class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {}
-class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {
+class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_PROJECTION) {
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
 
   @ApiProperty({ type: ClassInstructorDetailResponse })
   instructor: ClassInstructorDetailResponse
 }
+class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {}
 export class StaffViewClassListDataResponse extends DataResponse(StaffViewClassListResponse) {}
 
 class StaffViewClassDetailResponse extends PickType(BaseClassDto, CLASS_DETAIL_PROJECTION) {
