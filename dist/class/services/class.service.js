@@ -133,6 +133,10 @@ let ClassService = class ClassService {
                 {
                     path: 'course',
                     select: ['code']
+                },
+                {
+                    path: 'instructor',
+                    select: ['code']
                 }
             ]
         });

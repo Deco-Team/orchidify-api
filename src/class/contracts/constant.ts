@@ -15,6 +15,7 @@ export const CLASS_LIST_PROJECTION = [
   'slotNumbers',
   'rate',
   'ratingSummary',
+  'instructorId',
   'courseId',
   'createdAt',
   'updatedAt'

@@ -95,6 +95,9 @@ class StaffViewClassListItemResponse extends PickType(BaseClassDto, CLASS_LIST_P
 class StaffViewClassListResponse extends PaginateResponse(StaffViewClassListItemResponse) {
   @ApiProperty({ type: ClassCourseDetailResponse })
   course: ClassCourseDetailResponse
+
+  @ApiProperty({ type: ClassInstructorDetailResponse })
+  instructor: ClassInstructorDetailResponse
 }
 export class StaffViewClassListDataResponse extends DataResponse(StaffViewClassListResponse) {}
 

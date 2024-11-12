@@ -20,7 +20,7 @@ export declare class ClassGardenDetailResponse extends ClassGardenDetailResponse
 declare const ClassCourseDetailResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "code">>;
 export declare class ClassCourseDetailResponse extends ClassCourseDetailResponse_base {
 }
-declare const InstructorViewClassListItemResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "type" | "createdAt" | "title" | "thumbnail" | "updatedAt" | "_id" | "status" | "code" | "startDate" | "price" | "level" | "duration" | "learnerLimit" | "rate" | "ratingSummary" | "courseId" | "learnerQuantity" | "weekdays" | "slotNumbers">>;
+declare const InstructorViewClassListItemResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "type" | "createdAt" | "title" | "thumbnail" | "updatedAt" | "_id" | "status" | "code" | "startDate" | "price" | "level" | "duration" | "learnerLimit" | "rate" | "instructorId" | "ratingSummary" | "courseId" | "learnerQuantity" | "weekdays" | "slotNumbers">>;
 declare class InstructorViewClassListItemResponse extends InstructorViewClassListItemResponse_base {
     course: ClassCourseDetailResponse;
 }
@@ -55,7 +55,7 @@ declare const InstructorViewClassDetailDataResponse_base: import("@nestjs/common
 }>;
 export declare class InstructorViewClassDetailDataResponse extends InstructorViewClassDetailDataResponse_base {
 }
-declare const StaffViewClassListItemResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "type" | "createdAt" | "title" | "thumbnail" | "updatedAt" | "_id" | "status" | "code" | "startDate" | "price" | "level" | "duration" | "learnerLimit" | "rate" | "ratingSummary" | "courseId" | "learnerQuantity" | "weekdays" | "slotNumbers">>;
+declare const StaffViewClassListItemResponse_base: import("@nestjs/common").Type<Pick<BaseClassDto, "type" | "createdAt" | "title" | "thumbnail" | "updatedAt" | "_id" | "status" | "code" | "startDate" | "price" | "level" | "duration" | "learnerLimit" | "rate" | "instructorId" | "ratingSummary" | "courseId" | "learnerQuantity" | "weekdays" | "slotNumbers">>;
 declare class StaffViewClassListItemResponse extends StaffViewClassListItemResponse_base {
 }
 declare const StaffViewClassListResponse_base: import("@nestjs/common").Type<{
@@ -73,6 +73,7 @@ declare const StaffViewClassListResponse_base: import("@nestjs/common").Type<{
 }>;
 declare class StaffViewClassListResponse extends StaffViewClassListResponse_base {
     course: ClassCourseDetailResponse;
+    instructor: ClassInstructorDetailResponse;
 }
 declare const StaffViewClassListDataResponse_base: import("@nestjs/common").Type<{
     data: typeof StaffViewClassListResponse;

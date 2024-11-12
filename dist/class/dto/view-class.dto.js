@@ -122,6 +122,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: ClassCourseDetailResponse }),
     __metadata("design:type", ClassCourseDetailResponse)
 ], StaffViewClassListResponse.prototype, "course", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ClassInstructorDetailResponse }),
+    __metadata("design:type", ClassInstructorDetailResponse)
+], StaffViewClassListResponse.prototype, "instructor", void 0);
 class StaffViewClassListDataResponse extends (0, openapi_builder_1.DataResponse)(StaffViewClassListResponse) {
 }
 exports.StaffViewClassListDataResponse = StaffViewClassListDataResponse;
