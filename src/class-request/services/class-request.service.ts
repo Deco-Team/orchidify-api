@@ -267,6 +267,17 @@ export class ClassRequestService implements IClassRequestService {
           },
           { session }
         )
+
+        // update course
+        await this.courseService.update(
+          { _id: classRequest.courseId },
+          {
+            $set: {
+              isRequesting: false
+            }
+          },
+          { session }
+        )
       })
     } finally {
       await session.endSession()

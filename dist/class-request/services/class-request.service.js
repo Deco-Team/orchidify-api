@@ -172,6 +172,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                         }
                     }
                 }, { session });
+                await this.courseService.update({ _id: classRequest.courseId }, {
+                    $set: {
+                        isRequesting: false
+                    }
+                }, { session });
             });
         }
         finally {
