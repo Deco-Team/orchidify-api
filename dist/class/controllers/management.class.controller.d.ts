@@ -68,6 +68,7 @@ export declare class ManagementClassController {
         courseId: Types.ObjectId;
         progress: import("mongoose").FlattenMaps<import("../schemas/class.schema").Progress>;
         ratingSummary: import("mongoose").FlattenMaps<import("../dto/rating-summary.dto").BaseRatingSummaryDto>;
+        hasSentCertificate: boolean;
     }>;
     getLessonDetail(classId: string, sessionId: string): Promise<import("../schemas/session.schema").Session>;
     getAssignmentDetail(classId: string, assignmentId: string): Promise<import("../schemas/assignment.schema").Assignment>;

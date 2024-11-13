@@ -10,17 +10,32 @@ import { IClassService } from '@class/services/class.service'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { Class } from '@class/schemas/class.schema'
+import { ILearnerClassService } from '@class/services/learner-class.service'
+import { GeneratePDFResponse, HelperService } from '@common/services/helper.service'
+import * as _ from 'lodash'
+import * as fs from 'fs'
+import { MediaService } from '@media/services/media.service'
+import { ICertificateService } from '@certificate/services/certificate.service'
+import * as path from 'path'
+import { UploadApiResponse } from 'cloudinary'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
   private readonly appLogger = new AppLogger(ClassQueueConsumer.name)
   constructor(
+    private readonly helperService: HelperService,
+    private readonly mediaService: MediaService,
     @Inject(IClassService)
     private readonly classService: IClassService,
     @Inject(IGardenTimesheetService)
     private readonly gardenTimesheetService: IGardenTimesheetService,
     @Inject(ISettingService)
-    private readonly settingService: ISettingService
+    private readonly settingService: ISettingService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService,
+    @Inject(ICertificateService)
+    private readonly certificateService: ICertificateService
   ) {
     super()
   }
@@ -37,6 +52,9 @@ export class ClassQueueConsumer extends WorkerHost {
         }
         case JobName.ClassAutoCompleted: {
           return await this.completeClassAutomatically(job)
+        }
+        case JobName.SendClassCertificate: {
+          return await this.sendClassCertificate(job)
         }
         default:
       }
@@ -210,5 +228,110 @@ export class ClassQueueConsumer extends WorkerHost {
       )
       return false
     }
+  }
+
+  async sendClassCertificate(job: Job) {
+    this.appLogger.debug(`[sendClassCertificate]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`)
+
+    try {
+      this.appLogger.log(`[sendClassCertificate]: Start complete class ... id=${job.id}`)
+
+      const courseClasses = await this.classService.findMany(
+        {
+          'progress.percentage': 100,
+          hasSentCertificate: { $exists: false }
+        },
+        ['instructorId', 'title', 'code'],
+        [{ path: 'instructor', select: ['name'] }]
+      )
+
+      const sendClassCertificatePromises = []
+      courseClasses.forEach((courseClass) => {
+        sendClassCertificatePromises.push(this.generateCertificateForClass(courseClass))
+      })
+      await Promise.allSettled(sendClassCertificatePromises)
+
+      this.appLogger.log(`[sendClassCertificate]: End complete class... id=${job.id}`)
+      return { status: true, numbersOfHasSentCertificateClass: sendClassCertificatePromises.length }
+    } catch (error) {
+      this.appLogger.error(
+        `[sendClassCertificate]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`
+      )
+      return false
+    }
+  }
+
+  async generateCertificateForClass(courseClass: Class) {
+    const dateMoment = moment().tz(VN_TIMEZONE).format('LL')
+    const learnerClasses = await this.learnerClassService.findMany(
+      { classId: courseClass._id },
+      ['learnerId'],
+      [{ path: 'learner', select: ['_id', 'name'] }]
+    )
+    // generate PDF
+    const generatePDFPromises = []
+    for await (const learnerClass of learnerClasses) {
+      // BR-11: Learners must attend 80% of total class’s slots and get assignment average points at least 6 to receive the certificate.
+      // BR-48: If the instructors forget to take attendance, it will not affect the attendance percentage required to achieve the certificate at the end of the class.
+      // BR-50: After the class ends, if the instructor does not take attendance or grade any assignments, the learner will automatically get a certificate.
+      // TODO: implement later
+      
+      const learnerId = _.get(learnerClass, 'learner._id')
+      const certificateCode = await this.certificateService.generateCertificateCode()
+      const data = {
+        learnerName: _.get(learnerClass, 'learner.name') || 'Learner',
+        courseTitle: _.get(courseClass, 'title') || 'Course',
+        dateCompleted: dateMoment,
+        certificateCode,
+        instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
+      }
+      const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`
+      const metadata = { learnerId, code: certificateCode }
+      generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }))
+    }
+    const generatePDFResponses: GeneratePDFResponse[] = (await Promise.all(generatePDFPromises)).filter(
+      (res) => res.status === true
+    )
+
+    // Upload multiple to Cloudinary
+    const mediaPaths = generatePDFResponses.map((res) => path.resolve(__dirname, '../../../', res.certificatePath))
+    const uploadResponses: UploadApiResponse[] = await this.mediaService.uploadMultiple(mediaPaths)
+
+    // Save certificate
+    const saveCertificatePromises = []
+    generatePDFResponses.forEach((res, index) => {
+      const { metadata } = res
+      saveCertificatePromises.push(
+        this.certificateService.create({
+          url: uploadResponses.at(index).url,
+          ownerId: _.get(metadata, 'learnerId'),
+          code: _.get(metadata, 'code')
+        })
+      )
+    })
+    await Promise.all(saveCertificatePromises)
+
+    // update class hasSentCertificate true
+    await this.classService.update(
+      { _id: courseClass._id },
+      {
+        $set: { hasSentCertificate: true }
+      }
+    )
+
+    // unlink pdf in disk
+    const unlinkMediaFilePromises = []
+    mediaPaths.forEach((mediaPath) => {
+      unlinkMediaFilePromises.push(
+        fs.unlink(mediaPath, (err) => {
+          if (err) {
+            console.error(`Error removing file: ${err}`)
+            return
+          }
+          console.log(`File ${mediaPath} has been successfully removed.`)
+        })
+      )
+    })
+    Promise.allSettled(unlinkMediaFilePromises)
   }
 }

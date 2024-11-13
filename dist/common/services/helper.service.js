@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var HelperService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HelperService = void 0;
 const common_1 = require("@nestjs/common");
@@ -21,9 +22,15 @@ const mongoose_2 = require("mongoose");
 const constant_1 = require("../contracts/constant");
 const config_1 = require("../../config");
 const moment = require("moment-timezone");
-let HelperService = class HelperService {
+const fs = require("fs");
+const path = require("path");
+const ejs = require("ejs");
+const playwright = require("playwright");
+const app_logger_service_1 = require("./app-logger.service");
+let HelperService = HelperService_1 = class HelperService {
     constructor(connection) {
         this.connection = connection;
+        this.appLogger = new app_logger_service_1.AppLogger(HelperService_1.name);
         this.generateRandomString = (length = 6, characters = '0123456789') => {
             let randomString = '';
             for (let i = 0; i < length; i++) {
@@ -83,9 +90,42 @@ let HelperService = class HelperService {
         const diffTime = moment.tz(date, config_1.VN_TIMEZONE).diff(moment().tz(config_1.VN_TIMEZONE), 'milliseconds');
         return diffTime > 0 ? diffTime : 0;
     }
+    async generatePDF(params) {
+        const { data, templatePath = './templates/learner/certificate.ejs', certificatePath = 'certs/certificate.pdf', metadata = {} } = params;
+        this.appLogger.debug(`[generatePDF]: templatePath=${templatePath}, data=${JSON.stringify(data)}`);
+        try {
+            const fileName = path.resolve(__dirname, '../../', templatePath);
+            const templateContent = fs.readFileSync(fileName, 'utf-8');
+            const compiledTemplate = ejs.compile(templateContent, { async: true });
+            const htmlContent = await compiledTemplate(data);
+            const browser = await playwright.chromium.launch();
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            await page.setContent(htmlContent);
+            await page.pdf({
+                path: certificatePath,
+                format: 'A4',
+                printBackground: true,
+                preferCSSPageSize: true,
+                margin: {
+                    top: '10mm',
+                    bottom: '10mm',
+                    left: '0',
+                    right: '0',
+                }
+            });
+            await browser.close();
+            this.appLogger.log(`[generatePDF]: PDF file generated successfully.`);
+            return { status: true, certificatePath, metadata };
+        }
+        catch (error) {
+            this.appLogger.error(`[generatePDF]: error templatePath=${templatePath}, data=${JSON.stringify(data)}, error=${error}`);
+            return { error: error.name, status: false, certificatePath, metadata };
+        }
+    }
 };
 exports.HelperService = HelperService;
-exports.HelperService = HelperService = __decorate([
+exports.HelperService = HelperService = HelperService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectConnection)()),
     __metadata("design:paramtypes", [mongoose_2.Connection])

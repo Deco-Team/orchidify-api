@@ -25,8 +25,15 @@
 /// <reference types="mongoose-paginate-v2" />
 import { Connection, ClientSession } from 'mongoose';
 import { Weekday } from '@common/contracts/constant';
+export type GeneratePDFResponse = {
+    status: boolean;
+    certificatePath: string;
+    metadata: object;
+    error?: string;
+};
 export declare class HelperService {
     private readonly connection;
+    private readonly appLogger;
     constructor(connection: Connection);
     executeCommandsInTransaction(fn: (session: ClientSession, data?: Record<string, any>) => Promise<any>, data?: Record<string, any>): Promise<any>;
     createSignature(rawData: string, key: string): string;
@@ -52,4 +59,17 @@ export declare class HelperService {
         nextPage: number;
     };
     getDiffTimeByMilliseconds(date: Date): number;
+    generatePDF(params: {
+        data: {
+            learnerName: string;
+            courseTitle: string;
+            dateCompleted: string;
+            certificateCode: string;
+            instructorName: string;
+            instructorSignature?: string;
+        };
+        templatePath?: string;
+        certificatePath?: string;
+        metadata?: object;
+    }): Promise<GeneratePDFResponse>;
 }

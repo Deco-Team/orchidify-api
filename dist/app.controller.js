@@ -13,15 +13,33 @@ exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const terminus_1 = require("@nestjs/terminus");
 const app_service_1 = require("./app.service");
+const helper_service_1 = require("./common/services/helper.service");
 let AppController = class AppController {
-    constructor(appService, healthCheckService, memoryHealthIndicator, mongooseHealthIndicator) {
+    constructor(appService, healthCheckService, memoryHealthIndicator, mongooseHealthIndicator, helperService) {
         this.appService = appService;
         this.healthCheckService = healthCheckService;
         this.memoryHealthIndicator = memoryHealthIndicator;
         this.mongooseHealthIndicator = mongooseHealthIndicator;
+        this.helperService = helperService;
     }
     getWelcome() {
         return this.appService.getI18nText();
+    }
+    async cert() {
+        const data = {
+            learnerName: 'Vo Minh Tien',
+            courseTitle: 'Khóa học chăm học lan rừng, lan công nghiệp',
+            dateCompleted: 'July, 23 2021',
+            certificateCode: 'BS182903344',
+            instructorName: 'Nguyen Ngoc Anh',
+            instructorSignature: 'https://res.cloudinary.com/orchidify/image/upload/v1731113221/gdqqxchgrail8mrpkhwa.png'
+        };
+        await this.helperService.generatePDF({
+            data,
+            templatePath: './templates/learner/certificate.ejs',
+            certificatePath: 'certs/cert.pdf'
+        });
+        console.log('PDF file generated successfully.');
     }
     healthCheck() {
         return this.healthCheckService.check([
@@ -38,6 +56,12 @@ __decorate([
     __metadata("design:returntype", String)
 ], AppController.prototype, "getWelcome", null);
 __decorate([
+    (0, common_1.Get)('cert'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AppController.prototype, "cert", null);
+__decorate([
     (0, common_1.Get)('health'),
     (0, terminus_1.HealthCheck)(),
     __metadata("design:type", Function),
@@ -49,6 +73,7 @@ exports.AppController = AppController = __decorate([
     __metadata("design:paramtypes", [app_service_1.AppService,
         terminus_1.HealthCheckService,
         terminus_1.MemoryHealthIndicator,
-        terminus_1.MongooseHealthIndicator])
+        terminus_1.MongooseHealthIndicator,
+        helper_service_1.HelperService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

@@ -16,6 +16,8 @@ const queue_producer_service_1 = require("./services/queue-producer.service");
 const class_queue_consumer_1 = require("./services/class.queue-consumer");
 const recruitment_module_1 = require("../recruitment/recruitment.module");
 const recruitment_queue_consumer_1 = require("./services/recruitment.queue-consumer");
+const certificate_module_1 = require("../certificate/certificate.module");
+const media_module_1 = require("../media/media.module");
 let QueueModule = class QueueModule {
 };
 exports.QueueModule = QueueModule;
@@ -44,7 +46,9 @@ exports.QueueModule = QueueModule = __decorate([
             }, {
                 name: constant_1.QueueName.SLOT
             }),
-            recruitment_module_1.RecruitmentModule
+            recruitment_module_1.RecruitmentModule,
+            certificate_module_1.CertificateModule,
+            media_module_1.MediaModule
         ],
         controllers: [],
         providers: [

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var MediaService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MediaService = void 0;
 const common_1 = require("@nestjs/common");
@@ -16,9 +17,11 @@ const cloudinary_1 = require("cloudinary");
 const _ = require("lodash");
 const app_exception_1 = require("../../common/exceptions/app.exception");
 const error_1 = require("../../common/contracts/error");
-let MediaService = class MediaService {
+const app_logger_service_1 = require("../../common/services/app-logger.service");
+let MediaService = MediaService_1 = class MediaService {
     constructor(configService) {
         this.configService = configService;
+        this.appLogger = new app_logger_service_1.AppLogger(MediaService_1.name);
         this.cloudinary = cloudinary_1.v2;
     }
     onModuleInit() {
@@ -41,16 +44,25 @@ let MediaService = class MediaService {
             return result;
         }
         catch (err) {
-            console.error(err);
+            this.appLogger.error(err);
             throw new app_exception_1.AppException(error_1.Errors.UPLOAD_MEDIA_ERROR);
         }
     }
     async generateSignedUrl(params_to_sign) {
         return this.cloudinary.utils.api_sign_request(params_to_sign, this.configService.get('cloudinary.api_secret'));
     }
+    async uploadMultiple(images) {
+        const uploadPromises = [];
+        images.forEach((image) => {
+            uploadPromises.push(cloudinary_1.v2.uploader.upload(image));
+        });
+        const uploadResponses = await Promise.all(uploadPromises);
+        this.appLogger.log(JSON.stringify(uploadResponses));
+        return uploadResponses;
+    }
 };
 exports.MediaService = MediaService;
-exports.MediaService = MediaService = __decorate([
+exports.MediaService = MediaService = MediaService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService])
 ], MediaService);

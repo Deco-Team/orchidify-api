@@ -26,7 +26,7 @@
 import { BaseGardenTimesheetDto } from './base.garden-timesheet.dto';
 import { CreateSlotDto } from './slot.dto';
 import { Types } from 'mongoose';
-declare const CreateGardenTimesheetDto_base: import("@nestjs/common").Type<Pick<BaseGardenTimesheetDto, "date" | "status" | "gardenId" | "gardenMaxClass">>;
+declare const CreateGardenTimesheetDto_base: import("@nestjs/common").Type<Pick<BaseGardenTimesheetDto, "status" | "date" | "gardenId" | "gardenMaxClass">>;
 export declare class CreateGardenTimesheetDto extends CreateGardenTimesheetDto_base {
     slots: CreateSlotDto[];
     constructor(gardenId: Types.ObjectId, date: Date, gardenMaxClass: number);

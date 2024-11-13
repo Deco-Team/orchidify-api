@@ -388,5 +388,10 @@ exports.Errors = {
         message: 'Bạn đã gửi đánh giá.',
         httpStatus: common_1.HttpStatus.BAD_REQUEST
     },
+    CERTIFICATE_NOT_FOUND: {
+        error: 'CERTIFICATE_NOT_FOUND',
+        message: 'Thông tin chứng chỉ không tồn tại.',
+        httpStatus: common_1.HttpStatus.NOT_FOUND
+    },
 };
 //# sourceMappingURL=error.js.map

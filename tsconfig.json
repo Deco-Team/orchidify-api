@@ -90,6 +90,9 @@
       "@firebase/*": [
         "src/firebase/*"
       ],
+      "@certificate/*": [
+        "src/certificate/*"
+      ],
       "@src/*": [
         "src/*"
       ]

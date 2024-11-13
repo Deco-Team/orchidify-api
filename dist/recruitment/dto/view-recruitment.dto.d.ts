@@ -6,7 +6,7 @@ export declare class QueryRecruitmentDto {
     email: string;
     status: RecruitmentStatus[];
 }
-declare const RecruitmentDetailResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "createdAt" | "updatedAt" | "_id" | "status" | "applicationInfo" | "meetingUrl" | "histories" | "rejectReason" | "handledBy" | "isInstructorAdded">>;
+declare const RecruitmentDetailResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "status" | "createdAt" | "updatedAt" | "_id" | "applicationInfo" | "meetingUrl" | "histories" | "rejectReason" | "handledBy" | "isInstructorAdded">>;
 declare class RecruitmentDetailResponse extends RecruitmentDetailResponse_base {
     handledBy: Staff;
 }
@@ -15,7 +15,7 @@ declare const RecruitmentDetailDataResponse_base: import("@nestjs/common").Type<
 }>;
 export declare class RecruitmentDetailDataResponse extends RecruitmentDetailDataResponse_base {
 }
-declare const RecruitmentListItemResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "createdAt" | "updatedAt" | "_id" | "status" | "applicationInfo" | "meetingUrl" | "rejectReason" | "handledBy">>;
+declare const RecruitmentListItemResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "status" | "createdAt" | "updatedAt" | "_id" | "applicationInfo" | "meetingUrl" | "rejectReason" | "handledBy">>;
 declare class RecruitmentListItemResponse extends RecruitmentListItemResponse_base {
     handledBy: Staff;
 }

@@ -68,6 +68,7 @@ export declare class Class {
     courseId: Types.ObjectId;
     progress: Progress;
     ratingSummary: BaseRatingSummaryDto;
+    hasSentCertificate: boolean;
 }
 export declare const ClassSchema: import("mongoose").Schema<Class, import("mongoose").Model<Class, any, any, any, import("mongoose").Document<unknown, any, Class> & Class & Required<{
     _id: string;

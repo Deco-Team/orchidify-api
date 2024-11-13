@@ -171,6 +171,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: rating_summary_dto_1.BaseRatingSummaryDto }),
     __metadata("design:type", rating_summary_dto_1.BaseRatingSummaryDto)
 ], Class.prototype, "ratingSummary", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Boolean }),
+    __metadata("design:type", Boolean)
+], Class.prototype, "hasSentCertificate", void 0);
 exports.Class = Class = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'classes',
