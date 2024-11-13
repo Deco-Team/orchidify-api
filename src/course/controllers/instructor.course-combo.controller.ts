@@ -109,8 +109,9 @@ export class InstructorCourseComboController {
       instructorId: new Types.ObjectId(_id),
       status: CourseStatus.ACTIVE,
       childCourseIds: {
+        $exists: true,
+        $size: childCourseIds.length,
         $all: childCourseIds.map((courseId) => new Types.ObjectId(courseId)),
-        $size: childCourseIds.length
       }
     })
     if (existedCourseCombos.length > 0) throw new AppException(Errors.COURSE_COMBO_EXISTED)

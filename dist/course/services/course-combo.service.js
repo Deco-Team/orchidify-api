@@ -86,8 +86,8 @@ let CourseComboService = class CourseComboService {
     async findMany(conditions, projection, populates) {
         const courses = await this.courseRepository.findMany({
             conditions: {
+                childCourseIds: { $ne: [] },
                 ...conditions,
-                childCourseIds: { $ne: [] }
             },
             projection,
             populates

@@ -70,8 +70,9 @@ let InstructorCourseComboController = class InstructorCourseComboController {
             instructorId: new mongoose_1.Types.ObjectId(_id),
             status: constant_1.CourseStatus.ACTIVE,
             childCourseIds: {
+                $exists: true,
+                $size: childCourseIds.length,
                 $all: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId)),
-                $size: childCourseIds.length
             }
         });
         if (existedCourseCombos.length > 0)
