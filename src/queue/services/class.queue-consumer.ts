@@ -286,7 +286,7 @@ export class ClassQueueConsumer extends WorkerHost {
         instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
       }
       const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`
-      const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title') }
+      const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title'), learnerClassId: learnerClass._id }
       generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }))
     }
     const generatePDFResponses: GeneratePDFResponse[] = (await Promise.all(generatePDFPromises)).filter(
@@ -306,7 +306,8 @@ export class ClassQueueConsumer extends WorkerHost {
           url: uploadResponses.at(index).url,
           ownerId: _.get(metadata, 'learnerId'),
           code: _.get(metadata, 'code'),
-          name: _.get(metadata, 'name')
+          name: _.get(metadata, 'name'),
+          learnerClassId: _.get(metadata, 'learnerClassId'),
         })
       )
     })

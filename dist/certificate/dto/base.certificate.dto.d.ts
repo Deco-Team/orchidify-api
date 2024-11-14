@@ -5,6 +5,7 @@ export declare class BaseCertificateDto extends EmailDto {
     code: string;
     url: string;
     ownerId: string;
+    learnerClassId: string;
     createdAt: Date;
     updatedAt: Date;
 }

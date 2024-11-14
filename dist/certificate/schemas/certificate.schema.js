@@ -14,6 +14,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const paginate = require("mongoose-paginate-v2");
 const class_transformer_1 = require("class-transformer");
+const learner_class_schema_1 = require("../../class/schemas/learner-class.schema");
 let Certificate = class Certificate {
     constructor(id) {
         this._id = id;
@@ -40,6 +41,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Certificate.prototype, "ownerId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: learner_class_schema_1.LearnerClass.name, required: true }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Certificate.prototype, "learnerClassId", void 0);
 exports.Certificate = Certificate = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'certificates',

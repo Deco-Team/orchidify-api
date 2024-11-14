@@ -3,6 +3,7 @@ import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
 import { UserRole } from '@common/contracts/constant'
+import { LearnerClass } from '@class/schemas/learner-class.schema'
 
 export type CertificateDocument = HydratedDocument<Certificate>
 
@@ -36,6 +37,9 @@ export class Certificate {
 
   @Prop({ type: Types.ObjectId, required: true })
   ownerId: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: LearnerClass.name,  required: true })
+  learnerClassId: Types.ObjectId
 }
 
 export const CertificateSchema = SchemaFactory.createForClass(Certificate)

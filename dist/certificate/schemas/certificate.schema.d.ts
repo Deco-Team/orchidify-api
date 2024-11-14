@@ -32,6 +32,7 @@ export declare class Certificate {
     code: string;
     url: string;
     ownerId: Types.ObjectId;
+    learnerClassId: Types.ObjectId;
 }
 export declare const CertificateSchema: import("mongoose").Schema<Certificate, import("mongoose").Model<Certificate, any, any, any, import("mongoose").Document<unknown, any, Certificate> & Certificate & Required<{
     _id: string;

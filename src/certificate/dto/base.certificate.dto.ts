@@ -23,6 +23,10 @@ export class BaseCertificateDto extends EmailDto {
   @IsMongoId()
   ownerId: string
 
+  @ApiProperty({ type: String })
+  @IsMongoId()
+  learnerClassId: string
+
   @ApiProperty({ type: Date })
   createdAt: Date
 

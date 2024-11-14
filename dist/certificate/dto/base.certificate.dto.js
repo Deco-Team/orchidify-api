@@ -42,6 +42,11 @@ __decorate([
     __metadata("design:type", String)
 ], BaseCertificateDto.prototype, "ownerId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], BaseCertificateDto.prototype, "learnerClassId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
     __metadata("design:type", Date)
 ], BaseCertificateDto.prototype, "createdAt", void 0);
