@@ -10,6 +10,7 @@ export declare enum JobName {
     UpdateClassStatusInProgress = "UpdateClassStatusInProgress",
     UpdateClassProgressEndSlot = "UpdateClassProgressEndSlot",
     ClassAutoCompleted = "ClassAutoCompleted",
+    SendClassCertificate = "SendClassCertificate",
     RecruitmentAutoExpired = "RecruitmentAutoExpired",
     PayoutRequestAutoExpired = "PayoutRequestAutoExpired"
 }
@@ -19,5 +20,6 @@ export declare enum JobSchedulerKey {
     UpdateClassProgressEndSlot2Scheduler = "UpdateClassProgressEndSlot2Scheduler",
     UpdateClassProgressEndSlot3Scheduler = "UpdateClassProgressEndSlot3Scheduler",
     UpdateClassProgressEndSlot4Scheduler = "UpdateClassProgressEndSlot4Scheduler",
-    CompleteClassScheduler = "CompleteClassScheduler"
+    CompleteClassScheduler = "CompleteClassScheduler",
+    SendClassCertificateScheduler = "SendClassCertificateScheduler"
 }

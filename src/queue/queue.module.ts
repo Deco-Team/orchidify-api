@@ -8,6 +8,8 @@ import { IQueueProducerService, QueueProducerService } from './services/queue-pr
 import { ClassQueueConsumer } from './services/class.queue-consumer'
 import { RecruitmentModule } from '@recruitment/recruitment.module'
 import { RecruitmentQueueConsumer } from './services/recruitment.queue-consumer'
+import { CertificateModule } from '@certificate/certificate.module'
+import { MediaModule } from '@media/media.module'
 
 @Global()
 @Module({
@@ -39,7 +41,9 @@ import { RecruitmentQueueConsumer } from './services/recruitment.queue-consumer'
         name: QueueName.SLOT
       }
     ),
-    RecruitmentModule
+    RecruitmentModule,
+    CertificateModule,
+    MediaModule
   ],
   controllers: [],
   providers: [

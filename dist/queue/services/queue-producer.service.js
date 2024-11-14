@@ -36,6 +36,7 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
             await this.scheduleUpdateClassStatusJob();
             await this.scheduleUpdateClassProgressJob();
             await this.scheduleAutoCompleteClassJob();
+            await this.scheduleSendClassCertificateJob();
         }
         this.queueMap = new Map();
         this.queueMap.set(constant_2.QueueName.CLASS_REQUEST, this.classRequestQueue);
@@ -136,6 +137,14 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
             tz: config_1.VN_TIMEZONE
         }, {
             name: constant_2.JobName.ClassAutoCompleted
+        });
+    }
+    async scheduleSendClassCertificateJob() {
+        await this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.SendClassCertificateScheduler, {
+            pattern: '30 7 * * *',
+            tz: config_1.VN_TIMEZONE
+        }, {
+            name: constant_2.JobName.SendClassCertificate
         });
     }
 };

@@ -4,6 +4,7 @@ import { GenerateSignedUrlDto } from '@media/dto/generate-signed-url.dto';
 import { UploadMediaViaBase64Dto } from '@media/dto/upload-media-via-base64.dto';
 export declare class MediaService implements OnModuleInit {
     private readonly configService;
+    private readonly appLogger;
     private readonly cloudinary;
     constructor(configService: ConfigService);
     onModuleInit(): void;
@@ -18,4 +19,5 @@ export declare class MediaService implements OnModuleInit {
     }>;
     uploadViaBase64(uploadMediaViaBase64Dto: UploadMediaViaBase64Dto): Promise<import("cloudinary").UploadApiResponse>;
     private generateSignedUrl;
+    uploadMultiple(images: string[]): Promise<any[]>;
 }

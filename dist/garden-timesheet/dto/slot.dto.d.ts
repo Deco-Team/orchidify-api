@@ -44,7 +44,7 @@ export declare class BaseSlotDto {
     metadata: BaseSlotMetadataDto;
     hasTakenAttendance: boolean;
 }
-declare const CreateSlotDto_base: import("@nestjs/common").Type<Pick<BaseSlotDto, "status" | "end" | "instructorId" | "classId" | "metadata" | "slotNumber" | "start" | "sessionId">>;
+declare const CreateSlotDto_base: import("@nestjs/common").Type<Pick<BaseSlotDto, "metadata" | "status" | "end" | "instructorId" | "classId" | "slotNumber" | "start" | "sessionId">>;
 export declare class CreateSlotDto extends CreateSlotDto_base {
     constructor(slotNumber: SlotNumber, date: Date, instructorId?: Types.ObjectId, sessionId?: Types.ObjectId, classId?: Types.ObjectId, metadata?: BaseSlotMetadataDto);
 }

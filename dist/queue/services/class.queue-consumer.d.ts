@@ -3,12 +3,21 @@ import { Job } from 'bullmq';
 import { IClassService } from '@class/services/class.service';
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service';
 import { ISettingService } from '@setting/services/setting.service';
+import { Class } from '@class/schemas/class.schema';
+import { ILearnerClassService } from '@class/services/learner-class.service';
+import { HelperService } from '@common/services/helper.service';
+import { MediaService } from '@media/services/media.service';
+import { ICertificateService } from '@certificate/services/certificate.service';
 export declare class ClassQueueConsumer extends WorkerHost {
+    private readonly helperService;
+    private readonly mediaService;
     private readonly classService;
     private readonly gardenTimesheetService;
     private readonly settingService;
+    private readonly learnerClassService;
+    private readonly certificateService;
     private readonly appLogger;
-    constructor(classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService);
+    constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService);
     process(job: Job<any>): Promise<any>;
     updateClassStatusInProgress(job: Job): Promise<false | "No PUBLISHED status class" | {
         status: boolean;
@@ -22,4 +31,9 @@ export declare class ClassQueueConsumer extends WorkerHost {
         status: boolean;
         numbersOfCompletedClass: number;
     }>;
+    sendClassCertificate(job: Job): Promise<false | {
+        status: boolean;
+        numbersOfHasSentCertificateClass: number;
+    }>;
+    generateCertificateForClass(courseClass: Class): Promise<void>;
 }

@@ -33,7 +33,7 @@ export declare class QueryAttendanceDto {
 declare const AttendanceLearnerDetailResponse_base: import("@nestjs/common").Type<Pick<BaseLearnerDto, "name" | "avatar" | "_id">>;
 declare class AttendanceLearnerDetailResponse extends AttendanceLearnerDetailResponse_base {
 }
-declare const AttendanceListItemResponse_base: import("@nestjs/common").Type<Pick<BaseAttendanceDto, "createdAt" | "updatedAt" | "_id" | "status" | "note" | "learnerId">>;
+declare const AttendanceListItemResponse_base: import("@nestjs/common").Type<Pick<BaseAttendanceDto, "status" | "createdAt" | "updatedAt" | "_id" | "note" | "learnerId">>;
 declare class AttendanceListItemResponse extends AttendanceListItemResponse_base {
     learner: AttendanceLearnerDetailResponse;
 }

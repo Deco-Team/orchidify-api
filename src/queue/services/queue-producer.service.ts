@@ -31,6 +31,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
       await this.scheduleUpdateClassStatusJob()
       await this.scheduleUpdateClassProgressJob()
       await this.scheduleAutoCompleteClassJob()
+      await this.scheduleSendClassCertificateJob()
     }
 
     // Inject all queue to queueMap
@@ -173,6 +174,19 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
       },
       {
         name: JobName.ClassAutoCompleted
+      }
+    )
+  }
+
+  private async scheduleSendClassCertificateJob(): Promise<void> {
+    await this.classQueue.upsertJobScheduler(
+      JobSchedulerKey.SendClassCertificateScheduler,
+      {
+        pattern: '30 7 * * *',
+        tz: VN_TIMEZONE
+      },
+      {
+        name: JobName.SendClassCertificate
       }
     )
   }

@@ -385,4 +385,9 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    CERTIFICATE_NOT_FOUND: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
 };

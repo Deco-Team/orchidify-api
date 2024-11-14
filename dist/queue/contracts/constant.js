@@ -15,6 +15,7 @@ var JobName;
     JobName["UpdateClassStatusInProgress"] = "UpdateClassStatusInProgress";
     JobName["UpdateClassProgressEndSlot"] = "UpdateClassProgressEndSlot";
     JobName["ClassAutoCompleted"] = "ClassAutoCompleted";
+    JobName["SendClassCertificate"] = "SendClassCertificate";
     JobName["RecruitmentAutoExpired"] = "RecruitmentAutoExpired";
     JobName["PayoutRequestAutoExpired"] = "PayoutRequestAutoExpired";
 })(JobName || (exports.JobName = JobName = {}));
@@ -26,5 +27,6 @@ var JobSchedulerKey;
     JobSchedulerKey["UpdateClassProgressEndSlot3Scheduler"] = "UpdateClassProgressEndSlot3Scheduler";
     JobSchedulerKey["UpdateClassProgressEndSlot4Scheduler"] = "UpdateClassProgressEndSlot4Scheduler";
     JobSchedulerKey["CompleteClassScheduler"] = "CompleteClassScheduler";
+    JobSchedulerKey["SendClassCertificateScheduler"] = "SendClassCertificateScheduler";
 })(JobSchedulerKey || (exports.JobSchedulerKey = JobSchedulerKey = {}));
 //# sourceMappingURL=constant.js.map

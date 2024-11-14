@@ -140,6 +140,9 @@ export class Class {
 
   @Prop({ type: BaseRatingSummaryDto })
   ratingSummary: BaseRatingSummaryDto
+
+  @Prop({ type: Boolean })
+  hasSentCertificate: boolean
 }
 
 export const ClassSchema = SchemaFactory.createForClass(Class)

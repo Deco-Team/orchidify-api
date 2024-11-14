@@ -476,4 +476,13 @@ export const Errors = {
     message: 'Bạn đã gửi đánh giá.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+
+  /**
+   * Certificate
+   */
+  CERTIFICATE_NOT_FOUND: {
+    error: 'CERTIFICATE_NOT_FOUND',
+    message: 'Thông tin chứng chỉ không tồn tại.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }

@@ -72,6 +72,7 @@ export declare class InstructorClassController {
         courseId: Types.ObjectId;
         progress: import("mongoose").FlattenMaps<import("../schemas/class.schema").Progress>;
         ratingSummary: import("mongoose").FlattenMaps<import("../dto/rating-summary.dto").BaseRatingSummaryDto>;
+        hasSentCertificate: boolean;
     }>;
     getLessonDetail(req: any, classId: string, sessionId: string): Promise<import("../schemas/session.schema").Session>;
     getAssignmentDetail(req: any, classId: string, assignmentId: string): Promise<import("../schemas/assignment.schema").Assignment>;

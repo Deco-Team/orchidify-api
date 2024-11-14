@@ -25,12 +25,23 @@ const class_service_1 = require("../../class/services/class.service");
 const garden_timesheet_service_1 = require("../../garden-timesheet/services/garden-timesheet.service");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
+const learner_class_service_1 = require("../../class/services/learner-class.service");
+const helper_service_1 = require("../../common/services/helper.service");
+const _ = require("lodash");
+const fs = require("fs");
+const media_service_1 = require("../../media/services/media.service");
+const certificate_service_1 = require("../../certificate/services/certificate.service");
+const path = require("path");
 let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends bullmq_1.WorkerHost {
-    constructor(classService, gardenTimesheetService, settingService) {
+    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService) {
         super();
+        this.helperService = helperService;
+        this.mediaService = mediaService;
         this.classService = classService;
         this.gardenTimesheetService = gardenTimesheetService;
         this.settingService = settingService;
+        this.learnerClassService = learnerClassService;
+        this.certificateService = certificateService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassQueueConsumer_1.name);
     }
     async process(job) {
@@ -45,6 +56,9 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 }
                 case constant_2.JobName.ClassAutoCompleted: {
                     return await this.completeClassAutomatically(job);
+                }
+                case constant_2.JobName.SendClassCertificate: {
+                    return await this.sendClassCertificate(job);
                 }
                 default:
             }
@@ -175,13 +189,85 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             return false;
         }
     }
+    async sendClassCertificate(job) {
+        this.appLogger.debug(`[sendClassCertificate]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`);
+        try {
+            this.appLogger.log(`[sendClassCertificate]: Start complete class ... id=${job.id}`);
+            const courseClasses = await this.classService.findMany({
+                'progress.percentage': 100,
+                hasSentCertificate: { $exists: false }
+            }, ['instructorId', 'title', 'code'], [{ path: 'instructor', select: ['name'] }]);
+            const sendClassCertificatePromises = [];
+            courseClasses.forEach((courseClass) => {
+                sendClassCertificatePromises.push(this.generateCertificateForClass(courseClass));
+            });
+            await Promise.allSettled(sendClassCertificatePromises);
+            this.appLogger.log(`[sendClassCertificate]: End complete class... id=${job.id}`);
+            return { status: true, numbersOfHasSentCertificateClass: sendClassCertificatePromises.length };
+        }
+        catch (error) {
+            this.appLogger.error(`[sendClassCertificate]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`);
+            return false;
+        }
+    }
+    async generateCertificateForClass(courseClass) {
+        const dateMoment = moment().tz(config_1.VN_TIMEZONE).format('LL');
+        const learnerClasses = await this.learnerClassService.findMany({ classId: courseClass._id }, ['learnerId'], [{ path: 'learner', select: ['_id', 'name'] }]);
+        const generatePDFPromises = [];
+        for await (const learnerClass of learnerClasses) {
+            const learnerId = _.get(learnerClass, 'learner._id');
+            const certificateCode = await this.certificateService.generateCertificateCode();
+            const data = {
+                learnerName: _.get(learnerClass, 'learner.name') || 'Learner',
+                courseTitle: _.get(courseClass, 'title') || 'Course',
+                dateCompleted: dateMoment,
+                certificateCode,
+                instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
+            };
+            const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`;
+            const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title'), learnerClassId: learnerClass._id };
+            generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }));
+        }
+        const generatePDFResponses = (await Promise.all(generatePDFPromises)).filter((res) => res.status === true);
+        const mediaPaths = generatePDFResponses.map((res) => path.resolve(__dirname, '../../../', res.certificatePath));
+        const uploadResponses = await this.mediaService.uploadMultiple(mediaPaths);
+        const saveCertificatePromises = [];
+        generatePDFResponses.forEach((res, index) => {
+            const { metadata } = res;
+            saveCertificatePromises.push(this.certificateService.create({
+                url: uploadResponses.at(index).url,
+                ownerId: _.get(metadata, 'learnerId'),
+                code: _.get(metadata, 'code'),
+                name: _.get(metadata, 'name'),
+                learnerClassId: _.get(metadata, 'learnerClassId'),
+            }));
+        });
+        await Promise.all(saveCertificatePromises);
+        await this.classService.update({ _id: courseClass._id }, {
+            $set: { hasSentCertificate: true }
+        });
+        const unlinkMediaFilePromises = [];
+        mediaPaths.forEach((mediaPath) => {
+            unlinkMediaFilePromises.push(fs.unlink(mediaPath, (err) => {
+                if (err) {
+                    console.error(`Error removing file: ${err}`);
+                    return;
+                }
+                console.log(`File ${mediaPath} has been successfully removed.`);
+            }));
+        });
+        Promise.allSettled(unlinkMediaFilePromises);
+    }
 };
 exports.ClassQueueConsumer = ClassQueueConsumer;
 exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decorate([
     (0, bullmq_1.Processor)(constant_2.QueueName.CLASS),
-    __param(0, (0, common_1.Inject)(class_service_1.IClassService)),
-    __param(1, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
-    __param(2, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(2, (0, common_1.Inject)(class_service_1.IClassService)),
+    __param(3, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
+    __param(4, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(5, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __param(6, (0, common_1.Inject)(certificate_service_1.ICertificateService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService,
+        media_service_1.MediaService, Object, Object, Object, Object, Object])
 ], ClassQueueConsumer);
 //# sourceMappingURL=class.queue-consumer.js.map
