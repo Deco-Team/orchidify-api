@@ -225,7 +225,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
             };
             const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`;
-            const metadata = { learnerId, code: certificateCode };
+            const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title') };
             generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }));
         }
         const generatePDFResponses = (await Promise.all(generatePDFPromises)).filter((res) => res.status === true);
@@ -237,7 +237,8 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             saveCertificatePromises.push(this.certificateService.create({
                 url: uploadResponses.at(index).url,
                 ownerId: _.get(metadata, 'learnerId'),
-                code: _.get(metadata, 'code')
+                code: _.get(metadata, 'code'),
+                name: _.get(metadata, 'name')
             }));
         });
         await Promise.all(saveCertificatePromises);

@@ -9,7 +9,7 @@ export class BaseCertificateDto extends EmailDto {
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()
-  name?: string
+  name: string
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()
