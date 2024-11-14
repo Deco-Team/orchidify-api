@@ -78,7 +78,8 @@ export class InstructorCourseController {
     const { _id } = _.get(req, 'user')
     const course = await this.courseService.findById(courseId, COURSE_DETAIL_PROJECTION)
 
-    if (!course || course.instructorId?.toString() !== _id) throw new AppException(Errors.COURSE_NOT_FOUND)
+    if (!course || course.instructorId?.toString() !== _id || course.status === CourseStatus.DELETED)
+      throw new AppException(Errors.COURSE_NOT_FOUND)
     return course
   }
 

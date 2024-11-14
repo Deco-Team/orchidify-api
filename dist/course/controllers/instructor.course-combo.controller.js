@@ -49,7 +49,7 @@ let InstructorCourseComboController = class InstructorCourseComboController {
                 select: constant_2.CHILD_COURSE_COMBO_DETAIL_PROJECTION
             }
         ]);
-        if (!courseCombo || courseCombo.instructorId?.toString() !== _id)
+        if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === constant_1.CourseStatus.DELETED)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_NOT_FOUND);
         return courseCombo;
     }
@@ -72,7 +72,7 @@ let InstructorCourseComboController = class InstructorCourseComboController {
             childCourseIds: {
                 $exists: true,
                 $size: childCourseIds.length,
-                $all: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId)),
+                $all: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId))
             }
         });
         if (existedCourseCombos.length > 0)

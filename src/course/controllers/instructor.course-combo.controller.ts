@@ -78,7 +78,7 @@ export class InstructorCourseComboController {
       }
     ])
 
-    if (!courseCombo || courseCombo.instructorId?.toString() !== _id)
+    if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === CourseStatus.DELETED)
       throw new AppException(Errors.COURSE_COMBO_NOT_FOUND)
     return courseCombo
   }
@@ -111,7 +111,7 @@ export class InstructorCourseComboController {
       childCourseIds: {
         $exists: true,
         $size: childCourseIds.length,
-        $all: childCourseIds.map((courseId) => new Types.ObjectId(courseId)),
+        $all: childCourseIds.map((courseId) => new Types.ObjectId(courseId))
       }
     })
     if (existedCourseCombos.length > 0) throw new AppException(Errors.COURSE_COMBO_EXISTED)

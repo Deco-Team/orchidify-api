@@ -51,7 +51,7 @@ let InstructorCourseController = class InstructorCourseController {
     async getDetail(req, courseId) {
         const { _id } = _.get(req, 'user');
         const course = await this.courseService.findById(courseId, constant_2.COURSE_DETAIL_PROJECTION);
-        if (!course || course.instructorId?.toString() !== _id)
+        if (!course || course.instructorId?.toString() !== _id || course.status === constant_1.CourseStatus.DELETED)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
         return course;
     }
