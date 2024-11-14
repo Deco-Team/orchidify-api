@@ -62,4 +62,5 @@ exports.Certificate = Certificate = __decorate([
 ], Certificate);
 exports.CertificateSchema = mongoose_1.SchemaFactory.createForClass(Certificate);
 exports.CertificateSchema.plugin(paginate);
+exports.CertificateSchema.index({ ownerId: 1 });
 //# sourceMappingURL=certificate.schema.js.map

@@ -45,4 +45,4 @@ export class Certificate {
 export const CertificateSchema = SchemaFactory.createForClass(Certificate)
 
 CertificateSchema.plugin(paginate)
-// CertificateSchema.index({ code: 1 })
+CertificateSchema.index({ ownerId: 1 })
