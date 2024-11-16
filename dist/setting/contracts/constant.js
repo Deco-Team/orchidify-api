@@ -15,6 +15,8 @@ var SettingKey;
     SettingKey["CommissionRate"] = "CommissionRate";
     SettingKey["FirebaseConfig"] = "FirebaseConfig";
     SettingKey["ClassAutoCompleteAfterDay"] = "ClassAutoCompleteAfterDay";
+    SettingKey["ClassAttendanceRate"] = "ClassAttendanceRate";
+    SettingKey["ClassAssignmentPointAverage"] = "ClassAssignmentPointAverage";
     SettingKey["FeedbackOpenBeforeClassEndDay"] = "FeedbackOpenBeforeClassEndDay";
 })(SettingKey || (exports.SettingKey = SettingKey = {}));
 //# sourceMappingURL=constant.js.map

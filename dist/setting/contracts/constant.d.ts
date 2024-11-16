@@ -11,5 +11,7 @@ export declare enum SettingKey {
     CommissionRate = "CommissionRate",
     FirebaseConfig = "FirebaseConfig",
     ClassAutoCompleteAfterDay = "ClassAutoCompleteAfterDay",
+    ClassAttendanceRate = "ClassAttendanceRate",
+    ClassAssignmentPointAverage = "ClassAssignmentPointAverage",
     FeedbackOpenBeforeClassEndDay = "FeedbackOpenBeforeClassEndDay"
 }

@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
-import { AssignmentSubmission } from '@src/class/schemas/assignment-submission.schema'
+import { AssignmentSubmission, AssignmentSubmissionDocument } from '@src/class/schemas/assignment-submission.schema'
 import { FilterQuery, PopulateOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto'
 import { IAssignmentSubmissionRepository } from '@class/repositories/assignment-submission.repository'
@@ -27,6 +27,11 @@ export interface IAssignmentSubmissionService {
   ): Promise<AssignmentSubmission>
   findMyAssignmentSubmission(params: { assignmentId: string; learnerId: string }): Promise<AssignmentSubmission>
   list(querySubmissionDto: { classId: string; assignmentId: string })
+  findMany(
+    conditions: FilterQuery<AssignmentSubmissionDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<AssignmentSubmission[]>
 }
 
 @Injectable()
@@ -170,5 +175,18 @@ export class AssignmentSubmissionService implements IAssignmentSubmissionService
       }
     ])
     return { docs: submissions }
+  }
+
+  public async findMany(
+    conditions: FilterQuery<AssignmentSubmissionDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const submissions = await this.assignmentSubmissionRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return submissions
   }
 }

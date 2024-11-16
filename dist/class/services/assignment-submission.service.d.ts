@@ -23,7 +23,7 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
-import { AssignmentSubmission } from '@src/class/schemas/assignment-submission.schema';
+import { AssignmentSubmission, AssignmentSubmissionDocument } from '@src/class/schemas/assignment-submission.schema';
 import { FilterQuery, PopulateOptions, SaveOptions, UpdateQuery } from 'mongoose';
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto';
 import { IAssignmentSubmissionRepository } from '@class/repositories/assignment-submission.repository';
@@ -42,6 +42,7 @@ export interface IAssignmentSubmissionService {
         classId: string;
         assignmentId: string;
     }): any;
+    findMany(conditions: FilterQuery<AssignmentSubmissionDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<AssignmentSubmission[]>;
 }
 export declare class AssignmentSubmissionService implements IAssignmentSubmissionService {
     private readonly assignmentSubmissionRepository;
@@ -70,4 +71,7 @@ export declare class AssignmentSubmissionService implements IAssignmentSubmissio
     }): Promise<{
         docs: any[];
     }>;
+    findMany(conditions: FilterQuery<AssignmentSubmissionDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<(import("mongoose").Document<unknown, {}, AssignmentSubmission> & AssignmentSubmission & Required<{
+        _id: string;
+    }>)[]>;
 }

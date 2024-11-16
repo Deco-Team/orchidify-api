@@ -32,8 +32,10 @@ const fs = require("fs");
 const media_service_1 = require("../../media/services/media.service");
 const certificate_service_1 = require("../../certificate/services/certificate.service");
 const path = require("path");
+const attendance_service_1 = require("../../attendance/services/attendance.service");
+const assignment_submission_service_1 = require("../../class/services/assignment-submission.service");
 let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends bullmq_1.WorkerHost {
-    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService) {
+    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService) {
         super();
         this.helperService = helperService;
         this.mediaService = mediaService;
@@ -42,6 +44,8 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         this.settingService = settingService;
         this.learnerClassService = learnerClassService;
         this.certificateService = certificateService;
+        this.attendanceService = attendanceService;
+        this.assignmentSubmissionService = assignmentSubmissionService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassQueueConsumer_1.name);
     }
     async process(job) {
@@ -196,7 +200,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             const courseClasses = await this.classService.findMany({
                 'progress.percentage': 100,
                 hasSentCertificate: { $exists: false }
-            }, ['instructorId', 'title', 'code'], [{ path: 'instructor', select: ['name'] }]);
+            }, ['instructorId', 'title', 'code', 'sessions'], [{ path: 'instructor', select: ['name'] }]);
             const sendClassCertificatePromises = [];
             courseClasses.forEach((courseClass) => {
                 sendClassCertificatePromises.push(this.generateCertificateForClass(courseClass));
@@ -213,9 +217,36 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
     async generateCertificateForClass(courseClass) {
         const dateMoment = moment().tz(config_1.VN_TIMEZONE).format('LL');
         const learnerClasses = await this.learnerClassService.findMany({ classId: courseClass._id }, ['learnerId'], [{ path: 'learner', select: ['_id', 'name'] }]);
+        const classAttendanceRate = Number((await this.settingService.findByKey(constant_3.SettingKey.ClassAttendanceRate)).value) || 0.8;
+        const classAssignmentPointAverage = Number((await this.settingService.findByKey(constant_3.SettingKey.ClassAssignmentPointAverage)).value) || 6;
         const generatePDFPromises = [];
         for await (const learnerClass of learnerClasses) {
-            const learnerId = _.get(learnerClass, 'learner._id');
+            const learnerId = _.get(learnerClass, 'learnerId');
+            const classAssignmentCount = courseClass.sessions.filter((session) => session.assignments.length > 0).length;
+            const [attendances, submissions] = await Promise.all([
+                this.attendanceService.findMany({
+                    learnerId,
+                    classId: courseClass._id
+                }),
+                this.assignmentSubmissionService.findMany({
+                    learnerId,
+                    classId: courseClass._id
+                })
+            ]);
+            const presentAttendances = attendances.filter((attendance) => attendance.status === constant_1.AttendanceStatus.PRESENT);
+            let totalAssignmentPoint = 0;
+            submissions.forEach((submission) => {
+                if (submission.point) {
+                    totalAssignmentPoint += submission.point;
+                }
+                else {
+                    totalAssignmentPoint += 10;
+                }
+            });
+            const isAttendanceRateEnough = attendances.length === 0 || presentAttendances.length / attendances.length >= classAttendanceRate;
+            const isAssignmentPointAvgEnough = classAssignmentCount === 0 || totalAssignmentPoint / classAssignmentCount >= classAssignmentPointAverage;
+            if (!isAttendanceRateEnough || !isAssignmentPointAvgEnough)
+                continue;
             const certificateCode = await this.certificateService.generateCertificateCode();
             const data = {
                 learnerName: _.get(learnerClass, 'learner.name') || 'Learner',
@@ -225,7 +256,12 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
             };
             const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`;
-            const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title'), learnerClassId: learnerClass._id };
+            const metadata = {
+                learnerId,
+                code: certificateCode,
+                name: _.get(courseClass, 'title'),
+                learnerClassId: learnerClass._id
+            };
             generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }));
         }
         const generatePDFResponses = (await Promise.all(generatePDFPromises)).filter((res) => res.status === true);
@@ -239,7 +275,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 ownerId: _.get(metadata, 'learnerId'),
                 code: _.get(metadata, 'code'),
                 name: _.get(metadata, 'name'),
-                learnerClassId: _.get(metadata, 'learnerClassId'),
+                learnerClassId: _.get(metadata, 'learnerClassId')
             }));
         });
         await Promise.all(saveCertificatePromises);
@@ -267,7 +303,9 @@ exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decor
     __param(4, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(5, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
     __param(6, (0, common_1.Inject)(certificate_service_1.ICertificateService)),
+    __param(7, (0, common_1.Inject)(attendance_service_1.IAttendanceService)),
+    __param(8, (0, common_1.Inject)(assignment_submission_service_1.IAssignmentSubmissionService)),
     __metadata("design:paramtypes", [helper_service_1.HelperService,
-        media_service_1.MediaService, Object, Object, Object, Object, Object])
+        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object])
 ], ClassQueueConsumer);
 //# sourceMappingURL=class.queue-consumer.js.map

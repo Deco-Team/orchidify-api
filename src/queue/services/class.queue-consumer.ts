@@ -1,5 +1,11 @@
 import * as moment from 'moment-timezone'
-import { ClassStatus, SlotNumber, SlotStatus, UserRole } from '@common/contracts/constant'
+import {
+  AttendanceStatus,
+  ClassStatus,
+  SlotNumber,
+  SlotStatus,
+  UserRole
+} from '@common/contracts/constant'
 import { AppLogger } from '@common/services/app-logger.service'
 import { Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject } from '@nestjs/common'
@@ -19,6 +25,8 @@ import { MediaService } from '@media/services/media.service'
 import { ICertificateService } from '@certificate/services/certificate.service'
 import * as path from 'path'
 import { UploadApiResponse } from 'cloudinary'
+import { IAttendanceService } from '@attendance/services/attendance.service'
+import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
@@ -35,7 +43,11 @@ export class ClassQueueConsumer extends WorkerHost {
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
     @Inject(ICertificateService)
-    private readonly certificateService: ICertificateService
+    private readonly certificateService: ICertificateService,
+    @Inject(IAttendanceService)
+    private readonly attendanceService: IAttendanceService,
+    @Inject(IAssignmentSubmissionService)
+    private readonly assignmentSubmissionService: IAssignmentSubmissionService
   ) {
     super()
   }
@@ -241,7 +253,7 @@ export class ClassQueueConsumer extends WorkerHost {
           'progress.percentage': 100,
           hasSentCertificate: { $exists: false }
         },
-        ['instructorId', 'title', 'code'],
+        ['instructorId', 'title', 'code', 'sessions'],
         [{ path: 'instructor', select: ['name'] }]
       )
 
@@ -268,16 +280,47 @@ export class ClassQueueConsumer extends WorkerHost {
       ['learnerId'],
       [{ path: 'learner', select: ['_id', 'name'] }]
     )
+
+    const classAttendanceRate =
+      Number((await this.settingService.findByKey(SettingKey.ClassAttendanceRate)).value) || 0.8
+    const classAssignmentPointAverage =
+      Number((await this.settingService.findByKey(SettingKey.ClassAssignmentPointAverage)).value) || 6
+
     // generate PDF
     const generatePDFPromises = []
     for await (const learnerClass of learnerClasses) {
       // BR-11: Learners must attend 80% of total class’s slots and get assignment average points at least 6 to receive the certificate.
       // BR-48: If the instructors forget to take attendance, it will not affect the attendance percentage required to achieve the certificate at the end of the class.
       // BR-50: After the class ends, if the instructor does not take attendance or grade any assignments, the learner will automatically get a certificate.
-      // TODO: implement later
-      
-      
-      const learnerId = _.get(learnerClass, 'learner._id')
+      const learnerId = _.get(learnerClass, 'learnerId')
+
+      const classAssignmentCount = courseClass.sessions.filter((session) => session.assignments.length > 0).length
+      const [attendances, submissions] = await Promise.all([
+        this.attendanceService.findMany({
+          learnerId,
+          classId: courseClass._id
+        }),
+        this.assignmentSubmissionService.findMany({
+          learnerId,
+          classId: courseClass._id
+        })
+      ])
+      const presentAttendances = attendances.filter((attendance) => attendance.status === AttendanceStatus.PRESENT)
+      let totalAssignmentPoint = 0
+      submissions.forEach((submission) => {
+        if (submission.point) {
+          totalAssignmentPoint += submission.point
+        } else {
+          totalAssignmentPoint += 10
+        }
+      })
+
+      const isAttendanceRateEnough =
+        attendances.length === 0 || presentAttendances.length / attendances.length >= classAttendanceRate
+      const isAssignmentPointAvgEnough =
+        classAssignmentCount === 0 || totalAssignmentPoint / classAssignmentCount >= classAssignmentPointAverage
+      if (!isAttendanceRateEnough || !isAssignmentPointAvgEnough) continue
+
       const certificateCode = await this.certificateService.generateCertificateCode()
       const data = {
         learnerName: _.get(learnerClass, 'learner.name') || 'Learner',
@@ -287,7 +330,12 @@ export class ClassQueueConsumer extends WorkerHost {
         instructorName: _.get(courseClass, 'instructor.name') || 'Instructor'
       }
       const certificatePath = `certs/cert-${_.get(courseClass, 'code')}-${learnerId}.pdf`
-      const metadata = { learnerId, code: certificateCode, name: _.get(courseClass, 'title'), learnerClassId: learnerClass._id }
+      const metadata = {
+        learnerId,
+        code: certificateCode,
+        name: _.get(courseClass, 'title'),
+        learnerClassId: learnerClass._id
+      }
       generatePDFPromises.push(this.helperService.generatePDF({ data, certificatePath, metadata }))
     }
     const generatePDFResponses: GeneratePDFResponse[] = (await Promise.all(generatePDFPromises)).filter(
@@ -308,7 +356,7 @@ export class ClassQueueConsumer extends WorkerHost {
           ownerId: _.get(metadata, 'learnerId'),
           code: _.get(metadata, 'code'),
           name: _.get(metadata, 'name'),
-          learnerClassId: _.get(metadata, 'learnerClassId'),
+          learnerClassId: _.get(metadata, 'learnerClassId')
         })
       )
     })

@@ -139,6 +139,14 @@ let AssignmentSubmissionService = class AssignmentSubmissionService {
         ]);
         return { docs: submissions };
     }
+    async findMany(conditions, projection, populates) {
+        const submissions = await this.assignmentSubmissionRepository.findMany({
+            conditions,
+            projection,
+            populates
+        });
+        return submissions;
+    }
 };
 exports.AssignmentSubmissionService = AssignmentSubmissionService;
 exports.AssignmentSubmissionService = AssignmentSubmissionService = __decorate([
