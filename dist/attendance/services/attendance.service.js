@@ -31,14 +31,18 @@ let AttendanceService = AttendanceService_1 = class AttendanceService {
     async update(conditions, payload, options) {
         return await this.attendanceRepository.findOneAndUpdate(conditions, payload, options);
     }
-    bulkWrite(slotId, takeAttendanceDto) {
+    bulkWrite(slotId, takeAttendanceDto, classId) {
         const operations = [];
         for (const attendance of takeAttendanceDto) {
             operations.push({
                 updateOne: {
                     filter: { learnerId: new mongoose_1.Types.ObjectId(attendance.learnerId), slotId: new mongoose_1.Types.ObjectId(slotId) },
                     update: {
-                        $set: { ...attendance, learnerId: new mongoose_1.Types.ObjectId(attendance.learnerId) }
+                        $set: {
+                            ...attendance,
+                            learnerId: new mongoose_1.Types.ObjectId(attendance.learnerId),
+                            classId: new mongoose_1.Types.ObjectId(classId)
+                        }
                     },
                     upsert: true
                 }

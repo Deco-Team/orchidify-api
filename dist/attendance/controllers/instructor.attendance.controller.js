@@ -111,11 +111,11 @@ let InstructorAttendanceController = class InstructorAttendanceController {
         if (!slot.hasTakenAttendance) {
             if (attendanceLearners.length !== classLearnerIds.length)
                 throw new app_exception_1.AppException(error_1.Errors.NUMBER_OF_ATTENDANCES_INVALID);
-            await this.attendanceService.bulkWrite(slotId, attendanceLearners);
+            await this.attendanceService.bulkWrite(slotId, attendanceLearners, slot.classId.toString());
             await this.gardenTimesheetService.update({ 'slots._id': new mongoose_1.Types.ObjectId(slotId) }, { $set: { 'slots.$.hasTakenAttendance': true } });
         }
         else {
-            await this.attendanceService.bulkWrite(slotId, attendanceLearners);
+            await this.attendanceService.bulkWrite(slotId, attendanceLearners, slot.classId.toString());
         }
         return new dto_1.SuccessResponse(true);
     }

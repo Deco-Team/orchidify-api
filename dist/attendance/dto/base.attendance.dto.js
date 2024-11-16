@@ -44,6 +44,11 @@ __decorate([
     __metadata("design:type", String)
 ], BaseAttendanceDto.prototype, "slotId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], BaseAttendanceDto.prototype, "classId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
     __metadata("design:type", Date)
 ], BaseAttendanceDto.prototype, "createdAt", void 0);

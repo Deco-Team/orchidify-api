@@ -5,6 +5,7 @@ export declare class BaseAttendanceDto {
     note: string;
     learnerId: string;
     slotId: string;
+    classId: string;
     createdAt: Date;
     updatedAt: Date;
 }

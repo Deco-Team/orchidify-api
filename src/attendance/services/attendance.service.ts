@@ -37,7 +37,7 @@ export interface IAttendanceService {
     projection?: string | Record<string, any>,
     populate?: Array<PopulateOptions>
   )
-  bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[])
+  bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[], classId: string)
 }
 
 @Injectable()
@@ -60,14 +60,18 @@ export class AttendanceService implements IAttendanceService {
     return await this.attendanceRepository.findOneAndUpdate(conditions, payload, options)
   }
 
-  bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[]) {
+  bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[], classId: string) {
     const operations = []
     for (const attendance of takeAttendanceDto) {
       operations.push({
         updateOne: {
           filter: { learnerId: new Types.ObjectId(attendance.learnerId), slotId: new Types.ObjectId(slotId) },
           update: {
-            $set: { ...attendance, learnerId: new Types.ObjectId(attendance.learnerId) }
+            $set: {
+              ...attendance,
+              learnerId: new Types.ObjectId(attendance.learnerId),
+              classId: new Types.ObjectId(classId)
+            }
           },
           upsert: true
         }

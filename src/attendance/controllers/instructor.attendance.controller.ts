@@ -156,7 +156,7 @@ export class InstructorAttendanceController {
     if (!slot.hasTakenAttendance) {
       if (attendanceLearners.length !== classLearnerIds.length)
         throw new AppException(Errors.NUMBER_OF_ATTENDANCES_INVALID)
-      await this.attendanceService.bulkWrite(slotId, attendanceLearners)
+      await this.attendanceService.bulkWrite(slotId, attendanceLearners, slot.classId.toString())
 
       // update slot hasTakenAttendance true
       await this.gardenTimesheetService.update(
@@ -165,7 +165,7 @@ export class InstructorAttendanceController {
       )
     } else {
       // take attendance just for updated learners
-      await this.attendanceService.bulkWrite(slotId, attendanceLearners)
+      await this.attendanceService.bulkWrite(slotId, attendanceLearners, slot.classId.toString())
     }
 
     return new SuccessResponse(true)

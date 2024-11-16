@@ -37,7 +37,7 @@ export interface IAttendanceService {
     findMany(conditions: FilterQuery<AttendanceDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<AttendanceDocument[]>;
     update(conditions: FilterQuery<Attendance>, payload: UpdateQuery<Attendance>, options?: QueryOptions | undefined): Promise<AttendanceDocument>;
     list(queryAttendanceDto: QueryAttendanceDto, projection?: string | Record<string, any>, populate?: Array<PopulateOptions>): any;
-    bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[]): any;
+    bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[], classId: string): any;
 }
 export declare class AttendanceService implements IAttendanceService {
     private readonly attendanceRepository;
@@ -51,7 +51,7 @@ export declare class AttendanceService implements IAttendanceService {
     }>> & Omit<import("mongoose").Document<unknown, {}, Attendance> & Attendance & Required<{
         _id: string;
     }>, never>>;
-    bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[]): Promise<import("mongodb").BulkWriteResult>;
+    bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[], classId: string): Promise<import("mongodb").BulkWriteResult>;
     findById(attendanceId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Attendance> & Attendance & Required<{
         _id: string;
     }>>;

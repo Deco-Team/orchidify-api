@@ -5,6 +5,7 @@ import { Transform } from 'class-transformer'
 import { AttendanceStatus } from '@common/contracts/constant'
 import { Learner } from '@learner/schemas/learner.schema'
 import { Slot } from '@garden-timesheet/schemas/slot.schema'
+import { Class } from '@class/schemas/class.schema'
 
 export type AttendanceDocument = HydratedDocument<Attendance>
 
@@ -42,6 +43,9 @@ export class Attendance {
 
   @Prop({ type: Types.ObjectId, ref: Slot.name, required: true })
   slotId: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Class.name, required: true })
+  classId: Types.ObjectId
 }
 
 export const AttendanceSchema = SchemaFactory.createForClass(Attendance)

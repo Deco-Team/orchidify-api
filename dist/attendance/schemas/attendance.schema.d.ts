@@ -33,6 +33,7 @@ export declare class Attendance {
     note: string;
     learnerId: Types.ObjectId;
     slotId: Types.ObjectId;
+    classId: Types.ObjectId;
 }
 export declare const AttendanceSchema: import("mongoose").Schema<Attendance, import("mongoose").Model<Attendance, any, any, any, import("mongoose").Document<unknown, any, Attendance> & Attendance & Required<{
     _id: string;

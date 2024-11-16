@@ -276,6 +276,7 @@ export class ClassQueueConsumer extends WorkerHost {
       // BR-50: After the class ends, if the instructor does not take attendance or grade any assignments, the learner will automatically get a certificate.
       // TODO: implement later
       
+      
       const learnerId = _.get(learnerClass, 'learner._id')
       const certificateCode = await this.certificateService.generateCertificateCode()
       const data = {

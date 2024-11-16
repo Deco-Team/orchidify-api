@@ -39,6 +39,10 @@ export class BaseAttendanceDto {
   @IsMongoId()
   slotId: string
 
+  @ApiProperty({ type: String })
+  @IsMongoId()
+  classId: string
+
   @ApiProperty({ type: Date })
   createdAt: Date
 

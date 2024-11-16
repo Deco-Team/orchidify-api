@@ -17,6 +17,7 @@ const class_transformer_1 = require("class-transformer");
 const constant_1 = require("../../common/contracts/constant");
 const learner_schema_1 = require("../../learner/schemas/learner.schema");
 const slot_schema_1 = require("../../garden-timesheet/schemas/slot.schema");
+const class_schema_1 = require("../../class/schemas/class.schema");
 let Attendance = class Attendance {
     constructor(id) {
         this._id = id;
@@ -46,6 +47,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: slot_schema_1.Slot.name, required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Attendance.prototype, "slotId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: class_schema_1.Class.name, required: true }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Attendance.prototype, "classId", void 0);
 exports.Attendance = Attendance = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'attendances',
