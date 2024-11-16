@@ -13,9 +13,10 @@ const firebase_repository_1 = require("./repositories/firebase.repository");
 const setting_service_1 = require("../setting/services/setting.service");
 const constant_1 = require("../setting/contracts/constant");
 const firebase_controller_1 = require("./controllers/firebase.controller");
-const firebase_service_1 = require("./services/firebase.service");
+const firebase_auth_service_1 = require("./services/firebase.auth.service");
 const learner_module_1 = require("../learner/learner.module");
 const instructor_module_1 = require("../instructor/instructor.module");
+const firebase_messaging_service_1 = require("./services/firebase.messaging.service");
 const firebaseProvider = {
     provide: 'FIREBASE_APP',
     inject: [setting_service_1.ISettingService],
@@ -42,11 +43,24 @@ exports.FirebaseModule = FirebaseModule = __decorate([
                 useClass: firebase_repository_1.FirebaseRepository
             },
             {
-                provide: firebase_service_1.IFirebaseService,
-                useClass: firebase_service_1.FirebaseService
+                provide: firebase_auth_service_1.IFirebaseAuthService,
+                useClass: firebase_auth_service_1.FirebaseAuthService
+            },
+            {
+                provide: firebase_messaging_service_1.IFirebaseMessagingService,
+                useClass: firebase_messaging_service_1.FirebaseMessagingService
             }
         ],
-        exports: []
+        exports: [
+            {
+                provide: firebase_auth_service_1.IFirebaseAuthService,
+                useClass: firebase_auth_service_1.FirebaseAuthService
+            },
+            {
+                provide: firebase_messaging_service_1.IFirebaseMessagingService,
+                useClass: firebase_messaging_service_1.FirebaseMessagingService
+            }
+        ]
     })
 ], FirebaseModule);
 //# sourceMappingURL=firebase.module.js.map

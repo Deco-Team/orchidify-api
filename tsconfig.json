@@ -93,6 +93,9 @@
       "@certificate/*": [
         "src/certificate/*"
       ],
+      "@notification/*": [
+        "src/notification/*"
+      ],
       "@src/*": [
         "src/*"
       ]

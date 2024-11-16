@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PayoutRequestStatus = exports.AttendanceStatus = exports.SubmissionStatus = exports.SLOT_NUMBERS = exports.SlotNumber = exports.Weekday = exports.ClassRequestType = exports.TransactionStatus = exports.ClassRequestStatus = exports.CourseLevel = exports.SlotStatus = exports.GardenTimesheetStatus = exports.LearnerClassStatus = exports.ClassStatus = exports.CourseStatus = exports.RecruitmentStatus = exports.GardenStatus = exports.GardenManagerStatus = exports.StaffStatus = exports.InstructorStatus = exports.LearnerStatus = exports.TimesheetType = exports.UserRole = exports.UserSide = void 0;
+exports.UserDeviceStatus = exports.PayoutRequestStatus = exports.AttendanceStatus = exports.SubmissionStatus = exports.SLOT_NUMBERS = exports.SlotNumber = exports.Weekday = exports.ClassRequestType = exports.TransactionStatus = exports.ClassRequestStatus = exports.CourseLevel = exports.SlotStatus = exports.GardenTimesheetStatus = exports.LearnerClassStatus = exports.ClassStatus = exports.CourseStatus = exports.RecruitmentStatus = exports.GardenStatus = exports.GardenManagerStatus = exports.StaffStatus = exports.InstructorStatus = exports.LearnerStatus = exports.TimesheetType = exports.UserRole = exports.UserSide = void 0;
 var UserSide;
 (function (UserSide) {
     UserSide["LEARNER"] = "LEARNER";
@@ -152,4 +152,9 @@ var PayoutRequestStatus;
     PayoutRequestStatus["REJECTED"] = "REJECTED";
     PayoutRequestStatus["CANCELED"] = "CANCELED";
 })(PayoutRequestStatus || (exports.PayoutRequestStatus = PayoutRequestStatus = {}));
+var UserDeviceStatus;
+(function (UserDeviceStatus) {
+    UserDeviceStatus["ACTIVE"] = "ACTIVE";
+    UserDeviceStatus["INACTIVE"] = "INACTIVE";
+})(UserDeviceStatus || (exports.UserDeviceStatus = UserDeviceStatus = {}));
 //# sourceMappingURL=constant.js.map

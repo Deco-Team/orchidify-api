@@ -403,5 +403,10 @@ exports.Errors = {
         message: 'Thông tin chứng chỉ không tồn tại.',
         httpStatus: common_1.HttpStatus.NOT_FOUND
     },
+    USER_DEVICE_NOT_FOUND: {
+        error: 'USER_DEVICE_NOT_FOUND',
+        message: 'Không tìm thấy thôn tin thiết bị sử dụng.',
+        httpStatus: common_1.HttpStatus.NOT_FOUND
+    },
 };
 //# sourceMappingURL=error.js.map

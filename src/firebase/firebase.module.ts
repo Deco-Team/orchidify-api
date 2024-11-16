@@ -4,9 +4,10 @@ import { FirebaseRepository, IFirebaseRepository } from './repositories/firebase
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { FirebaseController } from './controllers/firebase.controller'
-import { FirebaseService, IFirebaseService } from './services/firebase.service'
+import { FirebaseAuthService, IFirebaseAuthService } from './services/firebase.auth.service'
 import { LearnerModule } from '@learner/learner.module'
 import { InstructorModule } from '@instructor/instructor.module'
+import { FirebaseMessagingService, IFirebaseMessagingService } from './services/firebase.messaging.service'
 
 const firebaseProvider = {
   provide: 'FIREBASE_APP',
@@ -32,10 +33,23 @@ const firebaseProvider = {
       useClass: FirebaseRepository
     },
     {
-      provide: IFirebaseService,
-      useClass: FirebaseService
+      provide: IFirebaseAuthService,
+      useClass: FirebaseAuthService
+    },
+    {
+      provide: IFirebaseMessagingService,
+      useClass: FirebaseMessagingService
     }
   ],
-  exports: []
+  exports: [
+    {
+      provide: IFirebaseAuthService,
+      useClass: FirebaseAuthService
+    },
+    {
+      provide: IFirebaseMessagingService,
+      useClass: FirebaseMessagingService
+    }
+  ]
 })
 export class FirebaseModule {}

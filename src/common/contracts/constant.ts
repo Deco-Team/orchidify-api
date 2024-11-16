@@ -150,3 +150,8 @@ export enum PayoutRequestStatus {
   REJECTED = 'REJECTED',
   CANCELED = 'CANCELED'
 }
+
+export enum UserDeviceStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE'
+}

@@ -163,6 +163,7 @@
       "^@feedback/(.*)$": "<rootDir>/feedback/$1",
       "^@firebase/(.*)$": "<rootDir>/firebase/$1",
       "^@certificate/(.*)$": "<rootDir>/certificate/$1",
+      "^@notification/(.*)$": "<rootDir>/notification/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }

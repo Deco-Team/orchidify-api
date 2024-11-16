@@ -495,4 +495,13 @@ export const Errors = {
     message: 'Thông tin chứng chỉ không tồn tại.',
     httpStatus: HttpStatus.NOT_FOUND
   },
+
+  /**
+   * User Device
+   */
+  USER_DEVICE_NOT_FOUND: {
+    error: 'USER_DEVICE_NOT_FOUND',
+    message: 'Không tìm thấy thôn tin thiết bị sử dụng.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
 }

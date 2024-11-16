@@ -7,15 +7,15 @@ import { IInstructorService } from '@instructor/services/instructor.service'
 import { ILearnerService } from '@learner/services/learner.service'
 import { UserRole } from '@common/contracts/constant'
 
-export const IFirebaseService = Symbol('IFirebaseService')
+export const IFirebaseAuthService = Symbol('IFirebaseAuthService')
 
-export interface IFirebaseService {
+export interface IFirebaseAuthService {
   createCustomToken(userAuth: UserAuth): Promise<string>
 }
 
 @Injectable()
-export class FirebaseService implements IFirebaseService {
-  private readonly appLogger = new AppLogger(FirebaseService.name)
+export class FirebaseAuthService implements IFirebaseAuthService {
+  private readonly appLogger = new AppLogger(FirebaseAuthService.name)
   constructor(
     @Inject(IFirebaseRepository)
     private readonly firebaseRepository: IFirebaseRepository,

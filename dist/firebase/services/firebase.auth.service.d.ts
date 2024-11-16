@@ -2,11 +2,11 @@ import { IFirebaseRepository } from '@firebase/repositories/firebase.repository'
 import { UserAuth } from '@common/contracts/dto';
 import { IInstructorService } from '@instructor/services/instructor.service';
 import { ILearnerService } from '@learner/services/learner.service';
-export declare const IFirebaseService: unique symbol;
-export interface IFirebaseService {
+export declare const IFirebaseAuthService: unique symbol;
+export interface IFirebaseAuthService {
     createCustomToken(userAuth: UserAuth): Promise<string>;
 }
-export declare class FirebaseService implements IFirebaseService {
+export declare class FirebaseAuthService implements IFirebaseAuthService {
     private readonly firebaseRepository;
     private readonly instructorService;
     private readonly learnerService;

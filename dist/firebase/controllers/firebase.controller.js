@@ -21,7 +21,7 @@ const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 const constant_1 = require("../../common/contracts/constant");
 const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../auth/guards/roles.guard");
-const firebase_service_1 = require("../services/firebase.service");
+const firebase_auth_service_1 = require("../services/firebase.auth.service");
 const create_custom_token_firebase_dto_1 = require("../dto/create-custom-token.firebase.dto");
 let FirebaseController = class FirebaseController {
     constructor(firebaseService) {
@@ -51,7 +51,7 @@ exports.FirebaseController = FirebaseController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard.ACCESS_TOKEN, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.INSTRUCTOR, constant_1.UserRole.LEARNER),
     (0, common_1.Controller)(),
-    __param(0, (0, common_1.Inject)(firebase_service_1.IFirebaseService)),
+    __param(0, (0, common_1.Inject)(firebase_auth_service_1.IFirebaseAuthService)),
     __metadata("design:paramtypes", [Object])
 ], FirebaseController);
 //# sourceMappingURL=firebase.controller.js.map

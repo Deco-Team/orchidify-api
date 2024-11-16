@@ -22,7 +22,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FirebaseRepository_auth, _FirebaseRepository_firestore;
+var _FirebaseRepository_auth, _FirebaseRepository_firestore, _FirebaseRepository_messaging;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FirebaseRepository = exports.IFirebaseRepository = void 0;
 const common_1 = require("@nestjs/common");
@@ -33,8 +33,10 @@ let FirebaseRepository = class FirebaseRepository {
         this.firebaseApp = firebaseApp;
         _FirebaseRepository_auth.set(this, void 0);
         _FirebaseRepository_firestore.set(this, void 0);
+        _FirebaseRepository_messaging.set(this, void 0);
         __classPrivateFieldSet(this, _FirebaseRepository_auth, this.firebaseApp.auth(), "f");
         __classPrivateFieldSet(this, _FirebaseRepository_firestore, this.firebaseApp.firestore(), "f");
+        __classPrivateFieldSet(this, _FirebaseRepository_messaging, this.firebaseApp.messaging(), "f");
     }
     getAuth() {
         return __classPrivateFieldGet(this, _FirebaseRepository_auth, "f");
@@ -42,10 +44,14 @@ let FirebaseRepository = class FirebaseRepository {
     getFirestore() {
         return __classPrivateFieldGet(this, _FirebaseRepository_firestore, "f");
     }
+    getMessaging() {
+        return __classPrivateFieldGet(this, _FirebaseRepository_messaging, "f");
+    }
 };
 exports.FirebaseRepository = FirebaseRepository;
 _FirebaseRepository_auth = new WeakMap();
 _FirebaseRepository_firestore = new WeakMap();
+_FirebaseRepository_messaging = new WeakMap();
 exports.FirebaseRepository = FirebaseRepository = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('FIREBASE_APP')),

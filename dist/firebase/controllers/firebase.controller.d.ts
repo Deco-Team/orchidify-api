@@ -1,7 +1,7 @@
-import { IFirebaseService } from '@firebase/services/firebase.service';
+import { IFirebaseAuthService } from '@firebase/services/firebase.auth.service';
 export declare class FirebaseController {
     private readonly firebaseService;
-    constructor(firebaseService: IFirebaseService);
+    constructor(firebaseService: IFirebaseAuthService);
     createCustomToken(req: any): Promise<{
         token: string;
     }>;

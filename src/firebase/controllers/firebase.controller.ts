@@ -7,7 +7,7 @@ import { Roles } from '@auth/decorators/roles.decorator'
 import { UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
-import { IFirebaseService } from '@firebase/services/firebase.service'
+import { IFirebaseAuthService } from '@firebase/services/firebase.auth.service'
 import { CreateCustomTokenFirebaseDataResponse } from '@firebase/dto/create-custom-token.firebase.dto'
 
 @ApiTags('Firebase')
@@ -18,8 +18,8 @@ import { CreateCustomTokenFirebaseDataResponse } from '@firebase/dto/create-cust
 @Controller()
 export class FirebaseController {
   constructor(
-    @Inject(IFirebaseService)
-    private readonly firebaseService: IFirebaseService
+    @Inject(IFirebaseAuthService)
+    private readonly firebaseService: IFirebaseAuthService
   ) {}
 
   @ApiOperation({

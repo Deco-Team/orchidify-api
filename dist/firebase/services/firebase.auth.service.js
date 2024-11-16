@@ -11,22 +11,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var FirebaseService_1;
+var FirebaseAuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.FirebaseService = exports.IFirebaseService = void 0;
+exports.FirebaseAuthService = exports.IFirebaseAuthService = void 0;
 const common_1 = require("@nestjs/common");
 const firebase_repository_1 = require("../repositories/firebase.repository");
 const app_logger_service_1 = require("../../common/services/app-logger.service");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
 const learner_service_1 = require("../../learner/services/learner.service");
 const constant_1 = require("../../common/contracts/constant");
-exports.IFirebaseService = Symbol('IFirebaseService');
-let FirebaseService = FirebaseService_1 = class FirebaseService {
+exports.IFirebaseAuthService = Symbol('IFirebaseAuthService');
+let FirebaseAuthService = FirebaseAuthService_1 = class FirebaseAuthService {
     constructor(firebaseRepository, instructorService, learnerService) {
         this.firebaseRepository = firebaseRepository;
         this.instructorService = instructorService;
         this.learnerService = learnerService;
-        this.appLogger = new app_logger_service_1.AppLogger(FirebaseService_1.name);
+        this.appLogger = new app_logger_service_1.AppLogger(FirebaseAuthService_1.name);
     }
     async createCustomToken(userAuth) {
         const { _id, role } = userAuth;
@@ -57,12 +57,12 @@ let FirebaseService = FirebaseService_1 = class FirebaseService {
         return await this.firebaseRepository.getAuth().createCustomToken(_id);
     }
 };
-exports.FirebaseService = FirebaseService;
-exports.FirebaseService = FirebaseService = FirebaseService_1 = __decorate([
+exports.FirebaseAuthService = FirebaseAuthService;
+exports.FirebaseAuthService = FirebaseAuthService = FirebaseAuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(firebase_repository_1.IFirebaseRepository)),
     __param(1, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
     __param(2, (0, common_1.Inject)(learner_service_1.ILearnerService)),
     __metadata("design:paramtypes", [Object, Object, Object])
-], FirebaseService);
-//# sourceMappingURL=firebase.service.js.map
+], FirebaseAuthService);
+//# sourceMappingURL=firebase.auth.service.js.map
