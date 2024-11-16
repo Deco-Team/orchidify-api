@@ -225,7 +225,7 @@ __decorate([
 ], InstructorClassRequestController.prototype, "createPublishClassRequest", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: `Create CLass Class Request`
+        summary: `Create Cancel Class Request`
     }),
     (0, swagger_1.ApiCreatedResponse)({ type: dto_1.IDDataResponse }),
     (0, api_response_decorator_1.ApiErrorResponse)([

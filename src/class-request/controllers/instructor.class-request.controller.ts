@@ -175,7 +175,7 @@ export class InstructorClassRequestController {
   }
 
   @ApiOperation({
-    summary: `Create CLass Class Request`
+    summary: `Create Cancel Class Request`
   })
   @ApiCreatedResponse({ type: IDDataResponse })
   @ApiErrorResponse([

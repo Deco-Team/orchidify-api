@@ -101,7 +101,7 @@ export class ManagementClassRequestController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] Reject Class Request`
+    summary: `[${UserRole.STAFF}] Reject Publish/Cancel Class Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([

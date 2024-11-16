@@ -124,7 +124,7 @@ __decorate([
 ], ManagementClassRequestController.prototype, "approve", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: `[${constant_1.UserRole.STAFF}] Reject Class Request`
+        summary: `[${constant_1.UserRole.STAFF}] Reject Publish/Cancel Class Request`
     }),
     (0, swagger_1.ApiOkResponse)({ type: dto_1.SuccessDataResponse }),
     (0, api_response_decorator_1.ApiErrorResponse)([
