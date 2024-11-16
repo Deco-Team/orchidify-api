@@ -52,8 +52,8 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         this.appLogger.log(`[process] Processing job id=${job.id}`);
         try {
             switch (job.name) {
-                case constant_2.JobName.UpdateClassStatusInProgress: {
-                    return await this.updateClassStatusInProgress(job);
+                case constant_2.JobName.UpdateClassStatus: {
+                    return await this.updateClassStatus(job);
                 }
                 case constant_2.JobName.UpdateClassProgressEndSlot: {
                     return await this.updateClassProgressEndSlot(job);
@@ -73,36 +73,47 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             throw error;
         }
     }
-    async updateClassStatusInProgress(job) {
-        this.appLogger.debug(`[updateClassStatusInProgress]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`);
+    async updateClassStatus(job) {
+        this.appLogger.debug(`[updateClassStatus]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`);
         try {
-            this.appLogger.log(`[updateClassStatusInProgress]: Start update class status... id=${job.id}`);
+            this.appLogger.log(`[updateClassStatus]: Start update class status... id=${job.id}`);
             const courseClasses = await this.classService.findManyByStatus([constant_1.ClassStatus.PUBLISHED]);
             if (courseClasses.length === 0)
                 return 'No PUBLISHED status class';
             const nowMoment = moment().tz(config_1.VN_TIMEZONE).startOf('date');
             const updateClassStatusPromises = [];
-            courseClasses.forEach((courseClass) => {
+            const updateClassToInProgress = [];
+            const updateClassToCanceled = [];
+            const classAutoCancelMinLearners = Number((await this.settingService.findByKey(constant_3.SettingKey.ClassAutoCancelMinLearners)).value) || 5;
+            for await (const courseClass of courseClasses) {
                 const startOfDate = moment(courseClass.startDate).tz(config_1.VN_TIMEZONE).startOf('date');
                 if (startOfDate.isSameOrBefore(nowMoment)) {
-                    updateClassStatusPromises.push(this.classService.update({ _id: courseClass._id }, {
-                        $set: { status: constant_1.ClassStatus.IN_PROGRESS },
-                        $push: {
-                            histories: {
-                                status: constant_1.ClassStatus.IN_PROGRESS,
-                                timestamp: new Date(),
-                                userRole: 'SYSTEM'
+                    const learnerQuantity = courseClass.learnerQuantity;
+                    if (learnerQuantity < classAutoCancelMinLearners) {
+                        updateClassToCanceled.push(courseClass._id);
+                        updateClassStatusPromises.push(this.classService.cancelClass(courseClass._id, { cancelReason: 'System cancel' }, { role: 'SYSTEM' }));
+                    }
+                    else {
+                        updateClassToInProgress.push(courseClass._id);
+                        updateClassStatusPromises.push(this.classService.update({ _id: courseClass._id }, {
+                            $set: { status: constant_1.ClassStatus.IN_PROGRESS },
+                            $push: {
+                                histories: {
+                                    status: constant_1.ClassStatus.IN_PROGRESS,
+                                    timestamp: new Date(),
+                                    userRole: 'SYSTEM'
+                                }
                             }
-                        }
-                    }));
+                        }));
+                    }
                 }
-            });
+            }
             await Promise.all(updateClassStatusPromises);
-            this.appLogger.log(`[updateClassStatusInProgress]: End update status... id=${job.id}`);
-            return { status: true, numbersOfUpdatedClass: updateClassStatusPromises.length };
+            this.appLogger.log(`[updateClassStatus]: End update status... id=${job.id}`);
+            return { status: true, updateClassToInProgress, updateClassToCanceled };
         }
         catch (error) {
-            this.appLogger.error(`[updateClassStatusInProgress]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`);
+            this.appLogger.error(`[updateClassStatus]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`);
             return false;
         }
     }

@@ -23,9 +23,10 @@ export declare class ClassQueueConsumer extends WorkerHost {
     private readonly appLogger;
     constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService, attendanceService: IAttendanceService, assignmentSubmissionService: IAssignmentSubmissionService);
     process(job: Job<any>): Promise<any>;
-    updateClassStatusInProgress(job: Job): Promise<false | "No PUBLISHED status class" | {
+    updateClassStatus(job: Job): Promise<false | "No PUBLISHED status class" | {
         status: boolean;
-        numbersOfUpdatedClass: number;
+        updateClassToInProgress: any[];
+        updateClassToCanceled: any[];
     }>;
     updateClassProgressEndSlot(job: Job): Promise<false | {
         status: boolean;

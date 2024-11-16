@@ -17,6 +17,7 @@ var SettingKey;
     SettingKey["ClassAutoCompleteAfterDay"] = "ClassAutoCompleteAfterDay";
     SettingKey["ClassAttendanceRate"] = "ClassAttendanceRate";
     SettingKey["ClassAssignmentPointAverage"] = "ClassAssignmentPointAverage";
+    SettingKey["ClassAutoCancelMinLearners"] = "ClassAutoCancelMinLearners";
     SettingKey["FeedbackOpenBeforeClassEndDay"] = "FeedbackOpenBeforeClassEndDay";
 })(SettingKey || (exports.SettingKey = SettingKey = {}));
 //# sourceMappingURL=constant.js.map

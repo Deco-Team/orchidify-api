@@ -1,11 +1,5 @@
 import * as moment from 'moment-timezone'
-import {
-  AttendanceStatus,
-  ClassStatus,
-  SlotNumber,
-  SlotStatus,
-  UserRole
-} from '@common/contracts/constant'
+import { AttendanceStatus, ClassStatus, SlotNumber, SlotStatus, UserRole } from '@common/contracts/constant'
 import { AppLogger } from '@common/services/app-logger.service'
 import { Processor, WorkerHost } from '@nestjs/bullmq'
 import { Inject } from '@nestjs/common'
@@ -56,8 +50,8 @@ export class ClassQueueConsumer extends WorkerHost {
     this.appLogger.log(`[process] Processing job id=${job.id}`)
     try {
       switch (job.name) {
-        case JobName.UpdateClassStatusInProgress: {
-          return await this.updateClassStatusInProgress(job)
+        case JobName.UpdateClassStatus: {
+          return await this.updateClassStatus(job)
         }
         case JobName.UpdateClassProgressEndSlot: {
           return await this.updateClassProgressEndSlot(job)
@@ -77,47 +71,62 @@ export class ClassQueueConsumer extends WorkerHost {
     }
   }
 
-  async updateClassStatusInProgress(job: Job) {
-    this.appLogger.debug(
-      `[updateClassStatusInProgress]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`
-    )
+  async updateClassStatus(job: Job) {
+    this.appLogger.debug(`[updateClassStatus]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`)
 
     try {
-      this.appLogger.log(`[updateClassStatusInProgress]: Start update class status... id=${job.id}`)
+      this.appLogger.log(`[updateClassStatus]: Start update class status... id=${job.id}`)
       const courseClasses = await this.classService.findManyByStatus([ClassStatus.PUBLISHED])
       if (courseClasses.length === 0) return 'No PUBLISHED status class'
 
       const nowMoment = moment().tz(VN_TIMEZONE).startOf('date')
       const updateClassStatusPromises = []
-      courseClasses.forEach((courseClass) => {
+      const updateClassToInProgress = []
+      const updateClassToCanceled = []
+      const classAutoCancelMinLearners =
+        Number((await this.settingService.findByKey(SettingKey.ClassAutoCancelMinLearners)).value) || 5
+
+      for await (const courseClass of courseClasses) {
         const startOfDate = moment(courseClass.startDate).tz(VN_TIMEZONE).startOf('date')
         if (startOfDate.isSameOrBefore(nowMoment)) {
-          updateClassStatusPromises.push(
-            this.classService.update(
-              { _id: courseClass._id },
-              {
-                $set: { status: ClassStatus.IN_PROGRESS },
-                $push: {
-                  histories: {
-                    status: ClassStatus.IN_PROGRESS,
-                    timestamp: new Date(),
-                    userRole: 'SYSTEM' as UserRole
+          // BR-42: If there are not enough 5 learners when the class starts, the class will be cancelled, learners will be refunded 100%.
+          const learnerQuantity = courseClass.learnerQuantity
+          if (learnerQuantity < classAutoCancelMinLearners) {
+            updateClassToCanceled.push(courseClass._id)
+            updateClassStatusPromises.push(
+              this.classService.cancelClass(
+                courseClass._id,
+                { cancelReason: 'System cancel' },
+                { role: 'SYSTEM' as UserRole }
+              )
+            )
+          } else {
+            updateClassToInProgress.push(courseClass._id)
+            updateClassStatusPromises.push(
+              this.classService.update(
+                { _id: courseClass._id },
+                {
+                  $set: { status: ClassStatus.IN_PROGRESS },
+                  $push: {
+                    histories: {
+                      status: ClassStatus.IN_PROGRESS,
+                      timestamp: new Date(),
+                      userRole: 'SYSTEM' as UserRole
+                    }
                   }
                 }
-              }
+              )
             )
-          )
+          }
         }
-      })
+      }
       await Promise.all(updateClassStatusPromises)
 
-      this.appLogger.log(`[updateClassStatusInProgress]: End update status... id=${job.id}`)
-      return { status: true, numbersOfUpdatedClass: updateClassStatusPromises.length }
+      this.appLogger.log(`[updateClassStatus]: End update status... id=${job.id}`)
+      return { status: true, updateClassToInProgress, updateClassToCanceled }
     } catch (error) {
       this.appLogger.error(
-        `[updateClassStatusInProgress]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(
-          job.data
-        )}, error=${error}`
+        `[updateClassStatus]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`
       )
       return false
     }

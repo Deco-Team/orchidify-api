@@ -88,7 +88,7 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
             pattern: '0 0 * * *',
             tz: config_1.VN_TIMEZONE
         }, {
-            name: constant_2.JobName.UpdateClassStatusInProgress
+            name: constant_2.JobName.UpdateClassStatus
         });
     }
     async scheduleUpdateClassProgressJob() {

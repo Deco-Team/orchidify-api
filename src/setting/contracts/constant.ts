@@ -30,6 +30,7 @@ export enum SettingKey {
   ClassAutoCompleteAfterDay = 'ClassAutoCompleteAfterDay',
   ClassAttendanceRate = 'ClassAttendanceRate',
   ClassAssignmentPointAverage = 'ClassAssignmentPointAverage',
+  ClassAutoCancelMinLearners = 'ClassAutoCancelMinLearners',
 
   // Feedback
   FeedbackOpenBeforeClassEndDay = 'FeedbackOpenBeforeClassEndDay',

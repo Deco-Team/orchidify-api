@@ -103,7 +103,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
         tz: VN_TIMEZONE
       },
       {
-        name: JobName.UpdateClassStatusInProgress
+        name: JobName.UpdateClassStatus
       }
     )
   }

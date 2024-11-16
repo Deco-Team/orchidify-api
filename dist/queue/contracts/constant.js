@@ -12,7 +12,7 @@ var QueueName;
 var JobName;
 (function (JobName) {
     JobName["ClassRequestAutoExpired"] = "ClassRequestAutoExpired";
-    JobName["UpdateClassStatusInProgress"] = "UpdateClassStatusInProgress";
+    JobName["UpdateClassStatus"] = "UpdateClassStatus";
     JobName["UpdateClassProgressEndSlot"] = "UpdateClassProgressEndSlot";
     JobName["ClassAutoCompleted"] = "ClassAutoCompleted";
     JobName["SendClassCertificate"] = "SendClassCertificate";

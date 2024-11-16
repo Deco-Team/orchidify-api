@@ -7,7 +7,7 @@ export declare enum QueueName {
 }
 export declare enum JobName {
     ClassRequestAutoExpired = "ClassRequestAutoExpired",
-    UpdateClassStatusInProgress = "UpdateClassStatusInProgress",
+    UpdateClassStatus = "UpdateClassStatus",
     UpdateClassProgressEndSlot = "UpdateClassProgressEndSlot",
     ClassAutoCompleted = "ClassAutoCompleted",
     SendClassCertificate = "SendClassCertificate",
