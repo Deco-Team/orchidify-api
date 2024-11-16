@@ -18,12 +18,13 @@ const constant_1 = require("../../common/contracts/constant");
 const class_transformer_1 = require("class-transformer");
 const constant_2 = require("../contracts/constant");
 const base_instructor_dto_1 = require("../../instructor/dto/base.instructor.dto");
+const base_class_dto_1 = require("../../class/dto/base.class.dto");
 class QueryClassRequestDto {
 }
 exports.QueryClassRequestDto = QueryClassRequestDto;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        enum: [constant_1.ClassRequestType.PUBLISH_CLASS],
+        enum: [constant_1.ClassRequestType.PUBLISH_CLASS, constant_1.ClassRequestType.CANCEL_CLASS],
         isArray: true
     }),
     (0, class_validator_1.IsOptional)(),
@@ -54,6 +55,10 @@ class InstructorViewClassRequestListDataResponse extends (0, openapi_builder_1.D
 exports.InstructorViewClassRequestListDataResponse = InstructorViewClassRequestListDataResponse;
 class InstructorViewClassRequestDetailResponse extends (0, swagger_1.PickType)(base_class_request_dto_1.BaseClassRequestDto, constant_2.CLASS_REQUEST_DETAIL_PROJECTION) {
 }
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: base_class_dto_1.BaseClassDto }),
+    __metadata("design:type", base_class_dto_1.BaseClassDto)
+], InstructorViewClassRequestDetailResponse.prototype, "class", void 0);
 class InstructorViewClassRequestDetailDataResponse extends (0, openapi_builder_1.DataResponse)(InstructorViewClassRequestDetailResponse) {
 }
 exports.InstructorViewClassRequestDetailDataResponse = InstructorViewClassRequestDetailDataResponse;
@@ -76,6 +81,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: ClassRequestCreatedByDto }),
     __metadata("design:type", Object)
 ], StaffViewClassRequestDetailResponse.prototype, "createdBy", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: base_class_dto_1.BaseClassDto }),
+    __metadata("design:type", base_class_dto_1.BaseClassDto)
+], StaffViewClassRequestDetailResponse.prototype, "class", void 0);
 class StaffViewClassRequestDetailDataResponse extends (0, openapi_builder_1.DataResponse)(StaffViewClassRequestDetailResponse) {
 }
 exports.StaffViewClassRequestDetailDataResponse = StaffViewClassRequestDetailDataResponse;

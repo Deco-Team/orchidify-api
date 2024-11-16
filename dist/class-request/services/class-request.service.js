@@ -36,9 +36,10 @@ const constant_3 = require("../../queue/contracts/constant");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_4 = require("../../setting/contracts/constant");
 const helper_service_1 = require("../../common/services/helper.service");
+const learner_class_service_1 = require("../../class/services/learner-class.service");
 exports.IClassRequestService = Symbol('IClassRequestService');
 let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
-    constructor(classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, helperService) {
+    constructor(classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, helperService) {
         this.classRequestRepository = classRequestRepository;
         this.courseService = courseService;
         this.gardenTimesheetService = gardenTimesheetService;
@@ -46,6 +47,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.connection = connection;
         this.queueProducerService = queueProducerService;
         this.settingService = settingService;
+        this.learnerClassService = learnerClassService;
         this.helperService = helperService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassRequestService_1.name);
     }
@@ -56,6 +58,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 isRequesting: true
             }
         });
+        this.addClassRequestAutoExpiredJob(classRequest);
+        return classRequest;
+    }
+    async createCancelClassRequest(createCancelClassRequestDto, options) {
+        const classRequest = await this.classRequestRepository.create(createCancelClassRequestDto, options);
         this.addClassRequestAutoExpiredJob(classRequest);
         return classRequest;
     }
@@ -78,7 +85,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         if (createdBy) {
             filter['createdBy'] = new mongoose_1.Types.ObjectId(createdBy);
         }
-        const validType = type?.filter((type) => [constant_1.ClassRequestType.PUBLISH_CLASS].includes(type));
+        const validType = type?.filter((level) => [constant_1.ClassRequestType.PUBLISH_CLASS, constant_1.ClassRequestType.CANCEL_CLASS].includes(level));
         if (validType?.length > 0) {
             filter['type'] = {
                 $in: validType
@@ -142,195 +149,326 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             }
         });
     }
-    async cancelPublishClassRequest(classRequestId, userAuth) {
+    async cancelClassRequest(classRequestId, userAuth) {
         const { _id, role } = userAuth;
         const classRequest = await this.findById(classRequestId);
-        if (!classRequest ||
-            classRequest.type !== constant_1.ClassRequestType.PUBLISH_CLASS ||
-            classRequest.createdBy.toString() !== _id)
+        if (!classRequest || classRequest.createdBy.toString() !== _id)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
         if (classRequest.status !== constant_1.ClassRequestStatus.PENDING)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_STATUS_INVALID);
-        const course = await this.courseService.findById(classRequest.courseId?.toString());
-        if (!course || course.instructorId.toString() !== _id)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
-        if (course.status === constant_1.CourseStatus.DELETED)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
-        const session = await this.connection.startSession();
-        try {
-            await session.withTransaction(async () => {
-                await this.update({ _id: classRequestId }, {
-                    $set: {
-                        status: constant_1.ClassRequestStatus.CANCELED
-                    },
-                    $push: {
-                        histories: {
-                            status: constant_1.ClassRequestStatus.CANCELED,
-                            timestamp: new Date(),
-                            userId: new mongoose_1.Types.ObjectId(_id),
-                            userRole: role
+        if (classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS) {
+            const course = await this.courseService.findById(classRequest.courseId?.toString());
+            if (!course || course.instructorId.toString() !== _id)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
+            if (course.status === constant_1.CourseStatus.DELETED)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.update({ _id: classRequestId }, {
+                        $set: {
+                            status: constant_1.ClassRequestStatus.CANCELED
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.CANCELED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
                         }
-                    }
-                }, { session });
-                await this.courseService.update({ _id: classRequest.courseId }, {
-                    $set: {
-                        isRequesting: false
-                    }
-                }, { session });
-            });
+                    }, { session });
+                    await this.courseService.update({ _id: classRequest.courseId }, {
+                        $set: {
+                            isRequesting: false
+                        }
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
-        finally {
-            await session.endSession();
+        else if (classRequest.type === constant_1.ClassRequestType.CANCEL_CLASS) {
+            const courseClass = await this.classService.findById(classRequest.classId?.toString());
+            if (!courseClass || courseClass.instructorId.toString() !== _id)
+                throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.update({ _id: classRequestId }, {
+                        $set: {
+                            status: constant_1.ClassRequestStatus.CANCELED
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.CANCELED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
+                        }
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
         return new dto_1.SuccessResponse(true);
     }
-    async approvePublishClassRequest(classRequestId, approvePublishClassRequestDto, userAuth) {
-        const { gardenId } = approvePublishClassRequestDto;
+    async approveClassRequest(classRequestId, approveClassRequestDto, userAuth) {
+        const { gardenId } = approveClassRequestDto;
         const { _id, role } = userAuth;
         const classRequest = await this.findById(classRequestId);
-        if (!classRequest || classRequest.type !== constant_1.ClassRequestType.PUBLISH_CLASS)
+        if (!classRequest)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
         if (classRequest.status !== constant_1.ClassRequestStatus.PENDING)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_STATUS_INVALID);
-        const course = await this.courseService.findById(classRequest.courseId?.toString(), ['+sessions']);
-        if (!course)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
-        if (course.status === constant_1.CourseStatus.DELETED)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
-        const { startDate, duration, weekdays, slotNumbers } = classRequest?.metadata;
-        const availableSlots = await this.gardenTimesheetService.viewAvailableTime({
-            startDate,
-            duration,
-            weekdays,
-            instructorId: course.instructorId
-        });
-        this.appLogger.log(`getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${availableSlots.slotNumbers}, availableTimeOfGardens=${JSON.stringify(availableSlots.availableTimeOfGardens)}`);
-        if (_.difference(slotNumbers, availableSlots.slotNumbers).length !== 0)
-            throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
-        const availableGardens = availableSlots.availableTimeOfGardens.filter((availableTimeOfGarden) => {
-            this.appLogger.log(`gardenId=${availableTimeOfGarden.gardenId}, slotNumbers=${availableTimeOfGarden.slotNumbers}`);
-            return _.difference(slotNumbers, availableTimeOfGarden.slotNumbers).length === 0;
-        });
-        if (availableGardens.length === 0)
-            throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
-        const garden = availableGardens.find((availableGarden) => availableGarden.gardenId?.toString() === gardenId);
-        if (!garden)
-            throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
-        const session = await this.connection.startSession();
-        try {
-            await session.withTransaction(async () => {
-                await this.classRequestRepository.findOneAndUpdate({ _id: classRequestId }, {
-                    $set: {
-                        status: constant_1.ClassRequestStatus.APPROVED
-                    },
-                    $push: {
-                        histories: {
-                            status: constant_1.ClassRequestStatus.APPROVED,
+        if (classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS) {
+            if (!gardenId)
+                throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
+            const course = await this.courseService.findById(classRequest.courseId?.toString(), ['+sessions']);
+            if (!course)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
+            if (course.status === constant_1.CourseStatus.DELETED)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
+            const { startDate, duration, weekdays, slotNumbers } = classRequest?.metadata;
+            const availableSlots = await this.gardenTimesheetService.viewAvailableTime({
+                startDate,
+                duration,
+                weekdays,
+                instructorId: course.instructorId
+            });
+            this.appLogger.log(`getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${availableSlots.slotNumbers}, availableTimeOfGardens=${JSON.stringify(availableSlots.availableTimeOfGardens)}`);
+            if (_.difference(slotNumbers, availableSlots.slotNumbers).length !== 0)
+                throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
+            const availableGardens = availableSlots.availableTimeOfGardens.filter((availableTimeOfGarden) => {
+                this.appLogger.log(`gardenId=${availableTimeOfGarden.gardenId}, slotNumbers=${availableTimeOfGarden.slotNumbers}`);
+                return _.difference(slotNumbers, availableTimeOfGarden.slotNumbers).length === 0;
+            });
+            if (availableGardens.length === 0)
+                throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
+            const garden = availableGardens.find((availableGarden) => availableGarden.gardenId?.toString() === gardenId);
+            if (!garden)
+                throw new app_exception_1.AppException(error_1.Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.classRequestRepository.findOneAndUpdate({ _id: classRequestId }, {
+                        $set: {
+                            status: constant_1.ClassRequestStatus.APPROVED
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.APPROVED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
+                        }
+                    }, { session });
+                    await this.courseService.update({ _id: classRequest.courseId }, {
+                        $set: {
+                            status: constant_1.CourseStatus.ACTIVE,
+                            isRequesting: false
+                        }
+                    }, { session });
+                    const classData = _.pick(classRequest.metadata, [
+                        'title',
+                        'description',
+                        'startDate',
+                        'price',
+                        'level',
+                        'type',
+                        'duration',
+                        'thumbnail',
+                        'media',
+                        'sessions',
+                        'learnerLimit',
+                        'weekdays',
+                        'slotNumbers',
+                        'gardenRequiredToolkits',
+                        'instructorId'
+                    ]);
+                    classData['code'] = await this.classService.generateCode();
+                    classData['status'] = constant_1.ClassStatus.PUBLISHED;
+                    classData['histories'] = [
+                        {
+                            status: constant_1.ClassStatus.PUBLISHED,
                             timestamp: new Date(),
                             userId: new mongoose_1.Types.ObjectId(_id),
                             userRole: role
                         }
-                    }
-                }, { session });
-                await this.courseService.update({ _id: classRequest.courseId }, {
-                    $set: {
-                        status: constant_1.CourseStatus.ACTIVE,
-                        isRequesting: false
-                    }
-                }, { session });
-                const classData = _.pick(classRequest.metadata, [
-                    'title',
-                    'description',
-                    'startDate',
-                    'price',
-                    'level',
-                    'type',
-                    'duration',
-                    'thumbnail',
-                    'media',
-                    'sessions',
-                    'learnerLimit',
-                    'weekdays',
-                    'slotNumbers',
-                    'gardenRequiredToolkits',
-                    'instructorId'
-                ]);
-                classData['code'] = await this.classService.generateCode();
-                classData['status'] = constant_1.ClassStatus.PUBLISHED;
-                classData['histories'] = [
-                    {
-                        status: constant_1.ClassStatus.PUBLISHED,
-                        timestamp: new Date(),
-                        userId: new mongoose_1.Types.ObjectId(_id),
-                        userRole: role
-                    }
-                ];
-                classData['learnerQuantity'] = 0;
-                classData['gardenId'] = new mongoose_1.Types.ObjectId(gardenId);
-                classData['courseId'] = classRequest.courseId;
-                classData['progress'] = new progress_dto_1.BaseProgressDto(_.get(classData, ['duration']) * 2, 0);
-                let sessions = _.get(classRequest, 'metadata.sessions');
-                classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
-                const createdClass = await this.classService.create(classData, { session });
-                await this.gardenTimesheetService.generateSlotsForClass({
-                    startDate,
-                    duration,
-                    weekdays,
-                    slotNumbers,
-                    gardenId: new mongoose_1.Types.ObjectId(gardenId),
-                    instructorId: course.instructorId,
-                    classId: new mongoose_1.Types.ObjectId(createdClass._id),
-                    metadata: { code: createdClass.code, title: createdClass.title },
-                    courseData: course
-                }, { session });
-            });
+                    ];
+                    classData['learnerQuantity'] = 0;
+                    classData['gardenId'] = new mongoose_1.Types.ObjectId(gardenId);
+                    classData['courseId'] = classRequest.courseId;
+                    classData['progress'] = new progress_dto_1.BaseProgressDto(_.get(classData, ['duration']) * 2, 0);
+                    let sessions = _.get(classRequest, 'metadata.sessions');
+                    classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
+                    const createdClass = await this.classService.create(classData, { session });
+                    await this.gardenTimesheetService.generateSlotsForClass({
+                        startDate,
+                        duration,
+                        weekdays,
+                        slotNumbers,
+                        gardenId: new mongoose_1.Types.ObjectId(gardenId),
+                        instructorId: course.instructorId,
+                        classId: new mongoose_1.Types.ObjectId(createdClass._id),
+                        metadata: { code: createdClass.code, title: createdClass.title },
+                        courseData: course
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
-        finally {
-            await session.endSession();
+        else if (classRequest.type === constant_1.ClassRequestType.CANCEL_CLASS) {
+            const courseClass = await this.classService.findById(classRequest.classId?.toString());
+            if (!courseClass)
+                throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
+            if (courseClass.status !== constant_1.ClassStatus.PUBLISHED)
+                throw new app_exception_1.AppException(error_1.Errors.CLASS_STATUS_INVALID);
+            const learnerClasses = await this.learnerClassService.findMany({
+                classId: courseClass._id
+            });
+            if (learnerClasses.length > 0)
+                throw new app_exception_1.AppException(error_1.Errors.CANCEL_CLASS_REQUEST_CAN_NOT_BE_APPROVED);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.classRequestRepository.findOneAndUpdate({ _id: classRequestId }, {
+                        $set: {
+                            status: constant_1.ClassRequestStatus.APPROVED
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.APPROVED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
+                        }
+                    }, { session });
+                    await this.update({ _id: new mongoose_1.Types.ObjectId(courseClass._id) }, {
+                        $set: {
+                            status: constant_1.ClassStatus.CANCELED,
+                            cancelReason: classRequest.description
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassStatus.CANCELED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(courseClass.instructorId),
+                                userRole: constant_1.UserRole.INSTRUCTOR
+                            }
+                        }
+                    }, { new: true, session });
+                    const { startDate, duration, weekdays, gardenId } = courseClass;
+                    const startOfDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
+                    const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
+                    const searchDates = [];
+                    let currentDate = startOfDate.clone();
+                    while (currentDate.isSameOrBefore(endOfDate)) {
+                        for (let weekday of weekdays) {
+                            const searchDate = currentDate.clone().isoWeekday(weekday);
+                            if (searchDate.isSameOrAfter(startOfDate) && searchDate.isBefore(endOfDate)) {
+                                searchDates.push(searchDate.toDate());
+                            }
+                        }
+                        currentDate.add(1, 'week');
+                    }
+                    await this.gardenTimesheetService.updateMany({
+                        date: {
+                            $in: searchDates
+                        },
+                        status: constant_1.GardenTimesheetStatus.ACTIVE,
+                        gardenId: gardenId
+                    }, {
+                        $pull: {
+                            slots: { classId: new mongoose_1.Types.ObjectId(courseClass._id) }
+                        }
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
         return new dto_1.SuccessResponse(true);
     }
-    async rejectPublishClassRequest(classRequestId, rejectPublishClassRequestDto, userAuth) {
-        const { rejectReason } = rejectPublishClassRequestDto;
+    async rejectClassRequest(classRequestId, RejectClassRequestDto, userAuth) {
+        const { rejectReason } = RejectClassRequestDto;
         const { _id, role } = userAuth;
         const classRequest = await this.findById(classRequestId);
-        if (!classRequest || classRequest.type !== constant_1.ClassRequestType.PUBLISH_CLASS)
+        if (!classRequest)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
         if (classRequest.status !== constant_1.ClassRequestStatus.PENDING)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_STATUS_INVALID);
-        const course = await this.courseService.findById(classRequest.courseId?.toString());
-        if (!course)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
-        if (course.status === constant_1.CourseStatus.DELETED)
-            throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
-        const session = await this.connection.startSession();
-        try {
-            await session.withTransaction(async () => {
-                await this.update({ _id: classRequestId }, {
-                    $set: {
-                        status: constant_1.ClassRequestStatus.REJECTED,
-                        rejectReason
-                    },
-                    $push: {
-                        histories: {
+        if (classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS) {
+            const course = await this.courseService.findById(classRequest.courseId?.toString());
+            if (!course)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_NOT_FOUND);
+            if (course.status === constant_1.CourseStatus.DELETED)
+                throw new app_exception_1.AppException(error_1.Errors.COURSE_STATUS_INVALID);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.update({ _id: classRequestId }, {
+                        $set: {
                             status: constant_1.ClassRequestStatus.REJECTED,
-                            timestamp: new Date(),
-                            userId: new mongoose_1.Types.ObjectId(_id),
-                            userRole: role
+                            rejectReason
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.REJECTED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
                         }
-                    }
-                }, { session });
-                await this.courseService.update({ _id: classRequest.courseId }, {
-                    $set: {
-                        isRequesting: false
-                    }
-                }, { session });
-            });
+                    }, { session });
+                    await this.courseService.update({ _id: classRequest.courseId }, {
+                        $set: {
+                            isRequesting: false
+                        }
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
-        finally {
-            await session.endSession();
+        else if (classRequest.type === constant_1.ClassRequestType.CANCEL_CLASS) {
+            const courseClass = await this.classService.findById(classRequest.classId?.toString());
+            if (!courseClass)
+                throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
+            const session = await this.connection.startSession();
+            try {
+                await session.withTransaction(async () => {
+                    await this.update({ _id: classRequestId }, {
+                        $set: {
+                            status: constant_1.ClassRequestStatus.REJECTED,
+                            rejectReason
+                        },
+                        $push: {
+                            histories: {
+                                status: constant_1.ClassRequestStatus.REJECTED,
+                                timestamp: new Date(),
+                                userId: new mongoose_1.Types.ObjectId(_id),
+                                userRole: role
+                            }
+                        }
+                    }, { session });
+                });
+            }
+            finally {
+                await session.endSession();
+            }
         }
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
         return new dto_1.SuccessResponse(true);
@@ -365,6 +503,38 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 await this.courseService.update({ _id: classRequest.courseId }, {
                     $set: {
                         isRequesting: false
+                    }
+                }, { session });
+            });
+        }
+        finally {
+            await session.endSession();
+        }
+        return new dto_1.SuccessResponse(true);
+    }
+    async expireCancelClassRequest(classRequestId, userAuth) {
+        const { role } = userAuth;
+        const classRequest = await this.findById(classRequestId);
+        if (!classRequest || classRequest.type !== constant_1.ClassRequestType.CANCEL_CLASS)
+            throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
+        if (classRequest.status !== constant_1.ClassRequestStatus.PENDING)
+            throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_STATUS_INVALID);
+        const courseClass = await this.classService.findById(classRequest.classId?.toString());
+        if (!courseClass)
+            throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
+        const session = await this.connection.startSession();
+        try {
+            await session.withTransaction(async () => {
+                await this.update({ _id: classRequestId }, {
+                    $set: {
+                        status: constant_1.ClassRequestStatus.EXPIRED
+                    },
+                    $push: {
+                        histories: {
+                            status: constant_1.ClassRequestStatus.EXPIRED,
+                            timestamp: new Date(),
+                            userRole: role
+                        }
                     }
                 }, { session });
             });
@@ -443,6 +613,7 @@ exports.ClassRequestService = ClassRequestService = ClassRequestService_1 = __de
     __param(4, (0, mongoose_2.InjectConnection)()),
     __param(5, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
     __param(6, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService])
+    __param(7, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, helper_service_1.HelperService])
 ], ClassRequestService);
 //# sourceMappingURL=class-request.service.js.map

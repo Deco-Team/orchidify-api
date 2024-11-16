@@ -50,6 +50,8 @@ export class ClassRequestQueueConsumer extends WorkerHost {
 
       if (classRequest.type === ClassRequestType.PUBLISH_CLASS) {
         await this.classRequestService.expirePublishClassRequest(job.id, { role: 'SYSTEM' as UserRole })
+      } else if(classRequest.type === ClassRequestType.CANCEL_CLASS) {
+        await this.classRequestService.expireCancelClassRequest(job.id, { role: 'SYSTEM' as UserRole })
       }
 
       this.appLogger.log(`[updateStatusToExpired]: End update status... id=${job.id}`)

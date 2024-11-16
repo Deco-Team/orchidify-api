@@ -59,6 +59,9 @@ let ClassRequestQueueConsumer = ClassRequestQueueConsumer_1 = class ClassRequest
             if (classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS) {
                 await this.classRequestService.expirePublishClassRequest(job.id, { role: 'SYSTEM' });
             }
+            else if (classRequest.type === constant_1.ClassRequestType.CANCEL_CLASS) {
+                await this.classRequestService.expireCancelClassRequest(job.id, { role: 'SYSTEM' });
+            }
             this.appLogger.log(`[updateStatusToExpired]: End update status... id=${job.id}`);
             return true;
         }

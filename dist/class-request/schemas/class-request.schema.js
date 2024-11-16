@@ -106,4 +106,10 @@ exports.ClassRequest = ClassRequest = __decorate([
 ], ClassRequest);
 exports.ClassRequestSchema = mongoose_1.SchemaFactory.createForClass(ClassRequest);
 exports.ClassRequestSchema.plugin(paginate);
+exports.ClassRequestSchema.virtual('class', {
+    ref: 'Class',
+    localField: 'classId',
+    foreignField: '_id',
+    justOne: true
+});
 //# sourceMappingURL=class-request.schema.js.map

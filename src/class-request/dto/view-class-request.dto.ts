@@ -7,18 +7,11 @@ import { Transform } from 'class-transformer'
 import { CLASS_REQUEST_DETAIL_PROJECTION, CLASS_REQUEST_LIST_PROJECTION } from '@src/class-request/contracts/constant'
 import { Types } from 'mongoose'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
+import { BaseClassDto } from '@class/dto/base.class.dto'
 
 export class QueryClassRequestDto {
-  // @ApiPropertyOptional({
-  //   description: 'Title to search'
-  // })
-  // @IsOptional()
-  // @IsString()
-  // @MaxLength(50)
-  // title: string
-
   @ApiPropertyOptional({
-    enum: [ClassRequestType.PUBLISH_CLASS],
+    enum: [ClassRequestType.PUBLISH_CLASS, ClassRequestType.CANCEL_CLASS],
     isArray: true
   })
   @IsOptional()
@@ -47,7 +40,10 @@ class InstructorViewClassRequestListItemResponse extends PickType(BaseClassReque
 class InstructorViewClassRequestListResponse extends PaginateResponse(InstructorViewClassRequestListItemResponse) {}
 export class InstructorViewClassRequestListDataResponse extends DataResponse(InstructorViewClassRequestListResponse) {}
 
-class InstructorViewClassRequestDetailResponse extends PickType(BaseClassRequestDto, CLASS_REQUEST_DETAIL_PROJECTION) {}
+class InstructorViewClassRequestDetailResponse extends PickType(BaseClassRequestDto, CLASS_REQUEST_DETAIL_PROJECTION) {
+  @ApiPropertyOptional({ type: BaseClassDto })
+  class: BaseClassDto
+}
 export class InstructorViewClassRequestDetailDataResponse extends DataResponse(
   InstructorViewClassRequestDetailResponse
 ) {}
@@ -65,5 +61,8 @@ export class StaffViewClassRequestListDataResponse extends DataResponse(StaffVie
 class StaffViewClassRequestDetailResponse extends InstructorViewClassRequestDetailResponse {
   @ApiProperty({ type: ClassRequestCreatedByDto })
   createdBy: Types.ObjectId | BaseInstructorDto
+
+  @ApiPropertyOptional({ type: BaseClassDto })
+  class: BaseClassDto
 }
 export class StaffViewClassRequestDetailDataResponse extends DataResponse(StaffViewClassRequestDetailResponse) {}

@@ -19,7 +19,7 @@ import {
 } from '@recruitment/dto/view-recruitment.dto'
 import { RECRUITMENT_DETAIL_PROJECTION } from '@recruitment/contracts/constant'
 import { ProcessRecruitmentApplicationDto } from '@recruitment/dto/process-recruitment-application.dto'
-import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto'
+import { RejectClassRequestDto } from '@class-request/dto/reject-class-request.dto'
 import { RejectRecruitmentProcessDto } from '@recruitment/dto/reject-recruitment-process.dto'
 
 @ApiTags('Recruitment - Management')
