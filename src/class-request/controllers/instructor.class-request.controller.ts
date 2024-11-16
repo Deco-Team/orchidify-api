@@ -10,14 +10,9 @@ import {
 } from '@nestjs/swagger'
 import * as _ from 'lodash'
 
-import {
-  ErrorResponse,
-  IDDataResponse,
-  IDResponse,
-  PaginationQuery,
-  SuccessDataResponse} from '@common/contracts/dto'
+import { ErrorResponse, IDDataResponse, IDResponse, PaginationQuery, SuccessDataResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { ClassRequestStatus, ClassRequestType, CourseStatus, UserRole } from '@common/contracts/constant'
+import { ClassRequestStatus, ClassRequestType, ClassStatus, CourseStatus, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { AppException } from '@common/exceptions/app.exception'
@@ -38,6 +33,9 @@ import { IGardenTimesheetService } from '@garden-timesheet/services/garden-times
 import { HelperService } from '@common/services/helper.service'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto'
+import { IClassService } from '@class/services/class.service'
+import { ILearnerClassService } from '@class/services/learner-class.service'
 
 @ApiTags('ClassRequest - Instructor')
 @ApiBearerAuth()
@@ -51,8 +49,12 @@ export class InstructorClassRequestController {
     private readonly classRequestService: IClassRequestService,
     @Inject(ICourseService)
     private readonly courseService: ICourseService,
+    @Inject(IClassService)
+    private readonly classService: IClassService,
     @Inject(IGardenTimesheetService)
     private readonly gardenTimesheetService: IGardenTimesheetService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService,
     @Inject(ISettingService)
     private readonly settingService: ISettingService,
     private readonly helperService: HelperService
@@ -82,7 +84,17 @@ export class InstructorClassRequestController {
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Req() req, @Param('id') classRequestId: string) {
     const { _id } = _.get(req, 'user')
-    const classRequest = await this.classRequestService.findById(classRequestId, CLASS_REQUEST_DETAIL_PROJECTION)
+    const classRequest = await this.classRequestService.findById(classRequestId, CLASS_REQUEST_DETAIL_PROJECTION, [
+      {
+        path: 'class',
+        populate: [
+          {
+            path: 'course',
+            select: ['code']
+          }
+        ]
+      }
+    ])
 
     if (!classRequest || classRequest.createdBy?.toString() !== _id)
       throw new AppException(Errors.CLASS_REQUEST_NOT_FOUND)
@@ -121,7 +133,8 @@ export class InstructorClassRequestController {
     // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
     const pendingClassRequests = await this.classRequestService.findMany({
       courseId: course._id,
-      status: ClassRequestStatus.PENDING
+      status: ClassRequestStatus.PENDING,
+      type: ClassRequestType.PUBLISH_CLASS
     })
     if (pendingClassRequests.length > 0) throw new AppException(Errors.COURSE_CAN_NOT_CREATE_REQUEST_TO_PUBLISH_CLASS)
 
@@ -162,18 +175,93 @@ export class InstructorClassRequestController {
   }
 
   @ApiOperation({
-    summary: `Cancel Publish Class Request`
+    summary: `Create CLass Class Request`
+  })
+  @ApiCreatedResponse({ type: IDDataResponse })
+  @ApiErrorResponse([
+    Errors.CLASS_NOT_FOUND,
+    Errors.CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS,
+    Errors.CREATE_CLASS_REQUEST_LIMIT,
+    Errors.CLASS_STATUS_INVALID
+  ])
+  @Post('cancel-class')
+  async createCancelClassRequest(@Req() req, @Body() createCancelClassRequestDto: CreateCancelClassRequestDto) {
+    const { _id, role } = _.get(req, 'user')
+    const { classId, description } = createCancelClassRequestDto
+
+    // BR-39: Instructors can only create 10 class requests per day.
+    const createClassRequestLimit =
+      Number((await this.settingService.findByKey(SettingKey.CreateClassRequestLimitPerDay)).value) || 10
+    const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date())
+    if (classRequestsCount > createClassRequestLimit) throw new AppException(Errors.CREATE_CLASS_REQUEST_LIMIT)
+
+    const courseClass = await this.classService.findById(
+      classId.toString(),
+      ['-sessions', '-histories'],
+      [
+        {
+          path: 'course',
+          select: ['_id', 'code']
+        }
+      ]
+    )
+    if (!courseClass || courseClass.instructorId.toString() !== _id) throw new AppException(Errors.CLASS_NOT_FOUND)
+    if (courseClass.status !== ClassStatus.PUBLISHED) throw new AppException(Errors.CLASS_STATUS_INVALID)
+
+    // BR-40: When a request for a class has been made, if that request has not been approved by staff, a new request for that class cannot be created.
+    const pendingClassRequests = await this.classRequestService.findMany({
+      classId: new Types.ObjectId(classId),
+      status: ClassRequestStatus.PENDING,
+      type: ClassRequestType.CANCEL_CLASS
+    })
+    if (pendingClassRequests.length > 0) throw new AppException(Errors.CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS)
+
+    // BR-41: A cancel-class request can only be created if the class has no learners enrolled.
+    const learnerClasses = await this.learnerClassService.findMany({
+      classId: new Types.ObjectId(classId)
+    })
+    if (learnerClasses.length > 0) throw new AppException(Errors.CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS)
+
+    createCancelClassRequestDto['status'] = ClassRequestStatus.PENDING
+    createCancelClassRequestDto['histories'] = [
+      {
+        status: ClassRequestStatus.PENDING,
+        timestamp: new Date(),
+        userId: new Types.ObjectId(_id),
+        userRole: role
+      }
+    ]
+    createCancelClassRequestDto['createdBy'] = new Types.ObjectId(_id)
+    createCancelClassRequestDto['classId'] = new Types.ObjectId(classId)
+    createCancelClassRequestDto['courseId'] = new Types.ObjectId(_.get(courseClass, 'course._id'))
+    createCancelClassRequestDto['type'] = ClassRequestType.CANCEL_CLASS
+    createCancelClassRequestDto['metadata'] = {
+      code: _.get(courseClass, 'code'),
+      course: {
+        code: _.get(courseClass, 'course.code')
+      }
+    }
+
+    // Create class request with status PENDING
+    const classRequest = await this.classRequestService.createCancelClassRequest(createCancelClassRequestDto)
+
+    return new IDResponse(classRequest._id)
+  }
+
+  @ApiOperation({
+    summary: `Cancel Publish/Cancel Class Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([
     Errors.CLASS_REQUEST_NOT_FOUND,
     Errors.CLASS_REQUEST_STATUS_INVALID,
     Errors.COURSE_NOT_FOUND,
+    Errors.CLASS_NOT_FOUND,
     Errors.COURSE_STATUS_INVALID
   ])
   @Patch(':id([0-9a-f]{24})/cancel')
   async cancel(@Req() req, @Param('id') classRequestId: string) {
     const user = _.get(req, 'user')
-    return this.classRequestService.cancelPublishClassRequest(classRequestId, user)
+    return this.classRequestService.cancelClassRequest(classRequestId, user)
   }
 }

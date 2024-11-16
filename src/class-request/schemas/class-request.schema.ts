@@ -79,3 +79,9 @@ export class ClassRequest {
 export const ClassRequestSchema = SchemaFactory.createForClass(ClassRequest)
 ClassRequestSchema.plugin(paginate)
 // ClassRequestSchema.index({ createdBy: 1 })
+ClassRequestSchema.virtual('class', {
+  ref: 'Class',
+  localField: 'classId',
+  foreignField: '_id',
+  justOne: true
+})

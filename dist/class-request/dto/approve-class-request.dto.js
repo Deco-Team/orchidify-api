@@ -9,16 +9,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RejectPublishClassRequestDto = void 0;
+exports.ApproveClassRequestDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class RejectPublishClassRequestDto {
+class ApproveClassRequestDto {
 }
-exports.RejectPublishClassRequestDto = RejectPublishClassRequestDto;
+exports.ApproveClassRequestDto = ApproveClassRequestDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: String, example: 'Class Request Reject Reason' }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500),
+    (0, swagger_1.ApiPropertyOptional)({ type: String, description: 'required if publish class request' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
-], RejectPublishClassRequestDto.prototype, "rejectReason", void 0);
-//# sourceMappingURL=reject-publish-class-request.dto.js.map
+], ApproveClassRequestDto.prototype, "gardenId", void 0);
+//# sourceMappingURL=approve-class-request.dto.js.map

@@ -108,7 +108,8 @@ export enum TransactionStatus {
 }
 
 export enum ClassRequestType {
-  PUBLISH_CLASS = 'PUBLISH_CLASS'
+  PUBLISH_CLASS = 'PUBLISH_CLASS',
+  CANCEL_CLASS = 'CANCEL_CLASS'
 }
 
 export enum Weekday {

@@ -273,6 +273,11 @@ export const Errors = {
     message: 'Bạn chưa đăng ký lớp học này.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS: {
+    error: 'CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS',
+    message: 'Không thể tạo yêu cầu hủy lớp học này.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Session
@@ -385,6 +390,11 @@ export const Errors = {
   GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST: {
     error: 'GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST',
     message: 'Vườn đã chọn không phù hợp với yêu cầu khóa học.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
+  CANCEL_CLASS_REQUEST_CAN_NOT_BE_APPROVED: {
+    error: 'CANCEL_CLASS_REQUEST_CAN_NOT_BE_APPROVED',
+    message: 'Không thể duyệt yêu cầu hủy lớp này. Lớp học đã có học viên đăng ký.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
 

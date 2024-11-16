@@ -27,8 +27,8 @@
 import { IClassRequestService } from '@class-request/services/class-request.service';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { QueryClassRequestDto } from '@class-request/dto/view-class-request.dto';
-import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto';
-import { ApprovePublishClassRequestDto } from '@class-request/dto/approve-publish-class-request.dto';
+import { RejectClassRequestDto } from '@class-request/dto/reject-class-request.dto';
+import { ApproveClassRequestDto } from '@class-request/dto/approve-class-request.dto';
 export declare class ManagementClassRequestController {
     private readonly classRequestService;
     constructor(classRequestService: IClassRequestService);
@@ -36,6 +36,6 @@ export declare class ManagementClassRequestController {
     getDetail(classRequestId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/class-request.schema").ClassRequest> & import("../schemas/class-request.schema").ClassRequest & Required<{
         _id: string;
     }>>;
-    approve(req: any, classRequestId: string, approvePublishClassRequestDto: ApprovePublishClassRequestDto): Promise<import("@common/contracts/dto").SuccessResponse>;
-    reject(req: any, classRequestId: string, rejectPublishClassRequestDto: RejectPublishClassRequestDto): Promise<import("@common/contracts/dto").SuccessResponse>;
+    approve(req: any, classRequestId: string, approveClassRequestDto: ApproveClassRequestDto): Promise<import("@common/contracts/dto").SuccessResponse>;
+    reject(req: any, classRequestId: string, RejectClassRequestDto: RejectClassRequestDto): Promise<import("@common/contracts/dto").SuccessResponse>;
 }

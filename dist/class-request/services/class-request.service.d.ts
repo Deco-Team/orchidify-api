@@ -32,17 +32,20 @@ import { ClassRequestStatus } from '@common/contracts/constant';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { QueryClassRequestDto } from '@src/class-request/dto/view-class-request.dto';
 import { SuccessResponse, UserAuth } from '@common/contracts/dto';
-import { ApprovePublishClassRequestDto } from '@class-request/dto/approve-publish-class-request.dto';
-import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto';
+import { ApproveClassRequestDto } from '@class-request/dto/approve-class-request.dto';
+import { RejectClassRequestDto } from '@class-request/dto/reject-class-request.dto';
 import { ICourseService } from '@course/services/course.service';
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service';
 import { IClassService } from '@class/services/class.service';
 import { IQueueProducerService } from '@queue/services/queue-producer.service';
 import { ISettingService } from '@setting/services/setting.service';
 import { HelperService } from '@common/services/helper.service';
+import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto';
+import { ILearnerClassService } from '@class/services/learner-class.service';
 export declare const IClassRequestService: unique symbol;
 export interface IClassRequestService {
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<ClassRequestDocument>;
+    createCancelClassRequest(createCancelClassRequestDto: CreateCancelClassRequestDto, options?: SaveOptions | undefined): Promise<ClassRequestDocument>;
     findById(classRequestId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ClassRequestDocument>;
     update(conditions: FilterQuery<ClassRequest>, payload: UpdateQuery<ClassRequest>, options?: QueryOptions | undefined): Promise<ClassRequestDocument>;
     list(pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto, projection?: Record<string, any>, populates?: Array<PopulateOptions>): any;
@@ -50,10 +53,11 @@ export interface IClassRequestService {
     findManyByStatus(status: ClassRequestStatus[]): Promise<ClassRequestDocument[]>;
     findManyByCreatedByAndStatus(createdBy: string, status?: ClassRequestStatus[]): Promise<ClassRequestDocument[]>;
     countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>;
-    cancelPublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    cancelClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
-    approvePublishClassRequest(classRequestId: string, approvePublishClassRequestDto: ApprovePublishClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
-    rejectPublishClassRequest(classRequestId: string, rejectPublishClassRequestDto: RejectPublishClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    expireCancelClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    approveClassRequest(classRequestId: string, ApproveClassRequestDto: ApproveClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    rejectClassRequest(classRequestId: string, RejectClassRequestDto: RejectClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
 }
 export declare class ClassRequestService implements IClassRequestService {
     private readonly classRequestRepository;
@@ -63,10 +67,14 @@ export declare class ClassRequestService implements IClassRequestService {
     readonly connection: Connection;
     private readonly queueProducerService;
     private readonly settingService;
+    private readonly learnerClassService;
     private readonly helperService;
     private readonly appLogger;
-    constructor(classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, helperService: HelperService);
+    constructor(classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, helperService: HelperService);
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
+        _id: string;
+    }>>;
+    createCancelClassRequest(createCancelClassRequestDto: CreateCancelClassRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
         _id: string;
     }>>;
     findById(classRequestId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
@@ -88,10 +96,11 @@ export declare class ClassRequestService implements IClassRequestService {
     findManyByStatus(status: ClassRequestStatus[]): Promise<ClassRequestDocument[]>;
     findManyByCreatedByAndStatus(createdBy: string, status?: ClassRequestStatus[]): Promise<ClassRequestDocument[]>;
     countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>;
-    cancelPublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
-    approvePublishClassRequest(classRequestId: string, approvePublishClassRequestDto: ApprovePublishClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
-    rejectPublishClassRequest(classRequestId: string, rejectPublishClassRequestDto: RejectPublishClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    cancelClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    approveClassRequest(classRequestId: string, approveClassRequestDto: ApproveClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    rejectClassRequest(classRequestId: string, RejectClassRequestDto: RejectClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
     expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    expireCancelClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     getExpiredAt(date: Date): Promise<Date>;
     addClassRequestAutoExpiredJob(classRequest: ClassRequest): Promise<void>;
     private generateDeadlineClassAssignment;

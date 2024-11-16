@@ -113,6 +113,7 @@ var TransactionStatus;
 var ClassRequestType;
 (function (ClassRequestType) {
     ClassRequestType["PUBLISH_CLASS"] = "PUBLISH_CLASS";
+    ClassRequestType["CANCEL_CLASS"] = "CANCEL_CLASS";
 })(ClassRequestType || (exports.ClassRequestType = ClassRequestType = {}));
 var Weekday;
 (function (Weekday) {

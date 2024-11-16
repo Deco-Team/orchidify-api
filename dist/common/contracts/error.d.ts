@@ -230,6 +230,11 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    CLASS_CAN_NOT_CREATE_REQUEST_TO_CANCEL_CLASS: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     SESSION_NOT_FOUND: {
         error: string;
         message: string;
@@ -316,6 +321,11 @@ export declare const Errors: {
         httpStatus: HttpStatus;
     };
     GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
+    CANCEL_CLASS_REQUEST_CAN_NOT_BE_APPROVED: {
         error: string;
         message: string;
         httpStatus: HttpStatus;

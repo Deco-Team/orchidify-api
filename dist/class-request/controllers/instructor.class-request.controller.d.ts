@@ -33,17 +33,23 @@ import { ICourseService } from '@course/services/course.service';
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service';
 import { HelperService } from '@common/services/helper.service';
 import { ISettingService } from '@setting/services/setting.service';
+import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto';
+import { IClassService } from '@class/services/class.service';
+import { ILearnerClassService } from '@class/services/learner-class.service';
 export declare class InstructorClassRequestController {
     private readonly classRequestService;
     private readonly courseService;
+    private readonly classService;
     private readonly gardenTimesheetService;
+    private readonly learnerClassService;
     private readonly settingService;
     private readonly helperService;
-    constructor(classRequestService: IClassRequestService, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, helperService: HelperService);
+    constructor(classRequestService: IClassRequestService, courseService: ICourseService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, learnerClassService: ILearnerClassService, settingService: ISettingService, helperService: HelperService);
     list(req: any, pagination: PaginationParams, queryClassRequestDto: QueryClassRequestDto): Promise<any>;
     getDetail(req: any, classRequestId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/class-request.schema").ClassRequest> & import("../schemas/class-request.schema").ClassRequest & Required<{
         _id: string;
     }>>;
     createPublishClassRequest(req: any, createPublishClassRequestDto: CreatePublishClassRequestDto): Promise<IDResponse>;
+    createCancelClassRequest(req: any, createCancelClassRequestDto: CreateCancelClassRequestDto): Promise<IDResponse>;
     cancel(req: any, classRequestId: string): Promise<import("@common/contracts/dto").SuccessResponse>;
 }

@@ -91,7 +91,8 @@ export declare enum TransactionStatus {
     REFUNDED = "REFUNDED"
 }
 export declare enum ClassRequestType {
-    PUBLISH_CLASS = "PUBLISH_CLASS"
+    PUBLISH_CLASS = "PUBLISH_CLASS",
+    CANCEL_CLASS = "CANCEL_CLASS"
 }
 export declare enum Weekday {
     MONDAY = "Monday",

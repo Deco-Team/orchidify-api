@@ -27,6 +27,7 @@ import { BaseClassRequestDto } from './base.class-request.dto';
 import { ClassRequestStatus, ClassRequestType } from '@common/contracts/constant';
 import { Types } from 'mongoose';
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto';
+import { BaseClassDto } from '@class/dto/base.class.dto';
 export declare class QueryClassRequestDto {
     type: ClassRequestType[];
     status: ClassRequestStatus[];
@@ -57,6 +58,7 @@ export declare class InstructorViewClassRequestListDataResponse extends Instruct
 }
 declare const InstructorViewClassRequestDetailResponse_base: import("@nestjs/common").Type<Pick<BaseClassRequestDto, "metadata" | "status" | "type" | "createdAt" | "description" | "updatedAt" | "_id" | "histories" | "rejectReason" | "courseId" | "classId" | "createdBy">>;
 declare class InstructorViewClassRequestDetailResponse extends InstructorViewClassRequestDetailResponse_base {
+    class: BaseClassDto;
 }
 declare const InstructorViewClassRequestDetailDataResponse_base: import("@nestjs/common").Type<{
     data: typeof InstructorViewClassRequestDetailResponse;
@@ -89,6 +91,7 @@ export declare class StaffViewClassRequestListDataResponse extends StaffViewClas
 }
 declare class StaffViewClassRequestDetailResponse extends InstructorViewClassRequestDetailResponse {
     createdBy: Types.ObjectId | BaseInstructorDto;
+    class: BaseClassDto;
 }
 declare const StaffViewClassRequestDetailDataResponse_base: import("@nestjs/common").Type<{
     data: typeof StaffViewClassRequestDetailResponse;

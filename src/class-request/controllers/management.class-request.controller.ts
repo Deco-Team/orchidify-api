@@ -17,10 +17,9 @@ import {
   StaffViewClassRequestDetailDataResponse,
   StaffViewClassRequestListDataResponse
 } from '@class-request/dto/view-class-request.dto'
-import { CLASS_REQUEST_DETAIL_PROJECTION } from '@class-request/contracts/constant'
-import { RejectPublishClassRequestDto } from '@class-request/dto/reject-publish-class-request.dto'
-import { ApprovePublishClassRequestDto } from '@class-request/dto/approve-publish-class-request.dto'
-import { CLASS_LIST_PROJECTION } from '@class/contracts/constant'
+import { CLASS_REQUEST_DETAIL_PROJECTION, CLASS_REQUEST_LIST_PROJECTION } from '@class-request/contracts/constant'
+import { RejectClassRequestDto } from '@class-request/dto/reject-class-request.dto'
+import { ApproveClassRequestDto } from '@class-request/dto/approve-class-request.dto'
 
 @ApiTags('ClassRequest - Management')
 @ApiBearerAuth()
@@ -41,7 +40,7 @@ export class ManagementClassRequestController {
   @Roles(UserRole.STAFF)
   @Get()
   async list(@Pagination() pagination: PaginationParams, @Query() queryClassRequestDto: QueryClassRequestDto) {
-    return await this.classRequestService.list(pagination, queryClassRequestDto, CLASS_LIST_PROJECTION, [
+    return await this.classRequestService.list(pagination, queryClassRequestDto, CLASS_REQUEST_LIST_PROJECTION, [
       {
         path: 'createdBy',
         select: ['_id', 'name', 'email', 'idCardPhoto', 'avatar']
@@ -61,6 +60,15 @@ export class ManagementClassRequestController {
       {
         path: 'createdBy',
         select: ['_id', 'name', 'phone', 'email', 'idCardPhoto', 'avatar']
+      },
+      {
+        path: 'class',
+        populate: [
+          {
+            path: 'course',
+            select: ['code']
+          }
+        ]
       }
     ])
 
@@ -69,7 +77,7 @@ export class ManagementClassRequestController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] Approve Publish Class Request`
+    summary: `[${UserRole.STAFF}] Approve Publish/Cancel Class Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([
@@ -77,37 +85,36 @@ export class ManagementClassRequestController {
     Errors.CLASS_REQUEST_STATUS_INVALID,
     Errors.COURSE_NOT_FOUND,
     Errors.COURSE_STATUS_INVALID,
-    Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST
+    Errors.CLASS_STATUS_INVALID,
+    Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST,
+    Errors.CANCEL_CLASS_REQUEST_CAN_NOT_BE_APPROVED
   ])
   @Roles(UserRole.STAFF)
   @Patch(':id([0-9a-f]{24})/approve')
   async approve(
     @Req() req,
     @Param('id') classRequestId: string,
-    @Body() approvePublishClassRequestDto: ApprovePublishClassRequestDto
+    @Body() approveClassRequestDto: ApproveClassRequestDto
   ) {
     const user = _.get(req, 'user')
-    return this.classRequestService.approvePublishClassRequest(classRequestId, approvePublishClassRequestDto, user)
+    return this.classRequestService.approveClassRequest(classRequestId, approveClassRequestDto, user)
   }
 
   @ApiOperation({
-    summary: `[${UserRole.STAFF}] Reject Publish Class Request`
+    summary: `[${UserRole.STAFF}] Reject Class Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([
     Errors.CLASS_REQUEST_NOT_FOUND,
     Errors.CLASS_REQUEST_STATUS_INVALID,
     Errors.COURSE_NOT_FOUND,
-    Errors.COURSE_STATUS_INVALID
+    Errors.COURSE_STATUS_INVALID,
+    Errors.CLASS_NOT_FOUND
   ])
   @Roles(UserRole.STAFF)
   @Patch(':id([0-9a-f]{24})/reject')
-  async reject(
-    @Req() req,
-    @Param('id') classRequestId: string,
-    @Body() rejectPublishClassRequestDto: RejectPublishClassRequestDto
-  ) {
+  async reject(@Req() req, @Param('id') classRequestId: string, @Body() RejectClassRequestDto: RejectClassRequestDto) {
     const user = _.get(req, 'user')
-    return this.classRequestService.rejectPublishClassRequest(classRequestId, rejectPublishClassRequestDto, user)
+    return this.classRequestService.rejectClassRequest(classRequestId, RejectClassRequestDto, user)
   }
 }
