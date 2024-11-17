@@ -14,8 +14,8 @@ import { HelperService } from '@common/services/helper.service';
 import { IOtpService } from './otp.service';
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto';
 import { IRecruitmentService } from '@recruitment/services/recruitment.service';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
 import { ISettingService } from '@setting/services/setting.service';
+import { INotificationService } from '@notification/services/notification.service';
 export interface IAuthUserService {
     findByEmail(email: string, projection?: string | Record<string, any>): any;
     findById(id: string): Promise<any>;
@@ -42,8 +42,8 @@ export declare class AuthService implements IAuthService {
     private readonly jwtService;
     private readonly helperService;
     private readonly configService;
-    private readonly notificationAdapter;
-    constructor(learnerService: ILearnerService, instructorService: IInstructorService, staffService: IStaffService, gardenManagerService: IGardenManagerService, userTokenService: IUserTokenService, otpService: IOtpService, recruitmentService: IRecruitmentService, settingService: ISettingService, jwtService: JwtService, helperService: HelperService, configService: ConfigService, notificationAdapter: NotificationAdapter);
+    private readonly notificationService;
+    constructor(learnerService: ILearnerService, instructorService: IInstructorService, staffService: IStaffService, gardenManagerService: IGardenManagerService, userTokenService: IUserTokenService, otpService: IOtpService, recruitmentService: IRecruitmentService, settingService: ISettingService, jwtService: JwtService, helperService: HelperService, configService: ConfigService, notificationService: INotificationService);
     private readonly authUserServiceMap;
     login(loginDto: LoginDto, role: UserRole): Promise<TokenResponse>;
     logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>;

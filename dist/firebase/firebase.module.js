@@ -17,6 +17,7 @@ const firebase_auth_service_1 = require("./services/firebase.auth.service");
 const learner_module_1 = require("../learner/learner.module");
 const instructor_module_1 = require("../instructor/instructor.module");
 const firebase_messaging_service_1 = require("./services/firebase.messaging.service");
+const firebase_firestore_service_1 = require("./services/firebase.firestore.service");
 const firebaseProvider = {
     provide: 'FIREBASE_APP',
     inject: [setting_service_1.ISettingService],
@@ -49,7 +50,11 @@ exports.FirebaseModule = FirebaseModule = __decorate([
             {
                 provide: firebase_messaging_service_1.IFirebaseMessagingService,
                 useClass: firebase_messaging_service_1.FirebaseMessagingService
-            }
+            },
+            {
+                provide: firebase_firestore_service_1.IFirebaseFirestoreService,
+                useClass: firebase_firestore_service_1.FirebaseFirestoreService
+            },
         ],
         exports: [
             {
@@ -59,7 +64,11 @@ exports.FirebaseModule = FirebaseModule = __decorate([
             {
                 provide: firebase_messaging_service_1.IFirebaseMessagingService,
                 useClass: firebase_messaging_service_1.FirebaseMessagingService
-            }
+            },
+            {
+                provide: firebase_firestore_service_1.IFirebaseFirestoreService,
+                useClass: firebase_firestore_service_1.FirebaseFirestoreService
+            },
         ]
     })
 ], FirebaseModule);

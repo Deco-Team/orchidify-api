@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SendFirebaseTopicMessagingDto = exports.SendFirebaseMulticastMessagingDto = exports.SendFirebaseMessagingDto = void 0;
+exports.SubscribeFirebaseTopicDto = exports.SendFirebaseTopicMessagingDto = exports.SendFirebaseMulticastMessagingDto = exports.SendFirebaseMessagingDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class SendFirebaseMessagingDto {
 }
@@ -27,9 +27,9 @@ __decorate([
     __metadata("design:type", String)
 ], SendFirebaseMessagingDto.prototype, "body", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: String }),
-    __metadata("design:type", String)
-], SendFirebaseMessagingDto.prototype, "icon", void 0);
+    (0, swagger_1.ApiPropertyOptional)({ type: Object }),
+    __metadata("design:type", Object)
+], SendFirebaseMessagingDto.prototype, "data", void 0);
 class SendFirebaseMulticastMessagingDto {
 }
 exports.SendFirebaseMulticastMessagingDto = SendFirebaseMulticastMessagingDto;
@@ -46,9 +46,9 @@ __decorate([
     __metadata("design:type", String)
 ], SendFirebaseMulticastMessagingDto.prototype, "body", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: String }),
-    __metadata("design:type", String)
-], SendFirebaseMulticastMessagingDto.prototype, "icon", void 0);
+    (0, swagger_1.ApiPropertyOptional)({ type: Object }),
+    __metadata("design:type", Object)
+], SendFirebaseMulticastMessagingDto.prototype, "data", void 0);
 class SendFirebaseTopicMessagingDto {
 }
 exports.SendFirebaseTopicMessagingDto = SendFirebaseTopicMessagingDto;
@@ -65,7 +65,18 @@ __decorate([
     __metadata("design:type", String)
 ], SendFirebaseTopicMessagingDto.prototype, "body", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: Object }),
+    __metadata("design:type", Object)
+], SendFirebaseTopicMessagingDto.prototype, "data", void 0);
+class SubscribeFirebaseTopicDto {
+}
+exports.SubscribeFirebaseTopicDto = SubscribeFirebaseTopicDto;
+__decorate([
     (0, swagger_1.ApiProperty)({ type: String }),
     __metadata("design:type", String)
-], SendFirebaseTopicMessagingDto.prototype, "icon", void 0);
+], SubscribeFirebaseTopicDto.prototype, "topic", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, isArray: true }),
+    __metadata("design:type", Array)
+], SubscribeFirebaseTopicDto.prototype, "tokens", void 0);
 //# sourceMappingURL=firebase-messaging.dto.js.map

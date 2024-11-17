@@ -37,9 +37,12 @@ const setting_service_1 = require("../../setting/services/setting.service");
 const constant_4 = require("../../setting/contracts/constant");
 const helper_service_1 = require("../../common/services/helper.service");
 const learner_class_service_1 = require("../../class/services/learner-class.service");
+const notification_service_1 = require("../../notification/services/notification.service");
+const constant_5 = require("../../notification/contracts/constant");
 exports.IClassRequestService = Symbol('IClassRequestService');
 let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
-    constructor(classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, helperService) {
+    constructor(helperService, classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, notificationService) {
+        this.helperService = helperService;
         this.classRequestRepository = classRequestRepository;
         this.courseService = courseService;
         this.gardenTimesheetService = gardenTimesheetService;
@@ -48,7 +51,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.queueProducerService = queueProducerService;
         this.settingService = settingService;
         this.learnerClassService = learnerClassService;
-        this.helperService = helperService;
+        this.notificationService = notificationService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassRequestService_1.name);
     }
     async createPublishClassRequest(createPublishClassRequestDto, options) {
@@ -398,6 +401,17 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 await session.endSession();
             }
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu lớp học của bạn đã được duyệt',
+            body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
+                ? 'Lớp học đã được mở. Bấm để xem chi tiết.'
+                : 'Lớp học đã hủy. Bấm để xem chi tiết',
+            receiverIds: [_id],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
+                id: classRequestId
+            }
+        });
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
         return new dto_1.SuccessResponse(true);
     }
@@ -470,11 +484,22 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 await session.endSession();
             }
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu lớp học của bạn đã bị từ chối',
+            body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
+                ? 'Yêu cầu mở lớp chưa phù hợp. Bấm để xem chi tiết.'
+                : 'Yêu cầu hủy lớp chưa phù hợp. Bấm để xem chi tiết',
+            receiverIds: [_id],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
+                id: classRequestId
+            }
+        });
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
         return new dto_1.SuccessResponse(true);
     }
     async expirePublishClassRequest(classRequestId, userAuth) {
-        const { role } = userAuth;
+        const { _id, role } = userAuth;
         const classRequest = await this.findById(classRequestId);
         if (!classRequest || classRequest.type !== constant_1.ClassRequestType.PUBLISH_CLASS)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
@@ -510,10 +535,19 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu lớp học của bạn đã hết hạn',
+            body: 'Yêu cầu mở lớp đã hết hạn. Bấm để xem chi tiết.',
+            receiverIds: [_id],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
+                id: classRequestId
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async expireCancelClassRequest(classRequestId, userAuth) {
-        const { role } = userAuth;
+        const { _id, role } = userAuth;
         const classRequest = await this.findById(classRequestId);
         if (!classRequest || classRequest.type !== constant_1.ClassRequestType.CANCEL_CLASS)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_REQUEST_NOT_FOUND);
@@ -542,6 +576,15 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu lớp học của bạn đã hết hạn',
+            body: 'Yêu cầu hủy lớp đã hết hạn. Bấm để xem chi tiết.',
+            receiverIds: [_id],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
+                id: classRequestId
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async getExpiredAt(date) {
@@ -606,14 +649,15 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
 exports.ClassRequestService = ClassRequestService;
 exports.ClassRequestService = ClassRequestService = ClassRequestService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(class_request_repository_1.IClassRequestRepository)),
-    __param(1, (0, common_1.Inject)(course_service_1.ICourseService)),
-    __param(2, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
-    __param(3, (0, common_1.Inject)(class_service_1.IClassService)),
-    __param(4, (0, mongoose_2.InjectConnection)()),
-    __param(5, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
-    __param(6, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __param(7, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, helper_service_1.HelperService])
+    __param(1, (0, common_1.Inject)(class_request_repository_1.IClassRequestRepository)),
+    __param(2, (0, common_1.Inject)(course_service_1.ICourseService)),
+    __param(3, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
+    __param(4, (0, common_1.Inject)(class_service_1.IClassService)),
+    __param(5, (0, mongoose_2.InjectConnection)()),
+    __param(6, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
+    __param(7, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(8, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, Object])
 ], ClassRequestService);
 //# sourceMappingURL=class-request.service.js.map

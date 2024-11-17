@@ -42,6 +42,7 @@ import { ISettingService } from '@setting/services/setting.service';
 import { HelperService } from '@common/services/helper.service';
 import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto';
 import { ILearnerClassService } from '@class/services/learner-class.service';
+import { INotificationService } from '@notification/services/notification.service';
 export declare const IClassRequestService: unique symbol;
 export interface IClassRequestService {
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<ClassRequestDocument>;
@@ -60,6 +61,7 @@ export interface IClassRequestService {
     rejectClassRequest(classRequestId: string, RejectClassRequestDto: RejectClassRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
 }
 export declare class ClassRequestService implements IClassRequestService {
+    private readonly helperService;
     private readonly classRequestRepository;
     private readonly courseService;
     private readonly gardenTimesheetService;
@@ -68,9 +70,9 @@ export declare class ClassRequestService implements IClassRequestService {
     private readonly queueProducerService;
     private readonly settingService;
     private readonly learnerClassService;
-    private readonly helperService;
+    private readonly notificationService;
     private readonly appLogger;
-    constructor(classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, helperService: HelperService);
+    constructor(helperService: HelperService, classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, notificationService: INotificationService);
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
         _id: string;
     }>>;

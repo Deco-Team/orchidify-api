@@ -28,9 +28,9 @@ import { IOtpService } from './otp.service'
 import { Types } from 'mongoose'
 import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { INotificationService } from '@notification/services/notification.service'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -73,7 +73,8 @@ export class AuthService implements IAuthService {
     private readonly jwtService: JwtService,
     private readonly helperService: HelperService,
     private readonly configService: ConfigService,
-    private readonly notificationAdapter: NotificationAdapter
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   private readonly authUserServiceMap: Record<UserRole, IAuthUserService> = {
@@ -151,7 +152,7 @@ export class AuthService implements IAuthService {
       expiredAt: new Date(Date.now() + 5 * 60000)
     })
 
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: learner.email,
       subject: `[Orchidify] Account Verification`,
       template: 'learner/verify-account',
@@ -202,7 +203,7 @@ export class AuthService implements IAuthService {
     await otp.save()
 
     // Send email contain OTP to learner
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: learner.email,
       subject: `[Orchidify] Resend Account Verification`,
       template: 'learner/verify-account',
@@ -237,7 +238,7 @@ export class AuthService implements IAuthService {
       ]
     })
 
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: instructorRegisterDto.email,
       subject: `[Orchidify] Confirmation of receipt of application`,
       template: 'viewer/register-instructor-success',

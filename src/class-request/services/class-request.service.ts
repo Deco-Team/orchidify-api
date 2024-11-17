@@ -37,6 +37,8 @@ import { HelperService } from '@common/services/helper.service'
 import { Session } from '@class/schemas/session.schema'
 import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto'
 import { ILearnerClassService } from '@class/services/learner-class.service'
+import { INotificationService } from '@notification/services/notification.service'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -92,6 +94,7 @@ export interface IClassRequestService {
 export class ClassRequestService implements IClassRequestService {
   private readonly appLogger = new AppLogger(ClassRequestService.name)
   constructor(
+    private readonly helperService: HelperService,
     @Inject(IClassRequestRepository)
     private readonly classRequestRepository: IClassRequestRepository,
     @Inject(ICourseService)
@@ -107,7 +110,8 @@ export class ClassRequestService implements IClassRequestService {
     private readonly settingService: ISettingService,
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
-    private readonly helperService: HelperService
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService
   ) {}
   public async createPublishClassRequest(
     createPublishClassRequestDto: CreatePublishClassRequestDto,
@@ -575,7 +579,19 @@ export class ClassRequestService implements IClassRequestService {
       }
     }
 
-    // TODO: send notification
+    // send notification to instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu lớp học của bạn đã được duyệt',
+      body:
+        classRequest.type === ClassRequestType.PUBLISH_CLASS
+          ? 'Lớp học đã được mở. Bấm để xem chi tiết.'
+          : 'Lớp học đã hủy. Bấm để xem chi tiết',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.CLASS_REQUEST,
+        id: classRequestId
+      }
+    })
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
@@ -671,13 +687,25 @@ export class ClassRequestService implements IClassRequestService {
       }
     }
 
-    // TODO: send notification
+    // send notification to instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu lớp học của bạn đã bị từ chối',
+      body:
+        classRequest.type === ClassRequestType.PUBLISH_CLASS
+          ? 'Yêu cầu mở lớp chưa phù hợp. Bấm để xem chi tiết.'
+          : 'Yêu cầu hủy lớp chưa phù hợp. Bấm để xem chi tiết',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.CLASS_REQUEST,
+        id: classRequestId
+      }
+    })
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
 
   async expirePublishClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse> {
-    const { role } = userAuth
+    const { _id, role } = userAuth
 
     // validate class request
     const classRequest = await this.findById(classRequestId)
@@ -726,12 +754,21 @@ export class ClassRequestService implements IClassRequestService {
     } finally {
       await session.endSession()
     }
-    // TODO: send notification
+    // send notification to instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu lớp học của bạn đã hết hạn',
+      body: 'Yêu cầu mở lớp đã hết hạn. Bấm để xem chi tiết.',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.CLASS_REQUEST,
+        id: classRequestId
+      }
+    })
     return new SuccessResponse(true)
   }
 
   async expireCancelClassRequest(classRequestId: string, userAuth: UserAuth): Promise<SuccessResponse> {
-    const { role } = userAuth
+    const { _id, role } = userAuth
 
     // validate class request
     const classRequest = await this.findById(classRequestId)
@@ -768,7 +805,16 @@ export class ClassRequestService implements IClassRequestService {
     } finally {
       await session.endSession()
     }
-    // TODO: send notification
+    // send notification to instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu lớp học của bạn đã hết hạn',
+      body: 'Yêu cầu hủy lớp đã hết hạn. Bấm để xem chi tiết.',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.CLASS_REQUEST,
+        id: classRequestId
+      }
+    })
     return new SuccessResponse(true)
   }
 

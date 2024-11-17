@@ -18,20 +18,20 @@ const garden_manager_repository_1 = require("../repositories/garden-manager.repo
 const constant_1 = require("../contracts/constant");
 const constant_2 = require("../../common/contracts/constant");
 const helper_service_1 = require("../../common/services/helper.service");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
+const notification_service_1 = require("../../notification/services/notification.service");
 exports.IGardenManagerService = Symbol('IGardenManagerService');
 let GardenManagerService = class GardenManagerService {
-    constructor(gardenManagerRepository, helperService, notificationAdapter) {
-        this.gardenManagerRepository = gardenManagerRepository;
+    constructor(helperService, gardenManagerRepository, notificationService) {
         this.helperService = helperService;
-        this.notificationAdapter = notificationAdapter;
+        this.gardenManagerRepository = gardenManagerRepository;
+        this.notificationService = notificationService;
     }
     async create(createGardenManagerDto, options) {
         const password = this.helperService.generateRandomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
         const hashPassword = await this.helperService.hashPassword(password);
         createGardenManagerDto['password'] = hashPassword;
         const gardenManager = await this.gardenManagerRepository.create(createGardenManagerDto, options);
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: gardenManager.email,
             subject: `[Orchidify] Thông tin đăng nhập`,
             template: 'management/add-garden-manager',
@@ -93,8 +93,8 @@ let GardenManagerService = class GardenManagerService {
 exports.GardenManagerService = GardenManagerService;
 exports.GardenManagerService = GardenManagerService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(garden_manager_repository_1.IGardenManagerRepository)),
-    __metadata("design:paramtypes", [Object, helper_service_1.HelperService,
-        notification_adapter_1.NotificationAdapter])
+    __param(1, (0, common_1.Inject)(garden_manager_repository_1.IGardenManagerRepository)),
+    __param(2, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object])
 ], GardenManagerService);
 //# sourceMappingURL=garden-manager.service.js.map

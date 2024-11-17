@@ -32,7 +32,7 @@ import { CreateGardenManagerDto } from '@garden-manager/dto/create-garden-manage
 import { QueryGardenManagerDto } from '@garden-manager/dto/view-garden-manager.dto';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { HelperService } from '@common/services/helper.service';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
+import { INotificationService } from '@notification/services/notification.service';
 export declare const IGardenManagerService: unique symbol;
 export interface IGardenManagerService extends IAuthUserService {
     create(gardenManager: CreateGardenManagerDto, options?: SaveOptions | undefined): Promise<GardenManagerDocument>;
@@ -42,10 +42,10 @@ export interface IGardenManagerService extends IAuthUserService {
     list(pagination: PaginationParams, queryGardenManagerDto: QueryGardenManagerDto): any;
 }
 export declare class GardenManagerService implements IGardenManagerService {
-    private readonly gardenManagerRepository;
     private readonly helperService;
-    private readonly notificationAdapter;
-    constructor(gardenManagerRepository: IGardenManagerRepository, helperService: HelperService, notificationAdapter: NotificationAdapter);
+    private readonly gardenManagerRepository;
+    private readonly notificationService;
+    constructor(helperService: HelperService, gardenManagerRepository: IGardenManagerRepository, notificationService: INotificationService);
     create(createGardenManagerDto: CreateGardenManagerDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, GardenManager> & GardenManager & Required<{
         _id: string;
     }>>;

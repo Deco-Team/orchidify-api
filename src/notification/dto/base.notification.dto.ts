@@ -1,30 +1,31 @@
-import {
-  IsMongoId,
-  IsNotEmpty,
-  IsString} from 'class-validator'
+import { IsArray, IsMongoId, IsNotEmpty, IsString } from 'class-validator'
 import { ApiProperty } from '@nestjs/swagger'
 
 export class BaseNotificationDto {
   @ApiProperty({ type: String })
-  @IsMongoId()
+  @IsString()
   _id: string
 
   @ApiProperty({ type: String })
   @IsNotEmpty()
   @IsString()
-  title: string
+  readonly title: string
 
   @ApiProperty({ type: String })
   @IsNotEmpty()
   @IsString()
-  body: string
+  readonly body: string
 
   @ApiProperty({ type: Object })
-  data: Object
+  readonly data: {
+    [key: string]: string
+  }
+
+  @ApiProperty({ type: String, isArray: true })
+  @IsArray()
+  @IsMongoId({ each: true })
+  readonly receiverIds: string[]
 
   @ApiProperty({ type: Date })
-  createdAt: Date
-
-  @ApiProperty({ type: Date })
-  updatedAt: Date
+  createdAt?: Date
 }

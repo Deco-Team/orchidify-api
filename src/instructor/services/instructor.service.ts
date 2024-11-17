@@ -9,7 +9,7 @@ import { INSTRUCTOR_LIST_PROJECTION } from '@instructor/contracts/constant'
 import { InstructorStatus } from '@common/contracts/constant'
 import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto'
 import { HelperService } from '@common/services/helper.service'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
+import { INotificationService } from '@notification/services/notification.service'
 
 export const IInstructorService = Symbol('IInstructorService')
 
@@ -28,10 +28,11 @@ export interface IInstructorService extends IAuthUserService {
 @Injectable()
 export class InstructorService implements IInstructorService {
   constructor(
+    private readonly helperService: HelperService,
     @Inject(IInstructorRepository)
     private readonly instructorRepository: IInstructorRepository,
-    private readonly helperService: HelperService,
-    private readonly notificationAdapter: NotificationAdapter
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   public async create(createInstructorDto: CreateInstructorDto, options?: SaveOptions | undefined) {
@@ -40,7 +41,7 @@ export class InstructorService implements IInstructorService {
     createInstructorDto['password'] = hashPassword
     const instructor = await this.instructorRepository.create(createInstructorDto, options)
 
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: instructor.email,
       subject: `[Orchidify] Thông tin đăng nhập`,
       template: 'instructor/add-instructor',

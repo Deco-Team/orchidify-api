@@ -1,11 +1,11 @@
 import { IAuthUserService } from '@auth/services/auth.service'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { StaffStatus, UserRole } from '@common/contracts/constant'
 import { Errors } from '@common/contracts/error'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { AppException } from '@common/exceptions/app.exception'
 import { HelperService } from '@common/services/helper.service'
 import { Injectable, Inject } from '@nestjs/common'
+import { INotificationService } from '@notification/services/notification.service'
 import { STAFF_LIST_PROJECTION } from '@staff/contracts/constant'
 import { CreateStaffDto } from '@staff/dto/create-staff.dto'
 import { QueryStaffDto } from '@staff/dto/view-staff.dto'
@@ -34,10 +34,11 @@ export interface IStaffService extends IAuthUserService {
 @Injectable()
 export class StaffService implements IStaffService {
   constructor(
+    private readonly helperService: HelperService,
     @Inject(IStaffRepository)
     private readonly staffRepository: IStaffRepository,
-    private readonly helperService: HelperService,
-    private readonly notificationAdapter: NotificationAdapter
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   public async create(createStaffDto: CreateStaffDto, options?: SaveOptions | undefined) {
@@ -50,7 +51,7 @@ export class StaffService implements IStaffService {
     createStaffDto['staffCode'] = staffCode
     const staff = await this.staffRepository.create(createStaffDto, options)
 
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: staff.email,
       subject: `[Orchidify] Thông tin đăng nhập`,
       template: 'management/add-staff',

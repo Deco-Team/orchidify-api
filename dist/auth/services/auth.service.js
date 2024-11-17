@@ -30,12 +30,12 @@ const helper_service_1 = require("../../common/services/helper.service");
 const otp_service_1 = require("./otp.service");
 const mongoose_1 = require("mongoose");
 const recruitment_service_1 = require("../../recruitment/services/recruitment.service");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_2 = require("../../setting/contracts/constant");
+const notification_service_1 = require("../../notification/services/notification.service");
 exports.IAuthService = Symbol('IAuthService');
 let AuthService = class AuthService {
-    constructor(learnerService, instructorService, staffService, gardenManagerService, userTokenService, otpService, recruitmentService, settingService, jwtService, helperService, configService, notificationAdapter) {
+    constructor(learnerService, instructorService, staffService, gardenManagerService, userTokenService, otpService, recruitmentService, settingService, jwtService, helperService, configService, notificationService) {
         this.learnerService = learnerService;
         this.instructorService = instructorService;
         this.staffService = staffService;
@@ -47,7 +47,7 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
         this.helperService = helperService;
         this.configService = configService;
-        this.notificationAdapter = notificationAdapter;
+        this.notificationService = notificationService;
         this.authUserServiceMap = {
             [constant_1.UserRole.LEARNER]: this.learnerService,
             [constant_1.UserRole.INSTRUCTOR]: this.instructorService,
@@ -109,7 +109,7 @@ let AuthService = class AuthService {
             role: constant_1.UserRole.LEARNER,
             expiredAt: new Date(Date.now() + 5 * 60000)
         });
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: learner.email,
             subject: `[Orchidify] Account Verification`,
             template: 'learner/verify-account',
@@ -157,7 +157,7 @@ let AuthService = class AuthService {
         otp.expiredAt = new Date(Date.now() + 5 * 60000);
         otp.__v++;
         await otp.save();
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: learner.email,
             subject: `[Orchidify] Resend Account Verification`,
             template: 'learner/verify-account',
@@ -186,7 +186,7 @@ let AuthService = class AuthService {
                 }
             ]
         });
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: instructorRegisterDto.email,
             subject: `[Orchidify] Confirmation of receipt of application`,
             template: 'viewer/register-instructor-success',
@@ -221,9 +221,9 @@ exports.AuthService = AuthService = __decorate([
     __param(5, (0, common_1.Inject)(otp_service_1.IOtpService)),
     __param(6, (0, common_1.Inject)(recruitment_service_1.IRecruitmentService)),
     __param(7, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(11, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, jwt_1.JwtService,
         helper_service_1.HelperService,
-        config_1.ConfigService,
-        notification_adapter_1.NotificationAdapter])
+        config_1.ConfigService, Object])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

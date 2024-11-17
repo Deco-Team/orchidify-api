@@ -2,29 +2,32 @@ import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
 import { IFirebaseRepository } from '@firebase/repositories/firebase.repository'
 import { AppLogger } from '@common/services/app-logger.service'
-import { IInstructorService } from '@instructor/services/instructor.service'
-import { ILearnerService } from '@learner/services/learner.service'
 import {
   SendFirebaseMessagingDto,
   SendFirebaseMulticastMessagingDto,
-  SendFirebaseTopicMessagingDto
+  SendFirebaseTopicMessagingDto,
+  SubscribeFirebaseTopicDto
 } from '@firebase/dto/firebase-messaging.dto'
-import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api'
+import { BatchResponse, MessagingTopicManagementResponse } from 'firebase-admin/lib/messaging/messaging-api'
 
 export const IFirebaseMessagingService = Symbol('IFirebaseMessagingService')
 
 export interface IFirebaseMessagingService {
-  send({ token, title, body, icon }: SendFirebaseMessagingDto): Promise<{
+  send({ token, title, body, data }: SendFirebaseMessagingDto): Promise<{
     success: boolean
     response?: string
   }>
-  sendMulticast({ tokens, title, body, icon }: SendFirebaseMulticastMessagingDto): Promise<{
+  sendMulticast({ tokens, title, body, data }: SendFirebaseMulticastMessagingDto): Promise<{
     success: boolean
     response?: BatchResponse
   }>
-  sendTopicNotification({ topic, title, body, icon }: SendFirebaseTopicMessagingDto): Promise<{
+  sendTopicNotification({ topic, title, body, data }: SendFirebaseTopicMessagingDto): Promise<{
     success: boolean
     response?: string
+  }>
+  subscribeToTopic({ topic, tokens }: SubscribeFirebaseTopicDto): Promise<{
+    success: boolean
+    response?: MessagingTopicManagementResponse
   }>
 }
 
@@ -33,78 +36,79 @@ export class FirebaseMessagingService implements IFirebaseMessagingService {
   private readonly appLogger = new AppLogger(FirebaseMessagingService.name)
   constructor(
     @Inject(IFirebaseRepository)
-    private readonly firebaseRepository: IFirebaseRepository,
-    @Inject(IInstructorService)
-    private readonly instructorService: IInstructorService,
-    @Inject(ILearnerService)
-    private readonly learnerService: ILearnerService
+    private readonly firebaseRepository: IFirebaseRepository
   ) {}
 
-  async send({ token, title, body, icon }: SendFirebaseMessagingDto) {
+  async send({ token, title, body, data }: SendFirebaseMessagingDto) {
     try {
       const response = await this.firebaseRepository.getMessaging().send({
         token,
         notification: {
           title,
-          body,
+          body
         },
-        // webpush: {
-        //   notification: {
-        //     title,
-        //     body,
-        //     icon
-        //   }
-        // }
+        data
       })
       return {
         success: true,
         response
       }
     } catch (error) {
-      console.log('Error sending messages:', error)
+      this.appLogger.error('Error sending messages:', error)
       return { success: false }
     }
   }
 
-  async sendMulticast({ tokens, title, body, icon }: SendFirebaseMulticastMessagingDto) {
+  async sendMulticast({ tokens, title, body, data }: SendFirebaseMulticastMessagingDto) {
     const message = {
       notification: {
         title,
-        body,
-        icon
+        body
       },
-      tokens
+      tokens,
+      data
     }
 
     try {
       const response = await this.firebaseRepository.getMessaging().sendEachForMulticast(message)
-      console.log('Successfully sent messages:', response)
+      this.appLogger.log(`Successfully sent messages: ${JSON.stringify(response)}`)
       return {
         success: true,
         response
       }
     } catch (error) {
-      console.log('Error sending messages:', error)
+      this.appLogger.error('Error sending messages:', error)
       return { success: false }
     }
   }
 
-  async sendTopicNotification({ topic, title, body, icon }: SendFirebaseTopicMessagingDto) {
+  async sendTopicNotification({ topic, title, body, data }: SendFirebaseTopicMessagingDto) {
     const message = {
       notification: {
         title,
-        body,
-        icon
+        body
       },
-      topic
+      topic,
+      data
     }
 
     try {
       const response = await this.firebaseRepository.getMessaging().send(message)
-      console.log('Successfully sent message:', response)
+      this.appLogger.log(`Successfully sent messages: ${JSON.stringify(response)}`)
       return { success: true, response }
     } catch (error) {
-      console.log('Error sending message:', error)
+      this.appLogger.error('Error sending message:', error)
+      return { success: false }
+    }
+  }
+
+  async subscribeToTopic({ topic, tokens }: SubscribeFirebaseTopicDto) {
+    try {
+      const response = await this.firebaseRepository.getMessaging().subscribeToTopic(tokens, topic)
+      this.appLogger.log(`Successfully subscribed to topic: ${JSON.stringify(response)}`)
+      return { success: true, response }
+    } catch (error) {
+      this.appLogger.error('Error subscribing to topic:', error)
       return { success: false }
     }
   }

@@ -1,0 +1,1 @@
+{"version":3,"file":"send-email.dto.js","sourceRoot":"/","sources":["notification/dto/send-email.dto.ts"],"names":[],"mappings":"","sourcesContent":["export interface MailSendOptions {\r\n  to: string | string[]\r\n  subject: string\r\n  template: string\r\n  context?: Record<string, any>\r\n}\r\n"]}

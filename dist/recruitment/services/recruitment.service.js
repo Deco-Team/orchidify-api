@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var RecruitmentService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RecruitmentService = exports.IRecruitmentService = void 0;
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 const constant_1 = require("../../common/contracts/constant");
 const dto_1 = require("../../common/contracts/dto");
 const error_1 = require("../../common/contracts/error");
@@ -22,6 +21,7 @@ const app_exception_1 = require("../../common/exceptions/app.exception");
 const app_logger_service_1 = require("../../common/services/app-logger.service");
 const helper_service_1 = require("../../common/services/helper.service");
 const common_1 = require("@nestjs/common");
+const notification_service_1 = require("../../notification/services/notification.service");
 const constant_2 = require("../../queue/contracts/constant");
 const queue_producer_service_1 = require("../../queue/services/queue-producer.service");
 const constant_3 = require("../contracts/constant");
@@ -33,12 +33,12 @@ const moment = require("moment-timezone");
 const mongoose_1 = require("mongoose");
 exports.IRecruitmentService = Symbol('IRecruitmentService');
 let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
-    constructor(notificationAdapter, helperService, recruitmentRepository, settingService, queueProducerService) {
-        this.notificationAdapter = notificationAdapter;
+    constructor(helperService, recruitmentRepository, settingService, queueProducerService, notificationService) {
         this.helperService = helperService;
         this.recruitmentRepository = recruitmentRepository;
         this.settingService = settingService;
         this.queueProducerService = queueProducerService;
+        this.notificationService = notificationService;
         this.appLogger = new app_logger_service_1.AppLogger(RecruitmentService_1.name);
     }
     async create(createRecruitmentDto, options) {
@@ -143,7 +143,7 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
                 }
             }
         }, { new: true });
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: recruitment?.applicationInfo?.email,
             subject: `[Orchidify] Mời phỏng vấn vị trí Giảng viên - Orchidify`,
             template: 'viewer/process-recruitment-application',
@@ -178,7 +178,7 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
                 }
             }
         });
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: recruitment?.applicationInfo?.email,
             subject: `[Orchidify] Chúc mừng bạn đã trở thành một phần của Orchidify`,
             template: 'viewer/process-recruitment-interview',
@@ -217,7 +217,7 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
         const mailTemplate = recruitment.status === constant_1.RecruitmentStatus.PENDING
             ? 'viewer/reject-recruitment-application.ejs'
             : 'viewer/reject-recruitment-interview.ejs';
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: recruitment?.applicationInfo?.email,
             subject: `[Orchidify] Thông báo về kết quả ứng tuyển giảng viên`,
             template: mailTemplate,
@@ -306,10 +306,10 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
 exports.RecruitmentService = RecruitmentService;
 exports.RecruitmentService = RecruitmentService = RecruitmentService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(2, (0, common_1.Inject)(recruitment_repository_1.IRecruitmentRepository)),
-    __param(3, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __param(4, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
-    __metadata("design:paramtypes", [notification_adapter_1.NotificationAdapter,
-        helper_service_1.HelperService, Object, Object, Object])
+    __param(1, (0, common_1.Inject)(recruitment_repository_1.IRecruitmentRepository)),
+    __param(2, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(3, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
+    __param(4, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object])
 ], RecruitmentService);
 //# sourceMappingURL=recruitment.service.js.map

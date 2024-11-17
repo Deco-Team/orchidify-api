@@ -32,21 +32,21 @@ import { CreateMomoPaymentDto, MomoPaymentResponseDto, QueryMomoPaymentDto, Refu
 import { ITransactionRepository } from '@src/transaction/repositories/transaction.repository';
 import { IPaymentStrategy } from '@src/transaction/strategies/payment-strategy.interface';
 import { Connection } from 'mongoose';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
 import { ILearnerService } from '@learner/services/learner.service';
+import { INotificationService } from '@notification/services/notification.service';
 export declare class MomoPaymentStrategy implements IPaymentStrategy {
     readonly connection: Connection;
     private readonly httpService;
     private readonly configService;
     private readonly helperService;
-    private readonly notificationAdapter;
     private readonly transactionRepository;
     private readonly classService;
     private readonly learnerClassService;
     private readonly learnerService;
+    private readonly notificationService;
     private readonly logger;
     private config;
-    constructor(connection: Connection, httpService: HttpService, configService: ConfigService, helperService: HelperService, notificationAdapter: NotificationAdapter, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService);
+    constructor(connection: Connection, httpService: HttpService, configService: ConfigService, helperService: HelperService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, notificationService: INotificationService);
     createTransaction(createMomoPaymentDto: CreateMomoPaymentDto): Promise<any>;
     getTransaction(queryDto: QueryMomoPaymentDto): Promise<any>;
     refundTransaction(refundDto: RefundMomoPaymentDto): Promise<any>;

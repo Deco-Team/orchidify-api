@@ -34,9 +34,11 @@ const helper_service_1 = require("../../common/services/helper.service");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
 const transaction_service_1 = require("../../transaction/services/transaction.service");
 const constant_5 = require("../../transaction/contracts/constant");
+const constant_6 = require("../../notification/contracts/constant");
+const notification_service_1 = require("../../notification/services/notification.service");
 exports.IPayoutRequestService = Symbol('IPayoutRequestService');
 let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
-    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService) {
+    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService, notificationService) {
         this.payoutRequestRepository = payoutRequestRepository;
         this.instructorService = instructorService;
         this.connection = connection;
@@ -44,6 +46,7 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         this.settingService = settingService;
         this.helperService = helperService;
         this.transactionService = transactionService;
+        this.notificationService = notificationService;
         this.appLogger = new app_logger_service_1.AppLogger(PayoutRequestService_1.name);
     }
     async createPayoutRequest(createPayoutRequestDto, options) {
@@ -211,6 +214,15 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu rút tiền của bạn đã được duyệt',
+            body: 'Số tiền sẽ được thanh toán sau vài ngày làm việc. Bấm để xem chi tiết.',
+            receiverIds: [_id],
+            data: {
+                type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
+                id: payoutRequestId
+            }
+        });
         this.queueProducerService.removeJob(constant_3.QueueName.PAYOUT_REQUEST, payoutRequestId);
         return new dto_1.SuccessResponse(true);
     }
@@ -250,11 +262,20 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu rút tiền đã bị từ chối',
+            body: 'Yêu cầu rút tiền chưa hợp lệ. Bấm để xem chi tiết.',
+            receiverIds: [_id],
+            data: {
+                type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
+                id: payoutRequestId
+            }
+        });
         this.queueProducerService.removeJob(constant_3.QueueName.PAYOUT_REQUEST, payoutRequestId);
         return new dto_1.SuccessResponse(true);
     }
     async expirePayoutRequest(payoutRequestId, userAuth) {
-        const { role } = userAuth;
+        const { _id, role } = userAuth;
         const payoutRequest = await this.findById(payoutRequestId);
         if (!payoutRequest)
             throw new app_exception_1.AppException(error_1.Errors.PAYOUT_REQUEST_NOT_FOUND);
@@ -285,6 +306,15 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu rút tiền đã hết hạn',
+            body: 'Yêu cầu rút tiền đã hết hạn. Bấm để xem chi tiết.',
+            receiverIds: [_id],
+            data: {
+                type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
+                id: payoutRequestId
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async getExpiredAt(date) {
@@ -327,6 +357,7 @@ exports.PayoutRequestService = PayoutRequestService = PayoutRequestService_1 = _
     __param(3, (0, common_1.Inject)(queue_producer_service_1.IQueueProducerService)),
     __param(4, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(6, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
-    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object])
+    __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object, Object])
 ], PayoutRequestService);
 //# sourceMappingURL=payout-request.service.js.map

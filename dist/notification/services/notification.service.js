@@ -15,54 +15,67 @@ var NotificationService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationService = exports.INotificationService = void 0;
 const common_1 = require("@nestjs/common");
-const notification_repository_1 = require("../repositories/notification.repository");
+const mongoose_1 = require("mongoose");
 const app_logger_service_1 = require("../../common/services/app-logger.service");
-const firebase_auth_service_1 = require("../../firebase/services/firebase.auth.service");
+const firebase_firestore_service_1 = require("../../firebase/services/firebase.firestore.service");
+const firebase_messaging_service_1 = require("../../firebase/services/firebase.messaging.service");
+const user_device_service_1 = require("./user-device.service");
+const constant_1 = require("../../common/contracts/constant");
+const mailer_1 = require("@nestjs-modules/mailer");
 exports.INotificationService = Symbol('INotificationService');
 let NotificationService = NotificationService_1 = class NotificationService {
-    constructor(notificationRepository, firebaseService) {
-        this.notificationRepository = notificationRepository;
-        this.firebaseService = firebaseService;
+    constructor(mailService, firebaseFirestoreService, firebaseMessagingService, userDeviceService) {
+        this.mailService = mailService;
+        this.firebaseFirestoreService = firebaseFirestoreService;
+        this.firebaseMessagingService = firebaseMessagingService;
+        this.userDeviceService = userDeviceService;
         this.appLogger = new app_logger_service_1.AppLogger(NotificationService_1.name);
     }
-    async create(createNotificationDto, options) {
-        return await this.notificationRepository.create({ ...createNotificationDto }, options);
+    async sendMail(options) {
+        try {
+            this.appLogger.log(`[sendMail] [success] data= ${JSON.stringify(options)}`);
+            await this.mailService.sendMail(options);
+        }
+        catch (error) {
+            this.appLogger.error(`[sendMail] [failed] error = ${JSON.stringify(error.message)}`);
+        }
     }
-    async update(conditions, payload, options) {
-        return await this.notificationRepository.findOneAndUpdate(conditions, payload, options);
-    }
-    async findById(notificationId, projection, populates) {
-        const notification = await this.notificationRepository.findOne({
-            conditions: {
-                _id: notificationId
-            },
-            projection,
-            populates
-        });
-        return notification;
-    }
-    async findOneBy(conditions, projection, populates) {
-        const notification = await this.notificationRepository.findOne({
-            conditions,
-            projection,
-            populates
-        });
-        return notification;
-    }
-    async findMany(conditions, projection, populates) {
-        const notifications = await this.notificationRepository.findMany({
-            conditions,
-            projection,
-            populates
-        });
-        return notifications;
+    async sendFirebaseCloudMessaging(sendNotificationDto) {
+        this.appLogger.debug(`[sendFirebaseCloudMessaging]: sendNotificationDto=${JSON.stringify(sendNotificationDto)}`);
+        try {
+            const { title, body, data, receiverIds } = sendNotificationDto;
+            const notificationCollection = await this.firebaseFirestoreService.getCollection('notification');
+            sendNotificationDto.createdAt = new Date();
+            await notificationCollection.add(sendNotificationDto);
+            const userDevices = await this.userDeviceService.findMany({
+                userId: {
+                    $in: receiverIds.map((receiverId) => new mongoose_1.Types.ObjectId(receiverId))
+                },
+                status: constant_1.UserDeviceStatus.ACTIVE
+            });
+            if (userDevices.length === 0)
+                return { success: true };
+            const tokens = userDevices.map((userDevice) => userDevice.fcmToken);
+            const result = await this.firebaseMessagingService.sendMulticast({
+                tokens,
+                title,
+                body,
+                data
+            });
+            return result;
+        }
+        catch (error) {
+            this.appLogger.error(`[sendFirebaseCloudMessaging]: error=${error}`);
+            return { success: false };
+        }
     }
 };
 exports.NotificationService = NotificationService;
 exports.NotificationService = NotificationService = NotificationService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(notification_repository_1.INotificationRepository)),
-    __param(1, (0, common_1.Inject)(firebase_auth_service_1.IFirebaseAuthService)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(1, (0, common_1.Inject)(firebase_firestore_service_1.IFirebaseFirestoreService)),
+    __param(2, (0, common_1.Inject)(firebase_messaging_service_1.IFirebaseMessagingService)),
+    __param(3, (0, common_1.Inject)(user_device_service_1.IUserDeviceService)),
+    __metadata("design:paramtypes", [mailer_1.MailerService, Object, Object, Object])
 ], NotificationService);
 //# sourceMappingURL=notification.service.js.map

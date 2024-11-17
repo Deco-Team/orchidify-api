@@ -1,134 +1,78 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
-import { INotificationRepository } from '@notification/repositories/notification.repository'
-import { Notification, NotificationDocument } from '@notification/schemas/notification.schema'
-import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
-import { CreateNotificationDto } from '@notification/dto/create-notification.dto'
-import { QueryNotificationDto } from '@notification/dto/view-notification.dto'
-import { NOTIFICATION_LIST_PROJECTION } from '@notification/contracts/constant'
+import { SaveOptions, Types } from 'mongoose'
+import { SendNotificationDto } from '@notification/dto/send-notification.dto'
 import { AppLogger } from '@common/services/app-logger.service'
-import { IFirebaseAuthService } from '@firebase/services/firebase.auth.service'
+import { IFirebaseFirestoreService } from '@firebase/services/firebase.firestore.service'
+import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service'
+import { IUserDeviceService } from './user-device.service'
+import { UserDeviceStatus } from '@common/contracts/constant'
+import { BatchResponse } from 'firebase-admin/lib/messaging/messaging-api'
+import { MailerService } from '@nestjs-modules/mailer'
+import { MailSendOptions } from '@notification/dto/send-email.dto'
 
 export const INotificationService = Symbol('INotificationService')
 
 export interface INotificationService {
-  create(createNotificationDto: CreateNotificationDto, options?: SaveOptions | undefined): Promise<NotificationDocument>
-  findById(
-    notificationId: string,
-    projection?: string | Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ): Promise<NotificationDocument>
-  findOneBy(
-    conditions: FilterQuery<Notification>,
-    projection?: string | Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ): Promise<NotificationDocument>
-  findMany(
-    conditions: FilterQuery<NotificationDocument>,
-    projection?: Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ): Promise<NotificationDocument[]>
-  update(
-    conditions: FilterQuery<Notification>,
-    payload: UpdateQuery<Notification>,
-    options?: QueryOptions | undefined
-  ): Promise<NotificationDocument>
-  // list(
-  //   queryNotificationDto: QueryNotificationDto,
-  //   projection?: string | Record<string, any>,
-  //   populate?: Array<PopulateOptions>
-  // )
+  sendMail(options: MailSendOptions): Promise<void>
+  sendFirebaseCloudMessaging(sendNotificationDto: SendNotificationDto): Promise<{
+    success: boolean
+    response?: BatchResponse
+  }>
 }
 
 @Injectable()
 export class NotificationService implements INotificationService {
   private readonly appLogger = new AppLogger(NotificationService.name)
   constructor(
-    @Inject(INotificationRepository)
-    private readonly notificationRepository: INotificationRepository,
-    @Inject(IFirebaseAuthService)
-    private readonly firebaseService: IFirebaseAuthService
+    private readonly mailService: MailerService,
+    @Inject(IFirebaseFirestoreService)
+    private readonly firebaseFirestoreService: IFirebaseFirestoreService,
+    @Inject(IFirebaseMessagingService)
+    private readonly firebaseMessagingService: IFirebaseMessagingService,
+    @Inject(IUserDeviceService)
+    private readonly userDeviceService: IUserDeviceService
   ) {}
 
-  public async create(createNotificationDto: CreateNotificationDto, options?: SaveOptions | undefined) {
-    // call firebase messaging
-    
-    return await this.notificationRepository.create({ ...createNotificationDto }, options)
+  async sendMail(options: MailSendOptions) {
+    try {
+      this.appLogger.log(`[sendMail] [success] data= ${JSON.stringify(options)}`)
+      await this.mailService.sendMail(options)
+    } catch (error) {
+      this.appLogger.error(`[sendMail] [failed] error = ${JSON.stringify(error.message)}`)
+    }
   }
 
-  public async update(
-    conditions: FilterQuery<Notification>,
-    payload: UpdateQuery<Notification>,
-    options?: QueryOptions | undefined
-  ) {
-    return await this.notificationRepository.findOneAndUpdate(conditions, payload, options)
+  public async sendFirebaseCloudMessaging(sendNotificationDto: SendNotificationDto) {
+    this.appLogger.debug(`[sendFirebaseCloudMessaging]: sendNotificationDto=${JSON.stringify(sendNotificationDto)}`)
+    try {
+      const { title, body, data, receiverIds } = sendNotificationDto
+
+      // Add notification doc to firestore
+      const notificationCollection = await this.firebaseFirestoreService.getCollection('notification')
+      sendNotificationDto.createdAt = new Date()
+      await notificationCollection.add(sendNotificationDto)
+
+      // Push firebase cloud messaging
+      const userDevices = await this.userDeviceService.findMany({
+        userId: {
+          $in: receiverIds.map((receiverId) => new Types.ObjectId(receiverId))
+        },
+        status: UserDeviceStatus.ACTIVE
+      })
+      if (userDevices.length === 0) return { success: true }
+
+      const tokens = userDevices.map((userDevice) => userDevice.fcmToken)
+      const result = await this.firebaseMessagingService.sendMulticast({
+        tokens,
+        title,
+        body,
+        data
+      })
+      return result
+    } catch (error) {
+      this.appLogger.error(`[sendFirebaseCloudMessaging]: error=${error}`)
+      return { success: false }
+    }
   }
-
-  public async findById(
-    notificationId: string,
-    projection?: string | Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ) {
-    const notification = await this.notificationRepository.findOne({
-      conditions: {
-        _id: notificationId
-      },
-      projection,
-      populates
-    })
-    return notification
-  }
-
-  public async findOneBy(
-    conditions: FilterQuery<Notification>,
-    projection?: string | Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ) {
-    const notification = await this.notificationRepository.findOne({
-      conditions,
-      projection,
-      populates
-    })
-    return notification
-  }
-
-  public async findMany(
-    conditions: FilterQuery<NotificationDocument>,
-    projection?: Record<string, any>,
-    populates?: Array<PopulateOptions>
-  ) {
-    const notifications = await this.notificationRepository.findMany({
-      conditions,
-      projection,
-      populates
-    })
-    return notifications
-  }
-
-  // async list(
-  //   queryCourseDto: QueryNotificationDto,
-  //   projection = NOTIFICATION_LIST_PROJECTION,
-  //   populate?: Array<PopulateOptions>
-  // ) {
-  //   const { slotId } = queryCourseDto
-  //   const filter: Record<string, any> = {}
-  //   if (slotId) {
-  //     filter['slotId'] = slotId
-  //   }
-
-  //   // const validStatus = status?.filter((status) =>
-  //   //   [NotificationStatus.ACTIVE, NotificationStatus.INACTIVE].includes(status)
-  //   // )
-  //   // if (validStatus?.length > 0) {
-  //   //   filter['status'] = {
-  //   //     $in: validStatus
-  //   //   }
-  //   // }
-
-  //   return this.notificationRepository.model.paginate(filter, {
-  //     // ...pagination,
-  //     projection,
-  //     populate
-  //   })
-  // }
 }

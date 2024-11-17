@@ -8,6 +8,7 @@ import { FirebaseAuthService, IFirebaseAuthService } from './services/firebase.a
 import { LearnerModule } from '@learner/learner.module'
 import { InstructorModule } from '@instructor/instructor.module'
 import { FirebaseMessagingService, IFirebaseMessagingService } from './services/firebase.messaging.service'
+import { FirebaseFirestoreService, IFirebaseFirestoreService } from './services/firebase.firestore.service'
 
 const firebaseProvider = {
   provide: 'FIREBASE_APP',
@@ -39,7 +40,11 @@ const firebaseProvider = {
     {
       provide: IFirebaseMessagingService,
       useClass: FirebaseMessagingService
-    }
+    },
+    {
+      provide: IFirebaseFirestoreService,
+      useClass: FirebaseFirestoreService
+    },
   ],
   exports: [
     {
@@ -49,7 +54,11 @@ const firebaseProvider = {
     {
       provide: IFirebaseMessagingService,
       useClass: FirebaseMessagingService
-    }
+    },
+    {
+      provide: IFirebaseFirestoreService,
+      useClass: FirebaseFirestoreService
+    },
   ]
 })
 export class FirebaseModule {}

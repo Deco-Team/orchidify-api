@@ -1,13 +1,9 @@
-export const NOTIFICATION_LIST_PROJECTION = ['_id', 'title', 'body', 'data', 'createdAt', 'updatedAt'] as const
+export const USER_DEVICE_LIST_PROJECTION = ['_id', 'userId', 'userRole', 'fcmToken', 'status', 'browser', 'os'] as const
 
-export const USER_DEVICE_LIST_PROJECTION = [
-  '_id',
-  'userId',
-  'userRole',
-  'fcmToken',
-  'browser',
-  'os',
-  'status',
-  'createdAt',
-  'updatedAt'
-] as const
+export enum FCMNotificationDataType {
+  CLASS_REQUEST = 'CLASS_REQUEST',
+  PAYOUT_REQUEST = 'PAYOUT_REQUEST',
+  RECRUITMENT = 'RECRUITMENT',
+  CLASS = 'CLASS',
+  SLOT = 'SLOT'
+}

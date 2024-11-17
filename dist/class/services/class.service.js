@@ -34,11 +34,11 @@ const garden_timesheet_service_1 = require("../../garden-timesheet/services/gard
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_4 = require("../../setting/contracts/constant");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
+const notification_service_1 = require("../../notification/services/notification.service");
 exports.IClassService = Symbol('IClassService');
 let ClassService = class ClassService {
-    constructor(notificationAdapter, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
-        this.notificationAdapter = notificationAdapter;
+    constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
+        this.notificationService = notificationService;
         this.connection = connection;
         this.classRepository = classRepository;
         this.configService = configService;
@@ -549,7 +549,7 @@ let ClassService = class ClassService {
         });
         const sendCancelClassEmailPromises = [];
         learners.forEach((learner) => {
-            sendCancelClassEmailPromises.push(this.notificationAdapter.sendMail({
+            sendCancelClassEmailPromises.push(this.notificationService.sendMail({
                 to: learner.email,
                 subject: `[Orchidify] Thông báo hủy lớp học`,
                 template: 'learner/cancel-class',
@@ -565,6 +565,7 @@ let ClassService = class ClassService {
 exports.ClassService = ClassService;
 exports.ClassService = ClassService = __decorate([
     (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __param(1, (0, mongoose_2.InjectConnection)()),
     __param(2, (0, common_1.Inject)(class_repository_1.IClassRepository)),
     __param(4, (0, common_1.Inject)(payment_service_1.IPaymentService)),
@@ -574,7 +575,6 @@ exports.ClassService = ClassService = __decorate([
     __param(8, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
     __param(9, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(10, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
-    __metadata("design:paramtypes", [notification_adapter_1.NotificationAdapter,
-        mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
+    __metadata("design:paramtypes", [Object, mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
 ], ClassService);
 //# sourceMappingURL=class.service.js.map

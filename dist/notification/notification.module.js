@@ -9,10 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
-const notification_schema_1 = require("./schemas/notification.schema");
-const notification_repository_1 = require("./repositories/notification.repository");
 const notification_service_1 = require("./services/notification.service");
-const notification_controller_1 = require("./controllers/notification.controller");
 const user_device_service_1 = require("./services/user-device.service");
 const user_device_repository_1 = require("./repositories/user-device.repository");
 const user_device_controller_1 = require("./controllers/user-device.controller");
@@ -26,20 +23,15 @@ exports.NotificationModule = NotificationModule = __decorate([
     (0, common_1.Module)({
         imports: [
             mongoose_1.MongooseModule.forFeature([
-                { name: notification_schema_1.Notification.name, schema: notification_schema_1.NotificationSchema },
                 { name: user_device_schema_1.UserDevice.name, schema: user_device_schema_1.UserDeviceSchema }
             ]),
             firebase_module_1.FirebaseModule
         ],
-        controllers: [notification_controller_1.NotificationController, user_device_controller_1.UserDeviceController],
+        controllers: [user_device_controller_1.UserDeviceController],
         providers: [
             {
                 provide: notification_service_1.INotificationService,
                 useClass: notification_service_1.NotificationService
-            },
-            {
-                provide: notification_repository_1.INotificationRepository,
-                useClass: notification_repository_1.NotificationRepository
             },
             {
                 provide: user_device_service_1.IUserDeviceService,

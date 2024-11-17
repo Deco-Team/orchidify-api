@@ -27,20 +27,20 @@ const constant_2 = require("../contracts/constant");
 const transaction_repository_1 = require("../repositories/transaction.repository");
 const lodash_1 = require("lodash");
 const mongoose_2 = require("mongoose");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 const learner_service_1 = require("../../learner/services/learner.service");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
+const notification_service_1 = require("../../notification/services/notification.service");
 let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrategy {
-    constructor(connection, configService, notificationAdapter, transactionRepository, classService, learnerClassService, learnerService, settingService) {
+    constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService) {
         this.connection = connection;
         this.configService = configService;
-        this.notificationAdapter = notificationAdapter;
         this.transactionRepository = transactionRepository;
         this.classService = classService;
         this.learnerClassService = learnerClassService;
         this.learnerService = learnerService;
         this.settingService = settingService;
+        this.notificationService = notificationService;
         this.logger = new common_1.Logger(StripePaymentStrategy_1.name);
     }
     async onModuleInit() {
@@ -129,7 +129,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                 this.learnerService.findById(learnerId),
                 this.classService.findById(classId)
             ]);
-            this.notificationAdapter.sendMail({
+            this.notificationService.sendMail({
                 to: learner?.email,
                 subject: `[Orchidify] Xác nhận đăng ký lớp học ${courseClass?.title} thành công`,
                 template: 'learner/enroll-class',
@@ -284,13 +284,13 @@ exports.StripePaymentStrategy = StripePaymentStrategy;
 exports.StripePaymentStrategy = StripePaymentStrategy = StripePaymentStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectConnection)()),
-    __param(3, (0, common_1.Inject)(transaction_repository_1.ITransactionRepository)),
-    __param(4, (0, common_1.Inject)((0, common_1.forwardRef)(() => class_service_1.IClassService))),
-    __param(5, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
-    __param(6, (0, common_1.Inject)(learner_service_1.ILearnerService)),
-    __param(7, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(2, (0, common_1.Inject)(transaction_repository_1.ITransactionRepository)),
+    __param(3, (0, common_1.Inject)((0, common_1.forwardRef)(() => class_service_1.IClassService))),
+    __param(4, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __param(5, (0, common_1.Inject)(learner_service_1.ILearnerService)),
+    __param(6, (0, common_1.Inject)(setting_service_1.ISettingService)),
+    __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __metadata("design:paramtypes", [mongoose_2.Connection,
-        config_1.ConfigService,
-        notification_adapter_1.NotificationAdapter, Object, Object, Object, Object, Object])
+        config_1.ConfigService, Object, Object, Object, Object, Object, Object])
 ], StripePaymentStrategy);
 //# sourceMappingURL=stripe.strategy.js.map

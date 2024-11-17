@@ -17,7 +17,7 @@ class BaseNotificationDto {
 exports.BaseNotificationDto = BaseNotificationDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String }),
-    (0, class_validator_1.IsMongoId)(),
+    (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], BaseNotificationDto.prototype, "_id", void 0);
 __decorate([
@@ -37,11 +37,13 @@ __decorate([
     __metadata("design:type", Object)
 ], BaseNotificationDto.prototype, "data", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: Date }),
-    __metadata("design:type", Date)
-], BaseNotificationDto.prototype, "createdAt", void 0);
+    (0, swagger_1.ApiProperty)({ type: String, isArray: true }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], BaseNotificationDto.prototype, "receiverIds", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
     __metadata("design:type", Date)
-], BaseNotificationDto.prototype, "updatedAt", void 0);
+], BaseNotificationDto.prototype, "createdAt", void 0);
 //# sourceMappingURL=base.notification.dto.js.map

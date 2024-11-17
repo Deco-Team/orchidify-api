@@ -29,19 +29,19 @@ const transaction_repository_1 = require("../repositories/transaction.repository
 const lodash_1 = require("lodash");
 const mongoose_2 = require("mongoose");
 const rxjs_1 = require("rxjs");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 const learner_service_1 = require("../../learner/services/learner.service");
+const notification_service_1 = require("../../notification/services/notification.service");
 let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
-    constructor(connection, httpService, configService, helperService, notificationAdapter, transactionRepository, classService, learnerClassService, learnerService) {
+    constructor(connection, httpService, configService, helperService, transactionRepository, classService, learnerClassService, learnerService, notificationService) {
         this.connection = connection;
         this.httpService = httpService;
         this.configService = configService;
         this.helperService = helperService;
-        this.notificationAdapter = notificationAdapter;
         this.transactionRepository = transactionRepository;
         this.classService = classService;
         this.learnerClassService = learnerClassService;
         this.learnerService = learnerService;
+        this.notificationService = notificationService;
         this.logger = new common_1.Logger(MomoPaymentStrategy_1.name);
         this.config = this.configService.get('payment.momo');
     }
@@ -202,7 +202,7 @@ let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
                 this.learnerService.findById(learnerId),
                 this.classService.findById(classId)
             ]);
-            this.notificationAdapter.sendMail({
+            this.notificationService.sendMail({
                 to: learner?.email,
                 subject: `[Orchidify] Xác nhận đăng ký lớp học ${courseClass?.title} thành công`,
                 template: 'learner/enroll-class',
@@ -219,14 +219,14 @@ exports.MomoPaymentStrategy = MomoPaymentStrategy;
 exports.MomoPaymentStrategy = MomoPaymentStrategy = MomoPaymentStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectConnection)()),
-    __param(5, (0, common_1.Inject)(transaction_repository_1.ITransactionRepository)),
-    __param(6, (0, common_1.Inject)((0, common_1.forwardRef)(() => class_service_1.IClassService))),
-    __param(7, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
-    __param(8, (0, common_1.Inject)(learner_service_1.ILearnerService)),
+    __param(4, (0, common_1.Inject)(transaction_repository_1.ITransactionRepository)),
+    __param(5, (0, common_1.Inject)((0, common_1.forwardRef)(() => class_service_1.IClassService))),
+    __param(6, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
+    __param(7, (0, common_1.Inject)(learner_service_1.ILearnerService)),
+    __param(8, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __metadata("design:paramtypes", [mongoose_2.Connection,
         axios_1.HttpService,
         config_1.ConfigService,
-        helper_service_1.HelperService,
-        notification_adapter_1.NotificationAdapter, Object, Object, Object, Object])
+        helper_service_1.HelperService, Object, Object, Object, Object, Object])
 ], MomoPaymentStrategy);
 //# sourceMappingURL=momo.strategy.js.map

@@ -25,9 +25,9 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
 import { IAuthUserService } from '@auth/services/auth.service';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { HelperService } from '@common/services/helper.service';
+import { INotificationService } from '@notification/services/notification.service';
 import { CreateStaffDto } from '@staff/dto/create-staff.dto';
 import { QueryStaffDto } from '@staff/dto/view-staff.dto';
 import { IStaffRepository } from '@staff/repositories/staff.repository';
@@ -42,10 +42,10 @@ export interface IStaffService extends IAuthUserService {
     list(pagination: PaginationParams, queryStaffDto: QueryStaffDto): any;
 }
 export declare class StaffService implements IStaffService {
-    private readonly staffRepository;
     private readonly helperService;
-    private readonly notificationAdapter;
-    constructor(staffRepository: IStaffRepository, helperService: HelperService, notificationAdapter: NotificationAdapter);
+    private readonly staffRepository;
+    private readonly notificationService;
+    constructor(helperService: HelperService, staffRepository: IStaffRepository, notificationService: INotificationService);
     create(createStaffDto: CreateStaffDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Staff> & Staff & Required<{
         _id: string;
     }>>;

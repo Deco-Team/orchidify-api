@@ -1,4 +1,3 @@
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { RecruitmentStatus } from '@common/contracts/constant'
 import { SuccessResponse, UserAuth } from '@common/contracts/dto'
 import { Errors } from '@common/contracts/error'
@@ -7,6 +6,7 @@ import { AppException } from '@common/exceptions/app.exception'
 import { AppLogger } from '@common/services/app-logger.service'
 import { HelperService } from '@common/services/helper.service'
 import { Injectable, Inject } from '@nestjs/common'
+import { INotificationService } from '@notification/services/notification.service'
 import { JobName, QueueName } from '@queue/contracts/constant'
 import { IQueueProducerService } from '@queue/services/queue-producer.service'
 import { RECRUITMENT_LIST_PROJECTION } from '@recruitment/contracts/constant'
@@ -55,14 +55,15 @@ export interface IRecruitmentService {
 export class RecruitmentService implements IRecruitmentService {
   private readonly appLogger = new AppLogger(RecruitmentService.name)
   constructor(
-    private readonly notificationAdapter: NotificationAdapter,
     private readonly helperService: HelperService,
     @Inject(IRecruitmentRepository)
     private readonly recruitmentRepository: IRecruitmentRepository,
     @Inject(ISettingService)
     private readonly settingService: ISettingService,
     @Inject(IQueueProducerService)
-    private readonly queueProducerService: IQueueProducerService
+    private readonly queueProducerService: IQueueProducerService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   public async create(createRecruitmentDto: any, options?: SaveOptions | undefined) {
@@ -199,7 +200,7 @@ export class RecruitmentService implements IRecruitmentService {
     )
 
     // send notification
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: recruitment?.applicationInfo?.email,
       subject: `[Orchidify] Mời phỏng vấn vị trí Giảng viên - Orchidify`,
       template: 'viewer/process-recruitment-application',
@@ -243,7 +244,7 @@ export class RecruitmentService implements IRecruitmentService {
       }
     )
     // send notification
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: recruitment?.applicationInfo?.email,
       subject: `[Orchidify] Chúc mừng bạn đã trở thành một phần của Orchidify`,
       template: 'viewer/process-recruitment-interview',
@@ -297,7 +298,7 @@ export class RecruitmentService implements IRecruitmentService {
       recruitment.status === RecruitmentStatus.PENDING
         ? 'viewer/reject-recruitment-application.ejs'
         : 'viewer/reject-recruitment-interview.ejs'
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: recruitment?.applicationInfo?.email,
       subject: `[Orchidify] Thông báo về kết quả ứng tuyển giảng viên`,
       template: mailTemplate,

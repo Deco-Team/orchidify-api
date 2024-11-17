@@ -44,7 +44,7 @@ import { UserAuth } from '@common/contracts/dto';
 import { ISettingService } from '@setting/services/setting.service';
 import { IInstructorService } from '@instructor/services/instructor.service';
 import { CancelClassDto } from '@class/dto/cancel-class.dto';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
+import { INotificationService } from '@notification/services/notification.service';
 export declare const IClassService: unique symbol;
 export interface IClassService {
     create(courseClass: CreateClassDto, options?: SaveOptions | undefined): Promise<ClassDocument>;
@@ -68,7 +68,7 @@ export interface IClassService {
     }): moment.Moment;
 }
 export declare class ClassService implements IClassService {
-    private readonly notificationAdapter;
+    private readonly notificationService;
     readonly connection: Connection;
     private readonly classRepository;
     private readonly configService;
@@ -79,7 +79,7 @@ export declare class ClassService implements IClassService {
     private readonly gardenTimesheetService;
     private readonly settingService;
     private readonly instructorService;
-    constructor(notificationAdapter: NotificationAdapter, connection: Connection, classRepository: IClassRepository, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService);
+    constructor(notificationService: INotificationService, connection: Connection, classRepository: IClassRepository, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService);
     create(createClassDto: CreateClassDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>>;

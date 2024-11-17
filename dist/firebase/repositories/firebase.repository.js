@@ -47,6 +47,9 @@ let FirebaseRepository = class FirebaseRepository {
     getMessaging() {
         return __classPrivateFieldGet(this, _FirebaseRepository_messaging, "f");
     }
+    getCollection(collectionName) {
+        return __classPrivateFieldGet(this, _FirebaseRepository_firestore, "f").collection(collectionName);
+    }
 };
 exports.FirebaseRepository = FirebaseRepository;
 _FirebaseRepository_auth = new WeakMap();

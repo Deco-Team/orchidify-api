@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class SendFirebaseMessagingDto {
   @ApiProperty({ type: String })
@@ -10,8 +10,10 @@ export class SendFirebaseMessagingDto {
   @ApiProperty({ type: String })
   body: string
 
-  @ApiProperty({ type: String })
-  icon?: string
+  @ApiPropertyOptional({ type: Object })
+  data?: {
+    [key: string]: string
+  }
 }
 
 export class SendFirebaseMulticastMessagingDto {
@@ -24,8 +26,10 @@ export class SendFirebaseMulticastMessagingDto {
   @ApiProperty({ type: String })
   body: string
 
-  @ApiProperty({ type: String })
-  icon?: string
+  @ApiPropertyOptional({ type: Object })
+  data?: {
+    [key: string]: string
+  }
 }
 
 export class SendFirebaseTopicMessagingDto {
@@ -38,6 +42,16 @@ export class SendFirebaseTopicMessagingDto {
   @ApiProperty({ type: String })
   body: string
 
+  @ApiPropertyOptional({ type: Object })
+  data?: {
+    [key: string]: string
+  }
+}
+
+export class SubscribeFirebaseTopicDto {
   @ApiProperty({ type: String })
-  icon?: string
+  topic: string
+
+  @ApiProperty({ type: String, isArray: true })
+  tokens: string[]
 }

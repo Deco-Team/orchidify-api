@@ -13,7 +13,6 @@ import { IPaymentStrategy } from '@src/transaction/strategies/payment-strategy.i
 import { BasePaymentDto } from '@transaction/dto/base.transaction.dto'
 import { get } from 'lodash'
 import { Connection, Types } from 'mongoose'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { ILearnerService } from '@learner/services/learner.service'
 import {
   CreateStripePaymentDto,
@@ -22,6 +21,7 @@ import {
 } from '@transaction/dto/stripe-payment.dto'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { INotificationService } from '@notification/services/notification.service'
 
 @Injectable()
 export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
@@ -31,7 +31,6 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
   constructor(
     @InjectConnection() readonly connection: Connection,
     private readonly configService: ConfigService,
-    private readonly notificationAdapter: NotificationAdapter,
     @Inject(ITransactionRepository)
     private readonly transactionRepository: ITransactionRepository,
     @Inject(forwardRef(() => IClassService))
@@ -41,7 +40,9 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
     @Inject(ISettingService)
-    private readonly settingService: ISettingService
+    private readonly settingService: ISettingService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
   async onModuleInit() {
     this.stripe = new Stripe(this.configService.get('payment.stripe.apiKey'))
@@ -167,7 +168,7 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
         this.learnerService.findById(learnerId),
         this.classService.findById(classId)
       ])
-      this.notificationAdapter.sendMail({
+      this.notificationService.sendMail({
         to: learner?.email,
         subject: `[Orchidify] Xác nhận đăng ký lớp học ${courseClass?.title} thành công`,
         template: 'learner/enroll-class',

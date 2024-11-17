@@ -24,11 +24,11 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
 import { RecruitmentStatus } from '@common/contracts/constant';
 import { SuccessResponse, UserAuth } from '@common/contracts/dto';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { HelperService } from '@common/services/helper.service';
+import { INotificationService } from '@notification/services/notification.service';
 import { IQueueProducerService } from '@queue/services/queue-producer.service';
 import { ProcessRecruitmentApplicationDto } from '@recruitment/dto/process-recruitment-application.dto';
 import { RejectRecruitmentProcessDto } from '@recruitment/dto/reject-recruitment-process.dto';
@@ -51,13 +51,13 @@ export interface IRecruitmentService {
     expiredRecruitmentProcess(recruitmentId: string, userAuth: UserAuth): Promise<SuccessResponse>;
 }
 export declare class RecruitmentService implements IRecruitmentService {
-    private readonly notificationAdapter;
     private readonly helperService;
     private readonly recruitmentRepository;
     private readonly settingService;
     private readonly queueProducerService;
+    private readonly notificationService;
     private readonly appLogger;
-    constructor(notificationAdapter: NotificationAdapter, helperService: HelperService, recruitmentRepository: IRecruitmentRepository, settingService: ISettingService, queueProducerService: IQueueProducerService);
+    constructor(helperService: HelperService, recruitmentRepository: IRecruitmentRepository, settingService: ISettingService, queueProducerService: IQueueProducerService, notificationService: INotificationService);
     create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Recruitment> & Recruitment & Required<{
         _id: string;
     }>>;

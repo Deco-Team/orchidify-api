@@ -23,8 +23,8 @@ import { AxiosError } from 'axios'
 import { get } from 'lodash'
 import { Connection, Types } from 'mongoose'
 import { catchError, firstValueFrom } from 'rxjs'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { ILearnerService } from '@learner/services/learner.service'
+import { INotificationService } from '@notification/services/notification.service'
 
 @Injectable()
 export class MomoPaymentStrategy implements IPaymentStrategy {
@@ -35,7 +35,6 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
     private readonly helperService: HelperService,
-    private readonly notificationAdapter: NotificationAdapter,
     @Inject(ITransactionRepository)
     private readonly transactionRepository: ITransactionRepository,
     @Inject(forwardRef(() => IClassService))
@@ -43,7 +42,9 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
     @Inject(ILearnerService)
-    private readonly learnerService: ILearnerService
+    private readonly learnerService: ILearnerService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {
     this.config = this.configService.get('payment.momo')
   }
@@ -293,7 +294,7 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
         this.learnerService.findById(learnerId),
         this.classService.findById(classId)
       ])
-      this.notificationAdapter.sendMail({
+      this.notificationService.sendMail({
         to: learner?.email,
         subject: `[Orchidify] Xác nhận đăng ký lớp học ${courseClass?.title} thành công`,
         template: 'learner/enroll-class',

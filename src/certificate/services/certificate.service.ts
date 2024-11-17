@@ -1,5 +1,3 @@
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
-import { UserRole } from '@common/contracts/constant'
 import { Errors } from '@common/contracts/error'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { AppException } from '@common/exceptions/app.exception'

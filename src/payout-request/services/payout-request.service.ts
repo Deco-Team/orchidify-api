@@ -25,6 +25,8 @@ import { IInstructorService } from '@instructor/services/instructor.service'
 import { ITransactionService } from '@transaction/services/transaction.service'
 import { BasePayoutDto } from '@transaction/dto/base.transaction.dto'
 import { TransactionType } from '@transaction/contracts/constant'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
+import { INotificationService } from '@notification/services/notification.service'
 
 export const IPayoutRequestService = Symbol('IPayoutRequestService')
 
@@ -80,7 +82,9 @@ export class PayoutRequestService implements IPayoutRequestService {
     private readonly settingService: ISettingService,
     private readonly helperService: HelperService,
     @Inject(ITransactionService)
-    private readonly transactionService: ITransactionService
+    private readonly transactionService: ITransactionService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService
   ) {}
 
   public async createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined) {
@@ -309,7 +313,17 @@ export class PayoutRequestService implements IPayoutRequestService {
     } finally {
       await session.endSession()
     }
-    // TODO: send notification
+
+    // send notification to instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu rút tiền của bạn đã được duyệt',
+      body: 'Số tiền sẽ được thanh toán sau vài ngày làm việc. Bấm để xem chi tiết.',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.PAYOUT_REQUEST,
+        id: payoutRequestId
+      }
+    })
 
     this.queueProducerService.removeJob(QueueName.PAYOUT_REQUEST, payoutRequestId)
     return new SuccessResponse(true)
@@ -366,14 +380,22 @@ export class PayoutRequestService implements IPayoutRequestService {
     } finally {
       await session.endSession()
     }
-    // TODO: send notification
 
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu rút tiền đã bị từ chối',
+      body: 'Yêu cầu rút tiền chưa hợp lệ. Bấm để xem chi tiết.',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.PAYOUT_REQUEST,
+        id: payoutRequestId
+      }
+    })
     this.queueProducerService.removeJob(QueueName.PAYOUT_REQUEST, payoutRequestId)
     return new SuccessResponse(true)
   }
 
   async expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse> {
-    const { role } = userAuth
+    const { _id, role } = userAuth
 
     // validate payout request
     const payoutRequest = await this.findById(payoutRequestId)
@@ -415,8 +437,16 @@ export class PayoutRequestService implements IPayoutRequestService {
     } finally {
       await session.endSession()
     }
-    // TODO: send notification
 
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu rút tiền đã hết hạn',
+      body: 'Yêu cầu rút tiền đã hết hạn. Bấm để xem chi tiết.',
+      receiverIds: [_id],
+      data: {
+        type: FCMNotificationDataType.PAYOUT_REQUEST,
+        id: payoutRequestId
+      }
+    })
     return new SuccessResponse(true)
   }
 

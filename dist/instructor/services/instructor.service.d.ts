@@ -32,7 +32,7 @@ import { QueryInstructorDto } from '@instructor/dto/view-instructor.dto';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto';
 import { HelperService } from '@common/services/helper.service';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
+import { INotificationService } from '@notification/services/notification.service';
 export declare const IInstructorService: unique symbol;
 export interface IInstructorService extends IAuthUserService {
     create(createInstructorDto: CreateInstructorDto, options?: SaveOptions | undefined): Promise<InstructorDocument>;
@@ -42,10 +42,10 @@ export interface IInstructorService extends IAuthUserService {
     list(pagination: PaginationParams, queryLearnerDto: QueryInstructorDto): any;
 }
 export declare class InstructorService implements IInstructorService {
-    private readonly instructorRepository;
     private readonly helperService;
-    private readonly notificationAdapter;
-    constructor(instructorRepository: IInstructorRepository, helperService: HelperService, notificationAdapter: NotificationAdapter);
+    private readonly instructorRepository;
+    private readonly notificationService;
+    constructor(helperService: HelperService, instructorRepository: IInstructorRepository, notificationService: INotificationService);
     create(createInstructorDto: CreateInstructorDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Instructor> & Instructor & Required<{
         _id: string;
     }>>;

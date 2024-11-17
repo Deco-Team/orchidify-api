@@ -7,6 +7,7 @@ export interface IFirebaseRepository {
   getAuth(): auth.Auth
   getFirestore(): FirebaseFirestore.Firestore
   getMessaging(): messaging.Messaging
+  getCollection(collectionName: string): FirebaseFirestore.CollectionReference
 }
 
 @Injectable()
@@ -14,13 +15,11 @@ export class FirebaseRepository {
   #auth: auth.Auth
   #firestore: FirebaseFirestore.Firestore
   #messaging: messaging.Messaging
-  // #collection: FirebaseFirestore.CollectionReference;
 
   constructor(@Inject('FIREBASE_APP') private firebaseApp: app.App) {
     this.#auth = this.firebaseApp.auth()
     this.#firestore = this.firebaseApp.firestore()
     this.#messaging = this.firebaseApp.messaging()
-    // this.#collection = this.#firestore.collection('<collection_name>');
   }
 
   getAuth() {
@@ -33,5 +32,9 @@ export class FirebaseRepository {
 
   getMessaging() {
     return this.#messaging
+  }
+
+  getCollection(collectionName: string) {
+    return this.#firestore.collection(collectionName);
   }
 }

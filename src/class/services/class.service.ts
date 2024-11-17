@@ -49,7 +49,7 @@ import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { IInstructorService } from '@instructor/services/instructor.service'
 import { CancelClassDto } from '@class/dto/cancel-class.dto'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
+import { INotificationService } from '@notification/services/notification.service'
 
 export const IClassService = Symbol('IClassService')
 
@@ -90,7 +90,8 @@ export interface IClassService {
 @Injectable()
 export class ClassService implements IClassService {
   constructor(
-    private readonly notificationAdapter: NotificationAdapter,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
     @InjectConnection() readonly connection: Connection,
     @Inject(IClassRepository)
     private readonly classRepository: IClassRepository,
@@ -757,7 +758,7 @@ export class ClassService implements IClassService {
     const sendCancelClassEmailPromises = []
     learners.forEach((learner) => {
       sendCancelClassEmailPromises.push(
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
           to: learner.email,
           subject: `[Orchidify] Thông báo hủy lớp học`,
           template: 'learner/cancel-class',

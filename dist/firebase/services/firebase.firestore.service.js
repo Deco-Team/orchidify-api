@@ -11,22 +11,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var FirebaseFirestoreService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NotificationRepository = exports.INotificationRepository = void 0;
+exports.FirebaseFirestoreService = exports.IFirebaseFirestoreService = void 0;
 const common_1 = require("@nestjs/common");
-const mongoose_1 = require("@nestjs/mongoose");
-const notification_schema_1 = require("../schemas/notification.schema");
-const repositories_1 = require("../../common/repositories");
-exports.INotificationRepository = Symbol('INotificationRepository');
-let NotificationRepository = class NotificationRepository extends repositories_1.AbstractRepository {
-    constructor(model) {
-        super(model);
+const firebase_repository_1 = require("../repositories/firebase.repository");
+const app_logger_service_1 = require("../../common/services/app-logger.service");
+exports.IFirebaseFirestoreService = Symbol('IFirebaseFirestoreService');
+let FirebaseFirestoreService = FirebaseFirestoreService_1 = class FirebaseFirestoreService {
+    constructor(firebaseRepository) {
+        this.firebaseRepository = firebaseRepository;
+        this.appLogger = new app_logger_service_1.AppLogger(FirebaseFirestoreService_1.name);
+    }
+    async getCollection(collectionName) {
+        return await this.firebaseRepository.getCollection(collectionName);
     }
 };
-exports.NotificationRepository = NotificationRepository;
-exports.NotificationRepository = NotificationRepository = __decorate([
+exports.FirebaseFirestoreService = FirebaseFirestoreService;
+exports.FirebaseFirestoreService = FirebaseFirestoreService = FirebaseFirestoreService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, mongoose_1.InjectModel)(notification_schema_1.Notification.name)),
+    __param(0, (0, common_1.Inject)(firebase_repository_1.IFirebaseRepository)),
     __metadata("design:paramtypes", [Object])
-], NotificationRepository);
-//# sourceMappingURL=notification.repository.js.map
+], FirebaseFirestoreService);
+//# sourceMappingURL=firebase.firestore.service.js.map

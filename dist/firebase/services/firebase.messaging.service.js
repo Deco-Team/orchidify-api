@@ -17,24 +17,21 @@ exports.FirebaseMessagingService = exports.IFirebaseMessagingService = void 0;
 const common_1 = require("@nestjs/common");
 const firebase_repository_1 = require("../repositories/firebase.repository");
 const app_logger_service_1 = require("../../common/services/app-logger.service");
-const instructor_service_1 = require("../../instructor/services/instructor.service");
-const learner_service_1 = require("../../learner/services/learner.service");
 exports.IFirebaseMessagingService = Symbol('IFirebaseMessagingService');
 let FirebaseMessagingService = FirebaseMessagingService_1 = class FirebaseMessagingService {
-    constructor(firebaseRepository, instructorService, learnerService) {
+    constructor(firebaseRepository) {
         this.firebaseRepository = firebaseRepository;
-        this.instructorService = instructorService;
-        this.learnerService = learnerService;
         this.appLogger = new app_logger_service_1.AppLogger(FirebaseMessagingService_1.name);
     }
-    async send({ token, title, body, icon }) {
+    async send({ token, title, body, data }) {
         try {
             const response = await this.firebaseRepository.getMessaging().send({
                 token,
                 notification: {
                     title,
-                    body,
+                    body
                 },
+                data
             });
             return {
                 success: true,
@@ -42,48 +39,59 @@ let FirebaseMessagingService = FirebaseMessagingService_1 = class FirebaseMessag
             };
         }
         catch (error) {
-            console.log('Error sending messages:', error);
+            this.appLogger.error('Error sending messages:', error);
             return { success: false };
         }
     }
-    async sendMulticast({ tokens, title, body, icon }) {
+    async sendMulticast({ tokens, title, body, data }) {
         const message = {
             notification: {
                 title,
-                body,
-                icon
+                body
             },
-            tokens
+            tokens,
+            data
         };
         try {
             const response = await this.firebaseRepository.getMessaging().sendEachForMulticast(message);
-            console.log('Successfully sent messages:', response);
+            this.appLogger.log(`Successfully sent messages: ${JSON.stringify(response)}`);
             return {
                 success: true,
                 response
             };
         }
         catch (error) {
-            console.log('Error sending messages:', error);
+            this.appLogger.error('Error sending messages:', error);
             return { success: false };
         }
     }
-    async sendTopicNotification({ topic, title, body, icon }) {
+    async sendTopicNotification({ topic, title, body, data }) {
         const message = {
             notification: {
                 title,
-                body,
-                icon
+                body
             },
-            topic
+            topic,
+            data
         };
         try {
             const response = await this.firebaseRepository.getMessaging().send(message);
-            console.log('Successfully sent message:', response);
+            this.appLogger.log(`Successfully sent messages: ${JSON.stringify(response)}`);
             return { success: true, response };
         }
         catch (error) {
-            console.log('Error sending message:', error);
+            this.appLogger.error('Error sending message:', error);
+            return { success: false };
+        }
+    }
+    async subscribeToTopic({ topic, tokens }) {
+        try {
+            const response = await this.firebaseRepository.getMessaging().subscribeToTopic(tokens, topic);
+            this.appLogger.log(`Successfully subscribed to topic: ${JSON.stringify(response)}`);
+            return { success: true, response };
+        }
+        catch (error) {
+            this.appLogger.error('Error subscribing to topic:', error);
             return { success: false };
         }
     }
@@ -92,8 +100,6 @@ exports.FirebaseMessagingService = FirebaseMessagingService;
 exports.FirebaseMessagingService = FirebaseMessagingService = FirebaseMessagingService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(firebase_repository_1.IFirebaseRepository)),
-    __param(1, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
-    __param(2, (0, common_1.Inject)(learner_service_1.ILearnerService)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __metadata("design:paramtypes", [Object])
 ], FirebaseMessagingService);
 //# sourceMappingURL=firebase.messaging.service.js.map

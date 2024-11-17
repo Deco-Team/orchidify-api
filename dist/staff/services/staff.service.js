@@ -13,20 +13,20 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StaffService = exports.IStaffService = void 0;
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
 const constant_1 = require("../../common/contracts/constant");
 const error_1 = require("../../common/contracts/error");
 const app_exception_1 = require("../../common/exceptions/app.exception");
 const helper_service_1 = require("../../common/services/helper.service");
 const common_1 = require("@nestjs/common");
+const notification_service_1 = require("../../notification/services/notification.service");
 const constant_2 = require("../contracts/constant");
 const staff_repository_1 = require("../repositories/staff.repository");
 exports.IStaffService = Symbol('IStaffService');
 let StaffService = class StaffService {
-    constructor(staffRepository, helperService, notificationAdapter) {
-        this.staffRepository = staffRepository;
+    constructor(helperService, staffRepository, notificationService) {
         this.helperService = helperService;
-        this.notificationAdapter = notificationAdapter;
+        this.staffRepository = staffRepository;
+        this.notificationService = notificationService;
     }
     async create(createStaffDto, options) {
         const password = this.helperService.generateRandomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
@@ -35,7 +35,7 @@ let StaffService = class StaffService {
         const staffCode = await this.generateStaffCode();
         createStaffDto['staffCode'] = staffCode;
         const staff = await this.staffRepository.create(createStaffDto, options);
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: staff.email,
             subject: `[Orchidify] Thông tin đăng nhập`,
             template: 'management/add-staff',
@@ -114,8 +114,8 @@ let StaffService = class StaffService {
 exports.StaffService = StaffService;
 exports.StaffService = StaffService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(staff_repository_1.IStaffRepository)),
-    __metadata("design:paramtypes", [Object, helper_service_1.HelperService,
-        notification_adapter_1.NotificationAdapter])
+    __param(1, (0, common_1.Inject)(staff_repository_1.IStaffRepository)),
+    __param(2, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object])
 ], StaffService);
 //# sourceMappingURL=staff.service.js.map

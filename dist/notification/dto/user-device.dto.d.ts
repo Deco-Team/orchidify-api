@@ -41,7 +41,7 @@ export declare class CreateUserDeviceDto extends CreateUserDeviceDto_base {
     userId: Types.ObjectId;
     userRole: UserRole;
 }
-declare const UserDeviceDetailResponse_base: import("@nestjs/common").Type<Pick<BaseUserDeviceDto, "status" | "createdAt" | "updatedAt" | "_id" | "userId" | "userRole" | "fcmToken" | "browser" | "os">>;
+declare const UserDeviceDetailResponse_base: import("@nestjs/common").Type<Pick<BaseUserDeviceDto, "status" | "_id" | "userId" | "userRole" | "fcmToken" | "browser" | "os">>;
 declare class UserDeviceDetailResponse extends UserDeviceDetailResponse_base {
 }
 declare const UserDeviceDetailDataResponse_base: import("@nestjs/common").Type<{

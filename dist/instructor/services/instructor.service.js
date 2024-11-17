@@ -18,20 +18,20 @@ const instructor_repository_1 = require("../repositories/instructor.repository")
 const constant_1 = require("../contracts/constant");
 const constant_2 = require("../../common/contracts/constant");
 const helper_service_1 = require("../../common/services/helper.service");
-const notification_adapter_1 = require("../../common/adapters/notification.adapter");
+const notification_service_1 = require("../../notification/services/notification.service");
 exports.IInstructorService = Symbol('IInstructorService');
 let InstructorService = class InstructorService {
-    constructor(instructorRepository, helperService, notificationAdapter) {
-        this.instructorRepository = instructorRepository;
+    constructor(helperService, instructorRepository, notificationService) {
         this.helperService = helperService;
-        this.notificationAdapter = notificationAdapter;
+        this.instructorRepository = instructorRepository;
+        this.notificationService = notificationService;
     }
     async create(createInstructorDto, options) {
         const password = this.helperService.generateRandomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
         const hashPassword = await this.helperService.hashPassword(password);
         createInstructorDto['password'] = hashPassword;
         const instructor = await this.instructorRepository.create(createInstructorDto, options);
-        this.notificationAdapter.sendMail({
+        this.notificationService.sendMail({
             to: instructor.email,
             subject: `[Orchidify] Thông tin đăng nhập`,
             template: 'instructor/add-instructor',
@@ -92,8 +92,8 @@ let InstructorService = class InstructorService {
 exports.InstructorService = InstructorService;
 exports.InstructorService = InstructorService = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, common_1.Inject)(instructor_repository_1.IInstructorRepository)),
-    __metadata("design:paramtypes", [Object, helper_service_1.HelperService,
-        notification_adapter_1.NotificationAdapter])
+    __param(1, (0, common_1.Inject)(instructor_repository_1.IInstructorRepository)),
+    __param(2, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object])
 ], InstructorService);
 //# sourceMappingURL=instructor.service.js.map

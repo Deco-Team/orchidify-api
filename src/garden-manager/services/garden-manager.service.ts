@@ -9,7 +9,7 @@ import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { GARDEN_MANAGER_LIST_PROJECTION } from '@garden-manager/contracts/constant'
 import { GardenManagerStatus } from '@common/contracts/constant'
 import { HelperService } from '@common/services/helper.service'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
+import { INotificationService } from '@notification/services/notification.service'
 
 export const IGardenManagerService = Symbol('IGardenManagerService')
 
@@ -32,10 +32,11 @@ export interface IGardenManagerService extends IAuthUserService {
 @Injectable()
 export class GardenManagerService implements IGardenManagerService {
   constructor(
+    private readonly helperService: HelperService,
     @Inject(IGardenManagerRepository)
     private readonly gardenManagerRepository: IGardenManagerRepository,
-    private readonly helperService: HelperService,
-    private readonly notificationAdapter: NotificationAdapter
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {}
 
   public async create(createGardenManagerDto: CreateGardenManagerDto, options?: SaveOptions | undefined) {
@@ -44,7 +45,7 @@ export class GardenManagerService implements IGardenManagerService {
     createGardenManagerDto['password'] = hashPassword
     const gardenManager = await this.gardenManagerRepository.create(createGardenManagerDto, options)
 
-    this.notificationAdapter.sendMail({
+    this.notificationService.sendMail({
       to: gardenManager.email,
       subject: `[Orchidify] Thông tin đăng nhập`,
       template: 'management/add-garden-manager',

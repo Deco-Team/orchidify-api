@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Inject, Post } from '@nestjs/common'
 import { HealthCheck, HealthCheckService, MemoryHealthIndicator, MongooseHealthIndicator } from '@nestjs/terminus'
+// import { INotificationService } from '@notification/services/notification.service'
 import { AppService } from '@src/app.service'
 // import { HelperService } from '@common/services/helper.service'
 
@@ -11,6 +12,8 @@ export class AppController {
     private readonly memoryHealthIndicator: MemoryHealthIndicator,
     private readonly mongooseHealthIndicator: MongooseHealthIndicator,
     // private readonly helperService: HelperService
+    // @Inject(INotificationService)
+    // private readonly notificationService: INotificationService
   ) {}
 
   @Get('welcome')
@@ -18,7 +21,7 @@ export class AppController {
     return this.appService.getI18nText()
   }
 
-  // @Get('cert')
+  // @Post('cert')
   // async cert() {
   //   const data = {
   //     learnerName: 'Vo Minh Tien',
@@ -36,6 +39,20 @@ export class AppController {
   //   })
 
   //   console.log('PDF file generated successfully.')
+  // }
+
+  // @Post('noti')
+  // async noti() {
+  //   const data = {
+  //     title: 'Title notification',
+  //     body: 'Body notification',
+  //     data: {},
+  //     receiverIds: ['66d8921faf503bca4c5627a5'],
+  //   }
+
+  //   await this.notificationService.sendFirebaseCloudMessaging(data)
+
+  //   console.log('Send noti successfully.')
   // }
 
   @Get('health')

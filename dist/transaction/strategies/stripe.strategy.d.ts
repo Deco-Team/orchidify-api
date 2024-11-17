@@ -317,23 +317,23 @@ import { ConfigService } from '@nestjs/config';
 import { ITransactionRepository } from '@src/transaction/repositories/transaction.repository';
 import { IPaymentStrategy } from '@src/transaction/strategies/payment-strategy.interface';
 import { Connection } from 'mongoose';
-import { NotificationAdapter } from '@common/adapters/notification.adapter';
 import { ILearnerService } from '@learner/services/learner.service';
 import { CreateStripePaymentDto, QueryStripePaymentDto, RefundStripePaymentDto } from '@transaction/dto/stripe-payment.dto';
 import { ISettingService } from '@setting/services/setting.service';
+import { INotificationService } from '@notification/services/notification.service';
 export declare class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     readonly connection: Connection;
     private readonly configService;
-    private readonly notificationAdapter;
     private readonly transactionRepository;
     private readonly classService;
     private readonly learnerClassService;
     private readonly learnerService;
     private readonly settingService;
+    private readonly notificationService;
     private readonly logger;
     private stripe;
     private publishableKey;
-    constructor(connection: Connection, configService: ConfigService, notificationAdapter: NotificationAdapter, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, settingService: ISettingService);
+    constructor(connection: Connection, configService: ConfigService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, settingService: ISettingService, notificationService: INotificationService);
     onModuleInit(): Promise<void>;
     createTransaction(createStripePaymentDto: CreateStripePaymentDto): Promise<{
         id: string;

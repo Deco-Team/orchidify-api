@@ -10,10 +10,8 @@ import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 import { JwtService } from '@nestjs/jwt'
 import { HelperService } from '@common/services/helper.service'
 import { ConfigService } from '@nestjs/config'
-import { NotificationAdapter } from '@common/adapters/notification.adapter'
 import { Errors } from '@common/contracts/error'
 import { AppException } from '@common/exceptions/app.exception'
-import { BadRequestException } from '@nestjs/common'
 import { SuccessResponse } from '@common/contracts/dto'
 import { LoginDto } from '@auth/dto/login.dto'
 import { LearnerStatus, RecruitmentStatus, UserRole } from '@common/contracts/constant'
@@ -28,6 +26,7 @@ import { InstructorDocument } from '@instructor/schemas/instructor.schema'
 import { RecruitmentDocument } from '@recruitment/schemas/recruitment.schema'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingDocument } from '@setting/schemas/setting.schema'
+import { INotificationService } from '@notification/services/notification.service'
 
 describe('AuthService', () => {
   let authService: AuthService
@@ -41,7 +40,7 @@ describe('AuthService', () => {
   let jwtServiceMock: JwtService
   let helperServiceMock: HelperService
   let configServiceMock: ConfigService
-  let notificationAdapterMock: NotificationAdapter
+  let notificationServiceMock: INotificationService
   let settingServiceMock: ISettingService
 
   beforeEach(async () => {
@@ -105,7 +104,7 @@ describe('AuthService', () => {
           }
         },
         { provide: ConfigService, useValue: { get: jest.fn() } },
-        { provide: NotificationAdapter, useValue: { sendMail: jest.fn() } },
+        { provide: INotificationService, useValue: { sendMail: jest.fn() } },
         {
           provide: ISettingService,
           useValue: {
@@ -126,7 +125,7 @@ describe('AuthService', () => {
     jwtServiceMock = module.get<JwtService>(JwtService)
     helperServiceMock = module.get<HelperService>(HelperService)
     configServiceMock = module.get<ConfigService>(ConfigService)
-    notificationAdapterMock = module.get<NotificationAdapter>(NotificationAdapter)
+    notificationServiceMock = module.get<INotificationService>(INotificationService)
     settingServiceMock = module.get<ISettingService>(ISettingService)
   })
 

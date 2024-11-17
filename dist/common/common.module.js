@@ -11,15 +11,14 @@ const common_1 = require("@nestjs/common");
 const app_logger_service_1 = require("./services/app-logger.service");
 const helper_service_1 = require("./services/helper.service");
 const discord_service_1 = require("./services/discord.service");
-const notification_adapter_1 = require("./adapters/notification.adapter");
 let CommonModule = class CommonModule {
 };
 exports.CommonModule = CommonModule;
 exports.CommonModule = CommonModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        providers: [app_logger_service_1.AppLogger, helper_service_1.HelperService, discord_service_1.DiscordService, notification_adapter_1.NotificationAdapter],
-        exports: [app_logger_service_1.AppLogger, helper_service_1.HelperService, discord_service_1.DiscordService, notification_adapter_1.NotificationAdapter]
+        providers: [app_logger_service_1.AppLogger, helper_service_1.HelperService, discord_service_1.DiscordService],
+        exports: [app_logger_service_1.AppLogger, helper_service_1.HelperService, discord_service_1.DiscordService]
     })
 ], CommonModule);
 //# sourceMappingURL=common.module.js.map
