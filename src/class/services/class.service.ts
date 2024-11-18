@@ -50,6 +50,7 @@ import { SettingKey } from '@setting/contracts/constant'
 import { IInstructorService } from '@instructor/services/instructor.service'
 import { CancelClassDto } from '@class/dto/cancel-class.dto'
 import { INotificationService } from '@notification/services/notification.service'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
 
 export const IClassService = Symbol('IClassService')
 
@@ -532,10 +533,11 @@ export class ClassService implements IClassService {
     const { _id, role } = userAuth
     // Execute in transaction
     const session = await this.connection.startSession()
+    let courseClass: Class
     try {
       await session.withTransaction(async () => {
         // complete class
-        const courseClass = await this.update(
+        courseClass = await this.update(
           { _id: new Types.ObjectId(classId) },
           {
             $set: {
@@ -583,7 +585,16 @@ export class ClassService implements IClassService {
       await session.endSession()
     }
 
-    // TODO: send notification for instructor
+    // send notification for instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Lớp học ${courseClass.code} đã hoàn thành`,
+      body: `Lớp học ${courseClass.code}: ${courseClass.title} đã hoàn thành. Số tiền đã được thanh toán vào số dư của bạn.`,
+      receiverIds: [courseClass.instructorId.toString()],
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: classId
+      },
+    })
   }
 
   public getClassEndTime(params: {
@@ -742,10 +753,19 @@ export class ClassService implements IClassService {
       await session.endSession()
     }
 
-    // send email for learners
+    // send email/notification for learners
     this.sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass)
 
-    // TODO: send notification for instructor
+    // send notification for instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Lớp học ${courseClass.code} đã bị hủy`,
+      body: `Lớp học ${courseClass.code}: ${courseClass.title} đã bị hủy. Bấm để xem chi tiết`,
+      receiverIds: [courseClass.instructorId.toString()],
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: classId
+      },
+    })
   }
 
   private async sendCancelClassNotificationForLearner(
@@ -757,6 +777,8 @@ export class ClassService implements IClassService {
     })
     const sendCancelClassEmailPromises = []
     learners.forEach((learner) => {
+      // TODO: send notification for learners(topic)
+      
       sendCancelClassEmailPromises.push(
         this.notificationService.sendMail({
           to: learner.email,

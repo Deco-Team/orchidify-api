@@ -183,8 +183,9 @@ export class ClassQueueConsumer extends WorkerHost {
 
       const updateClassProgressPromises = []
       courseClasses.forEach((courseClass) => {
-        const completed = courseClass.progress.completed + 1
-        const total = courseClass.progress.total
+        const { progress } = courseClass
+        const completed = progress.completed + 1 > progress.total ? progress.total : progress.completed + 1
+        const total = progress.total
         const percentage = Math.round((completed / total) * 100)
         updateClassProgressPromises.push(
           this.classService.update(

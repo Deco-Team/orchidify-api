@@ -35,6 +35,7 @@ const setting_service_1 = require("../../setting/services/setting.service");
 const constant_4 = require("../../setting/contracts/constant");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
 const notification_service_1 = require("../../notification/services/notification.service");
+const constant_5 = require("../../notification/contracts/constant");
 exports.IClassService = Symbol('IClassService');
 let ClassService = class ClassService {
     constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
@@ -385,9 +386,10 @@ let ClassService = class ClassService {
     async completeClass(classId, userAuth) {
         const { _id, role } = userAuth;
         const session = await this.connection.startSession();
+        let courseClass;
         try {
             await session.withTransaction(async () => {
-                const courseClass = await this.update({ _id: new mongoose_1.Types.ObjectId(classId) }, {
+                courseClass = await this.update({ _id: new mongoose_1.Types.ObjectId(classId) }, {
                     $set: {
                         status: constant_1.ClassStatus.COMPLETED
                     },
@@ -411,6 +413,15 @@ let ClassService = class ClassService {
         finally {
             await session.endSession();
         }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Lớp học ${courseClass.code} đã hoàn thành`,
+            body: `Lớp học ${courseClass.code}: ${courseClass.title} đã hoàn thành. Số tiền đã được thanh toán vào số dư của bạn.`,
+            receiverIds: [courseClass.instructorId.toString()],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS,
+                id: classId
+            },
+        });
     }
     getClassEndTime(params) {
         const { startDate, duration, weekdays, slotNumbers } = params;
@@ -542,6 +553,15 @@ let ClassService = class ClassService {
             await session.endSession();
         }
         this.sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass);
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Lớp học ${courseClass.code} đã bị hủy`,
+            body: `Lớp học ${courseClass.code}: ${courseClass.title} đã bị hủy. Bấm để xem chi tiết`,
+            receiverIds: [courseClass.instructorId.toString()],
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS,
+                id: classId
+            },
+        });
     }
     async sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass) {
         const learners = await this.learnerService.findMany({

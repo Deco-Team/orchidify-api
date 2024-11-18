@@ -31,6 +31,7 @@ const learner_service_1 = require("../../learner/services/learner.service");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
+const constant_4 = require("../../notification/contracts/constant");
 let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrategy {
     constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService) {
         this.connection = connection;
@@ -167,7 +168,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                         learnerId: new mongoose_2.Types.ObjectId(learnerId),
                         classId: new mongoose_2.Types.ObjectId(classId)
                     }, { session });
-                    await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
+                    const courseClass = await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
                         $inc: {
                             learnerQuantity: 1
                         }
@@ -187,7 +188,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                         status: constant_1.TransactionStatus.CAPTURED,
                         payment: newPayment
                     }, { session });
-                    this.sendNotificationWhenPaymentSuccess({ learnerId, classId });
+                    this.sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId });
                 }
             });
             this.logger.log('handleChargeSucceeded: [completed]');
@@ -278,6 +279,27 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
         finally {
             await session.endSession();
         }
+    }
+    async sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId }) {
+        this.sendNotificationWhenPaymentSuccess({ learnerId, classId });
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Bạn đã đăng ký lớp học thành công`,
+            body: `Chào mừng bạn đến với lớp học ${courseClass.code}: ${courseClass.title}.`,
+            receiverIds: [learnerId],
+            data: {
+                type: constant_4.FCMNotificationDataType.CLASS,
+                id: classId
+            }
+        });
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Học viên đã đăng ký lớp học thành công`,
+            body: `Lớp học ${courseClass.code}: ${courseClass.title} có học viên mới.`,
+            receiverIds: [courseClass.instructorId.toString()],
+            data: {
+                type: constant_4.FCMNotificationDataType.CLASS,
+                id: classId
+            }
+        });
     }
 };
 exports.StripePaymentStrategy = StripePaymentStrategy;

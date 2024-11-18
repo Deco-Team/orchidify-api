@@ -22,6 +22,7 @@ import {
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
 
 @Injectable()
 export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
@@ -42,7 +43,7 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     @Inject(ISettingService)
     private readonly settingService: ISettingService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService,
+    private readonly notificationService: INotificationService
   ) {}
   async onModuleInit() {
     this.stripe = new Stripe(this.configService.get('payment.stripe.apiKey'))
@@ -211,7 +212,7 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
             { session }
           )
           // 2. Update learnerQuantity in class
-          await this.classService.update(
+          const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
             {
               $inc: {
@@ -240,10 +241,8 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
             },
             { session }
           )
-          // 4. Send email/notification to learner
-          this.sendNotificationWhenPaymentSuccess({ learnerId, classId })
-
-          // 5. TODO: Send notification to staff
+          // 4. Send notification to learner/instructor
+          this.sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId })
         }
       })
       this.logger.log('handleChargeSucceeded: [completed]')
@@ -343,5 +342,32 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     } finally {
       await session.endSession()
     }
+  }
+
+  private async sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId }) {
+    // 4. Send email/notification to learner
+    this.sendNotificationWhenPaymentSuccess({ learnerId, classId })
+
+    // 5. Send notification to learner
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Bạn đã đăng ký lớp học thành công`,
+      body: `Chào mừng bạn đến với lớp học ${courseClass.code}: ${courseClass.title}.`,
+      receiverIds: [learnerId],
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: classId
+      }
+    })
+
+    // 6. Send notification for instructor
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Học viên đã đăng ký lớp học thành công`,
+      body: `Lớp học ${courseClass.code}: ${courseClass.title} có học viên mới.`,
+      receiverIds: [courseClass.instructorId.toString()],
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: classId
+      }
+    })
   }
 }

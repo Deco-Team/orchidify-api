@@ -354,4 +354,5 @@ export declare class StripePaymentStrategy implements IPaymentStrategy, OnModule
     private handleChargeSucceeded;
     private handleChargeFailed;
     private handleChargeRefunded;
+    private sendNotificationWhenChargeSucceeded;
 }
