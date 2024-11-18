@@ -26,9 +26,13 @@
 import { TransactionStatus, UserRole } from '@common/contracts/constant';
 import { PaymentMethod, TransactionType } from '@src/transaction/contracts/constant';
 import { Types } from 'mongoose';
+declare class BaseTransactionAccountUserDto {
+    name?: Types.ObjectId;
+}
 export declare class BaseTransactionAccountDto {
     userId?: Types.ObjectId;
     userRole: UserRole;
+    user?: BaseTransactionAccountUserDto;
 }
 export declare class BasePaymentDto {
     id: string;
@@ -60,3 +64,4 @@ export declare class BaseTransactionDto {
     createdAt: Date;
     updatedAt: Date;
 }
+export {};

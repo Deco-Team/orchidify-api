@@ -1,7 +1,7 @@
 import { Controller, Get, Inject, Logger, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
-import { TRANSACTION_DETAIL_PROJECTION } from '@src/transaction/contracts/constant'
+import { TRANSACTION_DETAIL_PROJECTION, TRANSACTION_LIST_PROJECTION } from '@src/transaction/contracts/constant'
 import { ITransactionService } from '@transaction/services/transaction.service'
 import { ErrorResponse, PaginationQuery } from '@common/contracts/dto'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
@@ -39,7 +39,16 @@ export class TransactionController {
   @Roles(UserRole.ADMIN)
   @Get()
   async list(@Pagination() pagination: PaginationParams, @Query() queryTransactionDto: QueryTransactionDto) {
-    return await this.transactionService.list(pagination, queryTransactionDto)
+    return await this.transactionService.list(pagination, queryTransactionDto, TRANSACTION_LIST_PROJECTION, [
+      {
+        path: 'debitAccount.user',
+        select: ['name']
+      },
+      {
+        path: 'creditAccount.user',
+        select: ['name']
+      }
+    ])
   }
 
   @ApiOperation({
@@ -50,12 +59,21 @@ export class TransactionController {
   @Roles(UserRole.ADMIN)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') staffId: string) {
-    const transaction = await this.transactionService.findById(staffId, [...TRANSACTION_DETAIL_PROJECTION])
+    const transaction = await this.transactionService.findById(staffId, TRANSACTION_DETAIL_PROJECTION, [
+      {
+        path: 'debitAccount.user',
+        select: ['name']
+      },
+      {
+        path: 'creditAccount.user',
+        select: ['name']
+      }
+    ])
 
     if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
 
-    const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status', 'description', 'orderInfo'])
-    const payout = _.pick(transaction.payout, ['id', 'code', 'createdAt', 'status'])
+    const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status', 'description', 'orderInfo', 'histories'])
+    const payout = _.pick(transaction.payout, ['id', 'code', 'createdAt', 'status', 'histories'])
     return { ...transaction.toObject(), payment, payout }
   }
 }

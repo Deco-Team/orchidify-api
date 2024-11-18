@@ -15,12 +15,19 @@ import { Type } from 'class-transformer'
 import { PaymentMethod, TransactionType } from '@src/transaction/contracts/constant'
 import { Types } from 'mongoose'
 
+class BaseTransactionAccountUserDto {
+  @ApiProperty({ type: String })
+  name?: Types.ObjectId
+}
 export class BaseTransactionAccountDto {
   @ApiProperty({ type: String })
   userId?: Types.ObjectId
 
   @ApiProperty({ type: String, enum: UserRole })
   userRole: UserRole
+
+  @ApiPropertyOptional({ type: BaseTransactionAccountUserDto })
+  user?: BaseTransactionAccountUserDto
 }
 
 export class BasePaymentDto {

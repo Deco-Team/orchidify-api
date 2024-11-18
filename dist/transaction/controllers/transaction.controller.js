@@ -35,14 +35,32 @@ let TransactionController = TransactionController_1 = class TransactionControlle
         this.logger = new common_1.Logger(TransactionController_1.name);
     }
     async list(pagination, queryTransactionDto) {
-        return await this.transactionService.list(pagination, queryTransactionDto);
+        return await this.transactionService.list(pagination, queryTransactionDto, constant_1.TRANSACTION_LIST_PROJECTION, [
+            {
+                path: 'debitAccount.user',
+                select: ['name']
+            },
+            {
+                path: 'creditAccount.user',
+                select: ['name']
+            }
+        ]);
     }
     async getDetail(staffId) {
-        const transaction = await this.transactionService.findById(staffId, [...constant_1.TRANSACTION_DETAIL_PROJECTION]);
+        const transaction = await this.transactionService.findById(staffId, constant_1.TRANSACTION_DETAIL_PROJECTION, [
+            {
+                path: 'debitAccount.user',
+                select: ['name']
+            },
+            {
+                path: 'creditAccount.user',
+                select: ['name']
+            }
+        ]);
         if (!transaction)
             throw new app_exception_1.AppException(error_1.Errors.TRANSACTION_NOT_FOUND);
-        const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status', 'description', 'orderInfo']);
-        const payout = _.pick(transaction.payout, ['id', 'code', 'createdAt', 'status']);
+        const payment = _.pick(transaction.payment, ['id', 'code', 'createdAt', 'status', 'description', 'orderInfo', 'histories']);
+        const payout = _.pick(transaction.payout, ['id', 'code', 'createdAt', 'status', 'histories']);
         return { ...transaction.toObject(), payment, payout };
     }
 };

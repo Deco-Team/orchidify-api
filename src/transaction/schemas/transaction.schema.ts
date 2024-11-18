@@ -59,7 +59,8 @@ export type TransactionDocument = HydratedDocument<Transaction>
   toJSON: {
     transform(doc, ret) {
       delete ret.__v
-    }
+    },
+    virtuals: true
   }
 })
 export class Transaction {
@@ -100,3 +101,16 @@ export class Transaction {
 export const TransactionSchema = SchemaFactory.createForClass(Transaction)
 
 TransactionSchema.plugin(paginate)
+TransactionSchema.virtual('debitAccount.user', {
+  ref: 'Learner',
+  localField: 'debitAccount.userId',
+  foreignField: '_id',
+  justOne: true
+})
+
+TransactionSchema.virtual('creditAccount.user', {
+  ref: 'Instructor',
+  localField: 'creditAccount.userId',
+  foreignField: '_id',
+  justOne: true
+})

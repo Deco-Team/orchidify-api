@@ -16,6 +16,12 @@ const constant_1 = require("../../common/contracts/constant");
 const class_transformer_1 = require("class-transformer");
 const constant_2 = require("../contracts/constant");
 const mongoose_1 = require("mongoose");
+class BaseTransactionAccountUserDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    __metadata("design:type", mongoose_1.Types.ObjectId)
+], BaseTransactionAccountUserDto.prototype, "name", void 0);
 class BaseTransactionAccountDto {
 }
 exports.BaseTransactionAccountDto = BaseTransactionAccountDto;
@@ -27,6 +33,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.UserRole }),
     __metadata("design:type", String)
 ], BaseTransactionAccountDto.prototype, "userRole", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: BaseTransactionAccountUserDto }),
+    __metadata("design:type", BaseTransactionAccountUserDto)
+], BaseTransactionAccountDto.prototype, "user", void 0);
 class BasePaymentDto {
 }
 exports.BasePaymentDto = BasePaymentDto;

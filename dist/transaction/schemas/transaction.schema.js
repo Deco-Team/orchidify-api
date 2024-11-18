@@ -130,11 +130,24 @@ exports.Transaction = Transaction = __decorate([
         toJSON: {
             transform(doc, ret) {
                 delete ret.__v;
-            }
+            },
+            virtuals: true
         }
     }),
     __metadata("design:paramtypes", [String])
 ], Transaction);
 exports.TransactionSchema = mongoose_1.SchemaFactory.createForClass(Transaction);
 exports.TransactionSchema.plugin(paginate);
+exports.TransactionSchema.virtual('debitAccount.user', {
+    ref: 'Learner',
+    localField: 'debitAccount.userId',
+    foreignField: '_id',
+    justOne: true
+});
+exports.TransactionSchema.virtual('creditAccount.user', {
+    ref: 'Instructor',
+    localField: 'creditAccount.userId',
+    foreignField: '_id',
+    justOne: true
+});
 //# sourceMappingURL=transaction.schema.js.map
