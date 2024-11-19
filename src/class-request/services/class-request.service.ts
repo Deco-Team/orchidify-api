@@ -524,7 +524,7 @@ export class ClassRequestService implements IClassRequestService {
           )
 
           // cancel class
-          await this.update(
+          await this.classService.update(
             { _id: new Types.ObjectId(courseClass._id) },
             {
               $set: {

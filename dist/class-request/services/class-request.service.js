@@ -356,7 +356,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             }
                         }
                     }, { session });
-                    await this.update({ _id: new mongoose_1.Types.ObjectId(courseClass._id) }, {
+                    await this.classService.update({ _id: new mongoose_1.Types.ObjectId(courseClass._id) }, {
                         $set: {
                             status: constant_1.ClassStatus.CANCELED,
                             cancelReason: classRequest.description
