@@ -58,6 +58,7 @@ let InstructorClassRequestController = class InstructorClassRequestController {
         const classRequest = await this.classRequestService.findById(classRequestId, constant_2.CLASS_REQUEST_DETAIL_PROJECTION, [
             {
                 path: 'class',
+                select: ['+sessions'],
                 populate: [
                     {
                         path: 'course',

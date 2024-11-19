@@ -63,6 +63,7 @@ export class ManagementClassRequestController {
       },
       {
         path: 'class',
+        select: ['+sessions'],
         populate: [
           {
             path: 'course',
