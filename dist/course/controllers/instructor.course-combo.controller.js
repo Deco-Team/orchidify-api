@@ -56,9 +56,10 @@ let InstructorCourseComboController = class InstructorCourseComboController {
     async create(req, createCourseComboDto) {
         const { _id } = _.get(req, 'user');
         const { childCourseIds } = createCourseComboDto;
+        const formatChildCourseIds = childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId));
         const childCourses = await this.courseService.findMany({
             _id: {
-                $in: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId))
+                $in: formatChildCourseIds
             },
             instructorId: new mongoose_1.Types.ObjectId(_id),
             status: constant_1.CourseStatus.ACTIVE,
@@ -72,26 +73,27 @@ let InstructorCourseComboController = class InstructorCourseComboController {
             childCourseIds: {
                 $exists: true,
                 $size: childCourseIds.length,
-                $all: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId))
+                $all: formatChildCourseIds
             }
         });
         if (existedCourseCombos.length > 0)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_EXISTED);
         createCourseComboDto['status'] = constant_1.CourseStatus.ACTIVE;
         createCourseComboDto['instructorId'] = new mongoose_1.Types.ObjectId(_id);
-        createCourseComboDto['childCourseIds'] = childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId));
+        createCourseComboDto['childCourseIds'] = formatChildCourseIds;
         const course = await this.courseComboService.create(createCourseComboDto);
         return new dto_1.IDResponse(course._id);
     }
     async update(req, courseId, updateCourseComboDto) {
         const { _id } = _.get(req, 'user');
         const { childCourseIds } = updateCourseComboDto;
+        const formatChildCourseIds = childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId));
         const courseCombo = await this.courseComboService.findById(courseId);
         if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === constant_1.CourseStatus.DELETED)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_NOT_FOUND);
         const childCourses = await this.courseService.findMany({
             _id: {
-                $in: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId))
+                $in: formatChildCourseIds
             },
             instructorId: new mongoose_1.Types.ObjectId(_id),
             status: constant_1.CourseStatus.ACTIVE,
@@ -104,12 +106,13 @@ let InstructorCourseComboController = class InstructorCourseComboController {
             instructorId: new mongoose_1.Types.ObjectId(_id),
             status: constant_1.CourseStatus.ACTIVE,
             childCourseIds: {
-                $all: childCourseIds.map((courseId) => new mongoose_1.Types.ObjectId(courseId)),
+                $all: formatChildCourseIds,
                 $size: childCourseIds.length
             }
         });
         if (existedCourseCombos.length > 0)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_EXISTED);
+        updateCourseComboDto['childCourseIds'] = formatChildCourseIds;
         await this.courseComboService.update({
             _id: courseId
         }, updateCourseComboDto);

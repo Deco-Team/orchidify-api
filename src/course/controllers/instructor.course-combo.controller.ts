@@ -93,10 +93,11 @@ export class InstructorCourseComboController {
     const { _id } = _.get(req, 'user')
     const { childCourseIds } = createCourseComboDto
 
+    const formatChildCourseIds = childCourseIds.map((courseId) => new Types.ObjectId(courseId))
     // Validate child courses
     const childCourses = await this.courseService.findMany({
       _id: {
-        $in: childCourseIds.map((courseId) => new Types.ObjectId(courseId))
+        $in: formatChildCourseIds
       },
       instructorId: new Types.ObjectId(_id),
       status: CourseStatus.ACTIVE,
@@ -111,14 +112,14 @@ export class InstructorCourseComboController {
       childCourseIds: {
         $exists: true,
         $size: childCourseIds.length,
-        $all: childCourseIds.map((courseId) => new Types.ObjectId(courseId))
+        $all: formatChildCourseIds
       }
     })
     if (existedCourseCombos.length > 0) throw new AppException(Errors.COURSE_COMBO_EXISTED)
 
     createCourseComboDto['status'] = CourseStatus.ACTIVE
     createCourseComboDto['instructorId'] = new Types.ObjectId(_id)
-    createCourseComboDto['childCourseIds'] = childCourseIds.map((courseId) => new Types.ObjectId(courseId))
+    createCourseComboDto['childCourseIds'] = formatChildCourseIds
     const course = await this.courseComboService.create(createCourseComboDto)
     return new IDResponse(course._id)
   }
@@ -133,6 +134,7 @@ export class InstructorCourseComboController {
     const { _id } = _.get(req, 'user')
     const { childCourseIds } = updateCourseComboDto
 
+    const formatChildCourseIds = childCourseIds.map((courseId) => new Types.ObjectId(courseId))
     const courseCombo = await this.courseComboService.findById(courseId)
     if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === CourseStatus.DELETED)
       throw new AppException(Errors.COURSE_COMBO_NOT_FOUND)
@@ -142,7 +144,7 @@ export class InstructorCourseComboController {
     // Validate child courses
     const childCourses = await this.courseService.findMany({
       _id: {
-        $in: childCourseIds.map((courseId) => new Types.ObjectId(courseId))
+        $in: formatChildCourseIds
       },
       instructorId: new Types.ObjectId(_id),
       status: CourseStatus.ACTIVE,
@@ -156,12 +158,13 @@ export class InstructorCourseComboController {
       instructorId: new Types.ObjectId(_id),
       status: CourseStatus.ACTIVE,
       childCourseIds: {
-        $all: childCourseIds.map((courseId) => new Types.ObjectId(courseId)),
+        $all: formatChildCourseIds,
         $size: childCourseIds.length
       }
     })
     if (existedCourseCombos.length > 0) throw new AppException(Errors.COURSE_COMBO_EXISTED)
 
+    updateCourseComboDto['childCourseIds'] = formatChildCourseIds
     await this.courseComboService.update(
       {
         _id: courseId
