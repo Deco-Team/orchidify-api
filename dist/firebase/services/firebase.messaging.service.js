@@ -95,6 +95,17 @@ let FirebaseMessagingService = FirebaseMessagingService_1 = class FirebaseMessag
             return { success: false };
         }
     }
+    async unsubscribeToTopic({ topic, tokens }) {
+        try {
+            const response = await this.firebaseRepository.getMessaging().unsubscribeFromTopic(tokens, topic);
+            this.appLogger.log(`Successfully unsubscribed to topic: ${JSON.stringify(response)}`);
+            return { success: true, response };
+        }
+        catch (error) {
+            this.appLogger.error('Error unsubscribing to topic:', error);
+            return { success: false };
+        }
+    }
 };
 exports.FirebaseMessagingService = FirebaseMessagingService;
 exports.FirebaseMessagingService = FirebaseMessagingService = FirebaseMessagingService_1 = __decorate([

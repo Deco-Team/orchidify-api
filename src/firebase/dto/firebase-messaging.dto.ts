@@ -55,3 +55,11 @@ export class SubscribeFirebaseTopicDto {
   @ApiProperty({ type: String, isArray: true })
   tokens: string[]
 }
+
+export class UnsubscribeFirebaseTopicDto {
+  @ApiProperty({ type: String })
+  topic: string
+
+  @ApiProperty({ type: String, isArray: true })
+  tokens: string[]
+}

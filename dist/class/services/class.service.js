@@ -420,7 +420,7 @@ let ClassService = class ClassService {
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS,
                 id: classId
-            },
+            }
         });
     }
     getClassEndTime(params) {
@@ -560,7 +560,7 @@ let ClassService = class ClassService {
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS,
                 id: classId
-            },
+            }
         });
     }
     async sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass) {
@@ -579,7 +579,16 @@ let ClassService = class ClassService {
                 }
             }));
         });
-        Promise.all(sendCancelClassEmailPromises);
+        sendCancelClassEmailPromises.push(this.notificationService.sendFirebaseCloudMessaging({
+            title: `Lớp học bạn đăng ký đã bị hủy`,
+            body: `Lớp học ${courseClass.code}: ${courseClass.title} đã bị hủy. Bấm để xem chi tiết.`,
+            receiverIds: refundTransactionLearnerIds.map((learnerId) => learnerId.toString()),
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS,
+                id: courseClass._id.toString()
+            }
+        }));
+        await Promise.all(sendCancelClassEmailPromises);
     }
 };
 exports.ClassService = ClassService;

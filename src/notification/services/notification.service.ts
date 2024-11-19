@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
 import { SaveOptions, Types } from 'mongoose'
-import { SendNotificationDto } from '@notification/dto/send-notification.dto'
+import { SendNotificationDto, SendTopicNotificationDto } from '@notification/dto/send-notification.dto'
 import { AppLogger } from '@common/services/app-logger.service'
 import { IFirebaseFirestoreService } from '@firebase/services/firebase.firestore.service'
 import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service'
@@ -18,6 +18,10 @@ export interface INotificationService {
   sendFirebaseCloudMessaging(sendNotificationDto: SendNotificationDto): Promise<{
     success: boolean
     response?: BatchResponse
+  }>
+  sendTopicFirebaseCloudMessaging(sendTopicNotificationDto: SendTopicNotificationDto): Promise<{
+    success: boolean
+    response?: string
   }>
 }
 
@@ -72,6 +76,32 @@ export class NotificationService implements INotificationService {
       return result
     } catch (error) {
       this.appLogger.error(`[sendFirebaseCloudMessaging]: error=${error}`)
+      return { success: false }
+    }
+  }
+
+  public async sendTopicFirebaseCloudMessaging(sendTopicNotificationDto: SendTopicNotificationDto) {
+    this.appLogger.debug(`[sendTopicFirebaseCloudMessaging]: sendTopicNotificationDto=${JSON.stringify(sendTopicNotificationDto)}`)
+    try {
+      const { title, body, data, topic } = sendTopicNotificationDto
+
+      // Get receiverIds
+
+      // Add notification doc to firestore
+      const notificationCollection = await this.firebaseFirestoreService.getCollection('notification')
+      sendTopicNotificationDto.createdAt = new Date()
+      await notificationCollection.add(sendTopicNotificationDto)
+
+      // Push firebase cloud messaging
+      const result = await this.firebaseMessagingService.sendTopicNotification({
+        topic,
+        title,
+        body,
+        data
+      })
+      return result
+    } catch (error) {
+      this.appLogger.error(`[sendTopicFirebaseCloudMessaging]: error=${error}`)
       return { success: false }
     }
   }

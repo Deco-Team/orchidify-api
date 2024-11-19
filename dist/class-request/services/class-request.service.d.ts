@@ -43,6 +43,7 @@ import { HelperService } from '@common/services/helper.service';
 import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-class-request.dto';
 import { ILearnerClassService } from '@class/services/learner-class.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { IStaffService } from '@staff/services/staff.service';
 export declare const IClassRequestService: unique symbol;
 export interface IClassRequestService {
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<ClassRequestDocument>;
@@ -71,8 +72,9 @@ export declare class ClassRequestService implements IClassRequestService {
     private readonly settingService;
     private readonly learnerClassService;
     private readonly notificationService;
+    private readonly staffService;
     private readonly appLogger;
-    constructor(helperService: HelperService, classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, notificationService: INotificationService);
+    constructor(helperService: HelperService, classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, notificationService: INotificationService, staffService: IStaffService);
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
         _id: string;
     }>>;
@@ -106,4 +108,5 @@ export declare class ClassRequestService implements IClassRequestService {
     getExpiredAt(date: Date): Promise<Date>;
     addClassRequestAutoExpiredJob(classRequest: ClassRequest): Promise<void>;
     private generateDeadlineClassAssignment;
+    private sendNotificationToStaffWhenClassRequestIsCreated;
 }

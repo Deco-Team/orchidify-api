@@ -9,10 +9,15 @@ import { IPayoutRequestService, PayoutRequestService } from '@src/payout-request
 import { InstructorPayoutRequestController } from './controllers/instructor.payout-request.controller'
 import { ManagementPayoutRequestController } from './controllers/management.payout-request.controller'
 import { InstructorModule } from '@instructor/instructor.module'
+import { StaffModule } from '@staff/staff.module'
 
 @Global()
 @Module({
-  imports: [MongooseModule.forFeature([{ name: PayoutRequest.name, schema: PayoutRequestSchema }]), InstructorModule],
+  imports: [
+    MongooseModule.forFeature([{ name: PayoutRequest.name, schema: PayoutRequestSchema }]),
+    InstructorModule,
+    StaffModule
+  ],
   controllers: [InstructorPayoutRequestController, ManagementPayoutRequestController],
   providers: [
     {

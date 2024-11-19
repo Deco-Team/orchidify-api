@@ -8,10 +8,11 @@ import {
 import { IClassRequestService, ClassRequestService } from '@src/class-request/services/class-request.service'
 import { InstructorClassRequestController } from './controllers/instructor.class-request.controller'
 import { ManagementClassRequestController } from './controllers/management.class-request.controller'
+import { StaffModule } from '@staff/staff.module'
 
 @Global()
 @Module({
-  imports: [MongooseModule.forFeature([{ name: ClassRequest.name, schema: ClassRequestSchema }])],
+  imports: [MongooseModule.forFeature([{ name: ClassRequest.name, schema: ClassRequestSchema }]), StaffModule],
   controllers: [InstructorClassRequestController, ManagementClassRequestController],
   providers: [
     {

@@ -593,7 +593,7 @@ export class ClassService implements IClassService {
       data: {
         type: FCMNotificationDataType.CLASS,
         id: classId
-      },
+      }
     })
   }
 
@@ -764,7 +764,7 @@ export class ClassService implements IClassService {
       data: {
         type: FCMNotificationDataType.CLASS,
         id: classId
-      },
+      }
     })
   }
 
@@ -777,8 +777,6 @@ export class ClassService implements IClassService {
     })
     const sendCancelClassEmailPromises = []
     learners.forEach((learner) => {
-      // TODO: send notification for learners(topic)
-      
       sendCancelClassEmailPromises.push(
         this.notificationService.sendMail({
           to: learner.email,
@@ -791,6 +789,19 @@ export class ClassService implements IClassService {
         })
       )
     })
-    Promise.all(sendCancelClassEmailPromises)
+
+    sendCancelClassEmailPromises.push(
+      //  send notification for learners
+      this.notificationService.sendFirebaseCloudMessaging({
+        title: `Lớp học bạn đăng ký đã bị hủy`,
+        body: `Lớp học ${courseClass.code}: ${courseClass.title} đã bị hủy. Bấm để xem chi tiết.`,
+        receiverIds: refundTransactionLearnerIds.map((learnerId) => learnerId.toString()),
+        data: {
+          type: FCMNotificationDataType.CLASS,
+          id: courseClass._id.toString()
+        }
+      })
+    )
+    await Promise.all(sendCancelClassEmailPromises)
   }
 }

@@ -34,8 +34,10 @@ const certificate_service_1 = require("../../certificate/services/certificate.se
 const path = require("path");
 const attendance_service_1 = require("../../attendance/services/attendance.service");
 const assignment_submission_service_1 = require("../../class/services/assignment-submission.service");
+const notification_service_1 = require("../../notification/services/notification.service");
+const constant_4 = require("../../notification/contracts/constant");
 let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends bullmq_1.WorkerHost {
-    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService) {
+    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService, notificationService) {
         super();
         this.helperService = helperService;
         this.mediaService = mediaService;
@@ -46,6 +48,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         this.certificateService = certificateService;
         this.attendanceService = attendanceService;
         this.assignmentSubmissionService = assignmentSubmissionService;
+        this.notificationService = notificationService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassQueueConsumer_1.name);
     }
     async process(job) {
@@ -294,6 +297,15 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         await this.classService.update({ _id: courseClass._id }, {
             $set: { hasSentCertificate: true }
         });
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Chúc mừng đã hoàn thành khóa học`,
+            body: `Lớp học ${courseClass.code}: ${courseClass.title} đã kết thúc. Bấm để xem chi tiết.`,
+            receiverIds: learnerClasses.map((learnerClass) => learnerClass.learnerId.toString()),
+            data: {
+                type: constant_4.FCMNotificationDataType.CLASS,
+                id: courseClass._id.toString()
+            }
+        });
         const unlinkMediaFilePromises = [];
         mediaPaths.forEach((mediaPath) => {
             unlinkMediaFilePromises.push(fs.unlink(mediaPath, (err) => {
@@ -317,7 +329,8 @@ exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decor
     __param(6, (0, common_1.Inject)(certificate_service_1.ICertificateService)),
     __param(7, (0, common_1.Inject)(attendance_service_1.IAttendanceService)),
     __param(8, (0, common_1.Inject)(assignment_submission_service_1.IAssignmentSubmissionService)),
+    __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __metadata("design:paramtypes", [helper_service_1.HelperService,
-        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object])
+        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object, Object])
 ], ClassQueueConsumer);
 //# sourceMappingURL=class.queue-consumer.js.map

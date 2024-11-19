@@ -1,4 +1,4 @@
-import { SendNotificationDto } from '@notification/dto/send-notification.dto';
+import { SendNotificationDto, SendTopicNotificationDto } from '@notification/dto/send-notification.dto';
 import { IFirebaseFirestoreService } from '@firebase/services/firebase.firestore.service';
 import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service';
 import { IUserDeviceService } from './user-device.service';
@@ -12,6 +12,10 @@ export interface INotificationService {
         success: boolean;
         response?: BatchResponse;
     }>;
+    sendTopicFirebaseCloudMessaging(sendTopicNotificationDto: SendTopicNotificationDto): Promise<{
+        success: boolean;
+        response?: string;
+    }>;
 }
 export declare class NotificationService implements INotificationService {
     private readonly mailService;
@@ -24,5 +28,9 @@ export declare class NotificationService implements INotificationService {
     sendFirebaseCloudMessaging(sendNotificationDto: SendNotificationDto): Promise<{
         success: boolean;
         response?: BatchResponse;
+    }>;
+    sendTopicFirebaseCloudMessaging(sendTopicNotificationDto: SendTopicNotificationDto): Promise<{
+        success: boolean;
+        response?: string;
     }>;
 }

@@ -15,13 +15,18 @@ const payout_request_service_1 = require("./services/payout-request.service");
 const instructor_payout_request_controller_1 = require("./controllers/instructor.payout-request.controller");
 const management_payout_request_controller_1 = require("./controllers/management.payout-request.controller");
 const instructor_module_1 = require("../instructor/instructor.module");
+const staff_module_1 = require("../staff/staff.module");
 let PayoutRequestModule = class PayoutRequestModule {
 };
 exports.PayoutRequestModule = PayoutRequestModule;
 exports.PayoutRequestModule = PayoutRequestModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [mongoose_1.MongooseModule.forFeature([{ name: payout_request_schema_1.PayoutRequest.name, schema: payout_request_schema_1.PayoutRequestSchema }]), instructor_module_1.InstructorModule],
+        imports: [
+            mongoose_1.MongooseModule.forFeature([{ name: payout_request_schema_1.PayoutRequest.name, schema: payout_request_schema_1.PayoutRequestSchema }]),
+            instructor_module_1.InstructorModule,
+            staff_module_1.StaffModule
+        ],
         controllers: [instructor_payout_request_controller_1.InstructorPayoutRequestController, management_payout_request_controller_1.ManagementPayoutRequestController],
         providers: [
             {

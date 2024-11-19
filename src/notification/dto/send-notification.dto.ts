@@ -8,3 +8,12 @@ export class SendNotificationDto extends PickType(BaseNotificationDto, [
   'receiverIds',
   'createdAt'
 ]) {}
+
+export class SendTopicNotificationDto extends PickType(BaseNotificationDto, [
+  'title',
+  'body',
+  'data',
+  'receiverIds',
+  'topic',
+  'createdAt'
+]) {}

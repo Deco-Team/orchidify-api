@@ -26,3 +26,7 @@ export declare class SubscribeFirebaseTopicDto {
     topic: string;
     tokens: string[];
 }
+export declare class UnsubscribeFirebaseTopicDto {
+    topic: string;
+    tokens: string[];
+}

@@ -95,6 +95,14 @@ let StaffService = class StaffService {
             projection
         });
     }
+    async findMany(conditions, projection, populates) {
+        const staffs = await this.staffRepository.findMany({
+            conditions,
+            projection,
+            populates
+        });
+        return staffs;
+    }
     async generateStaffCode(length = 6, startTime = Date.now()) {
         const staffCode = 'OCP' + this.helperService.generateRandomString(length);
         const staff = await this.staffRepository.findOne({

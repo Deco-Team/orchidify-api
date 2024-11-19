@@ -36,9 +36,10 @@ const transaction_service_1 = require("../../transaction/services/transaction.se
 const constant_5 = require("../../transaction/contracts/constant");
 const constant_6 = require("../../notification/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
+const staff_service_1 = require("../../staff/services/staff.service");
 exports.IPayoutRequestService = Symbol('IPayoutRequestService');
 let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
-    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService, notificationService) {
+    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService, notificationService, staffService) {
         this.payoutRequestRepository = payoutRequestRepository;
         this.instructorService = instructorService;
         this.connection = connection;
@@ -47,6 +48,7 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         this.helperService = helperService;
         this.transactionService = transactionService;
         this.notificationService = notificationService;
+        this.staffService = staffService;
         this.appLogger = new app_logger_service_1.AppLogger(PayoutRequestService_1.name);
     }
     async createPayoutRequest(createPayoutRequestDto, options) {
@@ -70,6 +72,7 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             await session.endSession();
         }
         this.addPayoutRequestAutoExpiredJob(payoutRequest);
+        this.sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest });
         return payoutRequest;
     }
     async findById(payoutRequestId, projection, populates) {
@@ -347,6 +350,23 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             this.appLogger.error(JSON.stringify(err));
         }
     }
+    async sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest }) {
+        const staffs = await this.staffService.findMany({
+            status: constant_1.StaffStatus.ACTIVE,
+            role: constant_1.UserRole.STAFF
+        });
+        const staffIds = staffs.map((staff) => staff._id.toString());
+        await this.notificationService.sendTopicFirebaseCloudMessaging({
+            title: 'Yêu cầu rút tiền của bạn đã được tạo',
+            body: 'Yêu cầu rút tiền được tạo. Bấm để xem chi tiết.',
+            receiverIds: staffIds,
+            data: {
+                type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
+                id: payoutRequest._id.toString()
+            },
+            topic: 'STAFF_NOTIFICATION_TOPIC'
+        });
+    }
 };
 exports.PayoutRequestService = PayoutRequestService;
 exports.PayoutRequestService = PayoutRequestService = PayoutRequestService_1 = __decorate([
@@ -358,6 +378,7 @@ exports.PayoutRequestService = PayoutRequestService = PayoutRequestService_1 = _
     __param(4, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(6, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
     __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
-    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object, Object])
+    __param(8, (0, common_1.Inject)(staff_service_1.IStaffService)),
+    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object, Object, Object])
 ], PayoutRequestService);
 //# sourceMappingURL=payout-request.service.js.map

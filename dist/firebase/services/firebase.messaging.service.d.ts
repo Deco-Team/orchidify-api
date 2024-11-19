@@ -1,5 +1,5 @@
 import { IFirebaseRepository } from '@firebase/repositories/firebase.repository';
-import { SendFirebaseMessagingDto, SendFirebaseMulticastMessagingDto, SendFirebaseTopicMessagingDto, SubscribeFirebaseTopicDto } from '@firebase/dto/firebase-messaging.dto';
+import { SendFirebaseMessagingDto, SendFirebaseMulticastMessagingDto, SendFirebaseTopicMessagingDto, SubscribeFirebaseTopicDto, UnsubscribeFirebaseTopicDto } from '@firebase/dto/firebase-messaging.dto';
 import { BatchResponse, MessagingTopicManagementResponse } from 'firebase-admin/lib/messaging/messaging-api';
 export declare const IFirebaseMessagingService: unique symbol;
 export interface IFirebaseMessagingService {
@@ -16,6 +16,10 @@ export interface IFirebaseMessagingService {
         response?: string;
     }>;
     subscribeToTopic({ topic, tokens }: SubscribeFirebaseTopicDto): Promise<{
+        success: boolean;
+        response?: MessagingTopicManagementResponse;
+    }>;
+    unsubscribeToTopic({ topic, tokens }: UnsubscribeFirebaseTopicDto): Promise<{
         success: boolean;
         response?: MessagingTopicManagementResponse;
     }>;
@@ -46,6 +50,13 @@ export declare class FirebaseMessagingService implements IFirebaseMessagingServi
         response?: undefined;
     }>;
     subscribeToTopic({ topic, tokens }: SubscribeFirebaseTopicDto): Promise<{
+        success: boolean;
+        response: MessagingTopicManagementResponse;
+    } | {
+        success: boolean;
+        response?: undefined;
+    }>;
+    unsubscribeToTopic({ topic, tokens }: UnsubscribeFirebaseTopicDto): Promise<{
         success: boolean;
         response: MessagingTopicManagementResponse;
     } | {

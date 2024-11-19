@@ -6,5 +6,6 @@ export declare class BaseNotificationDto {
         [key: string]: string;
     };
     readonly receiverIds: string[];
+    readonly topic: string;
     createdAt?: Date;
 }

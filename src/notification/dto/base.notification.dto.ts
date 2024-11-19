@@ -26,6 +26,10 @@ export class BaseNotificationDto {
   @IsMongoId({ each: true })
   readonly receiverIds: string[]
 
+  @ApiProperty({ type: String })
+  @IsString()
+  readonly topic: string
+
   @ApiProperty({ type: Date })
   createdAt?: Date
 }

@@ -39,9 +39,10 @@ const helper_service_1 = require("../../common/services/helper.service");
 const learner_class_service_1 = require("../../class/services/learner-class.service");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_5 = require("../../notification/contracts/constant");
+const staff_service_1 = require("../../staff/services/staff.service");
 exports.IClassRequestService = Symbol('IClassRequestService');
 let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
-    constructor(helperService, classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, notificationService) {
+    constructor(helperService, classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, notificationService, staffService) {
         this.helperService = helperService;
         this.classRequestRepository = classRequestRepository;
         this.courseService = courseService;
@@ -52,6 +53,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.settingService = settingService;
         this.learnerClassService = learnerClassService;
         this.notificationService = notificationService;
+        this.staffService = staffService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassRequestService_1.name);
     }
     async createPublishClassRequest(createPublishClassRequestDto, options) {
@@ -62,6 +64,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             }
         });
         this.addClassRequestAutoExpiredJob(classRequest);
+        this.sendNotificationToStaffWhenClassRequestIsCreated({ classRequest });
         return classRequest;
     }
     async createCancelClassRequest(createCancelClassRequestDto, options) {
@@ -645,6 +648,25 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             return session;
         });
     }
+    async sendNotificationToStaffWhenClassRequestIsCreated({ classRequest }) {
+        const staffs = await this.staffService.findMany({
+            status: constant_1.StaffStatus.ACTIVE,
+            role: constant_1.UserRole.STAFF
+        });
+        const staffIds = staffs.map((staff) => staff._id.toString());
+        await this.notificationService.sendTopicFirebaseCloudMessaging({
+            title: 'Yêu cầu lớp học của bạn đã được tạo',
+            body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
+                ? 'Yêu cầu mở lớp được tạo. Bấm để xem chi tiết.'
+                : 'Yêu cầu hủy lớp. Bấm để xem chi tiết',
+            receiverIds: staffIds,
+            data: {
+                type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
+                id: classRequest._id.toString()
+            },
+            topic: 'STAFF_NOTIFICATION_TOPIC'
+        });
+    }
 };
 exports.ClassRequestService = ClassRequestService;
 exports.ClassRequestService = ClassRequestService = ClassRequestService_1 = __decorate([
@@ -658,6 +680,7 @@ exports.ClassRequestService = ClassRequestService = ClassRequestService_1 = __de
     __param(7, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(8, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
     __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
-    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, Object])
+    __param(10, (0, common_1.Inject)(staff_service_1.IStaffService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, Object, Object])
 ], ClassRequestService);
 //# sourceMappingURL=class-request.service.js.map

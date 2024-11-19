@@ -131,6 +131,9 @@ export class ManagementStaffController {
       ),
       this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(staffId), UserRole.STAFF)
     ])
+
+    // TODO: remove fcmToken, inactive user device for staff when deactive
+
     return new SuccessResponse(true)
   }
 

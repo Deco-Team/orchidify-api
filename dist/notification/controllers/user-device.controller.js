@@ -25,9 +25,12 @@ const user_device_service_1 = require("../services/user-device.service");
 const user_device_dto_1 = require("../dto/user-device.dto");
 const app_exception_1 = require("../../common/exceptions/app.exception");
 const mongoose_1 = require("mongoose");
+const constant_1 = require("../../common/contracts/constant");
+const firebase_messaging_service_1 = require("../../firebase/services/firebase.messaging.service");
 let UserDeviceController = class UserDeviceController {
-    constructor(userDeviceService) {
+    constructor(userDeviceService, firebaseMessagingService) {
         this.userDeviceService = userDeviceService;
+        this.firebaseMessagingService = firebaseMessagingService;
     }
     async get(req, fcmToken) {
         const { _id, role } = _.get(req, 'user');
@@ -43,7 +46,23 @@ let UserDeviceController = class UserDeviceController {
         await this.userDeviceService.update({ fcmToken: createUserDeviceDto.fcmToken }, createUserDeviceDto, {
             upsert: true
         });
+        this.subscribeFirebaseMessagingTopic({ userId: _id, userRole: role });
         return new dto_1.SuccessResponse(true);
+    }
+    async subscribeFirebaseMessagingTopic({ userId, userRole }) {
+        if (userRole !== constant_1.UserRole.STAFF)
+            return;
+        const userDevices = await this.userDeviceService.findMany({
+            userId: new mongoose_1.Types.ObjectId(userId),
+            status: constant_1.UserDeviceStatus.ACTIVE
+        });
+        if (userDevices.length === 0)
+            return;
+        const tokens = userDevices.map((userDevice) => userDevice.fcmToken);
+        await this.firebaseMessagingService.subscribeToTopic({
+            topic: 'STAFF_NOTIFICATION_TOPIC',
+            tokens
+        });
     }
 };
 exports.UserDeviceController = UserDeviceController;
@@ -80,6 +99,7 @@ exports.UserDeviceController = UserDeviceController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard.ACCESS_TOKEN, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('user-devices'),
     __param(0, (0, common_1.Inject)(user_device_service_1.IUserDeviceService)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, common_1.Inject)(firebase_messaging_service_1.IFirebaseMessagingService)),
+    __metadata("design:paramtypes", [Object, Object])
 ], UserDeviceController);
 //# sourceMappingURL=user-device.controller.js.map

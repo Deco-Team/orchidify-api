@@ -6,7 +6,8 @@ import {
   SendFirebaseMessagingDto,
   SendFirebaseMulticastMessagingDto,
   SendFirebaseTopicMessagingDto,
-  SubscribeFirebaseTopicDto
+  SubscribeFirebaseTopicDto,
+  UnsubscribeFirebaseTopicDto
 } from '@firebase/dto/firebase-messaging.dto'
 import { BatchResponse, MessagingTopicManagementResponse } from 'firebase-admin/lib/messaging/messaging-api'
 
@@ -26,6 +27,10 @@ export interface IFirebaseMessagingService {
     response?: string
   }>
   subscribeToTopic({ topic, tokens }: SubscribeFirebaseTopicDto): Promise<{
+    success: boolean
+    response?: MessagingTopicManagementResponse
+  }>
+  unsubscribeToTopic({ topic, tokens }: UnsubscribeFirebaseTopicDto): Promise<{
     success: boolean
     response?: MessagingTopicManagementResponse
   }>
@@ -109,6 +114,17 @@ export class FirebaseMessagingService implements IFirebaseMessagingService {
       return { success: true, response }
     } catch (error) {
       this.appLogger.error('Error subscribing to topic:', error)
+      return { success: false }
+    }
+  }
+
+  async unsubscribeToTopic({ topic, tokens }: UnsubscribeFirebaseTopicDto) {
+    try {
+      const response = await this.firebaseRepository.getMessaging().unsubscribeFromTopic(tokens, topic)
+      this.appLogger.log(`Successfully unsubscribed to topic: ${JSON.stringify(response)}`)
+      return { success: true, response }
+    } catch (error) {
+      this.appLogger.error('Error unsubscribing to topic:', error)
       return { success: false }
     }
   }

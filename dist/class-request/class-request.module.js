@@ -14,13 +14,14 @@ const class_request_repository_1 = require("./repositories/class-request.reposit
 const class_request_service_1 = require("./services/class-request.service");
 const instructor_class_request_controller_1 = require("./controllers/instructor.class-request.controller");
 const management_class_request_controller_1 = require("./controllers/management.class-request.controller");
+const staff_module_1 = require("../staff/staff.module");
 let ClassRequestModule = class ClassRequestModule {
 };
 exports.ClassRequestModule = ClassRequestModule;
 exports.ClassRequestModule = ClassRequestModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [mongoose_1.MongooseModule.forFeature([{ name: class_request_schema_1.ClassRequest.name, schema: class_request_schema_1.ClassRequestSchema }])],
+        imports: [mongoose_1.MongooseModule.forFeature([{ name: class_request_schema_1.ClassRequest.name, schema: class_request_schema_1.ClassRequestSchema }]), staff_module_1.StaffModule],
         controllers: [instructor_class_request_controller_1.InstructorClassRequestController, management_class_request_controller_1.ManagementClassRequestController],
         providers: [
             {

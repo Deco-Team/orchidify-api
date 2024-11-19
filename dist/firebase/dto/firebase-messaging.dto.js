@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SubscribeFirebaseTopicDto = exports.SendFirebaseTopicMessagingDto = exports.SendFirebaseMulticastMessagingDto = exports.SendFirebaseMessagingDto = void 0;
+exports.UnsubscribeFirebaseTopicDto = exports.SubscribeFirebaseTopicDto = exports.SendFirebaseTopicMessagingDto = exports.SendFirebaseMulticastMessagingDto = exports.SendFirebaseMessagingDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class SendFirebaseMessagingDto {
 }
@@ -79,4 +79,15 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: String, isArray: true }),
     __metadata("design:type", Array)
 ], SubscribeFirebaseTopicDto.prototype, "tokens", void 0);
+class UnsubscribeFirebaseTopicDto {
+}
+exports.UnsubscribeFirebaseTopicDto = UnsubscribeFirebaseTopicDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    __metadata("design:type", String)
+], UnsubscribeFirebaseTopicDto.prototype, "topic", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, isArray: true }),
+    __metadata("design:type", Array)
+], UnsubscribeFirebaseTopicDto.prototype, "tokens", void 0);
 //# sourceMappingURL=firebase-messaging.dto.js.map

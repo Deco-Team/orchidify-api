@@ -40,6 +40,7 @@ export interface IStaffService extends IAuthUserService {
     findByEmail(email: string, projection?: string | Record<string, any>): Promise<StaffDocument>;
     update(conditions: FilterQuery<Staff>, payload: UpdateQuery<Staff>, options?: QueryOptions | undefined): Promise<StaffDocument>;
     list(pagination: PaginationParams, queryStaffDto: QueryStaffDto): any;
+    findMany(conditions: FilterQuery<StaffDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<StaffDocument[]>;
 }
 export declare class StaffService implements IStaffService {
     private readonly helperService;
@@ -65,5 +66,8 @@ export declare class StaffService implements IStaffService {
     }>> & import("mongoose").Document<unknown, {}, Staff> & Staff & Required<{
         _id: string;
     }>>>;
+    findMany(conditions: FilterQuery<StaffDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<(import("mongoose").Document<unknown, {}, Staff> & Staff & Required<{
+        _id: string;
+    }>)[]>;
     private generateStaffCode;
 }

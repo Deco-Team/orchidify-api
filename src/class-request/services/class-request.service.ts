@@ -11,6 +11,7 @@ import {
   ClassStatus,
   CourseStatus,
   GardenTimesheetStatus,
+  StaffStatus,
   UserRole,
   Weekday
 } from '@common/contracts/constant'
@@ -39,6 +40,7 @@ import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-cl
 import { ILearnerClassService } from '@class/services/learner-class.service'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
+import { IStaffService } from '@staff/services/staff.service'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -111,7 +113,9 @@ export class ClassRequestService implements IClassRequestService {
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
+    @Inject(IStaffService)
+    private readonly staffService: IStaffService
   ) {}
   public async createPublishClassRequest(
     createPublishClassRequestDto: CreatePublishClassRequestDto,
@@ -128,6 +132,9 @@ export class ClassRequestService implements IClassRequestService {
       }
     )
     this.addClassRequestAutoExpiredJob(classRequest)
+    
+    // Send notification to staff
+    this.sendNotificationToStaffWhenClassRequestIsCreated({ classRequest })
 
     return classRequest
   }
@@ -592,6 +599,7 @@ export class ClassRequestService implements IClassRequestService {
         id: classRequestId
       }
     })
+    
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
@@ -892,6 +900,27 @@ export class ClassRequestService implements IClassRequestService {
         session.assignments = session.assignments.map((assignment) => ({ ...assignment, deadline: deadline.toDate() }))
       }
       return session
+    })
+  }
+
+  private async sendNotificationToStaffWhenClassRequestIsCreated({ classRequest }) {
+    const staffs = await this.staffService.findMany({
+      status: StaffStatus.ACTIVE,
+      role: UserRole.STAFF
+    })
+    const staffIds = staffs.map((staff) => staff._id.toString())
+    await this.notificationService.sendTopicFirebaseCloudMessaging({
+      title: 'Yêu cầu lớp học của bạn đã được tạo',
+      body:
+        classRequest.type === ClassRequestType.PUBLISH_CLASS
+          ? 'Yêu cầu mở lớp được tạo. Bấm để xem chi tiết.'
+          : 'Yêu cầu hủy lớp. Bấm để xem chi tiết',
+      receiverIds: staffIds,
+      data: {
+        type: FCMNotificationDataType.CLASS_REQUEST,
+        id: classRequest._id.toString()
+      },
+      topic: 'STAFF_NOTIFICATION_TOPIC'
     })
   }
 }

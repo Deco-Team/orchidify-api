@@ -38,6 +38,7 @@ import { HelperService } from '@common/services/helper.service';
 import { IInstructorService } from '@instructor/services/instructor.service';
 import { ITransactionService } from '@transaction/services/transaction.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { IStaffService } from '@staff/services/staff.service';
 export declare const IPayoutRequestService: unique symbol;
 export interface IPayoutRequestService {
     createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined): Promise<PayoutRequestDocument>;
@@ -60,8 +61,9 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     private readonly helperService;
     private readonly transactionService;
     private readonly notificationService;
+    private readonly staffService;
     private readonly appLogger;
-    constructor(payoutRequestRepository: IPayoutRequestRepository, instructorService: IInstructorService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, helperService: HelperService, transactionService: ITransactionService, notificationService: INotificationService);
+    constructor(payoutRequestRepository: IPayoutRequestRepository, instructorService: IInstructorService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, helperService: HelperService, transactionService: ITransactionService, notificationService: INotificationService, staffService: IStaffService);
     createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
         _id: string;
     }>>;
@@ -88,4 +90,5 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     getExpiredAt(date: Date): Promise<Date>;
     addPayoutRequestAutoExpiredJob(payoutRequest: PayoutRequest): Promise<void>;
+    private sendNotificationToStaffWhenPayoutRequestIsCreated;
 }

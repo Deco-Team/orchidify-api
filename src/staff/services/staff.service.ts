@@ -29,6 +29,11 @@ export interface IStaffService extends IAuthUserService {
     options?: QueryOptions | undefined
   ): Promise<StaffDocument>
   list(pagination: PaginationParams, queryStaffDto: QueryStaffDto)
+  findMany(
+    conditions: FilterQuery<StaffDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<StaffDocument[]>
 }
 
 @Injectable()
@@ -123,6 +128,19 @@ export class StaffService implements IStaffService {
       ...pagination,
       projection
     })
+  }
+
+  public async findMany(
+    conditions: FilterQuery<StaffDocument>,
+    projection?: Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const staffs = await this.staffRepository.findMany({
+      conditions,
+      projection,
+      populates
+    })
+    return staffs
   }
 
   private async generateStaffCode(length = 6, startTime = Date.now()) {

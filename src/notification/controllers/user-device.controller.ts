@@ -11,6 +11,8 @@ import { IUserDeviceService } from '@notification/services/user-device.service'
 import { CreateUserDeviceDto, UserDeviceDetailDataResponse } from '@notification/dto/user-device.dto'
 import { AppException } from '@common/exceptions/app.exception'
 import { Types } from 'mongoose'
+import { UserDeviceStatus, UserRole } from '@common/contracts/constant'
+import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service'
 
 @ApiTags('UserDevice')
 @ApiBearerAuth()
@@ -20,7 +22,9 @@ import { Types } from 'mongoose'
 export class UserDeviceController {
   constructor(
     @Inject(IUserDeviceService)
-    private readonly userDeviceService: IUserDeviceService
+    private readonly userDeviceService: IUserDeviceService,
+    @Inject(IFirebaseMessagingService)
+    private readonly firebaseMessagingService: IFirebaseMessagingService
   ) {}
 
   @ApiOperation({
@@ -52,6 +56,26 @@ export class UserDeviceController {
     await this.userDeviceService.update({ fcmToken: createUserDeviceDto.fcmToken }, createUserDeviceDto, {
       upsert: true
     })
+
+    // subscribe to topic
+    this.subscribeFirebaseMessagingTopic({ userId: _id, userRole: role })
+
     return new SuccessResponse(true)
+  }
+
+  private async subscribeFirebaseMessagingTopic({ userId, userRole }) {
+    if (userRole !== UserRole.STAFF) return
+
+    const userDevices = await this.userDeviceService.findMany({
+      userId: new Types.ObjectId(userId),
+      status: UserDeviceStatus.ACTIVE
+    })
+    if (userDevices.length === 0) return
+
+    const tokens = userDevices.map((userDevice) => userDevice.fcmToken)
+    await this.firebaseMessagingService.subscribeToTopic({
+      topic: 'STAFF_NOTIFICATION_TOPIC',
+      tokens
+    })
   }
 }

@@ -21,6 +21,8 @@ import * as path from 'path'
 import { UploadApiResponse } from 'cloudinary'
 import { IAttendanceService } from '@attendance/services/attendance.service'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
+import { INotificationService } from '@notification/services/notification.service'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
@@ -41,7 +43,9 @@ export class ClassQueueConsumer extends WorkerHost {
     @Inject(IAttendanceService)
     private readonly attendanceService: IAttendanceService,
     @Inject(IAssignmentSubmissionService)
-    private readonly assignmentSubmissionService: IAssignmentSubmissionService
+    private readonly assignmentSubmissionService: IAssignmentSubmissionService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService,
   ) {
     super()
   }
@@ -379,6 +383,17 @@ export class ClassQueueConsumer extends WorkerHost {
         $set: { hasSentCertificate: true }
       }
     )
+
+    //  send notification for learners
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Chúc mừng đã hoàn thành khóa học`,
+      body: `Lớp học ${courseClass.code}: ${courseClass.title} đã kết thúc. Bấm để xem chi tiết.`,
+      receiverIds: learnerClasses.map((learnerClass) => learnerClass.learnerId.toString()),
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: courseClass._id.toString()
+      }
+    })
 
     // unlink pdf in disk
     const unlinkMediaFilePromises = []

@@ -43,6 +43,11 @@ __decorate([
     __metadata("design:type", Array)
 ], BaseNotificationDto.prototype, "receiverIds", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], BaseNotificationDto.prototype, "topic", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
     __metadata("design:type", Date)
 ], BaseNotificationDto.prototype, "createdAt", void 0);

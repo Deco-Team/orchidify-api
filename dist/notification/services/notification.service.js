@@ -69,6 +69,26 @@ let NotificationService = NotificationService_1 = class NotificationService {
             return { success: false };
         }
     }
+    async sendTopicFirebaseCloudMessaging(sendTopicNotificationDto) {
+        this.appLogger.debug(`[sendTopicFirebaseCloudMessaging]: sendTopicNotificationDto=${JSON.stringify(sendTopicNotificationDto)}`);
+        try {
+            const { title, body, data, topic } = sendTopicNotificationDto;
+            const notificationCollection = await this.firebaseFirestoreService.getCollection('notification');
+            sendTopicNotificationDto.createdAt = new Date();
+            await notificationCollection.add(sendTopicNotificationDto);
+            const result = await this.firebaseMessagingService.sendTopicNotification({
+                topic,
+                title,
+                body,
+                data
+            });
+            return result;
+        }
+        catch (error) {
+            this.appLogger.error(`[sendTopicFirebaseCloudMessaging]: error=${error}`);
+            return { success: false };
+        }
+    }
 };
 exports.NotificationService = NotificationService;
 exports.NotificationService = NotificationService = NotificationService_1 = __decorate([

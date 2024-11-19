@@ -5,7 +5,7 @@ import { IPayoutRequestRepository } from '@src/payout-request/repositories/payou
 import { PayoutRequest, PayoutRequestDocument } from '@src/payout-request/schemas/payout-request.schema'
 import { Connection, FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 import { CreatePayoutRequestDto } from '@payout-request/dto/create-payout-request.dto'
-import { PayoutRequestStatus, TransactionStatus, UserRole } from '@common/contracts/constant'
+import { PayoutRequestStatus, StaffStatus, TransactionStatus, UserRole } from '@common/contracts/constant'
 import { PaginationParams } from '@common/decorators/pagination.decorator'
 import { PAYOUT_REQUEST_LIST_PROJECTION } from '@src/payout-request/contracts/constant'
 import { QueryPayoutRequestDto } from '@src/payout-request/dto/view-payout-request.dto'
@@ -27,6 +27,7 @@ import { BasePayoutDto } from '@transaction/dto/base.transaction.dto'
 import { TransactionType } from '@transaction/contracts/constant'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
+import { IStaffService } from '@staff/services/staff.service'
 
 export const IPayoutRequestService = Symbol('IPayoutRequestService')
 
@@ -84,7 +85,9 @@ export class PayoutRequestService implements IPayoutRequestService {
     @Inject(ITransactionService)
     private readonly transactionService: ITransactionService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
+    @Inject(IStaffService)
+    private readonly staffService: IStaffService
   ) {}
 
   public async createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined) {
@@ -115,6 +118,9 @@ export class PayoutRequestService implements IPayoutRequestService {
       await session.endSession()
     }
     this.addPayoutRequestAutoExpiredJob(payoutRequest)
+
+    // Send notification to staff
+    this.sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest })
 
     return payoutRequest
   }
@@ -489,5 +495,23 @@ export class PayoutRequestService implements IPayoutRequestService {
     } catch (err) {
       this.appLogger.error(JSON.stringify(err))
     }
+  }
+
+  private async sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest }) {
+    const staffs = await this.staffService.findMany({
+      status: StaffStatus.ACTIVE,
+      role: UserRole.STAFF
+    })
+    const staffIds = staffs.map((staff) => staff._id.toString())
+    await this.notificationService.sendTopicFirebaseCloudMessaging({
+      title: 'Yêu cầu rút tiền của bạn đã được tạo',
+      body: 'Yêu cầu rút tiền được tạo. Bấm để xem chi tiết.',
+      receiverIds: staffIds,
+      data: {
+        type: FCMNotificationDataType.PAYOUT_REQUEST,
+        id: payoutRequest._id.toString()
+      },
+      topic: 'STAFF_NOTIFICATION_TOPIC'
+    })
   }
 }

@@ -27,11 +27,14 @@
 import { SuccessResponse } from '@common/contracts/dto';
 import { IUserDeviceService } from '@notification/services/user-device.service';
 import { CreateUserDeviceDto } from '@notification/dto/user-device.dto';
+import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service';
 export declare class UserDeviceController {
     private readonly userDeviceService;
-    constructor(userDeviceService: IUserDeviceService);
+    private readonly firebaseMessagingService;
+    constructor(userDeviceService: IUserDeviceService, firebaseMessagingService: IFirebaseMessagingService);
     get(req: any, fcmToken: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/user-device.schema").UserDevice> & import("../schemas/user-device.schema").UserDevice & Required<{
         _id: string;
     }>>;
     create(req: any, createUserDeviceDto: CreateUserDeviceDto): Promise<SuccessResponse>;
+    private subscribeFirebaseMessagingTopic;
 }
