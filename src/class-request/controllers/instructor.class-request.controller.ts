@@ -201,7 +201,7 @@ export class InstructorClassRequestController {
       [
         {
           path: 'course',
-          select: ['_id', 'code']
+          select: ['_id', 'code', 'title']
         }
       ]
     )
@@ -237,8 +237,10 @@ export class InstructorClassRequestController {
     createCancelClassRequestDto['type'] = ClassRequestType.CANCEL_CLASS
     createCancelClassRequestDto['metadata'] = {
       code: _.get(courseClass, 'code'),
+      title: _.get(courseClass, 'title'),
       course: {
-        code: _.get(courseClass, 'course.code')
+        code: _.get(courseClass, 'course.code'),
+        title: _.get(courseClass, 'course.title'),
       }
     }
 

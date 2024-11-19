@@ -130,7 +130,7 @@ let InstructorClassRequestController = class InstructorClassRequestController {
         const courseClass = await this.classService.findById(classId.toString(), ['-sessions', '-histories'], [
             {
                 path: 'course',
-                select: ['_id', 'code']
+                select: ['_id', 'code', 'title']
             }
         ]);
         if (!courseClass || courseClass.instructorId.toString() !== _id)
@@ -164,8 +164,10 @@ let InstructorClassRequestController = class InstructorClassRequestController {
         createCancelClassRequestDto['type'] = constant_1.ClassRequestType.CANCEL_CLASS;
         createCancelClassRequestDto['metadata'] = {
             code: _.get(courseClass, 'code'),
+            title: _.get(courseClass, 'title'),
             course: {
-                code: _.get(courseClass, 'course.code')
+                code: _.get(courseClass, 'course.code'),
+                title: _.get(courseClass, 'course.title'),
             }
         };
         const classRequest = await this.classRequestService.createCancelClassRequest(createCancelClassRequestDto);
