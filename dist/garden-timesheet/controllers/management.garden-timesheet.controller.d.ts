@@ -30,10 +30,12 @@ import { QueryGardenTimesheetDto } from '@garden-timesheet/dto/view-garden-times
 import { IGardenService } from '@garden/services/garden.service';
 import { QueryInstructorTimesheetDto } from '@garden-timesheet/dto/view-teaching-timesheet.dto';
 import { UpdateGardenTimesheetDto } from '@garden-timesheet/dto/update-garden-timesheet.dto';
+import { INotificationService } from '@notification/services/notification.service';
 export declare class ManagementGardenTimesheetController {
     private readonly gardenTimesheetService;
     private readonly gardenService;
-    constructor(gardenTimesheetService: IGardenTimesheetService, gardenService: IGardenService);
+    private readonly notificationService;
+    constructor(gardenTimesheetService: IGardenTimesheetService, gardenService: IGardenService, notificationService: INotificationService);
     viewGardenTimesheet(req: any, queryGardenTimesheetDto: QueryGardenTimesheetDto): Promise<{
         docs: (import("mongoose").Document<unknown, {}, import("../schemas/garden-timesheet.schema").GardenTimesheet> & import("../schemas/garden-timesheet.schema").GardenTimesheet & Required<{
             _id: string;

@@ -36,8 +36,10 @@ const attendance_service_1 = require("../../attendance/services/attendance.servi
 const assignment_submission_service_1 = require("../../class/services/assignment-submission.service");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_4 = require("../../notification/contracts/constant");
+const mongoose_1 = require("mongoose");
+const garden_service_1 = require("../../garden/services/garden.service");
 let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends bullmq_1.WorkerHost {
-    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService, notificationService) {
+    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService, notificationService, gardenService) {
         super();
         this.helperService = helperService;
         this.mediaService = mediaService;
@@ -49,6 +51,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         this.attendanceService = attendanceService;
         this.assignmentSubmissionService = assignmentSubmissionService;
         this.notificationService = notificationService;
+        this.gardenService = gardenService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassQueueConsumer_1.name);
     }
     async process(job) {
@@ -66,6 +69,12 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 }
                 case constant_2.JobName.SendClassCertificate: {
                     return await this.sendClassCertificate(job);
+                }
+                case constant_2.JobName.RemindClassStartSlot: {
+                    return await this.remindClassStartSlot(job);
+                }
+                case constant_2.JobName.RemindClassStartSoon: {
+                    return await this.remindClassStartSoon(job);
                 }
                 default:
             }
@@ -318,6 +327,123 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         });
         Promise.allSettled(unlinkMediaFilePromises);
     }
+    async remindClassStartSlot(job) {
+        const { slotNumber } = job.data;
+        this.appLogger.debug(`[remindClassStartSlot]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`);
+        try {
+            this.appLogger.log(`[remindClassStartSlot]: Start remind class start slot... id=${job.id}`);
+            const startOfDate = moment().tz(config_1.VN_TIMEZONE).startOf('date');
+            let start, end;
+            switch (slotNumber) {
+                case constant_1.SlotNumber.ONE:
+                    start = startOfDate.clone().add(7, 'hour').toDate();
+                    end = startOfDate.clone().add(9, 'hour').toDate();
+                    break;
+                case constant_1.SlotNumber.TWO:
+                    start = startOfDate.clone().add(9, 'hour').add(30, 'minute').toDate();
+                    end = startOfDate.clone().add(11, 'hour').add(30, 'minute').toDate();
+                    break;
+                case constant_1.SlotNumber.THREE:
+                    start = startOfDate.clone().add(13, 'hour').toDate();
+                    end = startOfDate.clone().add(15, 'hour').toDate();
+                    break;
+                case constant_1.SlotNumber.FOUR:
+                    start = startOfDate.clone().add(15, 'hour').add(30, 'minute').toDate();
+                    end = startOfDate.clone().add(17, 'hour').add(30, 'minute').toDate();
+                    break;
+            }
+            const timesheets = await this.gardenTimesheetService.findMany({
+                'slots.start': start,
+                'slots.end': end
+            });
+            const classIds = new Set();
+            for (const timesheet of timesheets) {
+                for (const slot of timesheet.slots) {
+                    if (slot.status === constant_1.SlotStatus.NOT_AVAILABLE && slot.slotNumber === slotNumber) {
+                        classIds.add(slot.classId);
+                    }
+                }
+            }
+            const courseClasses = await this.classService.findMany({
+                _id: {
+                    $in: [...classIds]
+                }
+            });
+            const remindClassSlotStartIn1HourPromises = [];
+            courseClasses.forEach((courseClass) => {
+                remindClassSlotStartIn1HourPromises.push(this.sendClassSlotStartRemindNotificationForLearner(courseClass));
+            });
+            await Promise.all(remindClassSlotStartIn1HourPromises);
+            this.appLogger.log(`[remindClassStartSlot]: End remind class start slot... id=${job.id}`);
+            return { status: true, classIds: [...classIds] };
+        }
+        catch (error) {
+            this.appLogger.error(`[remindClassStartSlot]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`);
+            return false;
+        }
+    }
+    async sendClassSlotStartRemindNotificationForLearner(courseClass) {
+        const learnerClasses = await this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(courseClass._id) }, [
+            'learnerId'
+        ]);
+        if (learnerClasses.length === 0)
+            return;
+        await this.notificationService.sendFirebaseCloudMessaging({
+            title: `Buổi học sẽ bắt đầu sau 1 tiếng`,
+            body: `Lớp ${courseClass.code}: ${courseClass.title} sắp bắt đầu buổi học. Bấm để xem chi tiết.`,
+            receiverIds: learnerClasses.map((learnerId) => learnerId.toString()),
+            data: {
+                type: constant_4.FCMNotificationDataType.CLASS,
+                id: courseClass._id.toString()
+            }
+        });
+    }
+    async remindClassStartSoon(job) {
+        this.appLogger.debug(`[remindClassStartSoon]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`);
+        try {
+            this.appLogger.log(`[remindClassStartSoon]: Start remind class start soon... id=${job.id}`);
+            const courseClasses = await this.classService.findManyByStatus([constant_1.ClassStatus.PUBLISHED]);
+            if (courseClasses.length === 0)
+                return 'No PUBLISHED status class';
+            const tomorrowMoment = moment().tz(config_1.VN_TIMEZONE).startOf('date').add(1, 'day');
+            const remindClassStartSoonPromises = [];
+            const classIds = [];
+            for await (const courseClass of courseClasses) {
+                const startOfDate = moment(courseClass.startDate).tz(config_1.VN_TIMEZONE).startOf('date');
+                if (startOfDate.isSame(tomorrowMoment)) {
+                    remindClassStartSoonPromises.push(this.sendClassStartSoonRemindNotification(courseClass));
+                    classIds.push(courseClass._id);
+                }
+            }
+            await Promise.all(remindClassStartSoonPromises);
+            this.appLogger.log(`[remindClassStartSoon]: End remind class start soon... id=${job.id}`);
+            return { status: true, classIds };
+        }
+        catch (error) {
+            this.appLogger.error(`[remindClassStartSoon]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`);
+            return false;
+        }
+    }
+    async sendClassStartSoonRemindNotification(courseClass) {
+        const [learnerClasses, garden] = await Promise.all([
+            this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(courseClass._id) }, ['learnerId']),
+            this.gardenService.findById(courseClass.gardenId.toString())
+        ]);
+        const receiverIds = learnerClasses.map((learnerId) => learnerId.toString());
+        receiverIds.push(courseClass.instructorId.toString());
+        receiverIds.push(garden.gardenManagerId.toString());
+        if (receiverIds.length === 0)
+            return;
+        await this.notificationService.sendFirebaseCloudMessaging({
+            title: `Lớp học sẽ bắt đầu vào ngày mai`,
+            body: `Lớp ${courseClass.code}: ${courseClass.title} sẽ bắt đầu vào ngày mai. Bấm để xem chi tiết.`,
+            receiverIds,
+            data: {
+                type: constant_4.FCMNotificationDataType.CLASS,
+                id: courseClass._id.toString()
+            }
+        });
+    }
 };
 exports.ClassQueueConsumer = ClassQueueConsumer;
 exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decorate([
@@ -330,7 +456,8 @@ exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decor
     __param(7, (0, common_1.Inject)(attendance_service_1.IAttendanceService)),
     __param(8, (0, common_1.Inject)(assignment_submission_service_1.IAssignmentSubmissionService)),
     __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __param(10, (0, common_1.Inject)(garden_service_1.IGardenService)),
     __metadata("design:paramtypes", [helper_service_1.HelperService,
-        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object, Object])
+        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object, Object, Object])
 ], ClassQueueConsumer);
 //# sourceMappingURL=class.queue-consumer.js.map

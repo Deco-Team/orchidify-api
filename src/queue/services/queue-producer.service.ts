@@ -32,6 +32,8 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
       await this.scheduleUpdateClassProgressJob()
       await this.scheduleAutoCompleteClassJob()
       await this.scheduleSendClassCertificateJob()
+      await this.scheduleRemindClassStartSlotJob()
+      await this.scheduleRemindClassStartSoonJob()
     }
 
     // Inject all queue to queueMap
@@ -187,6 +189,76 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
       },
       {
         name: JobName.SendClassCertificate
+      }
+    )
+  }
+
+  private async scheduleRemindClassStartSlotJob(): Promise<void> {
+    await Promise.all([
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.RemindClassStartSlot1Scheduler,
+        {
+          pattern: '0 6 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.RemindClassStartSlot,
+          data: {
+            slotNumber: SlotNumber.ONE
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.RemindClassStartSlot2Scheduler,
+        {
+          pattern: '30 8 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.RemindClassStartSlot,
+          data: {
+            slotNumber: SlotNumber.TWO
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.RemindClassStartSlot3Scheduler,
+        {
+          pattern: '0 12 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.RemindClassStartSlot,
+          data: {
+            slotNumber: SlotNumber.THREE
+          }
+        }
+      ),
+      this.classQueue.upsertJobScheduler(
+        JobSchedulerKey.RemindClassStartSlot4Scheduler,
+        {
+          pattern: '30 14 * * *',
+          tz: VN_TIMEZONE
+        },
+        {
+          name: JobName.RemindClassStartSlot,
+          data: {
+            slotNumber: SlotNumber.FOUR
+          }
+        }
+      )
+    ])
+  }
+
+  private async scheduleRemindClassStartSoonJob(): Promise<void> {
+    await this.classQueue.upsertJobScheduler(
+      JobSchedulerKey.RemindClassStartSoonScheduler,
+      {
+        pattern: '00 8 * * *',
+        tz: VN_TIMEZONE
+      },
+      {
+        name: JobName.RemindClassStartSoon
       }
     )
   }

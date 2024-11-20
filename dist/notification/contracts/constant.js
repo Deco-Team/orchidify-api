@@ -9,5 +9,6 @@ var FCMNotificationDataType;
     FCMNotificationDataType["RECRUITMENT"] = "RECRUITMENT";
     FCMNotificationDataType["CLASS"] = "CLASS";
     FCMNotificationDataType["SLOT"] = "SLOT";
+    FCMNotificationDataType["GARDEN_TIMESHEET"] = "GARDEN_TIMESHEET";
 })(FCMNotificationDataType || (exports.FCMNotificationDataType = FCMNotificationDataType = {}));
 //# sourceMappingURL=constant.js.map

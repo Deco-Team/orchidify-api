@@ -11,6 +11,7 @@ import { ICertificateService } from '@certificate/services/certificate.service';
 import { IAttendanceService } from '@attendance/services/attendance.service';
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { IGardenService } from '@garden/services/garden.service';
 export declare class ClassQueueConsumer extends WorkerHost {
     private readonly helperService;
     private readonly mediaService;
@@ -22,8 +23,9 @@ export declare class ClassQueueConsumer extends WorkerHost {
     private readonly attendanceService;
     private readonly assignmentSubmissionService;
     private readonly notificationService;
+    private readonly gardenService;
     private readonly appLogger;
-    constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService, attendanceService: IAttendanceService, assignmentSubmissionService: IAssignmentSubmissionService, notificationService: INotificationService);
+    constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService, attendanceService: IAttendanceService, assignmentSubmissionService: IAssignmentSubmissionService, notificationService: INotificationService, gardenService: IGardenService);
     process(job: Job<any>): Promise<any>;
     updateClassStatus(job: Job): Promise<false | "No PUBLISHED status class" | {
         status: boolean;
@@ -43,4 +45,14 @@ export declare class ClassQueueConsumer extends WorkerHost {
         numbersOfHasSentCertificateClass: number;
     }>;
     generateCertificateForClass(courseClass: Class): Promise<void>;
+    remindClassStartSlot(job: Job): Promise<false | {
+        status: boolean;
+        classIds: unknown[];
+    }>;
+    private sendClassSlotStartRemindNotificationForLearner;
+    remindClassStartSoon(job: Job): Promise<false | "No PUBLISHED status class" | {
+        status: boolean;
+        classIds: any[];
+    }>;
+    private sendClassStartSoonRemindNotification;
 }

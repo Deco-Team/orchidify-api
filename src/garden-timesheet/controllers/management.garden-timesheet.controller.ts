@@ -21,6 +21,8 @@ import {
 } from '@garden-timesheet/dto/view-teaching-timesheet.dto'
 import { UpdateGardenTimesheetDto } from '@garden-timesheet/dto/update-garden-timesheet.dto'
 import { Types } from 'mongoose'
+import { INotificationService } from '@notification/services/notification.service'
+import { FCMNotificationDataType } from '@notification/contracts/constant'
 
 @ApiTags('GardenTimesheet - Management')
 @ApiBearerAuth()
@@ -32,7 +34,9 @@ export class ManagementGardenTimesheetController {
     @Inject(IGardenTimesheetService)
     private readonly gardenTimesheetService: IGardenTimesheetService,
     @Inject(IGardenService)
-    private readonly gardenService: IGardenService
+    private readonly gardenService: IGardenService,
+    @Inject(INotificationService)
+    private readonly notificationService: INotificationService
   ) {}
 
   @ApiOperation({
@@ -90,6 +94,20 @@ export class ManagementGardenTimesheetController {
         $set: { status }
       }
     )
+
+    // Send notification to garden manager
+    const garden = await this.gardenService.findById(gardenId.toString())
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: `Lịch vườn ${garden.name} đã được cập nhật`,
+      body: `Lịch vườn ${garden.name} đã được cập nhật. Bấm để xem chi tiết.`,
+      receiverIds: [garden.gardenManagerId.toString()],
+      data: {
+        type: FCMNotificationDataType.GARDEN_TIMESHEET,
+        id: gardenTimesheet._id,
+        date: date.toISOString(),
+        gardenId: gardenId.toString()
+      }
+    })
 
     return new SuccessResponse(true)
   }

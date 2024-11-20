@@ -4,5 +4,6 @@ export declare enum FCMNotificationDataType {
     PAYOUT_REQUEST = "PAYOUT_REQUEST",
     RECRUITMENT = "RECRUITMENT",
     CLASS = "CLASS",
-    SLOT = "SLOT"
+    SLOT = "SLOT",
+    GARDEN_TIMESHEET = "GARDEN_TIMESHEET"
 }

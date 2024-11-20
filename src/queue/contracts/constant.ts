@@ -14,6 +14,8 @@ export enum JobName {
   UpdateClassProgressEndSlot = 'UpdateClassProgressEndSlot',
   ClassAutoCompleted = 'ClassAutoCompleted',
   SendClassCertificate = 'SendClassCertificate',
+  RemindClassStartSlot = 'RemindClassStartSlot',
+  RemindClassStartSoon = 'RemindClassStartSoon',
   // Recruitment
   RecruitmentAutoExpired = 'RecruitmentAutoExpired',
   // Payout Request
@@ -21,12 +23,22 @@ export enum JobName {
 }
 
 export enum JobSchedulerKey {
-  // Class
   UpdateClassStatusScheduler = 'UpdateClassStatusScheduler',
+  CompleteClassScheduler = 'CompleteClassScheduler',
+  SendClassCertificateScheduler = 'SendClassCertificateScheduler',
+
+  // Update class progress when slot ended
   UpdateClassProgressEndSlot1Scheduler = 'UpdateClassProgressEndSlot1Scheduler',
   UpdateClassProgressEndSlot2Scheduler = 'UpdateClassProgressEndSlot2Scheduler',
   UpdateClassProgressEndSlot3Scheduler = 'UpdateClassProgressEndSlot3Scheduler',
   UpdateClassProgressEndSlot4Scheduler = 'UpdateClassProgressEndSlot4Scheduler',
-  CompleteClassScheduler = 'CompleteClassScheduler',
-  SendClassCertificateScheduler = 'SendClassCertificateScheduler'
+
+  // Remind class slot start soon
+  RemindClassStartSlot1Scheduler = 'RemindClassStartSlot1Scheduler',
+  RemindClassStartSlot2Scheduler = 'RemindClassStartSlot2Scheduler',
+  RemindClassStartSlot3Scheduler = 'RemindClassStartSlot3Scheduler',
+  RemindClassStartSlot4Scheduler = 'RemindClassStartSlot4Scheduler',
+
+  // Remind class start soon
+  RemindClassStartSoonScheduler = 'RemindClassStartSoonScheduler',
 }

@@ -26,4 +26,6 @@ export declare class QueueProducerService implements IQueueProducerService, OnMo
     private scheduleUpdateClassProgressJob;
     private scheduleAutoCompleteClassJob;
     private scheduleSendClassCertificateJob;
+    private scheduleRemindClassStartSlotJob;
+    private scheduleRemindClassStartSoonJob;
 }

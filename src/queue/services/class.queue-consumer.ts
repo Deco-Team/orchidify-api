@@ -23,6 +23,8 @@ import { IAttendanceService } from '@attendance/services/attendance.service'
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
+import { Types } from 'mongoose'
+import { IGardenService } from '@garden/services/garden.service'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
@@ -46,6 +48,8 @@ export class ClassQueueConsumer extends WorkerHost {
     private readonly assignmentSubmissionService: IAssignmentSubmissionService,
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
+    @Inject(IGardenService)
+    private readonly gardenService: IGardenService
   ) {
     super()
   }
@@ -65,6 +69,12 @@ export class ClassQueueConsumer extends WorkerHost {
         }
         case JobName.SendClassCertificate: {
           return await this.sendClassCertificate(job)
+        }
+        case JobName.RemindClassStartSlot: {
+          return await this.remindClassStartSlot(job)
+        }
+        case JobName.RemindClassStartSoon: {
+          return await this.remindClassStartSoon(job)
         }
         default:
       }
@@ -409,5 +419,139 @@ export class ClassQueueConsumer extends WorkerHost {
       )
     })
     Promise.allSettled(unlinkMediaFilePromises)
+  }
+
+  async remindClassStartSlot(job: Job) {
+    const { slotNumber } = job.data
+    this.appLogger.debug(`[remindClassStartSlot]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`)
+
+    try {
+      this.appLogger.log(`[remindClassStartSlot]: Start remind class start slot... id=${job.id}`)
+
+      const startOfDate = moment().tz(VN_TIMEZONE).startOf('date')
+      let start, end: Date
+      switch (slotNumber) {
+        case SlotNumber.ONE:
+          start = startOfDate.clone().add(7, 'hour').toDate()
+          end = startOfDate.clone().add(9, 'hour').toDate()
+          break
+        case SlotNumber.TWO:
+          start = startOfDate.clone().add(9, 'hour').add(30, 'minute').toDate()
+          end = startOfDate.clone().add(11, 'hour').add(30, 'minute').toDate()
+          break
+        case SlotNumber.THREE:
+          start = startOfDate.clone().add(13, 'hour').toDate()
+          end = startOfDate.clone().add(15, 'hour').toDate()
+          break
+        case SlotNumber.FOUR:
+          start = startOfDate.clone().add(15, 'hour').add(30, 'minute').toDate()
+          end = startOfDate.clone().add(17, 'hour').add(30, 'minute').toDate()
+          break
+      }
+
+      const timesheets = await this.gardenTimesheetService.findMany({
+        'slots.start': start,
+        'slots.end': end
+      })
+
+      const classIds = new Set()
+      for (const timesheet of timesheets) {
+        for (const slot of timesheet.slots) {
+          if (slot.status === SlotStatus.NOT_AVAILABLE && slot.slotNumber === slotNumber) {
+            classIds.add(slot.classId)
+          }
+        }
+      }
+      const courseClasses = await this.classService.findMany({
+        _id: {
+          $in: [...classIds]
+        }
+      })
+
+      const remindClassSlotStartIn1HourPromises = []
+      courseClasses.forEach((courseClass) => {
+        remindClassSlotStartIn1HourPromises.push(this.sendClassSlotStartRemindNotificationForLearner(courseClass))
+      })
+      await Promise.all(remindClassSlotStartIn1HourPromises)
+
+      this.appLogger.log(`[remindClassStartSlot]: End remind class start slot... id=${job.id}`)
+      return { status: true, classIds: [...classIds] }
+    } catch (error) {
+      this.appLogger.error(
+        `[remindClassStartSlot]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`
+      )
+      return false
+    }
+  }
+
+  private async sendClassSlotStartRemindNotificationForLearner(courseClass: Class) {
+    const learnerClasses = await this.learnerClassService.findMany({ classId: new Types.ObjectId(courseClass._id) }, [
+      'learnerId'
+    ])
+    if (learnerClasses.length === 0) return
+
+    await this.notificationService.sendFirebaseCloudMessaging({
+      title: `Buổi học sẽ bắt đầu sau 1 tiếng`,
+      body: `Lớp ${courseClass.code}: ${courseClass.title} sắp bắt đầu buổi học. Bấm để xem chi tiết.`,
+      receiverIds: learnerClasses.map((learnerId) => learnerId.toString()),
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: courseClass._id.toString()
+      }
+    })
+  }
+
+  async remindClassStartSoon(job: Job) {
+    this.appLogger.debug(`[remindClassStartSoon]: id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}`)
+
+    try {
+      this.appLogger.log(`[remindClassStartSoon]: Start remind class start soon... id=${job.id}`)
+      const courseClasses = await this.classService.findManyByStatus([ClassStatus.PUBLISHED])
+      if (courseClasses.length === 0) return 'No PUBLISHED status class'
+
+      const tomorrowMoment = moment().tz(VN_TIMEZONE).startOf('date').add(1, 'day')
+      const remindClassStartSoonPromises = []
+      const classIds = []
+
+      for await (const courseClass of courseClasses) {
+        const startOfDate = moment(courseClass.startDate).tz(VN_TIMEZONE).startOf('date')
+        if (startOfDate.isSame(tomorrowMoment)) {
+          remindClassStartSoonPromises.push(this.sendClassStartSoonRemindNotification(courseClass))
+          classIds.push(courseClass._id)
+        }
+      }
+      await Promise.all(remindClassStartSoonPromises)
+
+      this.appLogger.log(`[remindClassStartSoon]: End remind class start soon... id=${job.id}`)
+      return { status: true, classIds }
+    } catch (error) {
+      this.appLogger.error(
+        `[remindClassStartSoon]: error id=${job.id}, name=${job.name}, data=${JSON.stringify(job.data)}, error=${error}`
+      )
+      return false
+    }
+  }
+
+  private async sendClassStartSoonRemindNotification(courseClass: Class) {
+    const [learnerClasses, garden] = await Promise.all([
+      this.learnerClassService.findMany({ classId: new Types.ObjectId(courseClass._id) }, ['learnerId']),
+      this.gardenService.findById(courseClass.gardenId.toString())
+    ])
+
+    const receiverIds = learnerClasses.map((learnerId) => learnerId.toString())
+    receiverIds.push(courseClass.instructorId.toString())
+    receiverIds.push(garden.gardenManagerId.toString())
+
+    if (receiverIds.length === 0) return
+
+    await this.notificationService.sendFirebaseCloudMessaging({
+      title: `Lớp học sẽ bắt đầu vào ngày mai`,
+      body: `Lớp ${courseClass.code}: ${courseClass.title} sẽ bắt đầu vào ngày mai. Bấm để xem chi tiết.`,
+      receiverIds,
+      data: {
+        type: FCMNotificationDataType.CLASS,
+        id: courseClass._id.toString()
+      }
+    })
   }
 }

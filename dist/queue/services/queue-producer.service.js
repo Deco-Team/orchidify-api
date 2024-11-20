@@ -37,6 +37,8 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
             await this.scheduleUpdateClassProgressJob();
             await this.scheduleAutoCompleteClassJob();
             await this.scheduleSendClassCertificateJob();
+            await this.scheduleRemindClassStartSlotJob();
+            await this.scheduleRemindClassStartSoonJob();
         }
         this.queueMap = new Map();
         this.queueMap.set(constant_2.QueueName.CLASS_REQUEST, this.classRequestQueue);
@@ -145,6 +147,54 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
             tz: config_1.VN_TIMEZONE
         }, {
             name: constant_2.JobName.SendClassCertificate
+        });
+    }
+    async scheduleRemindClassStartSlotJob() {
+        await Promise.all([
+            this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.RemindClassStartSlot1Scheduler, {
+                pattern: '0 6 * * *',
+                tz: config_1.VN_TIMEZONE
+            }, {
+                name: constant_2.JobName.RemindClassStartSlot,
+                data: {
+                    slotNumber: constant_1.SlotNumber.ONE
+                }
+            }),
+            this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.RemindClassStartSlot2Scheduler, {
+                pattern: '30 8 * * *',
+                tz: config_1.VN_TIMEZONE
+            }, {
+                name: constant_2.JobName.RemindClassStartSlot,
+                data: {
+                    slotNumber: constant_1.SlotNumber.TWO
+                }
+            }),
+            this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.RemindClassStartSlot3Scheduler, {
+                pattern: '0 12 * * *',
+                tz: config_1.VN_TIMEZONE
+            }, {
+                name: constant_2.JobName.RemindClassStartSlot,
+                data: {
+                    slotNumber: constant_1.SlotNumber.THREE
+                }
+            }),
+            this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.RemindClassStartSlot4Scheduler, {
+                pattern: '30 14 * * *',
+                tz: config_1.VN_TIMEZONE
+            }, {
+                name: constant_2.JobName.RemindClassStartSlot,
+                data: {
+                    slotNumber: constant_1.SlotNumber.FOUR
+                }
+            })
+        ]);
+    }
+    async scheduleRemindClassStartSoonJob() {
+        await this.classQueue.upsertJobScheduler(constant_2.JobSchedulerKey.RemindClassStartSoonScheduler, {
+            pattern: '00 8 * * *',
+            tz: config_1.VN_TIMEZONE
+        }, {
+            name: constant_2.JobName.RemindClassStartSoon
         });
     }
 };

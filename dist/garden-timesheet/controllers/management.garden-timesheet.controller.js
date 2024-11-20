@@ -30,10 +30,13 @@ const api_response_decorator_1 = require("../../common/decorators/api-response.d
 const view_teaching_timesheet_dto_1 = require("../dto/view-teaching-timesheet.dto");
 const update_garden_timesheet_dto_1 = require("../dto/update-garden-timesheet.dto");
 const mongoose_1 = require("mongoose");
+const notification_service_1 = require("../../notification/services/notification.service");
+const constant_2 = require("../../notification/contracts/constant");
 let ManagementGardenTimesheetController = class ManagementGardenTimesheetController {
-    constructor(gardenTimesheetService, gardenService) {
+    constructor(gardenTimesheetService, gardenService, notificationService) {
         this.gardenTimesheetService = gardenTimesheetService;
         this.gardenService = gardenService;
+        this.notificationService = notificationService;
     }
     async viewGardenTimesheet(req, queryGardenTimesheetDto) {
         const { _id, role } = _.get(req, 'user');
@@ -61,6 +64,18 @@ let ManagementGardenTimesheetController = class ManagementGardenTimesheetControl
             throw new app_exception_1.AppException(error_1.Errors.CAN_NOT_UPDATE_GARDEN_TIMESHEET);
         await this.gardenTimesheetService.update({ _id: gardenTimesheet._id }, {
             $set: { status }
+        });
+        const garden = await this.gardenService.findById(gardenId.toString());
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: `Lịch vườn ${garden.name} đã được cập nhật`,
+            body: `Lịch vườn ${garden.name} đã được cập nhật. Bấm để xem chi tiết.`,
+            receiverIds: [garden.gardenManagerId.toString()],
+            data: {
+                type: constant_2.FCMNotificationDataType.GARDEN_TIMESHEET,
+                id: gardenTimesheet._id,
+                date: date.toISOString(),
+                gardenId: gardenId.toString()
+            }
         });
         return new dto_1.SuccessResponse(true);
     }
@@ -113,6 +128,7 @@ exports.ManagementGardenTimesheetController = ManagementGardenTimesheetControlle
     (0, common_1.Controller)('management'),
     __param(0, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
     __param(1, (0, common_1.Inject)(garden_service_1.IGardenService)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __metadata("design:paramtypes", [Object, Object, Object])
 ], ManagementGardenTimesheetController);
 //# sourceMappingURL=management.garden-timesheet.controller.js.map
