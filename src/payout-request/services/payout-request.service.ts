@@ -324,7 +324,7 @@ export class PayoutRequestService implements IPayoutRequestService {
     this.notificationService.sendFirebaseCloudMessaging({
       title: 'Yêu cầu rút tiền của bạn đã được duyệt',
       body: 'Số tiền sẽ được thanh toán sau vài ngày làm việc. Bấm để xem chi tiết.',
-      receiverIds: [_id],
+      receiverIds: [payoutRequest.createdBy.toString()],
       data: {
         type: FCMNotificationDataType.PAYOUT_REQUEST,
         id: payoutRequestId
@@ -390,7 +390,7 @@ export class PayoutRequestService implements IPayoutRequestService {
     this.notificationService.sendFirebaseCloudMessaging({
       title: 'Yêu cầu rút tiền đã bị từ chối',
       body: 'Yêu cầu rút tiền chưa hợp lệ. Bấm để xem chi tiết.',
-      receiverIds: [_id],
+      receiverIds: [payoutRequest.createdBy.toString()],
       data: {
         type: FCMNotificationDataType.PAYOUT_REQUEST,
         id: payoutRequestId
@@ -447,7 +447,7 @@ export class PayoutRequestService implements IPayoutRequestService {
     this.notificationService.sendFirebaseCloudMessaging({
       title: 'Yêu cầu rút tiền đã hết hạn',
       body: 'Yêu cầu rút tiền đã hết hạn. Bấm để xem chi tiết.',
-      receiverIds: [_id],
+      receiverIds: [payoutRequest.createdBy.toString()],
       data: {
         type: FCMNotificationDataType.PAYOUT_REQUEST,
         id: payoutRequestId

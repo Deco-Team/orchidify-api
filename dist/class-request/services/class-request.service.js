@@ -409,7 +409,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
                 ? 'Lớp học đã được mở. Bấm để xem chi tiết.'
                 : 'Lớp học đã hủy. Bấm để xem chi tiết',
-            receiverIds: [_id],
+            receiverIds: [classRequest.createdBy.toString()],
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
                 id: classRequestId
@@ -492,7 +492,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
                 ? 'Yêu cầu mở lớp chưa phù hợp. Bấm để xem chi tiết.'
                 : 'Yêu cầu hủy lớp chưa phù hợp. Bấm để xem chi tiết',
-            receiverIds: [_id],
+            receiverIds: [classRequest.createdBy.toString()],
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
                 id: classRequestId
@@ -541,7 +541,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.notificationService.sendFirebaseCloudMessaging({
             title: 'Yêu cầu lớp học của bạn đã hết hạn',
             body: 'Yêu cầu mở lớp đã hết hạn. Bấm để xem chi tiết.',
-            receiverIds: [_id],
+            receiverIds: [classRequest.createdBy.toString()],
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
                 id: classRequestId
@@ -582,7 +582,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.notificationService.sendFirebaseCloudMessaging({
             title: 'Yêu cầu lớp học của bạn đã hết hạn',
             body: 'Yêu cầu hủy lớp đã hết hạn. Bấm để xem chi tiết.',
-            receiverIds: [_id],
+            receiverIds: [classRequest.createdBy.toString()],
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
                 id: classRequestId
