@@ -17,6 +17,8 @@ const constant_1 = require("../../common/contracts/constant");
 const future_max_month_validator_1 = require("../../common/validators/future-max-month.validator");
 const past_max_month_validator_1 = require("../../common/validators/past-max-month.validator");
 const slot_dto_1 = require("./slot.dto");
+const base_garden_dto_1 = require("../../garden/dto/base.garden.dto");
+const base_instructor_dto_1 = require("../../instructor/dto/base.instructor.dto");
 class QueryMyTimesheetDto {
 }
 exports.QueryMyTimesheetDto = QueryMyTimesheetDto;
@@ -31,6 +33,12 @@ __decorate([
     (0, class_validator_1.IsEnum)(constant_1.TimesheetType),
     __metadata("design:type", String)
 ], QueryMyTimesheetDto.prototype, "type", void 0);
+class MyTimesheetInstructorDetailResponse extends (0, swagger_1.PickType)(base_instructor_dto_1.BaseInstructorDto, ['name']) {
+}
+class MyTimesheetGardenDetailResponse extends (0, swagger_1.PickType)(base_garden_dto_1.BaseGardenDto, ['name']) {
+}
+class MyTimesheetAttendanceDetailResponse extends (0, swagger_1.PickType)(slot_dto_1.BaseSlotDto, ['status']) {
+}
 class ViewMyTimesheetItemResponse {
 }
 exports.ViewMyTimesheetItemResponse = ViewMyTimesheetItemResponse;
@@ -63,6 +71,18 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: slot_dto_1.BaseSlotMetadataDto }),
     __metadata("design:type", slot_dto_1.BaseSlotMetadataDto)
 ], ViewMyTimesheetItemResponse.prototype, "metadata", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: MyTimesheetInstructorDetailResponse }),
+    __metadata("design:type", MyTimesheetInstructorDetailResponse)
+], ViewMyTimesheetItemResponse.prototype, "instructor", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: MyTimesheetGardenDetailResponse }),
+    __metadata("design:type", MyTimesheetGardenDetailResponse)
+], ViewMyTimesheetItemResponse.prototype, "garden", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: MyTimesheetAttendanceDetailResponse }),
+    __metadata("design:type", MyTimesheetAttendanceDetailResponse)
+], ViewMyTimesheetItemResponse.prototype, "attendance", void 0);
 class ViewMyTimesheetListResponse {
 }
 __decorate([

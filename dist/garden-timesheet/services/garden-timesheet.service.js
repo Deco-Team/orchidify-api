@@ -192,7 +192,24 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
                 'slots.classId': {
                     $in: classIds
                 }
-            }
+            },
+            populates: [
+                {
+                    path: 'garden',
+                    select: ['name']
+                },
+                {
+                    path: 'slots.instructor',
+                    select: ['name']
+                },
+                {
+                    path: 'slots.attendance',
+                    select: ['status'],
+                    match: {
+                        learnerId: new mongoose_1.Types.ObjectId(learnerId)
+                    }
+                }
+            ]
         });
         return this.transformDataToMyCalendar(timesheets, classIds.map((classId) => classId.toString()));
     }
@@ -477,6 +494,12 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             for (const slot of timesheet.slots) {
                 if (slot.status === constant_1.SlotStatus.NOT_AVAILABLE && classIds.includes(slot.classId.toString())) {
                     _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass);
+                    _.set(slot, 'garden', timesheet['garden']);
+                    if (_.get(slot, 'attendance') === null) {
+                        _.set(slot, 'attendance', {
+                            status: constant_1.AttendanceStatus.NOT_YET
+                        });
+                    }
                     calendars.push(slot);
                 }
             }

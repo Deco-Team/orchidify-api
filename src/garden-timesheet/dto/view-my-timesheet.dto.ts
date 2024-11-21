@@ -4,7 +4,9 @@ import { IsEnum, IsMongoId } from 'class-validator'
 import { SlotNumber, TimesheetType } from '@common/contracts/constant'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
-import { BaseSlotMetadataDto } from './slot.dto'
+import { BaseSlotDto, BaseSlotMetadataDto } from './slot.dto'
+import { BaseGardenDto } from '@garden/dto/base.garden.dto'
+import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 
 export class QueryMyTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
@@ -19,6 +21,10 @@ export class QueryMyTimesheetDto {
   learnerId: string
 }
 
+
+class MyTimesheetInstructorDetailResponse extends PickType(BaseInstructorDto, ['name']) {}
+class MyTimesheetGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
+class MyTimesheetAttendanceDetailResponse extends PickType(BaseSlotDto, ['status']) {}
 export class ViewMyTimesheetItemResponse {
   @ApiProperty({ type: String })
   @IsMongoId()
@@ -41,6 +47,15 @@ export class ViewMyTimesheetItemResponse {
 
   @ApiPropertyOptional({ type: BaseSlotMetadataDto })
   metadata: BaseSlotMetadataDto
+
+  @ApiPropertyOptional({ type: MyTimesheetInstructorDetailResponse })
+  instructor: MyTimesheetInstructorDetailResponse
+
+  @ApiPropertyOptional({ type: MyTimesheetGardenDetailResponse })
+  garden: MyTimesheetGardenDetailResponse
+
+  @ApiPropertyOptional({ type: MyTimesheetAttendanceDetailResponse })
+  attendance: MyTimesheetAttendanceDetailResponse
 }
 class ViewMyTimesheetListResponse {
   @ApiProperty({ type: ViewMyTimesheetItemResponse, isArray: true })

@@ -51,3 +51,24 @@ export const GardenTimesheetSchema = SchemaFactory.createForClass(GardenTimeshee
 GardenTimesheetSchema.plugin(paginate)
 GardenTimesheetSchema.index({ date: 1, status: 1, gardenId: 1 }, { unique: true })
 GardenTimesheetSchema.index({ 'slots._id': 1, 'slots.instructorId': 1, date: 1 })
+
+GardenTimesheetSchema.virtual('garden', {
+  ref: 'Garden',
+  localField: 'gardenId',
+  foreignField: '_id',
+  justOne: true
+})
+
+GardenTimesheetSchema.virtual('slots.instructor', {
+  ref: 'Instructor',
+  localField: 'slots.instructorId',
+  foreignField: '_id',
+  justOne: true
+})
+
+GardenTimesheetSchema.virtual('slots.attendance', {
+  ref: 'Attendance',
+  localField: 'slots._id',
+  foreignField: 'slotId',
+  justOne: true
+})

@@ -33,7 +33,6 @@ const class_service_1 = require("../../class/services/class.service");
 const send_feedback_dto_1 = require("../dto/send-feedback.dto");
 const config_1 = require("../../config");
 const moment = require("moment-timezone");
-const constant_3 = require("../../setting/contracts/constant");
 const setting_service_1 = require("../../setting/services/setting.service");
 const pagination_decorator_1 = require("../../common/decorators/pagination.decorator");
 let LearnerFeedbackController = class LearnerFeedbackController {
@@ -94,13 +93,9 @@ let LearnerFeedbackController = class LearnerFeedbackController {
         const { startDate, duration, weekdays, slotNumbers } = courseClass;
         const classEndTime = this.classService.getClassEndTime({ startDate, duration, weekdays, slotNumbers });
         const now = moment().tz(config_1.VN_TIMEZONE);
-        const feedbackOpenBeforeClassEndDay = Number((await this.settingService.findByKey(constant_3.SettingKey.FeedbackOpenBeforeClassEndDay)).value) || 7;
-        const sendFeedbackOpenTime = classEndTime.clone().subtract(feedbackOpenBeforeClassEndDay, 'day');
+        const sendFeedbackOpenTime = classEndTime.clone();
         if (now.isBefore(sendFeedbackOpenTime))
             throw new app_exception_1.AppException(error_1.Errors.FEEDBACK_NOT_OPEN_YET);
-        const sendFeedbackCloseTime = classEndTime.clone();
-        if (now.isAfter(sendFeedbackCloseTime))
-            throw new app_exception_1.AppException(error_1.Errors.FEEDBACK_IS_OVER);
         sendFeedbackDto.learnerId = new mongoose_1.Types.ObjectId(learnerId);
         sendFeedbackDto.classId = new mongoose_1.Types.ObjectId(classId);
         sendFeedbackDto.courseId = new mongoose_1.Types.ObjectId(courseClass.courseId);

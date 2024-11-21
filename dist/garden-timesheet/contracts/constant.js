@@ -5,6 +5,7 @@ exports.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION = [
     '_id',
     'status',
     'date',
+    'gardenId',
     'slots',
     'gardenMaxClass'
 ];

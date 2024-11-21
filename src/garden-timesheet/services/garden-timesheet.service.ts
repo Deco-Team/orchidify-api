@@ -6,6 +6,7 @@ import { GardenTimesheet, GardenTimesheetDocument } from '@garden-timesheet/sche
 import { FilterQuery, MongooseQueryOptions, PopulateOptions, QueryOptions, Types, UpdateQuery } from 'mongoose'
 import { QueryGardenTimesheetDto } from '@garden-timesheet/dto/view-garden-timesheet.dto'
 import {
+  AttendanceStatus,
   GardenStatus,
   GardenTimesheetStatus,
   SLOT_NUMBERS,
@@ -281,7 +282,24 @@ export class GardenTimesheetService implements IGardenTimesheetService {
         'slots.classId': {
           $in: classIds
         }
-      }
+      },
+      populates: [
+        {
+          path: 'garden',
+          select: ['name']
+        },
+        {
+          path: 'slots.instructor',
+          select: ['name']
+        },
+        {
+          path: 'slots.attendance',
+          select: ['status'],
+          match: {
+            learnerId: new Types.ObjectId(learnerId)
+          }
+        }
+      ]
     })
     return this.transformDataToMyCalendar(
       timesheets,
@@ -638,6 +656,12 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       for (const slot of timesheet.slots) {
         if (slot.status === SlotStatus.NOT_AVAILABLE && classIds.includes(slot.classId.toString())) {
           _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
+          _.set(slot, 'garden', timesheet['garden'])
+          if (_.get(slot, 'attendance') === null) {
+            _.set(slot, 'attendance', {
+              status: AttendanceStatus.NOT_YET
+            })
+          }
           calendars.push(slot)
         }
       }

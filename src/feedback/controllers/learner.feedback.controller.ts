@@ -140,18 +140,16 @@ export class LearnerFeedbackController {
     const courseClass = _.get(learnerClass, 'class') as Class
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
 
-    //BR-07: Feedback form opens 7 days before the class ends and closes on the last day of the class.
+    // BR-07: Feedback form opens on the last slot and no closes.
     const { startDate, duration, weekdays, slotNumbers } = courseClass
     const classEndTime = this.classService.getClassEndTime({ startDate, duration, weekdays, slotNumbers })
     const now = moment().tz(VN_TIMEZONE)
-    const feedbackOpenBeforeClassEndDay =
-      Number((await this.settingService.findByKey(SettingKey.FeedbackOpenBeforeClassEndDay)).value) || 7
 
-    const sendFeedbackOpenTime = classEndTime.clone().subtract(feedbackOpenBeforeClassEndDay, 'day')
+    const sendFeedbackOpenTime = classEndTime.clone()
     if (now.isBefore(sendFeedbackOpenTime)) throw new AppException(Errors.FEEDBACK_NOT_OPEN_YET)
 
-    const sendFeedbackCloseTime = classEndTime.clone()
-    if (now.isAfter(sendFeedbackCloseTime)) throw new AppException(Errors.FEEDBACK_IS_OVER)
+    // const sendFeedbackCloseTime = classEndTime.clone()
+    // if (now.isAfter(sendFeedbackCloseTime)) throw new AppException(Errors.FEEDBACK_IS_OVER)
 
     sendFeedbackDto.learnerId = new Types.ObjectId(learnerId)
     sendFeedbackDto.classId = new Types.ObjectId(classId)
