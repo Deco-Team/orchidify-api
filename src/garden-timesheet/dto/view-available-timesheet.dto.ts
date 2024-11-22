@@ -11,7 +11,8 @@ import { VN_TIMEZONE } from '@src/config'
 
 export class QueryAvailableTimeDto {
   @ApiProperty({ type: Date })
-  @FutureMinMonth(1)
+  // @FutureMinMonth(1)
+  @FutureMinMonth(0)
   @FutureMaxMonth(3)
   @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).startOf('date').toISOString()))
   startDate: Date

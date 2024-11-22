@@ -24,7 +24,7 @@ class QueryAvailableTimeDto {
 exports.QueryAvailableTimeDto = QueryAvailableTimeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
-    (0, future_min_month_validator_1.FutureMinMonth)(1),
+    (0, future_min_month_validator_1.FutureMinMonth)(0),
     (0, future_max_month_validator_1.FutureMaxMonth)(3),
     (0, class_transformer_1.Transform)(({ value }) => (moment(value).tz(config_1.VN_TIMEZONE).startOf('date').toISOString())),
     __metadata("design:type", Date)

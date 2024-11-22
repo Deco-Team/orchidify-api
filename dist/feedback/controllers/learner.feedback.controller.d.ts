@@ -45,4 +45,7 @@ export declare class LearnerFeedbackController {
         }>)[];
     }>;
     sendFeedback(req: any, classId: string, sendFeedbackDto: SendFeedbackDto): Promise<SuccessResponse>;
+    getFeedbackDetail(req: any, classId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/feedback.schema").Feedback> & import("../schemas/feedback.schema").Feedback & Required<{
+        _id: string;
+    }>>;
 }

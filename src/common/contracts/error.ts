@@ -471,6 +471,11 @@ export const Errors = {
   /**
    * Feedback
    */
+  FEEDBACK_NOT_FOUND: {
+    error: 'FEEDBACK_NOT_FOUND',
+    message: 'Không tìm thấy đánh giá của bạn.',
+    httpStatus: HttpStatus.NOT_FOUND
+  },
   FEEDBACK_NOT_OPEN_YET: {
     error: 'FEEDBACK_NOT_OPEN_YET',
     message: 'Chưa đến thời gian đánh giá lớp học.',

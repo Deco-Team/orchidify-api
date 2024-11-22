@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InstructorViewCourseFeedbackListDataResponse = exports.CourseFeedbackListDataResponse = exports.InstructorViewClassFeedbackListDataResponse = exports.ClassFeedbackListDataResponse = exports.QueryFeedbackDto = void 0;
+exports.InstructorViewCourseFeedbackListDataResponse = exports.CourseFeedbackListDataResponse = exports.InstructorViewClassFeedbackListDataResponse = exports.ClassFeedbackListDataResponse = exports.FeedbackDetailDataResponse = exports.QueryFeedbackDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
 const base_feedback_dto_1 = require("./base.feedback.dto");
@@ -31,6 +31,11 @@ __decorate([
 ], QueryFeedbackDto.prototype, "rate", void 0);
 class FeedbackLearnerDetailResponse extends (0, swagger_1.PickType)(base_learner_dto_1.BaseLearnerDto, constant_1.FEEDBACK_LEANER_DETAIL) {
 }
+class FeedbackDetailResponse extends (0, swagger_1.PickType)(base_feedback_dto_1.BaseFeedbackDto, constant_1.FEEDBACK_DETAIL_PROJECTION) {
+}
+class FeedbackDetailDataResponse extends (0, openapi_builder_1.DataResponse)(FeedbackDetailResponse) {
+}
+exports.FeedbackDetailDataResponse = FeedbackDetailDataResponse;
 class FeedbackListItemResponse extends (0, swagger_1.PickType)(base_feedback_dto_1.BaseFeedbackDto, constant_1.FEEDBACK_LIST_PROJECTION) {
 }
 __decorate([

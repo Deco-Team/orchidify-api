@@ -24,7 +24,7 @@ class QueryAvailableGardenDto {
 exports.QueryAvailableGardenDto = QueryAvailableGardenDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
-    (0, future_min_month_validator_1.FutureMinMonth)(1),
+    (0, future_min_month_validator_1.FutureMinMonth)(0),
     (0, future_max_month_validator_1.FutureMaxMonth)(3),
     __metadata("design:type", Date)
 ], QueryAvailableGardenDto.prototype, "startDate", void 0);

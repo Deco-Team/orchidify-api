@@ -383,6 +383,11 @@ exports.Errors = {
         message: 'Số dư không đủ để tạo yêu cầu rút tiền.',
         httpStatus: common_1.HttpStatus.BAD_REQUEST
     },
+    FEEDBACK_NOT_FOUND: {
+        error: 'FEEDBACK_NOT_FOUND',
+        message: 'Không tìm thấy đánh giá của bạn.',
+        httpStatus: common_1.HttpStatus.NOT_FOUND
+    },
     FEEDBACK_NOT_OPEN_YET: {
         error: 'FEEDBACK_NOT_OPEN_YET',
         message: 'Chưa đến thời gian đánh giá lớp học.',

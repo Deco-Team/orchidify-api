@@ -22,11 +22,16 @@ import { IFeedbackService } from '@feedback/services/feedback.service'
 import {
   ClassFeedbackListDataResponse,
   CourseFeedbackListDataResponse,
+  FeedbackDetailDataResponse,
   QueryFeedbackDto
 } from '@feedback/dto/view-feedback.dto'
 import { Types } from 'mongoose'
 import { ILearnerClassService } from '@class/services/learner-class.service'
-import { FEEDBACK_LEANER_DETAIL, FEEDBACK_LIST_PROJECTION } from '@feedback/contracts/constant'
+import {
+  FEEDBACK_DETAIL_PROJECTION,
+  FEEDBACK_LEANER_DETAIL,
+  FEEDBACK_LIST_PROJECTION
+} from '@feedback/contracts/constant'
 import { IClassService } from '@class/services/class.service'
 import { SendFeedbackDto } from '@feedback/dto/send-feedback.dto'
 import { VN_TIMEZONE } from '@src/config'
@@ -162,5 +167,26 @@ export class LearnerFeedbackController {
       _.get(course, 'ratingSummary', null)
     )
     return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `Get Feedback Detail`
+  })
+  @ApiCreatedResponse({ type: FeedbackDetailDataResponse })
+  @ApiErrorResponse([Errors.FEEDBACK_NOT_FOUND])
+  @Get(':classId([0-9a-f]{24})')
+  async getFeedbackDetail(@Req() req, @Param('classId') classId: string) {
+    const { _id: learnerId } = _.get(req, 'user')
+
+    const feedback = await this.feedbackService.findOneBy(
+      {
+        learnerId: new Types.ObjectId(learnerId),
+        classId: new Types.ObjectId(classId)
+      },
+      FEEDBACK_DETAIL_PROJECTION
+    )
+    if (!feedback) throw new AppException(Errors.FEEDBACK_NOT_FOUND)
+
+    return feedback
   }
 }

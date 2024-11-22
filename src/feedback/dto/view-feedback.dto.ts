@@ -3,6 +3,7 @@ import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builde
 import { BaseFeedbackDto } from '@feedback/dto/base.feedback.dto'
 import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
 import {
+  FEEDBACK_DETAIL_PROJECTION,
   FEEDBACK_LEANER_DETAIL,
   FEEDBACK_LIST_PROJECTION,
   INSTRUCTOR_VIEW_FEEDBACK_LIST_PROJECTION
@@ -28,6 +29,9 @@ class FeedbackLearnerDetailResponse extends PickType(BaseLearnerDto, FEEDBACK_LE
 /**
  * Class Feedback
  */
+class FeedbackDetailResponse extends PickType(BaseFeedbackDto, FEEDBACK_DETAIL_PROJECTION) {}
+export class FeedbackDetailDataResponse extends DataResponse(FeedbackDetailResponse) {}
+
 class FeedbackListItemResponse extends PickType(BaseFeedbackDto, FEEDBACK_LIST_PROJECTION) {
   @ApiProperty({ type: FeedbackLearnerDetailResponse })
   learner: FeedbackLearnerDetailResponse

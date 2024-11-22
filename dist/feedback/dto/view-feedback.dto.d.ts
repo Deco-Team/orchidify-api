@@ -33,6 +33,14 @@ export declare class QueryFeedbackDto {
 declare const FeedbackLearnerDetailResponse_base: import("@nestjs/common").Type<Pick<BaseLearnerDto, "name" | "avatar" | "_id" | "email" | "dateOfBirth" | "phone">>;
 declare class FeedbackLearnerDetailResponse extends FeedbackLearnerDetailResponse_base {
 }
+declare const FeedbackDetailResponse_base: import("@nestjs/common").Type<Pick<BaseFeedbackDto, "createdAt" | "updatedAt" | "_id" | "comment" | "rate" | "classId" | "learnerId">>;
+declare class FeedbackDetailResponse extends FeedbackDetailResponse_base {
+}
+declare const FeedbackDetailDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof FeedbackDetailResponse;
+}>;
+export declare class FeedbackDetailDataResponse extends FeedbackDetailDataResponse_base {
+}
 declare const FeedbackListItemResponse_base: import("@nestjs/common").Type<Pick<BaseFeedbackDto, "createdAt" | "updatedAt" | "_id" | "comment" | "rate" | "classId" | "learnerId">>;
 declare class FeedbackListItemResponse extends FeedbackListItemResponse_base {
     learner: FeedbackLearnerDetailResponse;

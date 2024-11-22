@@ -103,6 +103,16 @@ let LearnerFeedbackController = class LearnerFeedbackController {
         await this.feedbackService.sendFeedback(sendFeedbackDto, _.get(courseClass, 'ratingSummary', null), _.get(course, 'ratingSummary', null));
         return new dto_1.SuccessResponse(true);
     }
+    async getFeedbackDetail(req, classId) {
+        const { _id: learnerId } = _.get(req, 'user');
+        const feedback = await this.feedbackService.findOneBy({
+            learnerId: new mongoose_1.Types.ObjectId(learnerId),
+            classId: new mongoose_1.Types.ObjectId(classId)
+        }, constant_2.FEEDBACK_DETAIL_PROJECTION);
+        if (!feedback)
+            throw new app_exception_1.AppException(error_1.Errors.FEEDBACK_NOT_FOUND);
+        return feedback;
+    }
 };
 exports.LearnerFeedbackController = LearnerFeedbackController;
 __decorate([
@@ -151,6 +161,19 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, send_feedback_dto_1.SendFeedbackDto]),
     __metadata("design:returntype", Promise)
 ], LearnerFeedbackController.prototype, "sendFeedback", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `Get Feedback Detail`
+    }),
+    (0, swagger_1.ApiCreatedResponse)({ type: view_feedback_dto_1.FeedbackDetailDataResponse }),
+    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.FEEDBACK_NOT_FOUND]),
+    (0, common_1.Get)(':classId([0-9a-f]{24})'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('classId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], LearnerFeedbackController.prototype, "getFeedbackDetail", null);
 exports.LearnerFeedbackController = LearnerFeedbackController = __decorate([
     (0, swagger_1.ApiTags)('Feedback - Learner'),
     (0, swagger_1.ApiBearerAuth)(),
