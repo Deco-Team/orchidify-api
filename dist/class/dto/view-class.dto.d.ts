@@ -133,6 +133,7 @@ declare const LearnerViewMyClassDetailResponse_base: import("@nestjs/common").Ty
 declare class LearnerViewMyClassDetailResponse extends LearnerViewMyClassDetailResponse_base {
     garden: ClassGardenDetailResponse;
     instructor: MyClassInstructorDetailResponse;
+    hasSentFeedback: boolean;
 }
 declare const LearnerViewMyClassDetailDataResponse_base: import("@nestjs/common").Type<{
     data: typeof LearnerViewMyClassDetailResponse;

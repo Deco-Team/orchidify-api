@@ -43,13 +43,16 @@ const assignment_submission_service_1 = require("../services/assignment-submissi
 const stripe_payment_dto_1 = require("../../transaction/dto/stripe-payment.dto");
 const config_1 = require("../../config");
 const moment = require("moment-timezone");
+const feedback_service_1 = require("../../feedback/services/feedback.service");
+const constant_5 = require("../../feedback/contracts/constant");
 let LearnerClassController = class LearnerClassController {
-    constructor(classService, sessionService, assignmentService, learnerClassService, assignmentSubmissionService) {
+    constructor(classService, sessionService, assignmentService, learnerClassService, assignmentSubmissionService, feedbackService) {
         this.classService = classService;
         this.sessionService = sessionService;
         this.assignmentService = assignmentService;
         this.learnerClassService = learnerClassService;
         this.assignmentSubmissionService = assignmentSubmissionService;
+        this.feedbackService = feedbackService;
     }
     async enrollClass(req, classId, enrollClassDto) {
         const { _id } = _.get(req, 'user');
@@ -67,25 +70,31 @@ let LearnerClassController = class LearnerClassController {
     }
     async getDetail(req, classId) {
         const { _id } = _.get(req, 'user');
-        const learnerClass = await this.learnerClassService.findOneBy({ learnerId: new mongoose_1.Types.ObjectId(_id), classId: new mongoose_1.Types.ObjectId(classId) }, undefined, [
-            {
-                path: 'class',
-                select: constant_3.LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION,
-                populate: [
-                    {
-                        path: 'garden',
-                        select: ['name']
-                    },
-                    {
-                        path: 'instructor',
-                        select: constant_4.MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION
-                    }
-                ]
-            }
+        const [learnerClass, feedback] = await Promise.all([
+            this.learnerClassService.findOneBy({ learnerId: new mongoose_1.Types.ObjectId(_id), classId: new mongoose_1.Types.ObjectId(classId) }, undefined, [
+                {
+                    path: 'class',
+                    select: constant_3.LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION,
+                    populate: [
+                        {
+                            path: 'garden',
+                            select: ['name']
+                        },
+                        {
+                            path: 'instructor',
+                            select: constant_4.MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION
+                        }
+                    ]
+                }
+            ]),
+            this.feedbackService.findOneBy({
+                learnerId: new mongoose_1.Types.ObjectId(_id),
+                classId: new mongoose_1.Types.ObjectId(classId)
+            }, constant_5.FEEDBACK_DETAIL_PROJECTION)
         ]);
         if (!learnerClass)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
-        return learnerClass?.['class'];
+        return { ...learnerClass?.toObject()['class'], hasSentFeedback: !!feedback };
     }
     async getLessonDetail(req, classId, sessionId) {
         const { _id: learnerId } = _.get(req, 'user');
@@ -248,6 +257,7 @@ exports.LearnerClassController = LearnerClassController = __decorate([
     __param(2, (0, common_1.Inject)(assignment_service_1.IAssignmentService)),
     __param(3, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
     __param(4, (0, common_1.Inject)(assignment_submission_service_1.IAssignmentSubmissionService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
+    __param(5, (0, common_1.Inject)(feedback_service_1.IFeedbackService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object])
 ], LearnerClassController);
 //# sourceMappingURL=learner.class.controller.js.map

@@ -141,5 +141,8 @@ class LearnerViewMyClassDetailResponse extends PickType(BaseClassDto, LEARNER_VI
 
   @ApiProperty({ type: MyClassInstructorDetailResponse })
   instructor: MyClassInstructorDetailResponse
+
+  @ApiPropertyOptional({ type: Boolean })
+  hasSentFeedback: boolean
 }
 export class LearnerViewMyClassDetailDataResponse extends DataResponse(LearnerViewMyClassDetailResponse) {}

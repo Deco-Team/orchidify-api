@@ -186,6 +186,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: MyClassInstructorDetailResponse }),
     __metadata("design:type", MyClassInstructorDetailResponse)
 ], LearnerViewMyClassDetailResponse.prototype, "instructor", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: Boolean }),
+    __metadata("design:type", Boolean)
+], LearnerViewMyClassDetailResponse.prototype, "hasSentFeedback", void 0);
 class LearnerViewMyClassDetailDataResponse extends (0, openapi_builder_1.DataResponse)(LearnerViewMyClassDetailResponse) {
 }
 exports.LearnerViewMyClassDetailDataResponse = LearnerViewMyClassDetailDataResponse;

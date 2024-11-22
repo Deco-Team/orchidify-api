@@ -43,6 +43,8 @@ import { IAssignmentSubmissionService } from '@class/services/assignment-submiss
 import { CreateStripePaymentDataResponse } from '@transaction/dto/stripe-payment.dto'
 import { VN_TIMEZONE } from '@src/config'
 import * as moment from 'moment-timezone'
+import { IFeedbackService } from '@feedback/services/feedback.service'
+import { FEEDBACK_DETAIL_PROJECTION } from '@feedback/contracts/constant'
 
 @ApiTags('Class - Learner')
 @ApiBearerAuth()
@@ -61,7 +63,9 @@ export class LearnerClassController {
     @Inject(ILearnerClassService)
     private readonly learnerClassService: ILearnerClassService,
     @Inject(IAssignmentSubmissionService)
-    private readonly assignmentSubmissionService: IAssignmentSubmissionService
+    private readonly assignmentSubmissionService: IAssignmentSubmissionService,
+    @Inject(IFeedbackService)
+    private readonly feedbackService: IFeedbackService
   ) {}
 
   @ApiOperation({
@@ -112,29 +116,40 @@ export class LearnerClassController {
   @Get('my-classes/:id([0-9a-f]{24})')
   async getDetail(@Req() req, @Param('id') classId: string) {
     const { _id } = _.get(req, 'user')
-    const learnerClass = await this.learnerClassService.findOneBy(
-      { learnerId: new Types.ObjectId(_id), classId: new Types.ObjectId(classId) },
-      undefined,
-      [
+
+    const [learnerClass, feedback] = await Promise.all([
+      this.learnerClassService.findOneBy(
+        { learnerId: new Types.ObjectId(_id), classId: new Types.ObjectId(classId) },
+        undefined,
+        [
+          {
+            path: 'class',
+            select: LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION,
+            populate: [
+              {
+                path: 'garden',
+                select: ['name']
+              },
+              {
+                path: 'instructor',
+                select: MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION
+              }
+            ]
+          }
+        ]
+      ),
+      this.feedbackService.findOneBy(
         {
-          path: 'class',
-          select: LEARNER_VIEW_MY_CLASS_DETAIL_PROJECTION,
-          populate: [
-            {
-              path: 'garden',
-              select: ['name']
-            },
-            {
-              path: 'instructor',
-              select: MY_CLASS_INSTRUCTOR_DETAIL_PROJECTION
-            }
-          ]
-        }
-      ]
-    )
+          learnerId: new Types.ObjectId(_id),
+          classId: new Types.ObjectId(classId)
+        },
+        FEEDBACK_DETAIL_PROJECTION
+      )
+    ])
+
     if (!learnerClass) throw new AppException(Errors.CLASS_NOT_FOUND)
 
-    return learnerClass?.['class']
+    return { ...learnerClass?.toObject()['class'], hasSentFeedback: !!feedback }
   }
 
   @ApiOperation({

@@ -8,13 +8,15 @@ import { QueryClassDto } from '@class/dto/view-class.dto';
 import { ILearnerClassService } from '@class/services/learner-class.service';
 import { CreateAssignmentSubmissionDto } from '@class/dto/assignment-submission.dto';
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service';
+import { IFeedbackService } from '@feedback/services/feedback.service';
 export declare class LearnerClassController {
     private readonly classService;
     private readonly sessionService;
     private readonly assignmentService;
     private readonly learnerClassService;
     private readonly assignmentSubmissionService;
-    constructor(classService: IClassService, sessionService: ISessionService, assignmentService: IAssignmentService, learnerClassService: ILearnerClassService, assignmentSubmissionService: IAssignmentSubmissionService);
+    private readonly feedbackService;
+    constructor(classService: IClassService, sessionService: ISessionService, assignmentService: IAssignmentService, learnerClassService: ILearnerClassService, assignmentSubmissionService: IAssignmentSubmissionService, feedbackService: IFeedbackService);
     enrollClass(req: any, classId: string, enrollClassDto: EnrollClassDto): Promise<import("@src/transaction/dto/momo-payment.dto").CreateMomoPaymentResponse>;
     myClassList(req: any, pagination: PaginationParams, queryClassDto: QueryClassDto): Promise<any>;
     getDetail(req: any, classId: string): Promise<any>;
