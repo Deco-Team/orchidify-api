@@ -32,8 +32,9 @@ const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_4 = require("../../notification/contracts/constant");
+const course_service_1 = require("../../course/services/course.service");
 let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrategy {
-    constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService) {
+    constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService, courseService) {
         this.connection = connection;
         this.configService = configService;
         this.transactionRepository = transactionRepository;
@@ -42,6 +43,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
         this.learnerService = learnerService;
         this.settingService = settingService;
         this.notificationService = notificationService;
+        this.courseService = courseService;
         this.logger = new common_1.Logger(StripePaymentStrategy_1.name);
     }
     async onModuleInit() {
@@ -163,6 +165,11 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                         throw new app_exception_1.AppException(error_1.Errors.TRANSACTION_NOT_FOUND);
                     const { learnerId, classId, orderCode, price, discount } = (0, lodash_1.get)(charge, 'metadata');
                     const courseClass = await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
+                        $inc: {
+                            learnerQuantity: 1
+                        }
+                    }, { session });
+                    await this.courseService.update({ _id: new mongoose_2.Types.ObjectId(courseClass.courseId) }, {
                         $inc: {
                             learnerQuantity: 1
                         }
@@ -315,7 +322,8 @@ exports.StripePaymentStrategy = StripePaymentStrategy = StripePaymentStrategy_1 
     __param(5, (0, common_1.Inject)(learner_service_1.ILearnerService)),
     __param(6, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __param(8, (0, common_1.Inject)(course_service_1.ICourseService)),
     __metadata("design:paramtypes", [mongoose_2.Connection,
-        config_1.ConfigService, Object, Object, Object, Object, Object, Object])
+        config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
 ], StripePaymentStrategy);
 //# sourceMappingURL=stripe.strategy.js.map

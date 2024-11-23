@@ -25,6 +25,7 @@ import { Connection, Types } from 'mongoose'
 import { catchError, firstValueFrom } from 'rxjs'
 import { ILearnerService } from '@learner/services/learner.service'
 import { INotificationService } from '@notification/services/notification.service'
+import { ICourseService } from '@course/services/course.service'
 
 @Injectable()
 export class MomoPaymentStrategy implements IPaymentStrategy {
@@ -44,7 +45,9 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
+    @Inject(ICourseService)
+    private readonly courseService: ICourseService
   ) {
     this.config = this.configService.get('payment.momo')
   }
@@ -174,9 +177,18 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
 
           // Get learnerId, classId from extraData
           const { learnerId, classId, price, discount } = JSON.parse(get(webhookData, 'extraData'))
-          // 1. Update learnerQuantity in class
+          // 1. Update learnerQuantity in class, course
           const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
+            {
+              $inc: {
+                learnerQuantity: 1
+              }
+            },
+            { session }
+          )
+          await this.courseService.update(
+            { _id: new Types.ObjectId(courseClass.courseId) },
             {
               $inc: {
                 learnerQuantity: 1

@@ -43,6 +43,8 @@ export interface ICourseService {
     listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto): any;
     listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): any;
     listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): any;
+    listBestSellerCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): any;
+    listRecommendedCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): any;
     findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>;
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<CourseDocument[]>;
 }
@@ -85,6 +87,30 @@ export declare class CourseService implements ICourseService {
         nextPage: number;
     }>;
     listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): Promise<{
+        docs: any[];
+        totalDocs: number;
+        limit: number;
+        page: number;
+        totalPages: number;
+        pagingCounter: any;
+        hasPrevPage: boolean;
+        hasNextPage: boolean;
+        prevPage: number;
+        nextPage: number;
+    }>;
+    listBestSellerCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): Promise<{
+        docs: any[];
+        totalDocs: number;
+        limit: number;
+        page: number;
+        totalPages: number;
+        pagingCounter: any;
+        hasPrevPage: boolean;
+        hasNextPage: boolean;
+        prevPage: number;
+        nextPage: number;
+    }>;
+    listRecommendedCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): Promise<{
         docs: any[];
         totalDocs: number;
         limit: number;

@@ -9,6 +9,8 @@ export declare class CourseController {
     constructor(courseService: ICourseService, learnerClassService: ILearnerClassService);
     list(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<any>;
     listForLearner(req: any, pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<any>;
+    listBestSellerCourseForLearner(req: any, pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<any>;
+    listRecommendedCourseForLearner(req: any, pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<any>;
     getDetail(req: any, courseId: string): Promise<Course & Required<{
         _id: string;
     }>>;

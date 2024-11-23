@@ -34,6 +34,7 @@ import { IPaymentStrategy } from '@src/transaction/strategies/payment-strategy.i
 import { Connection } from 'mongoose';
 import { ILearnerService } from '@learner/services/learner.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { ICourseService } from '@course/services/course.service';
 export declare class MomoPaymentStrategy implements IPaymentStrategy {
     readonly connection: Connection;
     private readonly httpService;
@@ -44,9 +45,10 @@ export declare class MomoPaymentStrategy implements IPaymentStrategy {
     private readonly learnerClassService;
     private readonly learnerService;
     private readonly notificationService;
+    private readonly courseService;
     private readonly logger;
     private config;
-    constructor(connection: Connection, httpService: HttpService, configService: ConfigService, helperService: HelperService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, notificationService: INotificationService);
+    constructor(connection: Connection, httpService: HttpService, configService: ConfigService, helperService: HelperService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, notificationService: INotificationService, courseService: ICourseService);
     createTransaction(createMomoPaymentDto: CreateMomoPaymentDto): Promise<any>;
     getTransaction(queryDto: QueryMomoPaymentDto): Promise<any>;
     refundTransaction(refundDto: RefundMomoPaymentDto): Promise<any>;

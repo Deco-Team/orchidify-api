@@ -321,6 +321,7 @@ import { ILearnerService } from '@learner/services/learner.service';
 import { CreateStripePaymentDto, QueryStripePaymentDto, RefundStripePaymentDto } from '@transaction/dto/stripe-payment.dto';
 import { ISettingService } from '@setting/services/setting.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { ICourseService } from '@course/services/course.service';
 export declare class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     readonly connection: Connection;
     private readonly configService;
@@ -330,10 +331,11 @@ export declare class StripePaymentStrategy implements IPaymentStrategy, OnModule
     private readonly learnerService;
     private readonly settingService;
     private readonly notificationService;
+    private readonly courseService;
     private readonly logger;
     private stripe;
     private publishableKey;
-    constructor(connection: Connection, configService: ConfigService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, settingService: ISettingService, notificationService: INotificationService);
+    constructor(connection: Connection, configService: ConfigService, transactionRepository: ITransactionRepository, classService: IClassService, learnerClassService: ILearnerClassService, learnerService: ILearnerService, settingService: ISettingService, notificationService: INotificationService, courseService: ICourseService);
     onModuleInit(): Promise<void>;
     createTransaction(createStripePaymentDto: CreateStripePaymentDto): Promise<{
         id: string;

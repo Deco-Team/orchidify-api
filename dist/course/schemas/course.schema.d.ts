@@ -45,6 +45,7 @@ export declare class Course {
     sessions: Session[];
     childCourseIds: Types.ObjectId[];
     learnerLimit: number;
+    learnerQuantity: number;
     rate: number;
     discount: number;
     gardenRequiredToolkits: string;

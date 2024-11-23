@@ -67,6 +67,42 @@ export class CourseController {
   }
 
   @ApiOperation({
+    summary: `[${UserRole.LEARNER}] View Best Seller Course List`
+  })
+  @ApiBearerAuth()
+  @ApiQuery({ type: PaginationQuery })
+  @ApiOkResponse({ type: LearnerViewCourseListDataResponse })
+  @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
+  @Roles(UserRole.LEARNER)
+  @Get('learner/best-seller')
+  async listBestSellerCourseForLearner(
+    @Req() req,
+    @Pagination() pagination: PaginationParams,
+    @Query() queryCourseDto: PublicQueryCourseDto
+  ) {
+    const userAuth = _.get(req, 'user')
+    return await this.courseService.listBestSellerCoursesByLearner(pagination, queryCourseDto, userAuth)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.LEARNER}] View Recommended Course List`
+  })
+  @ApiBearerAuth()
+  @ApiQuery({ type: PaginationQuery })
+  @ApiOkResponse({ type: LearnerViewCourseListDataResponse })
+  @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
+  @Roles(UserRole.LEARNER)
+  @Get('learner/recommended')
+  async listRecommendedCourseForLearner(
+    @Req() req,
+    @Pagination() pagination: PaginationParams,
+    @Query() queryCourseDto: PublicQueryCourseDto
+  ) {
+    const userAuth = _.get(req, 'user')
+    return await this.courseService.listRecommendedCoursesByLearner(pagination, queryCourseDto, userAuth)
+  }
+
+  @ApiOperation({
     summary: `[${UserRole.LEARNER}] View Course Detail`
   })
   @ApiBearerAuth()

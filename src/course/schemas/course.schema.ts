@@ -76,6 +76,9 @@ export class Course {
   @Prop({ type: Number })
   learnerLimit: number
 
+  @Prop({ type: Number, default: 0 })
+  learnerQuantity: number
+
   @Prop({ type: Number })
   rate: number
 

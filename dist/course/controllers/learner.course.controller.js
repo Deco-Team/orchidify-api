@@ -44,6 +44,14 @@ let CourseController = class CourseController {
         const userAuth = _.get(req, 'user');
         return await this.courseService.listByLearner(pagination, queryCourseDto, userAuth);
     }
+    async listBestSellerCourseForLearner(req, pagination, queryCourseDto) {
+        const userAuth = _.get(req, 'user');
+        return await this.courseService.listBestSellerCoursesByLearner(pagination, queryCourseDto, userAuth);
+    }
+    async listRecommendedCourseForLearner(req, pagination, queryCourseDto) {
+        const userAuth = _.get(req, 'user');
+        return await this.courseService.listRecommendedCoursesByLearner(pagination, queryCourseDto, userAuth);
+    }
     async getDetail(req, courseId) {
         const { _id: learnerId } = _.get(req, 'user');
         const [course, learnerClasses] = await Promise.all([
@@ -135,6 +143,40 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, view_course_dto_1.PublicQueryCourseDto]),
     __metadata("design:returntype", Promise)
 ], CourseController.prototype, "listForLearner", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.LEARNER}] View Best Seller Course List`
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({ type: dto_1.PaginationQuery }),
+    (0, swagger_1.ApiOkResponse)({ type: view_course_dto_1.LearnerViewCourseListDataResponse }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard.ACCESS_TOKEN, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.LEARNER),
+    (0, common_1.Get)('learner/best-seller'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, pagination_decorator_1.Pagination)()),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, view_course_dto_1.PublicQueryCourseDto]),
+    __metadata("design:returntype", Promise)
+], CourseController.prototype, "listBestSellerCourseForLearner", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.LEARNER}] View Recommended Course List`
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiQuery)({ type: dto_1.PaginationQuery }),
+    (0, swagger_1.ApiOkResponse)({ type: view_course_dto_1.LearnerViewCourseListDataResponse }),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard.ACCESS_TOKEN, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.LEARNER),
+    (0, common_1.Get)('learner/recommended'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, pagination_decorator_1.Pagination)()),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, view_course_dto_1.PublicQueryCourseDto]),
+    __metadata("design:returntype", Promise)
+], CourseController.prototype, "listRecommendedCourseForLearner", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: `[${constant_1.UserRole.LEARNER}] View Course Detail`

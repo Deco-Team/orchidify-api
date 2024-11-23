@@ -31,8 +31,9 @@ const mongoose_2 = require("mongoose");
 const rxjs_1 = require("rxjs");
 const learner_service_1 = require("../../learner/services/learner.service");
 const notification_service_1 = require("../../notification/services/notification.service");
+const course_service_1 = require("../../course/services/course.service");
 let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
-    constructor(connection, httpService, configService, helperService, transactionRepository, classService, learnerClassService, learnerService, notificationService) {
+    constructor(connection, httpService, configService, helperService, transactionRepository, classService, learnerClassService, learnerService, notificationService, courseService) {
         this.connection = connection;
         this.httpService = httpService;
         this.configService = configService;
@@ -42,6 +43,7 @@ let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
         this.learnerClassService = learnerClassService;
         this.learnerService = learnerService;
         this.notificationService = notificationService;
+        this.courseService = courseService;
         this.logger = new common_1.Logger(MomoPaymentStrategy_1.name);
         this.config = this.configService.get('payment.momo');
     }
@@ -128,6 +130,11 @@ let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
                         throw new app_exception_1.AppException(error_1.Errors.TRANSACTION_NOT_FOUND);
                     const { learnerId, classId, price, discount } = JSON.parse((0, lodash_1.get)(webhookData, 'extraData'));
                     const courseClass = await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
+                        $inc: {
+                            learnerQuantity: 1
+                        }
+                    }, { session });
+                    await this.courseService.update({ _id: new mongoose_2.Types.ObjectId(courseClass.courseId) }, {
                         $inc: {
                             learnerQuantity: 1
                         }
@@ -227,9 +234,10 @@ exports.MomoPaymentStrategy = MomoPaymentStrategy = MomoPaymentStrategy_1 = __de
     __param(6, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
     __param(7, (0, common_1.Inject)(learner_service_1.ILearnerService)),
     __param(8, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __param(9, (0, common_1.Inject)(course_service_1.ICourseService)),
     __metadata("design:paramtypes", [mongoose_2.Connection,
         axios_1.HttpService,
         config_1.ConfigService,
-        helper_service_1.HelperService, Object, Object, Object, Object, Object])
+        helper_service_1.HelperService, Object, Object, Object, Object, Object, Object])
 ], MomoPaymentStrategy);
 //# sourceMappingURL=momo.strategy.js.map

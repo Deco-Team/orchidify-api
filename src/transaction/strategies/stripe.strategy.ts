@@ -23,6 +23,7 @@ import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
+import { ICourseService } from '@course/services/course.service'
 
 @Injectable()
 export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
@@ -43,7 +44,9 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     @Inject(ISettingService)
     private readonly settingService: ISettingService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService
+    private readonly notificationService: INotificationService,
+    @Inject(ICourseService)
+    private readonly courseService: ICourseService,
   ) {}
   async onModuleInit() {
     this.stripe = new Stripe(this.configService.get('payment.stripe.apiKey'))
@@ -202,9 +205,18 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
           // Get learnerId, classId from extraData
           const { learnerId, classId, orderCode, price, discount } = get(charge, 'metadata')
-          // 1. Update learnerQuantity in class
+          // 1. Update learnerQuantity in class, course
           const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
+            {
+              $inc: {
+                learnerQuantity: 1
+              }
+            },
+            { session }
+          )
+          await this.courseService.update(
+            { _id: new Types.ObjectId(courseClass.courseId) },
             {
               $inc: {
                 learnerQuantity: 1
