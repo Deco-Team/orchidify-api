@@ -127,16 +127,17 @@ let MomoPaymentStrategy = MomoPaymentStrategy_1 = class MomoPaymentStrategy {
                     if (!transaction)
                         throw new app_exception_1.AppException(error_1.Errors.TRANSACTION_NOT_FOUND);
                     const { learnerId, classId } = JSON.parse((0, lodash_1.get)(webhookData, 'extraData'));
+                    const courseClass = await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
+                        $inc: {
+                            learnerQuantity: 1
+                        }
+                    }, { session });
                     await this.learnerClassService.create({
                         enrollDate: new Date(),
                         transactionId: transaction._id,
                         learnerId: new mongoose_2.Types.ObjectId(learnerId),
-                        classId: new mongoose_2.Types.ObjectId(classId)
-                    }, { session });
-                    await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
-                        $inc: {
-                            learnerQuantity: 1
-                        }
+                        classId: new mongoose_2.Types.ObjectId(classId),
+                        courseId: courseClass.courseId
                     }, { session });
                     const paymentPayLoad = {
                         id: webhookData?.transId?.toString(),

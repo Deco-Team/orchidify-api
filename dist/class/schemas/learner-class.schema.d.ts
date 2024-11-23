@@ -33,6 +33,7 @@ export declare class LearnerClass {
     transactionId: Types.ObjectId;
     learnerId: Types.ObjectId;
     classId: Types.ObjectId;
+    courseId: Types.ObjectId;
 }
 export declare const LearnerClassSchema: import("mongoose").Schema<LearnerClass, import("mongoose").Model<LearnerClass, any, any, any, import("mongoose").Document<unknown, any, LearnerClass> & LearnerClass & Required<{
     _id: string;

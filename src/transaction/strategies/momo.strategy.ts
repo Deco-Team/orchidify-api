@@ -44,7 +44,7 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService,
+    private readonly notificationService: INotificationService
   ) {
     this.config = this.configService.get('payment.momo')
   }
@@ -172,26 +172,26 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
           })
           if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
 
-          // 1. Fetch learnerId, classId from extraData => create learnerClass
+          // Get learnerId, classId from extraData
           const { learnerId, classId } = JSON.parse(get(webhookData, 'extraData'))
-          await this.learnerClassService.create(
-            {
-              enrollDate: new Date(),
-              // status: LearnerClassStatus.ENROLLED,
-              transactionId: transaction._id,
-              learnerId: new Types.ObjectId(learnerId),
-              classId: new Types.ObjectId(classId)
-            },
-            { session }
-          )
-
-          // 2. Update learnerQuantity in class
-          await this.classService.update(
+          // 1. Update learnerQuantity in class
+          const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
             {
               $inc: {
                 learnerQuantity: 1
               }
+            },
+            { session }
+          )
+          // 2. Create learnerClass
+          await this.learnerClassService.create(
+            {
+              enrollDate: new Date(),
+              transactionId: transaction._id,
+              learnerId: new Types.ObjectId(learnerId),
+              classId: new Types.ObjectId(classId),
+              courseId: courseClass.courseId
             },
             { session }
           )

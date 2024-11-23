@@ -6,6 +6,7 @@ import { Transform } from 'class-transformer'
 import { Transaction } from '@transaction/schemas/transaction.schema'
 import { Learner } from '@learner/schemas/learner.schema'
 import { Class } from './class.schema'
+import { Course } from '@course/schemas/course.schema'
 
 export type LearnerClassDocument = HydratedDocument<LearnerClass>
 
@@ -46,6 +47,9 @@ export class LearnerClass {
 
   @Prop({ type: Types.ObjectId, ref: Class.name, required: true })
   classId: Types.ObjectId
+
+  @Prop({ type: Types.ObjectId, ref: Course.name, required: true })
+  courseId: Types.ObjectId
 }
 
 export const LearnerClassSchema = SchemaFactory.createForClass(LearnerClass)

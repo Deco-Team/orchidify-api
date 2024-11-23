@@ -17,6 +17,7 @@ const class_transformer_1 = require("class-transformer");
 const transaction_schema_1 = require("../../transaction/schemas/transaction.schema");
 const learner_schema_1 = require("../../learner/schemas/learner.schema");
 const class_schema_1 = require("./class.schema");
+const course_schema_1 = require("../../course/schemas/course.schema");
 let LearnerClass = class LearnerClass {
     constructor(id) {
         this._id = id;
@@ -47,6 +48,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: class_schema_1.Class.name, required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], LearnerClass.prototype, "classId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: course_schema_1.Course.name, required: true }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], LearnerClass.prototype, "courseId", void 0);
 exports.LearnerClass = LearnerClass = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'learner-classes',
