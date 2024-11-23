@@ -36,9 +36,10 @@ const constant_4 = require("../../setting/contracts/constant");
 const instructor_service_1 = require("../../instructor/services/instructor.service");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_5 = require("../../notification/contracts/constant");
+const course_service_1 = require("../../course/services/course.service");
 exports.IClassService = Symbol('IClassService');
 let ClassService = class ClassService {
-    constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService) {
+    constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService, courseService) {
         this.notificationService = notificationService;
         this.connection = connection;
         this.classRepository = classRepository;
@@ -50,6 +51,7 @@ let ClassService = class ClassService {
         this.gardenTimesheetService = gardenTimesheetService;
         this.settingService = settingService;
         this.instructorService = instructorService;
+        this.courseService = courseService;
     }
     async create(createClassDto, options) {
         const courseClass = await this.classRepository.create(createClassDto, options);
@@ -190,7 +192,7 @@ let ClassService = class ClassService {
     }
     async enrollClass(enrollClassDto) {
         const { classId, paymentMethod, learnerId, requestType = 'captureWallet' } = enrollClassDto;
-        const [learner, courseClass, learnerClass] = await Promise.all([
+        const [learner, courseClass, enrolledLearnerClass] = await Promise.all([
             this.learnerService.findById(learnerId?.toString()),
             this.findById(classId?.toString()),
             this.learnerClassService.findOneBy({
@@ -208,13 +210,44 @@ let ClassService = class ClassService {
             throw new app_exception_1.AppException(error_1.Errors.CLASS_STATUS_INVALID);
         if (courseClass.learnerQuantity >= courseClass.learnerLimit)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_LEARNER_LIMIT);
-        if (learnerClass)
+        if (enrolledLearnerClass)
             throw new app_exception_1.AppException(error_1.Errors.LEARNER_CLASS_EXISTED);
         await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() });
         const MAX_VALUE = 9007199254740991;
         const MIM_VALUE = 1000000000000000;
         const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE));
         const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`;
+        const [course, learnerClasses] = await Promise.all([
+            this.courseService.findById(courseClass.courseId.toString(), undefined, [
+                {
+                    path: 'combos',
+                    select: ['childCourseIds', 'discount'],
+                    match: { status: constant_1.CourseStatus.ACTIVE }
+                }
+            ]),
+            this.learnerClassService.findMany({
+                learnerId: new mongoose_1.Types.ObjectId(learnerId)
+            })
+        ]);
+        const learnedCourseIdSet = new Set(learnerClasses.map((learnerClass) => learnerClass.courseId.toString()));
+        const courseData = course.toObject();
+        const combos = _.get(courseData, 'combos');
+        let discount = 0;
+        if (combos.length !== 0) {
+            const clonedCourseIdSet = new Set([...learnedCourseIdSet]);
+            clonedCourseIdSet.delete(course._id.toString());
+            for (const combo of combos) {
+                const matchedCourseIds = combo.childCourseIds.filter((childCourseId) => {
+                    return childCourseId.toString() !== course._id.toString() && clonedCourseIdSet.has(childCourseId.toString());
+                });
+                if (matchedCourseIds.length > 0) {
+                    const newDiscount = combo.discount;
+                    discount = newDiscount > discount ? newDiscount : discount;
+                }
+            }
+        }
+        const price = _.get(courseData, 'price');
+        const finalPrice = Math.round((price * (100 - discount)) / 100);
         const session = await this.connection.startSession();
         let paymentResponse;
         try {
@@ -228,10 +261,10 @@ let ClassService = class ClassService {
                             redirectUrl: `${this.configService.get('WEB_URL')}/payment`,
                             ipnUrl: `${this.configService.get('SERVER_URL')}/transactions/payment/webhook/momo`,
                             requestType,
-                            amount: courseClass.price,
+                            amount: finalPrice,
                             orderId: orderCode.toString(),
                             requestId: orderCode.toString(),
-                            extraData: JSON.stringify({ classId, learnerId }),
+                            extraData: JSON.stringify({ classId, learnerId, price, discount }),
                             autoCapture: true,
                             lang: 'vi',
                             orderExpireTime: 30
@@ -254,8 +287,8 @@ let ClassService = class ClassService {
                         const createStripePaymentDto = {
                             customerEmail: learner.email,
                             description: orderInfo,
-                            amount: courseClass.price,
-                            metadata: { classId: classId.toString(), learnerId: learnerId.toString(), orderCode }
+                            amount: finalPrice,
+                            metadata: { classId: classId.toString(), learnerId: learnerId.toString(), orderCode, price, discount }
                         };
                         paymentResponse = await this.processPaymentWithStripe({
                             createStripePaymentDto,
@@ -341,7 +374,7 @@ let ClassService = class ClassService {
         await this.transactionService.create({
             type: constant_3.TransactionType.PAYMENT,
             paymentMethod,
-            amount: courseClass.price,
+            amount: createMomoPaymentDto.amount,
             debitAccount: { userId: learnerId, userRole: constant_1.UserRole.LEARNER },
             creditAccount: { userRole: 'SYSTEM' },
             description: orderInfo,
@@ -372,7 +405,7 @@ let ClassService = class ClassService {
         await this.transactionService.create({
             type: constant_3.TransactionType.PAYMENT,
             paymentMethod,
-            amount: courseClass.price,
+            amount: createStripePaymentDto.amount,
             debitAccount: { userId: learnerId, userRole: constant_1.UserRole.LEARNER },
             creditAccount: { userRole: 'SYSTEM' },
             description: orderInfo,
@@ -604,6 +637,7 @@ exports.ClassService = ClassService = __decorate([
     __param(8, (0, common_1.Inject)(garden_timesheet_service_1.IGardenTimesheetService)),
     __param(9, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(10, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
-    __metadata("design:paramtypes", [Object, mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
+    __param(11, (0, common_1.Inject)(course_service_1.ICourseService)),
+    __metadata("design:paramtypes", [Object, mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object, Object])
 ], ClassService);
 //# sourceMappingURL=class.service.js.map

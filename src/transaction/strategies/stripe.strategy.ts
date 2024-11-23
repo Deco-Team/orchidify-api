@@ -201,7 +201,7 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           })
           if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
           // Get learnerId, classId from extraData
-          const { learnerId, classId, orderCode } = get(charge, 'metadata')
+          const { learnerId, classId, orderCode, price, discount } = get(charge, 'metadata')
           // 1. Update learnerQuantity in class
           const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
@@ -219,7 +219,9 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
               transactionId: transaction._id,
               learnerId: new Types.ObjectId(learnerId),
               classId: new Types.ObjectId(classId),
-              courseId: courseClass.courseId
+              courseId: courseClass.courseId,
+              price,
+              discount
             },
             { session }
           )

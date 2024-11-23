@@ -34,6 +34,8 @@ export declare class LearnerClass {
     learnerId: Types.ObjectId;
     classId: Types.ObjectId;
     courseId: Types.ObjectId;
+    price: number;
+    discount: number;
 }
 export declare const LearnerClassSchema: import("mongoose").Schema<LearnerClass, import("mongoose").Model<LearnerClass, any, any, any, import("mongoose").Document<unknown, any, LearnerClass> & LearnerClass & Required<{
     _id: string;

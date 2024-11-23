@@ -52,6 +52,14 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: course_schema_1.Course.name, required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], LearnerClass.prototype, "courseId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerClass.prototype, "price", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerClass.prototype, "discount", void 0);
 exports.LearnerClass = LearnerClass = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'learner-classes',

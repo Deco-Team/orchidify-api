@@ -17,6 +17,7 @@ import { CreateClassDto } from '@class/dto/create-class.dto'
 import {
   ClassStatus,
   CourseLevel,
+  CourseStatus,
   GardenTimesheetStatus,
   LearnerStatus,
   SlotNumber,
@@ -51,6 +52,8 @@ import { IInstructorService } from '@instructor/services/instructor.service'
 import { CancelClassDto } from '@class/dto/cancel-class.dto'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
+import { ICourseService } from '@course/services/course.service'
+import { Course } from '@course/schemas/course.schema'
 
 export const IClassService = Symbol('IClassService')
 
@@ -110,7 +113,9 @@ export class ClassService implements IClassService {
     @Inject(ISettingService)
     private readonly settingService: ISettingService,
     @Inject(IInstructorService)
-    private readonly instructorService: IInstructorService
+    private readonly instructorService: IInstructorService,
+    @Inject(ICourseService)
+    private readonly courseService: ICourseService
   ) {}
 
   public async create(createClassDto: CreateClassDto, options?: SaveOptions | undefined) {
@@ -295,8 +300,9 @@ export class ClassService implements IClassService {
 
   public async enrollClass(enrollClassDto: EnrollClassDto) {
     const { classId, paymentMethod, learnerId, requestType = 'captureWallet' } = enrollClassDto
+
     // 1. Validate class, learner, learnerClass(learner had enrolled class before)
-    const [learner, courseClass, learnerClass] = await Promise.all([
+    const [learner, courseClass, enrolledLearnerClass] = await Promise.all([
       this.learnerService.findById(learnerId?.toString()),
       this.findById(classId?.toString()),
       this.learnerClassService.findOneBy({
@@ -309,7 +315,7 @@ export class ClassService implements IClassService {
     if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
     if (courseClass.status !== ClassStatus.PUBLISHED) throw new AppException(Errors.CLASS_STATUS_INVALID)
     if (courseClass.learnerQuantity >= courseClass.learnerLimit) throw new AppException(Errors.CLASS_LEARNER_LIMIT)
-    if (learnerClass) throw new AppException(Errors.LEARNER_CLASS_EXISTED)
+    if (enrolledLearnerClass) throw new AppException(Errors.LEARNER_CLASS_EXISTED)
 
     // Check duplicate timesheet with enrolled class
     await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() })
@@ -318,6 +324,40 @@ export class ClassService implements IClassService {
     const MIM_VALUE = 1_000_000_000_000_000
     const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE))
     const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`
+
+    // get discount and finalPrice
+    const [course, learnerClasses] = await Promise.all([
+      this.courseService.findById(courseClass.courseId.toString(), undefined, [
+        {
+          path: 'combos',
+          select: ['childCourseIds', 'discount'],
+          match: { status: CourseStatus.ACTIVE }
+        }
+      ]),
+      this.learnerClassService.findMany({
+        learnerId: new Types.ObjectId(learnerId)
+      })
+    ])
+    const learnedCourseIdSet = new Set(learnerClasses.map((learnerClass) => learnerClass.courseId.toString()))
+
+    const courseData = course.toObject()
+    const combos = _.get(courseData, 'combos') as Course[]
+    let discount = 0
+    if (combos.length !== 0) {
+      const clonedCourseIdSet = new Set([...learnedCourseIdSet])
+      clonedCourseIdSet.delete(course._id.toString())
+      for (const combo of combos) {
+        const matchedCourseIds = combo.childCourseIds.filter((childCourseId) => {
+          return childCourseId.toString() !== course._id.toString() && clonedCourseIdSet.has(childCourseId.toString())
+        })
+        if (matchedCourseIds.length > 0) {
+          const newDiscount = combo.discount
+          discount = newDiscount > discount ? newDiscount : discount
+        }
+      }
+    }
+    const price = _.get(courseData, 'price')
+    const finalPrice = Math.round((price * (100 - discount)) / 100)
 
     // Execute in transaction
     const session = await this.connection.startSession()
@@ -334,10 +374,10 @@ export class ClassService implements IClassService {
               redirectUrl: `${this.configService.get('WEB_URL')}/payment`,
               ipnUrl: `${this.configService.get('SERVER_URL')}/transactions/payment/webhook/momo`,
               requestType,
-              amount: courseClass.price,
+              amount: finalPrice,
               orderId: orderCode.toString(),
               requestId: orderCode.toString(),
-              extraData: JSON.stringify({ classId, learnerId }),
+              extraData: JSON.stringify({ classId, learnerId, price, discount }),
               autoCapture: true,
               lang: 'vi',
               orderExpireTime: 30
@@ -360,9 +400,9 @@ export class ClassService implements IClassService {
             const createStripePaymentDto: CreateStripePaymentDto = {
               customerEmail: learner.email,
               description: orderInfo,
-              amount: courseClass.price,
+              amount: finalPrice,
               // orderId: orderCode.toString(),
-              metadata: { classId: classId.toString(), learnerId: learnerId.toString(), orderCode }
+              metadata: { classId: classId.toString(), learnerId: learnerId.toString(), orderCode, price, discount }
             }
             paymentResponse = await this.processPaymentWithStripe({
               createStripePaymentDto,
@@ -471,7 +511,7 @@ export class ClassService implements IClassService {
       {
         type: TransactionType.PAYMENT,
         paymentMethod,
-        amount: courseClass.price,
+        amount: createMomoPaymentDto.amount,
         debitAccount: { userId: learnerId, userRole: UserRole.LEARNER },
         creditAccount: { userRole: 'SYSTEM' as UserRole },
         description: orderInfo,
@@ -515,7 +555,7 @@ export class ClassService implements IClassService {
       {
         type: TransactionType.PAYMENT,
         paymentMethod,
-        amount: courseClass.price,
+        amount: createStripePaymentDto.amount,
         debitAccount: { userId: learnerId, userRole: UserRole.LEARNER },
         creditAccount: { userRole: 'SYSTEM' as UserRole },
         description: orderInfo,

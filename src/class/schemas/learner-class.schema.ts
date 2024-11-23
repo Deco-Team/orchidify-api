@@ -50,6 +50,12 @@ export class LearnerClass {
 
   @Prop({ type: Types.ObjectId, ref: Course.name, required: true })
   courseId: Types.ObjectId
+
+  @Prop({ type: Number })
+  price: number
+
+  @Prop({ type: Number })
+  discount: number
 }
 
 export const LearnerClassSchema = SchemaFactory.createForClass(LearnerClass)

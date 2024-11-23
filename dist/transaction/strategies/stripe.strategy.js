@@ -161,7 +161,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                     });
                     if (!transaction)
                         throw new app_exception_1.AppException(error_1.Errors.TRANSACTION_NOT_FOUND);
-                    const { learnerId, classId, orderCode } = (0, lodash_1.get)(charge, 'metadata');
+                    const { learnerId, classId, orderCode, price, discount } = (0, lodash_1.get)(charge, 'metadata');
                     const courseClass = await this.classService.update({ _id: new mongoose_2.Types.ObjectId(classId) }, {
                         $inc: {
                             learnerQuantity: 1
@@ -172,7 +172,9 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                         transactionId: transaction._id,
                         learnerId: new mongoose_2.Types.ObjectId(learnerId),
                         classId: new mongoose_2.Types.ObjectId(classId),
-                        courseId: courseClass.courseId
+                        courseId: courseClass.courseId,
+                        price,
+                        discount
                     }, { session });
                     const paymentPayLoad = {
                         id: charge?.id,

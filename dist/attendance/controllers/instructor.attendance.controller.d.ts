@@ -45,6 +45,8 @@ export declare class InstructorAttendanceController {
             learnerId: Types.ObjectId;
             classId: Types.ObjectId;
             courseId: Types.ObjectId;
+            price: number;
+            discount: number;
         }[];
         slot: import("../../garden-timesheet/schemas/slot.schema").Slot;
     } | {

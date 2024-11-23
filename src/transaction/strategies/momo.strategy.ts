@@ -173,7 +173,7 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
           if (!transaction) throw new AppException(Errors.TRANSACTION_NOT_FOUND)
 
           // Get learnerId, classId from extraData
-          const { learnerId, classId } = JSON.parse(get(webhookData, 'extraData'))
+          const { learnerId, classId, price, discount } = JSON.parse(get(webhookData, 'extraData'))
           // 1. Update learnerQuantity in class
           const courseClass = await this.classService.update(
             { _id: new Types.ObjectId(classId) },
@@ -191,7 +191,9 @@ export class MomoPaymentStrategy implements IPaymentStrategy {
               transactionId: transaction._id,
               learnerId: new Types.ObjectId(learnerId),
               classId: new Types.ObjectId(classId),
-              courseId: courseClass.courseId
+              courseId: courseClass.courseId,
+              price,
+              discount
             },
             { session }
           )
