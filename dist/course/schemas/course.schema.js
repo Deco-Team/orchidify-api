@@ -121,6 +121,9 @@ exports.Course = Course = __decorate([
                 delete ret.__v;
             },
             virtuals: true
+        },
+        toObject: {
+            virtuals: true
         }
     }),
     __metadata("design:paramtypes", [String])
@@ -143,5 +146,10 @@ exports.CourseSchema.virtual('childCourses', {
     ref: 'Course',
     localField: 'childCourseIds',
     foreignField: '_id'
+});
+exports.CourseSchema.virtual('combos', {
+    ref: 'Course',
+    localField: '_id',
+    foreignField: 'childCourseIds'
 });
 //# sourceMappingURL=course.schema.js.map

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PublicCourseDetailDataResponse = exports.PublishCourseListDataResponse = exports.CourseDetailDataResponse = exports.CourseListDataResponse = exports.CourseInstructorDto = exports.PublicQueryCourseDto = exports.StaffQueryCourseDto = exports.QueryCourseDto = void 0;
+exports.LearnerViewCourseDetailDataResponse = exports.PublicCourseDetailDataResponse = exports.LearnerViewCourseListDataResponse = exports.PublishCourseListDataResponse = exports.CourseDetailDataResponse = exports.CourseListDataResponse = exports.CourseInstructorDto = exports.PublicQueryCourseDto = exports.StaffQueryCourseDto = exports.QueryCourseDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_course_dto_1 = require("./base.course.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -135,6 +135,21 @@ class PublicCourseListResponse extends (0, openapi_builder_1.PaginateResponse)(P
 class PublishCourseListDataResponse extends (0, openapi_builder_1.DataResponse)(PublicCourseListResponse) {
 }
 exports.PublishCourseListDataResponse = PublishCourseListDataResponse;
+class LearnerViewCourseListItemResponse extends PublicCourseListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerViewCourseListItemResponse.prototype, "discount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerViewCourseListItemResponse.prototype, "finalPrice", void 0);
+class LearnerViewCourseListResponse extends (0, openapi_builder_1.PaginateResponse)(LearnerViewCourseListItemResponse) {
+}
+class LearnerViewCourseListDataResponse extends (0, openapi_builder_1.DataResponse)(LearnerViewCourseListResponse) {
+}
+exports.LearnerViewCourseListDataResponse = LearnerViewCourseListDataResponse;
 class PublicCourseClassGardenDto extends (0, swagger_1.PickType)(base_garden_dto_1.BaseGardenDto, ['_id', 'name']) {
 }
 class PublicCourseSessionDto extends (0, swagger_1.PickType)(session_dto_1.BaseSessionDto, ['_id', 'title']) {
@@ -168,4 +183,17 @@ __decorate([
 class PublicCourseDetailDataResponse extends (0, openapi_builder_1.DataResponse)(PublicCourseDetailResponse) {
 }
 exports.PublicCourseDetailDataResponse = PublicCourseDetailDataResponse;
+class LearnerViewCourseDetailResponse extends PublicCourseDetailResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerViewCourseDetailResponse.prototype, "discount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], LearnerViewCourseDetailResponse.prototype, "finalPrice", void 0);
+class LearnerViewCourseDetailDataResponse extends (0, openapi_builder_1.DataResponse)(LearnerViewCourseDetailResponse) {
+}
+exports.LearnerViewCourseDetailDataResponse = LearnerViewCourseDetailDataResponse;
 //# sourceMappingURL=view-course.dto.js.map

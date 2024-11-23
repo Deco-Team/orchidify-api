@@ -103,6 +103,16 @@ class PublicCourseListItemResponse extends PickType(BaseCourseDto, COURSE_LIST_P
 class PublicCourseListResponse extends PaginateResponse(PublicCourseListItemResponse) {}
 export class PublishCourseListDataResponse extends DataResponse(PublicCourseListResponse) {}
 
+class LearnerViewCourseListItemResponse extends PublicCourseListItemResponse {
+  @ApiProperty({ type: Number })
+  discount: number
+
+  @ApiProperty({ type: Number })
+  finalPrice: number
+}
+class LearnerViewCourseListResponse extends PaginateResponse(LearnerViewCourseListItemResponse) {}
+export class LearnerViewCourseListDataResponse extends DataResponse(LearnerViewCourseListResponse) {}
+
 class PublicCourseClassGardenDto extends PickType(BaseGardenDto, ['_id', 'name']) {}
 class PublicCourseSessionDto extends PickType(BaseSessionDto, ['_id', 'title']) {}
 class PublicCourseLearnerClassDto extends PickType(BaseLearnerDto, ['_id']) {}
@@ -124,3 +134,12 @@ class PublicCourseDetailResponse extends PickType(BaseCourseDto, COURSE_DETAIL_P
   classes: PublicCourseClassDto
 }
 export class PublicCourseDetailDataResponse extends DataResponse(PublicCourseDetailResponse) {}
+
+class LearnerViewCourseDetailResponse extends PublicCourseDetailResponse {
+  @ApiProperty({ type: Number })
+  discount: number
+
+  @ApiProperty({ type: Number })
+  finalPrice: number
+}
+export class LearnerViewCourseDetailDataResponse extends DataResponse(LearnerViewCourseDetailResponse) {}

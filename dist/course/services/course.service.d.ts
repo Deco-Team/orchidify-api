@@ -32,6 +32,8 @@ import { CourseStatus } from '@common/contracts/constant';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { QueryCourseDto, PublicQueryCourseDto, StaffQueryCourseDto } from '@course/dto/view-course.dto';
 import { HelperService } from '@common/services/helper.service';
+import { UserAuth } from '@common/contracts/dto';
+import { ILearnerClassService } from '@class/services/learner-class.service';
 export declare const ICourseService: unique symbol;
 export interface ICourseService {
     create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined): Promise<CourseDocument>;
@@ -40,13 +42,15 @@ export interface ICourseService {
     listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto): any;
     listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto): any;
     listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): any;
+    listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): any;
     findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>;
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<CourseDocument[]>;
 }
 export declare class CourseService implements ICourseService {
-    private readonly courseRepository;
     private readonly helperService;
-    constructor(courseRepository: ICourseRepository, helperService: HelperService);
+    private readonly courseRepository;
+    private readonly learnerClassService;
+    constructor(helperService: HelperService, courseRepository: ICourseRepository, learnerClassService: ILearnerClassService);
     create(createCourseDto: CreateCourseDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>>;
@@ -69,6 +73,18 @@ export declare class CourseService implements ICourseService {
         _id: string;
     }>>>;
     listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto): Promise<{
+        docs: any[];
+        totalDocs: number;
+        limit: number;
+        page: number;
+        totalPages: number;
+        pagingCounter: any;
+        hasPrevPage: boolean;
+        hasNextPage: boolean;
+        prevPage: number;
+        nextPage: number;
+    }>;
+    listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): Promise<{
         docs: any[];
         totalDocs: number;
         limit: number;

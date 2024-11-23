@@ -22,6 +22,9 @@ export type CourseDocument = HydratedDocument<Course>
       delete ret.__v
     },
     virtuals: true
+  },
+  toObject: {
+    virtuals: true
   }
 })
 export class Course {
@@ -113,4 +116,10 @@ CourseSchema.virtual('childCourses', {
   ref: 'Course',
   localField: 'childCourseIds',
   foreignField: '_id'
+})
+
+CourseSchema.virtual('combos', {
+  ref: 'Course',
+  localField: '_id',
+  foreignField: 'childCourseIds'
 })

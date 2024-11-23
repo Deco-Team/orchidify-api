@@ -81,6 +81,30 @@ declare const PublishCourseListDataResponse_base: import("@nestjs/common").Type<
 }>;
 export declare class PublishCourseListDataResponse extends PublishCourseListDataResponse_base {
 }
+declare class LearnerViewCourseListItemResponse extends PublicCourseListItemResponse {
+    discount: number;
+    finalPrice: number;
+}
+declare const LearnerViewCourseListResponse_base: import("@nestjs/common").Type<{
+    docs: (typeof LearnerViewCourseListItemResponse)[];
+    totalDocs: number;
+    offset: number;
+    limit: number;
+    totalPages: number;
+    page?: number;
+    pagingCounter: number;
+    hasPrevPage: boolean;
+    hasNextPage: boolean;
+    prevPage?: number;
+    nextPage?: number;
+}>;
+declare class LearnerViewCourseListResponse extends LearnerViewCourseListResponse_base {
+}
+declare const LearnerViewCourseListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof LearnerViewCourseListResponse;
+}>;
+export declare class LearnerViewCourseListDataResponse extends LearnerViewCourseListDataResponse_base {
+}
 declare const PublicCourseClassGardenDto_base: import("@nestjs/common").Type<Pick<BaseGardenDto, "name" | "_id">>;
 declare class PublicCourseClassGardenDto extends PublicCourseClassGardenDto_base {
 }
@@ -102,5 +126,14 @@ declare const PublicCourseDetailDataResponse_base: import("@nestjs/common").Type
     data: typeof PublicCourseDetailResponse;
 }>;
 export declare class PublicCourseDetailDataResponse extends PublicCourseDetailDataResponse_base {
+}
+declare class LearnerViewCourseDetailResponse extends PublicCourseDetailResponse {
+    discount: number;
+    finalPrice: number;
+}
+declare const LearnerViewCourseDetailDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof LearnerViewCourseDetailResponse;
+}>;
+export declare class LearnerViewCourseDetailDataResponse extends LearnerViewCourseDetailDataResponse_base {
 }
 export {};

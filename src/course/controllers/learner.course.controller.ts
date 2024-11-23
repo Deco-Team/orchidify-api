@@ -10,6 +10,8 @@ import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { Pagination, PaginationParams } from '@common/decorators/pagination.decorator'
 import { ICourseService } from '@course/services/course.service'
 import {
+  LearnerViewCourseDetailDataResponse,
+  LearnerViewCourseListDataResponse,
   PublicCourseDetailDataResponse,
   PublicQueryCourseDto,
   PublishCourseListDataResponse
@@ -21,6 +23,8 @@ import { RolesGuard } from '@auth/guards/roles.guard'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { Types } from 'mongoose'
+import { Course } from '@course/schemas/course.schema'
+import { ILearnerClassService } from '@class/services/learner-class.service'
 
 @ApiTags('Course - Viewer/Learner')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -28,12 +32,15 @@ import { Types } from 'mongoose'
 export class CourseController {
   constructor(
     @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    private readonly courseService: ICourseService,
+    @Inject(ILearnerClassService)
+    private readonly learnerClassService: ILearnerClassService
   ) {}
 
   @ApiOperation({
-    summary: `[Viewer/${UserRole.LEARNER}] View Course List`
+    summary: `[Viewer] View Public Course List`
   })
+  @ApiBearerAuth()
   @ApiQuery({ type: PaginationQuery })
   @ApiOkResponse({ type: PublishCourseListDataResponse })
   @Get()
@@ -42,40 +49,91 @@ export class CourseController {
   }
 
   @ApiOperation({
+    summary: `[${UserRole.LEARNER}] View Course List`
+  })
+  @ApiBearerAuth()
+  @ApiQuery({ type: PaginationQuery })
+  @ApiOkResponse({ type: LearnerViewCourseListDataResponse })
+  @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
+  @Roles(UserRole.LEARNER)
+  @Get('learner')
+  async listForLearner(
+    @Req() req,
+    @Pagination() pagination: PaginationParams,
+    @Query() queryCourseDto: PublicQueryCourseDto
+  ) {
+    const userAuth = _.get(req, 'user')
+    return await this.courseService.listByLearner(pagination, queryCourseDto, userAuth)
+  }
+
+  @ApiOperation({
     summary: `[${UserRole.LEARNER}] View Course Detail`
   })
   @ApiBearerAuth()
-  @ApiOkResponse({ type: PublicCourseDetailDataResponse })
+  @ApiOkResponse({ type: LearnerViewCourseDetailDataResponse })
   @ApiErrorResponse([Errors.COURSE_NOT_FOUND])
   @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
   @Roles(UserRole.LEARNER)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Req() req, @Param('id') courseId: string) {
-    const { _id } = _.get(req, 'user')
-    const course = await this.courseService.findById(courseId, PUBLIC_COURSE_DETAIL_PROJECTION, [
-      {
-        path: 'classes',
-        select: PUBLIC_COURSE_CLASS_DETAIL_PROJECTION,
-        match: { status: ClassStatus.PUBLISHED },
-        populate: [
-          {
-            path: 'learnerClass',
-            select: ['_id'],
-            match: { learnerId: new Types.ObjectId(_id) }
-          },
-          {
-            path: 'garden',
-            select: ['_id', 'name']
-          }
-        ]
-      },
-      {
-        path: 'instructor',
-        select: COURSE_INSTRUCTOR_DETAIL_PROJECTION
-      }
+    const { _id: learnerId } = _.get(req, 'user')
+    const [course, learnerClasses] = await Promise.all([
+      this.courseService.findById(courseId, PUBLIC_COURSE_DETAIL_PROJECTION, [
+        {
+          path: 'classes',
+          select: PUBLIC_COURSE_CLASS_DETAIL_PROJECTION,
+          match: { status: ClassStatus.PUBLISHED },
+          populate: [
+            {
+              path: 'learnerClass',
+              select: ['_id'],
+              match: { learnerId: new Types.ObjectId(learnerId) }
+            },
+            {
+              path: 'garden',
+              select: ['_id', 'name']
+            }
+          ]
+        },
+        {
+          path: 'instructor',
+          select: COURSE_INSTRUCTOR_DETAIL_PROJECTION
+        },
+        {
+          path: 'combos',
+          select: ['childCourseIds', 'discount'],
+          match: { status: CourseStatus.ACTIVE }
+        }
+      ]),
+      this.learnerClassService.findMany({
+        learnerId: new Types.ObjectId(learnerId)
+      })
     ])
     if (!course || [CourseStatus.ACTIVE].includes(course.status) === false)
       throw new AppException(Errors.COURSE_NOT_FOUND)
-    return course
+
+    const learnedCourseIdSet = new Set(learnerClasses.map((learnerClass) => learnerClass.courseId.toString()))
+
+    const courseData = course.toObject()
+    const combos = _.get(courseData, 'combos') as Course[]
+    let discount = 0
+    if (combos.length !== 0) {
+      const clonedCourseIdSet = new Set([...learnedCourseIdSet])
+      clonedCourseIdSet.delete(course._id.toString())
+      for (const combo of combos) {
+        const matchedCourseIds = combo.childCourseIds.filter((childCourseId) => {
+          return childCourseId.toString() !== course._id.toString() && clonedCourseIdSet.has(childCourseId.toString())
+        })
+        if (matchedCourseIds.length > 0) {
+          const newDiscount = combo.discount
+          discount = newDiscount > discount ? newDiscount : discount
+        }
+      }
+    }
+    _.set(courseData, 'discount', discount)
+    _.set(courseData, 'finalPrice', Math.round((_.get(courseData, 'price') * (100 - discount)) / 100))
+    _.unset(courseData, 'combos')
+
+    return courseData
   }
 }
