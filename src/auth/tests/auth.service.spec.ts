@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { TestBed, Mocked } from '@suites/unit'
 import { AuthService } from '@auth/services/auth.service'
 import { ILearnerService } from '@learner/services/learner.service'
 import { IInstructorService } from '@instructor/services/instructor.service'
@@ -30,103 +30,35 @@ import { INotificationService } from '@notification/services/notification.servic
 
 describe('AuthService', () => {
   let authService: AuthService
-  let learnerServiceMock: ILearnerService
-  let instructorServiceMock: IInstructorService
-  let staffServiceMock: IStaffService
-  let gardenManagerServiceMock: IGardenManagerService
-  let userTokenServiceMock: IUserTokenService
-  let otpServiceMock: IOtpService
-  let recruitmentServiceMock: IRecruitmentService
-  let jwtServiceMock: JwtService
-  let helperServiceMock: HelperService
-  let configServiceMock: ConfigService
-  let notificationServiceMock: INotificationService
-  let settingServiceMock: ISettingService
+  let learnerService: Mocked<ILearnerService>
+  let instructorService: Mocked<IInstructorService>
+  let staffService: Mocked<IStaffService>
+  let gardenManagerService: Mocked<IGardenManagerService>
+  let userTokenService: Mocked<IUserTokenService>
+  let otpService: Mocked<IOtpService>
+  let recruitmentService: Mocked<IRecruitmentService>
+  let jwtService: Mocked<JwtService>
+  let helperService: Mocked<HelperService>
+  let configService: Mocked<ConfigService>
+  let notificationService: Mocked<INotificationService>
+  let settingService: Mocked<ISettingService>
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        {
-          provide: ILearnerService,
-          useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
-            findByEmail: jest.fn(),
-            findById: jest.fn()
-          }
-        },
-        {
-          provide: IInstructorService,
-          useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
-            findByEmail: jest.fn(),
-            findById: jest.fn()
-          }
-        },
-        { provide: IStaffService, useClass: jest.fn() },
-        { provide: IGardenManagerService, useClass: jest.fn() },
-        {
-          provide: IUserTokenService,
-          useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
-            findByRefreshToken: jest.fn(),
-            disableRefreshToken: jest.fn()
-          }
-        },
-        {
-          provide: IOtpService,
-          useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
-            findByCode: jest.fn(),
-            findByUserIdAndRole: jest.fn(),
-            clearOtp: jest.fn()
-          }
-        },
-        {
-          provide: IRecruitmentService,
-          useValue: {
-            create: jest.fn(),
-            update: jest.fn(),
-            findOneByApplicationEmailAndStatus: jest.fn()
-          }
-        },
-        { provide: JwtService, useValue: { sign: jest.fn() } },
-        {
-          provide: HelperService,
-          useValue: {
-            comparePassword: jest.fn(),
-            hashPassword: jest.fn(),
-            generateRandomString: jest.fn()
-          }
-        },
-        { provide: ConfigService, useValue: { get: jest.fn() } },
-        { provide: INotificationService, useValue: { sendMail: jest.fn() } },
-        {
-          provide: ISettingService,
-          useValue: {
-            findByKey: jest.fn()
-          }
-        }
-      ]
-    }).compile()
+    const { unit, unitRef } = await TestBed.solitary(AuthService).compile()
 
-    authService = module.get<AuthService>(AuthService)
-    learnerServiceMock = module.get<ILearnerService>(ILearnerService)
-    instructorServiceMock = module.get<IInstructorService>(IInstructorService)
-    staffServiceMock = module.get<IStaffService>(IStaffService)
-    gardenManagerServiceMock = module.get<IGardenManagerService>(IGardenManagerService)
-    userTokenServiceMock = module.get<IUserTokenService>(IUserTokenService)
-    otpServiceMock = module.get<IOtpService>(IOtpService)
-    recruitmentServiceMock = module.get<IRecruitmentService>(IRecruitmentService)
-    jwtServiceMock = module.get<JwtService>(JwtService)
-    helperServiceMock = module.get<HelperService>(HelperService)
-    configServiceMock = module.get<ConfigService>(ConfigService)
-    notificationServiceMock = module.get<INotificationService>(INotificationService)
-    settingServiceMock = module.get<ISettingService>(ISettingService)
+    authService = unit
+    learnerService = unitRef.get(ILearnerService)
+    instructorService = unitRef.get(IInstructorService)
+    staffService = unitRef.get(IStaffService)
+    gardenManagerService = unitRef.get(IGardenManagerService)
+    userTokenService = unitRef.get(IUserTokenService)
+    otpService = unitRef.get(IOtpService)
+    recruitmentService = unitRef.get(IRecruitmentService)
+    jwtService = unitRef.get(JwtService)
+    helperService = unitRef.get(HelperService)
+    configService = unitRef.get(ConfigService)
+    notificationService = unitRef.get(INotificationService)
+    settingService = unitRef.get(ISettingService)
   })
 
   describe('login', () => {
@@ -137,14 +69,14 @@ describe('AuthService', () => {
       }
       const role = UserRole.LEARNER
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: '_id',
         email: 'valid@email.com',
         password: 'correctPassword',
         status: LearnerStatus.ACTIVE
       } as LearnerDocument)
 
-      jest.spyOn(helperServiceMock, 'comparePassword').mockResolvedValue(true)
+      helperService.comparePassword.mockResolvedValue(true)
 
       const result = await authService.login(loginDto, role)
 
@@ -159,7 +91,7 @@ describe('AuthService', () => {
       }
       const role = UserRole.LEARNER
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue(null)
+      learnerService.findByEmail.mockResolvedValue(null)
 
       await expect(authService.login(loginDto, role)).rejects.toThrow(new AppException(Errors.WRONG_EMAIL_OR_PASSWORD))
     })
@@ -171,7 +103,7 @@ describe('AuthService', () => {
       }
       const role = UserRole.LEARNER
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: '_id',
         email: 'unverified@email.com',
         password: 'correctPassword',
@@ -188,7 +120,7 @@ describe('AuthService', () => {
       }
       const role = UserRole.LEARNER
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: '_id',
         email: 'inactive@email.com',
         password: 'correctPassword',
@@ -205,13 +137,13 @@ describe('AuthService', () => {
       }
       const role = UserRole.LEARNER
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: '_id',
         email: 'correct@email.com',
         password: 'correctPassword'
       } as LearnerDocument)
 
-      jest.spyOn(helperServiceMock, 'comparePassword').mockResolvedValue(false)
+      jest.spyOn(helperService, 'comparePassword').mockResolvedValue(false)
 
       await expect(authService.login(loginDto, role)).rejects.toThrow(new AppException(Errors.WRONG_EMAIL_OR_PASSWORD))
     })
@@ -223,7 +155,7 @@ describe('AuthService', () => {
         refreshToken: 'valid-refresh-token'
       }
 
-      jest.spyOn(userTokenServiceMock, 'disableRefreshToken').mockResolvedValue({} as UserToken)
+      userTokenService.disableRefreshToken.mockResolvedValue({} as UserToken)
 
       const result = await authService.logout(refreshTokenDto)
 
@@ -237,7 +169,7 @@ describe('AuthService', () => {
       const role = UserRole.LEARNER
       const refreshToken = 'valid-refresh-token'
 
-      jest.spyOn(userTokenServiceMock, 'findByRefreshToken').mockResolvedValue({
+      userTokenService.findByRefreshToken.mockResolvedValue({
         _id: '_id',
         userId,
         role,
@@ -245,13 +177,13 @@ describe('AuthService', () => {
         enabled: true
       })
 
-      jest.spyOn(learnerServiceMock, 'findById').mockResolvedValue({
+      learnerService.findById.mockResolvedValue({
         _id: userId.toString(),
         name: 'John Doe'
       } as LearnerDocument)
 
-      jest.spyOn(jwtServiceMock, 'sign').mockReturnValueOnce('new-access-token')
-      jest.spyOn(jwtServiceMock, 'sign').mockReturnValueOnce('new-refresh-token')
+      jwtService.sign.mockReturnValueOnce('new-access-token')
+      jwtService.sign.mockReturnValueOnce('new-refresh-token')
 
       const result = await authService.refreshToken(userId.toString(), role, refreshToken)
 
@@ -260,7 +192,7 @@ describe('AuthService', () => {
         refreshToken: 'new-refresh-token'
       })
 
-      expect(userTokenServiceMock.update).toHaveBeenCalled()
+      expect(userTokenService.update).toHaveBeenCalled()
     })
 
     it('should throw an error when the refresh token is invalid', async () => {
@@ -268,7 +200,7 @@ describe('AuthService', () => {
       const role = UserRole.LEARNER
       const refreshToken = 'invalid-refresh-token'
 
-      jest.spyOn(userTokenServiceMock, 'findByRefreshToken').mockResolvedValue(null)
+      userTokenService.findByRefreshToken.mockResolvedValue(null)
 
       await expect(authService.refreshToken(userId.toString(), role, refreshToken)).rejects.toThrow(
         new AppException(Errors.REFRESH_TOKEN_INVALID)
@@ -280,7 +212,7 @@ describe('AuthService', () => {
       const role = UserRole.LEARNER
       const refreshToken = 'valid-refresh-token'
 
-      jest.spyOn(userTokenServiceMock, 'findByRefreshToken').mockResolvedValue({
+      userTokenService.findByRefreshToken.mockResolvedValue({
         _id: '_id',
         userId,
         role,
@@ -288,7 +220,7 @@ describe('AuthService', () => {
         enabled: true
       })
 
-      jest.spyOn(learnerServiceMock, 'findById').mockResolvedValue(null)
+      learnerService.findById.mockResolvedValue(null)
 
       await expect(authService.refreshToken(userId.toString(), role, refreshToken)).rejects.toThrow(
         new AppException(Errors.REFRESH_TOKEN_INVALID)
@@ -304,7 +236,7 @@ describe('AuthService', () => {
         password: 'password'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: '_id',
         email: 'existing@email.com'
       } as LearnerDocument)
@@ -321,14 +253,14 @@ describe('AuthService', () => {
         password: 'password'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(helperServiceMock, 'hashPassword').mockResolvedValue('hashedPassword')
-      jest.spyOn(helperServiceMock, 'generateRandomString').mockResolvedValue('randomString' as never)
-      jest.spyOn(learnerServiceMock, 'create').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue(null)
+      helperService.hashPassword.mockResolvedValue('hashedPassword')
+      helperService.generateRandomString.mockResolvedValue('randomString' as never)
+      learnerService.create.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'valid@email.com'
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'create').mockRejectedValue(new Error('OTP creation failed'))
+      otpService.create.mockRejectedValue(new Error('OTP creation failed'))
 
       await expect(authService.registerByLearner(learnerRegisterDto)).rejects.toThrow('OTP creation failed')
     })
@@ -340,13 +272,13 @@ describe('AuthService', () => {
         password: 'password'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(helperServiceMock, 'hashPassword').mockResolvedValue('hashedPassword')
-      jest.spyOn(learnerServiceMock, 'create').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue(null)
+      helperService.hashPassword.mockResolvedValue('hashedPassword')
+      learnerService.create.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'valid@email.com'
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'create').mockResolvedValue({
+      otpService.create.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         code: '123456'
       } as OtpDocument)
@@ -364,7 +296,7 @@ describe('AuthService', () => {
         code: '123456'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue(null)
+      learnerService.findByEmail.mockResolvedValue(null)
 
       await expect(authService.verifyOtpByLearner(learnerVerifyAccountDto)).rejects.toThrow(
         new AppException(Errors.LEARNER_NOT_FOUND)
@@ -377,7 +309,7 @@ describe('AuthService', () => {
         code: '123456'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'inactive@email.com',
         status: LearnerStatus.INACTIVE
@@ -394,12 +326,12 @@ describe('AuthService', () => {
         code: 'invalid-code'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'findByCode').mockResolvedValue(null)
+      otpService.findByCode.mockResolvedValue(null)
 
       await expect(authService.verifyOtpByLearner(learnerVerifyAccountDto)).rejects.toThrow(
         new AppException(Errors.WRONG_OTP_CODE)
@@ -413,12 +345,12 @@ describe('AuthService', () => {
       }
 
       const userId = new Types.ObjectId()
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: userId.toString(),
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'findByCode').mockResolvedValue({
+      otpService.findByCode.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         userId,
         role: UserRole.LEARNER,
@@ -438,12 +370,12 @@ describe('AuthService', () => {
       }
 
       const userId = new Types.ObjectId()
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: userId.toString(),
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'findByCode').mockResolvedValue({
+      otpService.findByCode.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         userId,
         role: UserRole.LEARNER,
@@ -463,7 +395,7 @@ describe('AuthService', () => {
         email: 'nonexistent@email.com'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue(null)
+      learnerService.findByEmail.mockResolvedValue(null)
 
       await expect(authService.resendOtpByLearner(learnerResendOtpDto)).rejects.toThrow(
         new AppException(Errors.LEARNER_NOT_FOUND)
@@ -475,7 +407,7 @@ describe('AuthService', () => {
         email: 'inactive@email.com'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'inactive@email.com',
         status: LearnerStatus.INACTIVE
@@ -491,13 +423,13 @@ describe('AuthService', () => {
         email: 'valid@email.com'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
-      jest.spyOn(settingServiceMock, 'findByKey').mockResolvedValue({ value: 5 } as SettingDocument)
-      jest.spyOn(otpServiceMock, 'findByUserIdAndRole').mockResolvedValue({
+      settingService.findByKey.mockResolvedValue({ value: 5 } as SettingDocument)
+      otpService.findByUserIdAndRole.mockResolvedValue({
         __v: 5
         // updatedAt: new Date(Date.now() - 10000) // 10 seconds ago
       } as OtpDocument)
@@ -512,17 +444,17 @@ describe('AuthService', () => {
         email: 'valid@email.com'
       }
 
-      jest.spyOn(learnerServiceMock, 'findByEmail').mockResolvedValue({
+      learnerService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'valid@email.com',
         status: LearnerStatus.UNVERIFIED
       } as LearnerDocument)
-      jest.spyOn(otpServiceMock, 'findByUserIdAndRole').mockResolvedValue({
+      otpService.findByUserIdAndRole.mockResolvedValue({
         __v: 4,
         save: () => {}
         // updatedAt: new Date(Date.now() - 10000) // 10 seconds ago
       } as OtpDocument)
-      jest.spyOn(settingServiceMock, 'findByKey').mockResolvedValue({ value: 5 } as SettingDocument)
+      settingService.findByKey.mockResolvedValue({ value: 5 } as SettingDocument)
 
       const result = await authService.resendOtpByLearner(learnerResendOtpDto)
 
@@ -540,7 +472,7 @@ describe('AuthService', () => {
         note: 'note'
       }
 
-      jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue({
+      instructorService.findByEmail.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         email: 'existing@email.com'
       } as InstructorDocument)
@@ -559,8 +491,8 @@ describe('AuthService', () => {
         note: 'note'
       }
 
-      jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue({
+      instructorService.findByEmail.mockResolvedValue(null)
+      recruitmentService.findOneByApplicationEmailAndStatus.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         applicationInfo: instructorRegisterDto,
         status: RecruitmentStatus.PENDING
@@ -580,9 +512,9 @@ describe('AuthService', () => {
         note: 'note'
       }
 
-      jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'create').mockRejectedValue(new Error('Recruitment creation failed'))
+      instructorService.findByEmail.mockResolvedValue(null)
+      recruitmentService.findOneByApplicationEmailAndStatus.mockResolvedValue(null)
+      recruitmentService.create.mockRejectedValue(new Error('Recruitment creation failed'))
 
       await expect(authService.registerByInstructor(instructorRegisterDto)).rejects.toThrow(
         'Recruitment creation failed'
@@ -598,9 +530,9 @@ describe('AuthService', () => {
         note: 'note'
       }
 
-      jest.spyOn(instructorServiceMock, 'findByEmail').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'findOneByApplicationEmailAndStatus').mockResolvedValue(null)
-      jest.spyOn(recruitmentServiceMock, 'create').mockResolvedValue({
+      instructorService.findByEmail.mockResolvedValue(null)
+      recruitmentService.findOneByApplicationEmailAndStatus.mockResolvedValue(null)
+      recruitmentService.create.mockResolvedValue({
         _id: new Types.ObjectId().toString(),
         applicationInfo: instructorRegisterDto,
         status: RecruitmentStatus.PENDING

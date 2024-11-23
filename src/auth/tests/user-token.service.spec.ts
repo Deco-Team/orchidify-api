@@ -1,48 +1,26 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { TestBed, Mocked } from '@suites/unit'
 import { FilterQuery, UpdateQuery, Types } from 'mongoose'
 import { UserRole } from '@common/contracts/constant'
 import { CreateUserTokenDto } from '@auth/dto/user-token.dto'
-import { UserToken } from '@auth/schemas/user-token.schema'
+import { UserTokenDocument } from '@auth/schemas/user-token.schema'
 import { UserTokenService } from '@auth/services/user-token.service'
 import { IUserTokenRepository } from '@auth/repositories/user-token.repository'
 
-// Mock IUserTokenRepository interface
-interface MockIUserTokenRepository {
-  create(createUserTokenDto: CreateUserTokenDto, options?: any): Promise<UserToken>
-  findOneAndUpdate(conditions: FilterQuery<any>, payload: UpdateQuery<any>, options?: any): Promise<UserToken>
-  findOne(conditions: FilterQuery<any>): Promise<UserToken>
-  deleteMany(conditions: FilterQuery<any>): Promise<any>
-}
-
 describe('UserTokenService', () => {
   let userTokenService: UserTokenService
-  let userTokenRepository: MockIUserTokenRepository
+  let userTokenRepository: Mocked<IUserTokenRepository>
   const mockUserToken = {
     _id: '_id',
     userId: new Types.ObjectId(),
     role: UserRole.LEARNER,
     refreshToken: 'refreshToken',
     enabled: true
-  }
+  } as UserTokenDocument
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserTokenService,
-        {
-          provide: IUserTokenRepository,
-          useFactory: () => ({
-            create: jest.fn(),
-            findOneAndUpdate: jest.fn(),
-            findOne: jest.fn(),
-            deleteMany: jest.fn()
-          })
-        }
-      ]
-    }).compile()
-
-    userTokenService = module.get<UserTokenService>(UserTokenService)
-    userTokenRepository = module.get<MockIUserTokenRepository>(IUserTokenRepository)
+    const { unit, unitRef } = await TestBed.solitary(UserTokenService).compile()
+    userTokenService = unit
+    userTokenRepository = unitRef.get(IUserTokenRepository)
   })
 
   it('should create a user token', async () => {
@@ -51,9 +29,9 @@ describe('UserTokenService', () => {
       role: UserRole.LEARNER,
       refreshToken: 'refreshToken'
     }
-    const expectedUserToken: UserToken = mockUserToken
+    const expectedUserToken = mockUserToken
 
-    jest.spyOn(userTokenRepository, 'create').mockResolvedValue(expectedUserToken)
+    userTokenRepository.create.mockResolvedValue(expectedUserToken)
 
     const result = await userTokenService.create(createUserTokenDto)
 
@@ -72,9 +50,9 @@ describe('UserTokenService', () => {
     const expectedUserToken = {
       ...mockUserToken,
       refreshToken: 'newRefreshToken'
-    } as UserToken
+    } as UserTokenDocument
 
-    jest.spyOn(userTokenRepository, 'findOneAndUpdate').mockResolvedValue(expectedUserToken)
+    userTokenRepository.findOneAndUpdate.mockResolvedValue(expectedUserToken)
 
     const result = await userTokenService.update(conditions, payload)
 
@@ -84,12 +62,12 @@ describe('UserTokenService', () => {
 
   it('should find a user token by refresh token', async () => {
     const refreshToken = 'refresh_token_123'
-    const expectedUserToken: UserToken = {
+    const expectedUserToken = {
       ...mockUserToken,
       refreshToken
-    }
+    } as UserTokenDocument
 
-    jest.spyOn(userTokenRepository, 'findOne').mockResolvedValue(expectedUserToken)
+    userTokenRepository.findOne.mockResolvedValue(expectedUserToken)
 
     const result = await userTokenService.findByRefreshToken(refreshToken)
 
@@ -99,12 +77,12 @@ describe('UserTokenService', () => {
 
   it('should disable a user token by refresh token', async () => {
     const refreshToken = 'refresh_token_123'
-    const expectedUserToken: UserToken = {
+    const expectedUserToken = {
       ...mockUserToken,
       refreshToken
-    }
+    } as UserTokenDocument
 
-    jest.spyOn(userTokenRepository, 'findOneAndUpdate').mockResolvedValue(expectedUserToken)
+    userTokenRepository.findOneAndUpdate.mockResolvedValue(expectedUserToken)
 
     const result = await userTokenService.disableRefreshToken(refreshToken)
 
@@ -113,7 +91,7 @@ describe('UserTokenService', () => {
   })
 
   it('should clear all refresh tokens of a user', async () => {
-    jest.spyOn(userTokenRepository, 'deleteMany').mockResolvedValue({ acknowledged: true })
+    userTokenRepository.deleteMany.mockResolvedValue({ acknowledged: true, deletedCount: 1 })
 
     await userTokenService.clearAllRefreshTokensOfUser(mockUserToken.userId, mockUserToken.role)
 

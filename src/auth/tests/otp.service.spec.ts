@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing'
+import { TestBed, Mocked } from '@suites/unit';
 import { Types } from 'mongoose'
 import { IOtpRepository } from '@auth/repositories/otp.repository'
 import { OtpDocument } from '@auth/schemas/otp.schema'
@@ -7,28 +7,12 @@ import { UserRole } from '@common/contracts/constant'
 
 describe('OtpService', () => {
   let otpService: OtpService
-  let otpRepository: IOtpRepository
+  let otpRepository:  Mocked<IOtpRepository>
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OtpService,
-        {
-          provide: IOtpRepository,
-          useValue: {
-            create: jest.fn(),
-            findOneAndUpdate: jest.fn(),
-            findOne: jest.fn(),
-            model: {
-              deleteOne: jest.fn()
-            }
-          }
-        }
-      ]
-    }).compile()
-
-    otpService = module.get<OtpService>(OtpService)
-    otpRepository = module.get<IOtpRepository>(IOtpRepository)
+    const { unit, unitRef } = await TestBed.solitary(OtpService).compile();
+    otpService = unit
+    otpRepository = unitRef.get(IOtpRepository);
   })
 
   it('should create an OTP document', async () => {
@@ -41,12 +25,12 @@ describe('OtpService', () => {
       expiredAt: new Date()
     } as OtpDocument // Expected OTP document
 
-    jest.spyOn(otpRepository, 'create').mockResolvedValueOnce(expectedOtp)
+    otpRepository.create.mockResolvedValueOnce(expectedOtp)
 
     const result = await otpService.create(createOtpDto)
 
-    expect(result).toEqual(expectedOtp)
     expect(otpRepository.create).toHaveBeenCalled()
+    expect(result).toEqual(expectedOtp)
   })
 
   it('should update an OTP document', async () => {
@@ -59,12 +43,12 @@ describe('OtpService', () => {
       expiredAt: new Date()
     } as OtpDocument
 
-    jest.spyOn(otpRepository, 'findOneAndUpdate').mockResolvedValueOnce(updatedOtp)
+    otpRepository.findOneAndUpdate.mockResolvedValueOnce(updatedOtp)
 
     const result = await otpService.update(conditions, payload, undefined)
 
-    expect(result).toEqual(updatedOtp)
     expect(otpRepository.findOneAndUpdate).toHaveBeenCalled()
+    expect(result).toEqual(updatedOtp)
   })
 
   it('should find an OTP by code', async () => {
@@ -76,7 +60,7 @@ describe('OtpService', () => {
       expiredAt: new Date()
     } as OtpDocument
 
-    jest.spyOn(otpRepository, 'findOne').mockResolvedValueOnce(foundOtp)
+    otpRepository.findOne.mockResolvedValueOnce(foundOtp)
 
     const result = await otpService.findByCode(code)
 
@@ -94,7 +78,7 @@ describe('OtpService', () => {
       expiredAt: new Date()
     } as OtpDocument
 
-    jest.spyOn(otpRepository, 'findOne').mockResolvedValueOnce(foundOtp)
+    otpRepository.findOne.mockResolvedValueOnce(foundOtp)
 
     const result = await otpService.findByUserIdAndRole(userId, role)
 
@@ -105,7 +89,7 @@ describe('OtpService', () => {
   it('should delete an OTP by code', async () => {
     const code = '123456'
 
-    jest.spyOn(otpRepository.model, 'deleteOne').mockResolvedValueOnce({} as any)
+    otpRepository.model.deleteOne.mockResolvedValueOnce({} as any)
 
     await otpService.clearOtp(code)
 
