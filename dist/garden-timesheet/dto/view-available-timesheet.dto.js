@@ -15,7 +15,6 @@ const moment = require("moment-timezone");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
 const class_validator_1 = require("class-validator");
 const constant_1 = require("../../common/contracts/constant");
-const future_min_month_validator_1 = require("../../common/validators/future-min-month.validator");
 const future_max_month_validator_1 = require("../../common/validators/future-max-month.validator");
 const class_transformer_1 = require("class-transformer");
 const config_1 = require("../../config");
@@ -24,7 +23,6 @@ class QueryAvailableTimeDto {
 exports.QueryAvailableTimeDto = QueryAvailableTimeDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
-    (0, future_min_month_validator_1.FutureMinMonth)(0),
     (0, future_max_month_validator_1.FutureMaxMonth)(3),
     (0, class_transformer_1.Transform)(({ value }) => (moment(value).tz(config_1.VN_TIMEZONE).startOf('date').toISOString())),
     __metadata("design:type", Date)

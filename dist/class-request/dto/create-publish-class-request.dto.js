@@ -16,7 +16,6 @@ const base_class_request_dto_1 = require("./base.class-request.dto");
 const constant_1 = require("../../common/contracts/constant");
 const class_validator_1 = require("class-validator");
 const future_max_month_validator_1 = require("../../common/validators/future-max-month.validator");
-const future_min_month_validator_1 = require("../../common/validators/future-min-month.validator");
 const class_transformer_1 = require("class-transformer");
 const config_1 = require("../../config");
 class CreatePublishClassRequestDto extends (0, swagger_1.PickType)(base_class_request_dto_1.BaseClassRequestDto, ['description', 'courseId']) {
@@ -24,7 +23,6 @@ class CreatePublishClassRequestDto extends (0, swagger_1.PickType)(base_class_re
 exports.CreatePublishClassRequestDto = CreatePublishClassRequestDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
-    (0, future_min_month_validator_1.FutureMinMonth)(0),
     (0, future_max_month_validator_1.FutureMaxMonth)(3),
     (0, class_transformer_1.Transform)(({ value }) => (moment(value).tz(config_1.VN_TIMEZONE).startOf('date').toISOString())),
     __metadata("design:type", Date)

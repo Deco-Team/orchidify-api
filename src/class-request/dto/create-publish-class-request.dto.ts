@@ -11,7 +11,6 @@ import { VN_TIMEZONE } from '@src/config'
 export class CreatePublishClassRequestDto extends PickType(BaseClassRequestDto, ['description', 'courseId']) {
   @ApiProperty({ type: Date })
   // @FutureMinMonth(1)
-  @FutureMinMonth(0)
   @FutureMaxMonth(3)
   @Transform(({ value }) => (moment(value).tz(VN_TIMEZONE).startOf('date').toISOString()))
   startDate: Date

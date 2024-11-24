@@ -16,7 +16,6 @@ const class_validator_1 = require("class-validator");
 const constant_1 = require("../../common/contracts/constant");
 const class_transformer_1 = require("class-transformer");
 const base_garden_dto_1 = require("./base.garden.dto");
-const future_min_month_validator_1 = require("../../common/validators/future-min-month.validator");
 const future_max_month_validator_1 = require("../../common/validators/future-max-month.validator");
 const mongoose_1 = require("mongoose");
 class QueryAvailableGardenDto {
@@ -24,7 +23,6 @@ class QueryAvailableGardenDto {
 exports.QueryAvailableGardenDto = QueryAvailableGardenDto;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
-    (0, future_min_month_validator_1.FutureMinMonth)(0),
     (0, future_max_month_validator_1.FutureMaxMonth)(3),
     __metadata("design:type", Date)
 ], QueryAvailableGardenDto.prototype, "startDate", void 0);
