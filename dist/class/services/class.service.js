@@ -435,9 +435,21 @@ let ClassService = class ClassService {
                         }
                     }
                 }, { new: true, session });
+                let totalPrice = 0;
+                const learnerClasses = await this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(classId) }, [
+                    'learnerId',
+                    'classId',
+                    'price',
+                    'discount'
+                ]);
+                learnerClasses.forEach((learnerClass) => {
+                    const price = learnerClass.price || 0;
+                    const discount = learnerClass.discount || 0;
+                    totalPrice += (price * (100 - discount)) / 100;
+                });
                 const commissionRate = Number((await this.settingService.findByKey(constant_4.SettingKey.CommissionRate)).value) || 0.2;
-                const { price, instructorId, rate = 5 } = courseClass;
-                let salary = Math.floor(price * (1 - commissionRate));
+                const { instructorId } = courseClass;
+                const salary = Math.floor(totalPrice * (1 - commissionRate));
                 await this.instructorService.update({ _id: instructorId }, {
                     $inc: { balance: salary }
                 }, { session });

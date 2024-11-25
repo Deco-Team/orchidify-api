@@ -576,7 +576,7 @@ export class ClassService implements IClassService {
     let courseClass: Class
     try {
       await session.withTransaction(async () => {
-        // complete class
+        // 1. complete class
         courseClass = await this.update(
           { _id: new Types.ObjectId(classId) },
           {
@@ -594,25 +594,24 @@ export class ClassService implements IClassService {
           },
           { new: true, session }
         )
-        // process salary for instructor
-        const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
-        const { price, instructorId, rate = 5 } = courseClass
+        // 2. process salary for instructor
         // BR-53: Once the staff completes the class, the salary will be settled (transferred to the balance) for the instructor.
-        // If the quality is good (feedback rate >= 4), the instructor receives 100% salary.
-        // If the quality is fair (feedback rate >= 3), the instructor receives 70% salary.
-        // If the quality is average (feedback rate >= 2), the instructor receives 50% salary.
-        // If the quality is poor (feedback rate < 2), the instructor receives 30% salary.
-        // BR-54: Salary will be rounded down before being transferred to balance.
-        let salary: number = Math.floor(price * (1 - commissionRate))
-        // if (rate >= 4) {
-        //   salary = Math.floor(price * (1 - commissionRate))
-        // } else if (rate < 4 && rate >= 3) {
-        //   salary = Math.floor(price * (1 - commissionRate) * 0.7)
-        // } else if (rate < 3 && rate >= 2) {
-        //   salary = Math.floor(price * (1 - commissionRate) * 0.5)
-        // } else if (rate < 2) {
-        //   salary = Math.floor(price * (1 - commissionRate) * 0.3)
-        // }
+        let totalPrice: number = 0
+        const learnerClasses = await this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, [
+          'learnerId',
+          'classId',
+          'price',
+          'discount'
+        ])
+        learnerClasses.forEach((learnerClass) => {
+          const price = learnerClass.price || 0
+          const discount = learnerClass.discount || 0
+          totalPrice += (price * (100 - discount)) / 100
+        })
+
+        const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
+        const { instructorId } = courseClass
+        const salary = Math.floor(totalPrice * (1 - commissionRate))
         await this.instructorService.update(
           { _id: instructorId },
           {
