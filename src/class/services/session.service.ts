@@ -48,7 +48,10 @@ export class SessionService implements ISessionService {
       populates: [
         {
           path: 'learnerClass',
-          select: ['learnerId']
+          select: ['learnerId'],
+          match: {
+            learnerId: new Types.ObjectId(learnerId)
+          }
         }
       ],
       options: { lean: true }

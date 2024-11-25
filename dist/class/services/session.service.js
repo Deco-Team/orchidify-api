@@ -48,7 +48,10 @@ let SessionService = class SessionService {
             populates: [
                 {
                     path: 'learnerClass',
-                    select: ['learnerId']
+                    select: ['learnerId'],
+                    match: {
+                        learnerId: new mongoose_1.Types.ObjectId(learnerId)
+                    }
                 }
             ],
             options: { lean: true }
