@@ -5,7 +5,7 @@ export class CreateGardenDto extends PickType(BaseGardenDto, [
   'name',
   'description',
   'address',
-  'addressLink',
+  // 'addressLink',
   'images',
   'maxClass',
   'gardenManagerId'

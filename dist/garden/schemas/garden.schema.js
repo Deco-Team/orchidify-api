@@ -39,7 +39,7 @@ __decorate([
     __metadata("design:type", String)
 ], Garden.prototype, "address", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, required: true }),
+    (0, mongoose_1.Prop)({ type: String }),
     __metadata("design:type", String)
 ], Garden.prototype, "addressLink", void 0);
 __decorate([
