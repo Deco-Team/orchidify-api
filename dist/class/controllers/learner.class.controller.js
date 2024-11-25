@@ -121,7 +121,18 @@ let LearnerClassController = class LearnerClassController {
         if (!courseClass)
             throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
         const { startDate } = courseClass;
-        const classStartDate = moment(startDate).tz(config_1.VN_TIMEZONE);
+        const classStartDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
+        const nowMoment = moment().tz(config_1.VN_TIMEZONE);
+        if (nowMoment.isBefore(classStartDate))
+            throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET);
+        const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId });
+        if (!assignment)
+            throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_NOT_FOUND);
+        if (assignment.deadline) {
+            const assignmentDeadline = moment(assignment.deadline).tz(config_1.VN_TIMEZONE);
+            if (nowMoment.isAfter(assignmentDeadline))
+                throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER);
+        }
         const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
             assignmentId,
             learnerId

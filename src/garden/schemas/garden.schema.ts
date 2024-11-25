@@ -36,10 +36,7 @@ export class Garden {
   @Prop({ type: String, required: true })
   address: string
 
-  // @Prop({ type: String, required: true })
-  // addressLink: string
-
-  @Prop({ type: String })
+  @Prop({ type: String, required: true })
   addressLink: string
 
   @Prop({ type: [Array], required: true })

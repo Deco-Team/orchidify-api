@@ -7,6 +7,7 @@ class CreateGardenDto extends (0, swagger_1.PickType)(base_garden_dto_1.BaseGard
     'name',
     'description',
     'address',
+    'addressLink',
     'images',
     'maxClass',
     'gardenManagerId'
