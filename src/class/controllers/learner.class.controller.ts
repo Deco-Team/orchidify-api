@@ -216,18 +216,18 @@ export class LearnerClassController {
     // BR-70: Learners are only allowed to submit assignments when the class starts.
     const { startDate } = courseClass
     const classStartDate = moment(startDate).tz(VN_TIMEZONE)
-    if (classStartDate.isAfter(moment().tz(VN_TIMEZONE)))
-      throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
+    // if (classStartDate.isAfter(moment().tz(VN_TIMEZONE)))
+    //   throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
 
-    const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
-    if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
+    // const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
+    // if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
 
-    // BR-71: Learners are only allowed to submit assignments before the deadline.
-    if (assignment.deadline) {
-      const assignmentDeadline = moment(assignment.deadline).tz(VN_TIMEZONE)
-      if (assignmentDeadline.isAfter(moment().tz(VN_TIMEZONE)))
-        throw new AppException(Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER)
-    }
+    // // BR-71: Learners are only allowed to submit assignments before the deadline.
+    // if (assignment.deadline) {
+    //   const assignmentDeadline = moment(assignment.deadline).tz(VN_TIMEZONE)
+    //   if (assignmentDeadline.isAfter(moment().tz(VN_TIMEZONE)))
+    //     throw new AppException(Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER)
+    // }
 
     const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
       assignmentId,
