@@ -37,10 +37,10 @@ export class Learner {
   @Prop({ type: String })
   avatar: string
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date })
   dateOfBirth: Date
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   phone: string
 
   @Prop({

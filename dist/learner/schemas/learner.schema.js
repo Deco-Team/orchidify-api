@@ -41,11 +41,11 @@ __decorate([
     __metadata("design:type", String)
 ], Learner.prototype, "avatar", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: Date, required: true }),
+    (0, mongoose_1.Prop)({ type: Date }),
     __metadata("design:type", Date)
 ], Learner.prototype, "dateOfBirth", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, required: true }),
+    (0, mongoose_1.Prop)({ type: String }),
     __metadata("design:type", String)
 ], Learner.prototype, "phone", void 0);
 __decorate([
