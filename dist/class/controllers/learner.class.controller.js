@@ -122,7 +122,7 @@ let LearnerClassController = class LearnerClassController {
             throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
         const { startDate } = courseClass;
         const classStartDate = moment(startDate).tz(config_1.VN_TIMEZONE);
-        if (classStartDate.isBefore(moment().tz(config_1.VN_TIMEZONE)))
+        if (classStartDate.isAfter(moment().tz(config_1.VN_TIMEZONE)))
             throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET);
         const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId });
         if (!assignment)

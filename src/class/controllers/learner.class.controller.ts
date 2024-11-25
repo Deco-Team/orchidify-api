@@ -216,7 +216,7 @@ export class LearnerClassController {
     // BR-70: Learners are only allowed to submit assignments when the class starts.
     const { startDate } = courseClass
     const classStartDate = moment(startDate).tz(VN_TIMEZONE)
-    if (classStartDate.isBefore(moment().tz(VN_TIMEZONE)))
+    if (classStartDate.isAfter(moment().tz(VN_TIMEZONE)))
       throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
 
     const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
