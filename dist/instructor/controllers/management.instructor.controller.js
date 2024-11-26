@@ -33,12 +33,15 @@ const mongoose_1 = require("mongoose");
 const class_service_1 = require("../../class/services/class.service");
 const create_instructor_dto_1 = require("../dto/create-instructor.dto");
 const recruitment_service_1 = require("../../recruitment/services/recruitment.service");
+const report_service_1 = require("../../report/services/report.service");
+const constant_3 = require("../../report/contracts/constant");
 let ManagementInstructorController = class ManagementInstructorController {
-    constructor(instructorService, userTokenService, classService, recruitmentService) {
+    constructor(instructorService, userTokenService, classService, recruitmentService, reportService) {
         this.instructorService = instructorService;
         this.userTokenService = userTokenService;
         this.classService = classService;
         this.recruitmentService = recruitmentService;
+        this.reportService = reportService;
     }
     async list(pagination, queryInstructorDto) {
         return await this.instructorService.list(pagination, queryInstructorDto);
@@ -58,6 +61,18 @@ let ManagementInstructorController = class ManagementInstructorController {
             throw new app_exception_1.AppException(error_1.Errors.INSTRUCTOR_HAS_NO_SELECTED_APPLICATIONS);
         const instructor = await this.instructorService.create(createInstructorDto);
         await this.recruitmentService.update({ _id: selectedRecruitment._id }, { $set: { isInstructorAdded: true } });
+        this.reportService.update({ type: constant_3.ReportType.InstructorSum }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        this.reportService.update({ type: constant_3.ReportType.InstructorSumByMonth, 'data.year': year }, {
+            $inc: {
+                [`data.${month}.quantity`]: 1
+            }
+        });
         return new dto_1.IDResponse(instructor._id);
     }
     async update(instructorId, updateInstructorDto) {
@@ -178,6 +193,7 @@ exports.ManagementInstructorController = ManagementInstructorController = __deco
     __param(1, (0, common_1.Inject)(user_token_service_1.IUserTokenService)),
     __param(2, (0, common_1.Inject)(class_service_1.IClassService)),
     __param(3, (0, common_1.Inject)(recruitment_service_1.IRecruitmentService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object])
+    __param(4, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
 ], ManagementInstructorController);
 //# sourceMappingURL=management.instructor.controller.js.map

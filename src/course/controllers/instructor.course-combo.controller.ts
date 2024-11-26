@@ -37,6 +37,8 @@ import {
   QueryCourseComboDto
 } from '@course/dto/view-course-combo.dto'
 import { CHILD_COURSE_COMBO_DETAIL_PROJECTION, COURSE_COMBO_DETAIL_PROJECTION } from '@course/contracts/constant'
+import { ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 @ApiTags('CourseCombo - Instructor')
 @ApiBearerAuth()
@@ -49,7 +51,9 @@ export class InstructorCourseComboController {
     @Inject(ICourseComboService)
     private readonly courseComboService: ICourseComboService,
     @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    private readonly courseService: ICourseService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   @ApiOperation({
@@ -121,6 +125,17 @@ export class InstructorCourseComboController {
     createCourseComboDto['instructorId'] = new Types.ObjectId(_id)
     createCourseComboDto['childCourseIds'] = formatChildCourseIds
     const course = await this.courseComboService.create(createCourseComboDto)
+
+    // update course combo report
+    this.reportService.update(
+      { type: ReportType.CourseComboSum },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
+
     return new IDResponse(course._id)
   }
 
@@ -190,6 +205,16 @@ export class InstructorCourseComboController {
     //   throw new AppException(Errors.CAN_NOT_DELETE_COURSE)
 
     await this.courseComboService.update({ _id: courseId }, { status: CourseStatus.DELETED })
+
+    // update course combo report
+    this.reportService.update(
+      { type: ReportType.CourseComboSum },
+      {
+        $inc: {
+          'data.quantity': -1
+        }
+      }
+    )
 
     return new SuccessResponse(true)
   }

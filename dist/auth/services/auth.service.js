@@ -33,9 +33,11 @@ const recruitment_service_1 = require("../../recruitment/services/recruitment.se
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_2 = require("../../setting/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
+const report_service_1 = require("../../report/services/report.service");
+const constant_3 = require("../../report/contracts/constant");
 exports.IAuthService = Symbol('IAuthService');
 let AuthService = class AuthService {
-    constructor(learnerService, instructorService, staffService, gardenManagerService, userTokenService, otpService, recruitmentService, settingService, jwtService, helperService, configService, notificationService) {
+    constructor(learnerService, instructorService, staffService, gardenManagerService, userTokenService, otpService, recruitmentService, settingService, jwtService, helperService, configService, notificationService, reportService) {
         this.learnerService = learnerService;
         this.instructorService = instructorService;
         this.staffService = staffService;
@@ -48,6 +50,7 @@ let AuthService = class AuthService {
         this.helperService = helperService;
         this.configService = configService;
         this.notificationService = notificationService;
+        this.reportService = reportService;
         this.authUserServiceMap = {
             [constant_1.UserRole.LEARNER]: this.learnerService,
             [constant_1.UserRole.INSTRUCTOR]: this.instructorService,
@@ -117,6 +120,18 @@ let AuthService = class AuthService {
                 code,
                 name: learner.name,
                 expirationMinutes: 5
+            }
+        });
+        this.reportService.update({ type: constant_3.ReportType.LearnerSum }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        this.reportService.update({ type: constant_3.ReportType.LearnerSumByMonth, 'data.year': year }, {
+            $inc: {
+                [`data.${month}.quantity`]: 1
             }
         });
         return new dto_1.SuccessResponse(true);
@@ -195,6 +210,11 @@ let AuthService = class AuthService {
                 daysToRespond: 7
             }
         });
+        this.reportService.update({ type: constant_3.ReportType.RecruitmentApplicationSum }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     generateTokens(accessTokenPayload, refreshTokenPayload) {
@@ -222,8 +242,9 @@ exports.AuthService = AuthService = __decorate([
     __param(6, (0, common_1.Inject)(recruitment_service_1.IRecruitmentService)),
     __param(7, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(11, (0, common_1.Inject)(notification_service_1.INotificationService)),
+    __param(12, (0, common_1.Inject)(report_service_1.IReportService)),
     __metadata("design:paramtypes", [Object, Object, Object, Object, Object, Object, Object, Object, jwt_1.JwtService,
         helper_service_1.HelperService,
-        config_1.ConfigService, Object])
+        config_1.ConfigService, Object, Object])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

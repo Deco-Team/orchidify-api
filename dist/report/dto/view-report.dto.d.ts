@@ -1,23 +1,44 @@
 import { BaseReportDto } from './base.report.dto';
-import { ReportType } from '@report/contracts/constant';
-export declare class QueryReportDto {
-    type: ReportType;
+import { ClassStatus } from '@common/contracts/constant';
+export declare class QueryReportClassByMonthDto {
+    year: number;
 }
-declare class ReportListItemResponse extends BaseReportDto {
+declare class ReportTotalSummaryReportListItemResponse extends BaseReportDto {
 }
-declare class ReportListResponse {
-    docs: ReportListItemResponse[];
+declare class ReportTotalSummaryListResponse {
+    docs: ReportTotalSummaryReportListItemResponse[];
 }
-declare const ReportListDataResponse_base: import("@nestjs/common").Type<{
-    data: typeof ReportListResponse;
+declare const ReportTotalSummaryListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportTotalSummaryListResponse;
 }>;
-export declare class ReportListDataResponse extends ReportListDataResponse_base {
+export declare class ReportTotalSummaryListDataResponse extends ReportTotalSummaryListDataResponse_base {
 }
-declare class ReportDetailResponse extends BaseReportDto {
+declare class ReportUserQuantityResponse {
+    quantity: number;
 }
-declare const ReportDetailDataResponse_base: import("@nestjs/common").Type<{
-    data: typeof ReportDetailResponse;
+declare class ReportUserByMonthListItemResponse {
+    learner: ReportUserQuantityResponse;
+    instructor: ReportUserQuantityResponse;
+}
+declare class ReportUserByMonthListResponse {
+    docs: ReportUserByMonthListItemResponse[];
+}
+declare const ReportUserByMonthListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportUserByMonthListResponse;
 }>;
-export declare class ReportDetailDataResponse extends ReportDetailDataResponse_base {
+export declare class ReportUserByMonthListDataResponse extends ReportUserByMonthListDataResponse_base {
+}
+declare class ReportClassByStatusListItemResponse {
+    quantity: number;
+    status: ClassStatus;
+}
+declare class ReportClassByStatusListResponse {
+    quantity: number;
+    docs: ReportClassByStatusListItemResponse[];
+}
+declare const ReportClassByStatusListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportClassByStatusListResponse;
+}>;
+export declare class ReportClassByStatusListDataResponse extends ReportClassByStatusListDataResponse_base {
 }
 export {};

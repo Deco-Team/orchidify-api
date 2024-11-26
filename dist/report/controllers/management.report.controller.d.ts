@@ -25,6 +25,7 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
 import { IReportService } from '@report/services/report.service';
+import { QueryReportClassByMonthDto } from '@report/dto/view-report.dto';
 export declare class ManagementReportController {
     private readonly reportService;
     constructor(reportService: IReportService);
@@ -32,5 +33,15 @@ export declare class ManagementReportController {
         docs: (import("mongoose").Document<unknown, {}, import("../schemas/report.schema").Report> & import("../schemas/report.schema").Report & Required<{
             _id: string;
         }>)[];
+    }>;
+    viewReportUserDataByMonth(queryReportClassByMonthDto: QueryReportClassByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    viewReportClassDataByStatus(): Promise<{
+        quantity: any;
+        docs: {
+            status: any;
+            quantity: any;
+        }[];
     }>;
 }

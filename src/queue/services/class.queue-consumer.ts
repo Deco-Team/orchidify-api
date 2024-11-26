@@ -25,6 +25,8 @@ import { INotificationService } from '@notification/services/notification.servic
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { Types } from 'mongoose'
 import { IGardenService } from '@garden/services/garden.service'
+import { ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 @Processor(QueueName.CLASS)
 export class ClassQueueConsumer extends WorkerHost {
@@ -49,7 +51,9 @@ export class ClassQueueConsumer extends WorkerHost {
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
     @Inject(IGardenService)
-    private readonly gardenService: IGardenService
+    private readonly gardenService: IGardenService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {
     super()
   }
@@ -135,6 +139,16 @@ export class ClassQueueConsumer extends WorkerHost {
         }
       }
       await Promise.all(updateClassStatusPromises)
+      // update class report
+      this.reportService.update(
+        { type: ReportType.ClassSum },
+        {
+          $inc: {
+            [`data.${ClassStatus.PUBLISHED}.quantity`]: -updateClassToInProgress.length,
+            [`data.${ClassStatus.IN_PROGRESS}.quantity`]: updateClassToInProgress.length
+          }
+        }
+      )
 
       this.appLogger.log(`[updateClassStatus]: End update status... id=${job.id}`)
       return { status: true, updateClassToInProgress, updateClassToCanceled }

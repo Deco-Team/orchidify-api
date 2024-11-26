@@ -4,4 +4,8 @@ export enum ReportType {
   InstructorSum = 'InstructorSum',
   RecruitmentApplicationSum = 'RecruitmentApplicationSum',
   CourseComboSum = 'CourseComboSum',
+  ClassSum = 'ClassSum',
+
+  LearnerSumByMonth = 'LearnerSumByMonth',
+  InstructorSumByMonth = 'InstructorSumByMonth',
 }

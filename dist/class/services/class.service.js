@@ -37,9 +37,11 @@ const instructor_service_1 = require("../../instructor/services/instructor.servi
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_5 = require("../../notification/contracts/constant");
 const course_service_1 = require("../../course/services/course.service");
+const constant_6 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 exports.IClassService = Symbol('IClassService');
 let ClassService = class ClassService {
-    constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService, courseService) {
+    constructor(notificationService, connection, classRepository, configService, paymentService, transactionService, learnerService, learnerClassService, gardenTimesheetService, settingService, instructorService, courseService, reportService) {
         this.notificationService = notificationService;
         this.connection = connection;
         this.classRepository = classRepository;
@@ -52,6 +54,7 @@ let ClassService = class ClassService {
         this.settingService = settingService;
         this.instructorService = instructorService;
         this.courseService = courseService;
+        this.reportService = reportService;
     }
     async create(createClassDto, options) {
         const courseClass = await this.classRepository.create(createClassDto, options);
@@ -435,6 +438,12 @@ let ClassService = class ClassService {
                         }
                     }
                 }, { new: true, session });
+                this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                    $inc: {
+                        [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: -1,
+                        [`data.${constant_1.ClassStatus.COMPLETED}.quantity`]: 1
+                    }
+                });
                 let totalPrice = 0;
                 const learnerClasses = await this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(classId) }, [
                     'learnerId',
@@ -449,9 +458,9 @@ let ClassService = class ClassService {
                 });
                 const commissionRate = Number((await this.settingService.findByKey(constant_4.SettingKey.CommissionRate)).value) || 0.2;
                 const { instructorId } = courseClass;
-                const salary = Math.floor(totalPrice * (1 - commissionRate));
+                const earnings = Math.floor(totalPrice * (1 - commissionRate));
                 await this.instructorService.update({ _id: instructorId }, {
-                    $inc: { balance: salary }
+                    $inc: { balance: earnings }
                 }, { session });
             });
         }
@@ -524,6 +533,12 @@ let ClassService = class ClassService {
                         }
                     }
                 }, { new: true, session });
+                this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                    $inc: {
+                        [`data.${courseClass.status}.quantity`]: -1,
+                        [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+                    }
+                }, { session });
                 const { startDate, duration, weekdays, gardenId } = courseClass;
                 const startOfDate = moment(startDate).tz(config_2.VN_TIMEZONE).startOf('date');
                 const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
@@ -650,6 +665,7 @@ exports.ClassService = ClassService = __decorate([
     __param(9, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(10, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
     __param(11, (0, common_1.Inject)(course_service_1.ICourseService)),
-    __metadata("design:paramtypes", [Object, mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object, Object])
+    __param(12, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, mongoose_1.Connection, Object, config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object, Object, Object])
 ], ClassService);
 //# sourceMappingURL=class.service.js.map

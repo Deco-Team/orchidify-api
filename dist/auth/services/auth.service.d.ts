@@ -16,6 +16,7 @@ import { InstructorRegisterDto } from '@auth/dto/instructor-register.dto';
 import { IRecruitmentService } from '@recruitment/services/recruitment.service';
 import { ISettingService } from '@setting/services/setting.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { IReportService } from '@report/services/report.service';
 export interface IAuthUserService {
     findByEmail(email: string, projection?: string | Record<string, any>): any;
     findById(id: string): Promise<any>;
@@ -43,7 +44,8 @@ export declare class AuthService implements IAuthService {
     private readonly helperService;
     private readonly configService;
     private readonly notificationService;
-    constructor(learnerService: ILearnerService, instructorService: IInstructorService, staffService: IStaffService, gardenManagerService: IGardenManagerService, userTokenService: IUserTokenService, otpService: IOtpService, recruitmentService: IRecruitmentService, settingService: ISettingService, jwtService: JwtService, helperService: HelperService, configService: ConfigService, notificationService: INotificationService);
+    private readonly reportService;
+    constructor(learnerService: ILearnerService, instructorService: IInstructorService, staffService: IStaffService, gardenManagerService: IGardenManagerService, userTokenService: IUserTokenService, otpService: IOtpService, recruitmentService: IRecruitmentService, settingService: ISettingService, jwtService: JwtService, helperService: HelperService, configService: ConfigService, notificationService: INotificationService, reportService: IReportService);
     private readonly authUserServiceMap;
     login(loginDto: LoginDto, role: UserRole): Promise<TokenResponse>;
     logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>;

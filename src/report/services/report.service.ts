@@ -18,6 +18,11 @@ export interface IReportService {
     projection?: string | Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<ReportDocument>
+  findOne(
+    conditions: FilterQuery<Report>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<ReportDocument>
   update(
     conditions: FilterQuery<Report>,
     payload: UpdateQuery<Report>,
@@ -61,6 +66,19 @@ export class ReportService implements IReportService {
       conditions: {
         type
       },
+      projection,
+      populates
+    })
+    return report
+  }
+
+  public async findOne(
+    conditions: FilterQuery<Report>,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
+    const report = await this.reportRepository.findOne({
+      conditions,
       projection,
       populates
     })

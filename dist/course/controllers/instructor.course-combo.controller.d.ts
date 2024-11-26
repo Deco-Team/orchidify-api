@@ -31,10 +31,12 @@ import { UpdateCourseComboDto } from '@course/dto/update-course-combo.dto';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { ICourseComboService } from '@course/services/course-combo.service';
 import { QueryCourseComboDto } from '@course/dto/view-course-combo.dto';
+import { IReportService } from '@report/services/report.service';
 export declare class InstructorCourseComboController {
     private readonly courseComboService;
     private readonly courseService;
-    constructor(courseComboService: ICourseComboService, courseService: ICourseService);
+    private readonly reportService;
+    constructor(courseComboService: ICourseComboService, courseService: ICourseService, reportService: IReportService);
     list(req: any, pagination: PaginationParams, queryCourseDto: QueryCourseComboDto): Promise<any>;
     getDetail(req: any, courseId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/course.schema").Course> & import("../schemas/course.schema").Course & Required<{
         _id: string;

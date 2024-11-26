@@ -40,9 +40,11 @@ const learner_class_service_1 = require("../../class/services/learner-class.serv
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_5 = require("../../notification/contracts/constant");
 const staff_service_1 = require("../../staff/services/staff.service");
+const report_service_1 = require("../../report/services/report.service");
+const constant_6 = require("../../report/contracts/constant");
 exports.IClassRequestService = Symbol('IClassRequestService');
 let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
-    constructor(helperService, classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, notificationService, staffService) {
+    constructor(helperService, classRequestRepository, courseService, gardenTimesheetService, classService, connection, queueProducerService, settingService, learnerClassService, notificationService, staffService, reportService) {
         this.helperService = helperService;
         this.classRequestRepository = classRequestRepository;
         this.courseService = courseService;
@@ -54,6 +56,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         this.learnerClassService = learnerClassService;
         this.notificationService = notificationService;
         this.staffService = staffService;
+        this.reportService = reportService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassRequestService_1.name);
     }
     async createPublishClassRequest(createPublishClassRequestDto, options) {
@@ -281,6 +284,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             isRequesting: false
                         }
                     }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.CourseSum }, {
+                        $inc: {
+                            'data.quantity': 1
+                        }
+                    }, { session });
                     const classData = _.pick(classRequest.metadata, [
                         'title',
                         'description',
@@ -315,6 +323,12 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                     let sessions = _.get(classRequest, 'metadata.sessions');
                     classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
                     const createdClass = await this.classService.create(classData, { session });
+                    this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                        $inc: {
+                            'data.quantity': 1,
+                            [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
+                        }
+                    }, { session });
                     await this.gardenTimesheetService.generateSlotsForClass({
                         startDate,
                         duration,
@@ -373,6 +387,12 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             }
                         }
                     }, { new: true, session });
+                    this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                        $inc: {
+                            [`data.${courseClass.status}.quantity`]: -1,
+                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+                        }
+                    }, { session });
                     const { startDate, duration, weekdays, gardenId } = courseClass;
                     const startOfDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
                     const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
@@ -681,6 +701,7 @@ exports.ClassRequestService = ClassRequestService = ClassRequestService_1 = __de
     __param(8, (0, common_1.Inject)(learner_class_service_1.ILearnerClassService)),
     __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __param(10, (0, common_1.Inject)(staff_service_1.IStaffService)),
-    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, Object, Object])
+    __param(11, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object, Object, mongoose_1.Connection, Object, Object, Object, Object, Object, Object])
 ], ClassRequestService);
 //# sourceMappingURL=class-request.service.js.map

@@ -1,23 +1,57 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { BaseReportDto } from './base.report.dto'
-import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builder'
-import { ReportType } from '@report/contracts/constant'
-import { IsEnum } from 'class-validator'
+import { DataResponse } from '@common/contracts/openapi-builder'
+import { IsInt, IsOptional, Max, Min } from 'class-validator'
+import { ClassStatus } from '@common/contracts/constant'
 
-export class QueryReportDto {
-  @ApiProperty({
-    enum: ReportType
-  })
-  @IsEnum(ReportType)
-  type: ReportType
+export class QueryReportClassByMonthDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(2024)
+  @Max(2024)
+  year: number
 }
 
-class ReportListItemResponse extends BaseReportDto {}
-class ReportListResponse {
-  @ApiProperty({ type: ReportListItemResponse, isArray: true })
-  docs: ReportListItemResponse[]
+// View Report Data Total Summary
+class ReportTotalSummaryReportListItemResponse extends BaseReportDto {}
+class ReportTotalSummaryListResponse {
+  @ApiProperty({ type: ReportTotalSummaryReportListItemResponse, isArray: true })
+  docs: ReportTotalSummaryReportListItemResponse[]
 }
-export class ReportListDataResponse extends DataResponse(ReportListResponse) {}
+export class ReportTotalSummaryListDataResponse extends DataResponse(ReportTotalSummaryListResponse) {}
 
-class ReportDetailResponse extends BaseReportDto {}
-export class ReportDetailDataResponse extends DataResponse(ReportDetailResponse) {}
+// View Report User Data By Month
+class ReportUserQuantityResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+}
+class ReportUserByMonthListItemResponse {
+  @ApiProperty({ type: ReportUserQuantityResponse })
+  learner: ReportUserQuantityResponse
+
+  @ApiProperty({ type: ReportUserQuantityResponse })
+  instructor: ReportUserQuantityResponse
+}
+class ReportUserByMonthListResponse {
+  @ApiProperty({ type: ReportUserByMonthListItemResponse, isArray: true })
+  docs: ReportUserByMonthListItemResponse[]
+}
+export class ReportUserByMonthListDataResponse extends DataResponse(ReportUserByMonthListResponse) {}
+
+// View Report Class Data By Status
+class ReportClassByStatusListItemResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: String, enum: ClassStatus })
+  status: ClassStatus
+}
+class ReportClassByStatusListResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: ReportClassByStatusListItemResponse, isArray: true })
+  docs: ReportClassByStatusListItemResponse[]
+}
+export class ReportClassByStatusListDataResponse extends DataResponse(ReportClassByStatusListResponse) {}

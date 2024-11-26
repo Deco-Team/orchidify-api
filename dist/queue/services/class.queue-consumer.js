@@ -38,8 +38,10 @@ const notification_service_1 = require("../../notification/services/notification
 const constant_4 = require("../../notification/contracts/constant");
 const mongoose_1 = require("mongoose");
 const garden_service_1 = require("../../garden/services/garden.service");
+const constant_5 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends bullmq_1.WorkerHost {
-    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService, notificationService, gardenService) {
+    constructor(helperService, mediaService, classService, gardenTimesheetService, settingService, learnerClassService, certificateService, attendanceService, assignmentSubmissionService, notificationService, gardenService, reportService) {
         super();
         this.helperService = helperService;
         this.mediaService = mediaService;
@@ -52,6 +54,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         this.assignmentSubmissionService = assignmentSubmissionService;
         this.notificationService = notificationService;
         this.gardenService = gardenService;
+        this.reportService = reportService;
         this.appLogger = new app_logger_service_1.AppLogger(ClassQueueConsumer_1.name);
     }
     async process(job) {
@@ -121,6 +124,12 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                 }
             }
             await Promise.all(updateClassStatusPromises);
+            this.reportService.update({ type: constant_5.ReportType.ClassSum }, {
+                $inc: {
+                    [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: -updateClassToInProgress.length,
+                    [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: updateClassToInProgress.length
+                }
+            });
             this.appLogger.log(`[updateClassStatus]: End update status... id=${job.id}`);
             return { status: true, updateClassToInProgress, updateClassToCanceled };
         }
@@ -457,7 +466,8 @@ exports.ClassQueueConsumer = ClassQueueConsumer = ClassQueueConsumer_1 = __decor
     __param(8, (0, common_1.Inject)(assignment_submission_service_1.IAssignmentSubmissionService)),
     __param(9, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __param(10, (0, common_1.Inject)(garden_service_1.IGardenService)),
+    __param(11, (0, common_1.Inject)(report_service_1.IReportService)),
     __metadata("design:paramtypes", [helper_service_1.HelperService,
-        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object, Object, Object])
+        media_service_1.MediaService, Object, Object, Object, Object, Object, Object, Object, Object, Object, Object])
 ], ClassQueueConsumer);
 //# sourceMappingURL=class.queue-consumer.js.map

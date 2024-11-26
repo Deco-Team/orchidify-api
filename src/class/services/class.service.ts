@@ -54,6 +54,8 @@ import { INotificationService } from '@notification/services/notification.servic
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { ICourseService } from '@course/services/course.service'
 import { Course } from '@course/schemas/course.schema'
+import { ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 export const IClassService = Symbol('IClassService')
 
@@ -115,7 +117,9 @@ export class ClassService implements IClassService {
     @Inject(IInstructorService)
     private readonly instructorService: IInstructorService,
     @Inject(ICourseService)
-    private readonly courseService: ICourseService
+    private readonly courseService: ICourseService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   public async create(createClassDto: CreateClassDto, options?: SaveOptions | undefined) {
@@ -594,8 +598,20 @@ export class ClassService implements IClassService {
           },
           { new: true, session }
         )
-        // 2. process salary for instructor
-        // BR-53: Once the staff completes the class, the salary will be settled (transferred to the balance) for the instructor.
+
+        // update class report
+        this.reportService.update(
+          { type: ReportType.ClassSum },
+          {
+            $inc: {
+              [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
+              [`data.${ClassStatus.COMPLETED}.quantity`]: 1
+            }
+          }
+        )
+
+        // 2. process earnings for instructor
+        // BR-53: Once the staff completes the class, the earnings will be settled (transferred to the balance) for the instructor.
         let totalPrice: number = 0
         const learnerClasses = await this.learnerClassService.findMany({ classId: new Types.ObjectId(classId) }, [
           'learnerId',
@@ -611,11 +627,11 @@ export class ClassService implements IClassService {
 
         const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
         const { instructorId } = courseClass
-        const salary = Math.floor(totalPrice * (1 - commissionRate))
+        const earnings = Math.floor(totalPrice * (1 - commissionRate))
         await this.instructorService.update(
           { _id: instructorId },
           {
-            $inc: { balance: salary }
+            $inc: { balance: earnings }
           },
           { session }
         )
@@ -705,6 +721,18 @@ export class ClassService implements IClassService {
           },
           { new: true, session }
         )
+        // update class report
+        this.reportService.update(
+          { type: ReportType.ClassSum },
+          {
+            $inc: {
+              [`data.${courseClass.status}.quantity`]: -1,
+              [`data.${ClassStatus.CANCELED}.quantity`]: 1
+            }
+          },
+          { session }
+        )
+
         // clear class timesheet
         const { startDate, duration, weekdays, gardenId } = courseClass
         const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')

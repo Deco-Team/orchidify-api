@@ -31,6 +31,8 @@ import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
+import { IReportService } from '@report/services/report.service'
+import { ReportType } from '@report/contracts/constant'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -75,6 +77,8 @@ export class AuthService implements IAuthService {
     private readonly configService: ConfigService,
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   private readonly authUserServiceMap: Record<UserRole, IAuthUserService> = {
@@ -163,6 +167,28 @@ export class AuthService implements IAuthService {
       }
     })
 
+    // update learner report
+    this.reportService.update(
+      { type: ReportType.LearnerSum },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
+
+    // update learner sum by month report
+    const month = new Date().getMonth() + 1
+    const year = new Date().getFullYear()
+    this.reportService.update(
+      { type: ReportType.LearnerSumByMonth, 'data.year': year },
+      {
+        $inc: {
+          [`data.${month}.quantity`]: 1
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 
@@ -248,6 +274,16 @@ export class AuthService implements IAuthService {
         daysToRespond: 7
       }
     })
+
+    // update recruitment report
+    this.reportService.update(
+      { type: ReportType.RecruitmentApplicationSum },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
 
     return new SuccessResponse(true)
   }

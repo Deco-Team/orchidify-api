@@ -33,12 +33,14 @@ import { UpdateInstructorDto } from '@instructor/dto/update-instructor.dto';
 import { IClassService } from '@src/class/services/class.service';
 import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto';
 import { IRecruitmentService } from '@recruitment/services/recruitment.service';
+import { IReportService } from '@report/services/report.service';
 export declare class ManagementInstructorController {
     private readonly instructorService;
     private readonly userTokenService;
     private readonly classService;
     private readonly recruitmentService;
-    constructor(instructorService: IInstructorService, userTokenService: IUserTokenService, classService: IClassService, recruitmentService: IRecruitmentService);
+    private readonly reportService;
+    constructor(instructorService: IInstructorService, userTokenService: IUserTokenService, classService: IClassService, recruitmentService: IRecruitmentService, reportService: IReportService);
     list(pagination: PaginationParams, queryInstructorDto: QueryInstructorDto): Promise<any>;
     getDetail(instructorId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/instructor.schema").Instructor> & import("../schemas/instructor.schema").Instructor & Required<{
         _id: string;

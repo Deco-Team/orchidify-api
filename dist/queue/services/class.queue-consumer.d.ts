@@ -12,6 +12,7 @@ import { IAttendanceService } from '@attendance/services/attendance.service';
 import { IAssignmentSubmissionService } from '@class/services/assignment-submission.service';
 import { INotificationService } from '@notification/services/notification.service';
 import { IGardenService } from '@garden/services/garden.service';
+import { IReportService } from '@report/services/report.service';
 export declare class ClassQueueConsumer extends WorkerHost {
     private readonly helperService;
     private readonly mediaService;
@@ -24,8 +25,9 @@ export declare class ClassQueueConsumer extends WorkerHost {
     private readonly assignmentSubmissionService;
     private readonly notificationService;
     private readonly gardenService;
+    private readonly reportService;
     private readonly appLogger;
-    constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService, attendanceService: IAttendanceService, assignmentSubmissionService: IAssignmentSubmissionService, notificationService: INotificationService, gardenService: IGardenService);
+    constructor(helperService: HelperService, mediaService: MediaService, classService: IClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, learnerClassService: ILearnerClassService, certificateService: ICertificateService, attendanceService: IAttendanceService, assignmentSubmissionService: IAssignmentSubmissionService, notificationService: INotificationService, gardenService: IGardenService, reportService: IReportService);
     process(job: Job<any>): Promise<any>;
     updateClassStatus(job: Job): Promise<false | "No PUBLISHED status class" | {
         status: boolean;

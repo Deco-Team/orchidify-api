@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ManagementReportController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const _ = require("lodash");
 const dto_1 = require("../../common/contracts/dto");
 const report_service_1 = require("../services/report.service");
 const view_report_dto_1 = require("../dto/view-report.dto");
@@ -30,15 +31,41 @@ let ManagementReportController = class ManagementReportController {
     async viewReportTotalSummary() {
         const reports = await this.reportService.findMany({
             type: {
-                $in: [
-                    constant_2.ReportType.CourseSum,
-                    constant_2.ReportType.LearnerSum,
-                    constant_2.ReportType.InstructorSum,
-                    constant_2.ReportType.CourseComboSum
-                ]
+                $in: [constant_2.ReportType.CourseSum, constant_2.ReportType.LearnerSum, constant_2.ReportType.InstructorSum, constant_2.ReportType.CourseComboSum]
             }
         });
         return { docs: reports };
+    }
+    async viewReportUserDataByMonth(queryReportClassByMonthDto) {
+        const { year = 2024 } = queryReportClassByMonthDto;
+        const [learnerReport, instructorReport] = await this.reportService.findMany({
+            type: {
+                $in: [constant_2.ReportType.LearnerSumByMonth, constant_2.ReportType.InstructorSumByMonth]
+            },
+            'data.year': year
+        });
+        const docs = [];
+        if (learnerReport && instructorReport) {
+            for (let month = 1; month <= 12; month++) {
+                const learner = _.get(learnerReport.data, `${month}`) || { quantity: 0 };
+                const instructor = _.get(instructorReport.data, `${month}`) || { quantity: 0 };
+                docs.push({
+                    learner,
+                    instructor
+                });
+            }
+        }
+        return { docs };
+    }
+    async viewReportClassDataByStatus() {
+        const report = await this.reportService.findOne({ type: constant_2.ReportType.ClassSum });
+        return {
+            quantity: report.data.quantity,
+            docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
+                status: constant_1.ClassStatus[statusKey],
+                quantity: report.data[statusKey].quantity
+            }))
+        };
     }
 };
 exports.ManagementReportController = ManagementReportController;
@@ -47,13 +74,38 @@ __decorate([
         summary: `[${constant_1.UserRole.STAFF}] View Report Data Total Summary`
     }),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportListDataResponse }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportTotalSummaryListDataResponse }),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Get)('total-summary'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ManagementReportController.prototype, "viewReportTotalSummary", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.STAFF}] View Report User Data By Month`
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportUserByMonthListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
+    (0, common_1.Get)('user-by-month'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [view_report_dto_1.QueryReportClassByMonthDto]),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportUserDataByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.STAFF}] View Report Class Data By Status`
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportClassByStatusListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
+    (0, common_1.Get)('class-by-status'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportClassDataByStatus", null);
 exports.ManagementReportController = ManagementReportController = __decorate([
     (0, swagger_1.ApiTags)('Report'),
     (0, swagger_1.ApiBearerAuth)(),

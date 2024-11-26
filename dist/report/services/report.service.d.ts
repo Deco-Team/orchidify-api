@@ -31,6 +31,7 @@ export declare const IReportService: unique symbol;
 export interface IReportService {
     findById(reportId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
     findByType(type: ReportType, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
+    findOne(conditions: FilterQuery<Report>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
     update(conditions: FilterQuery<Report>, payload: UpdateQuery<Report>, options?: QueryOptions | undefined): Promise<ReportDocument>;
     findMany(conditions: FilterQuery<ReportDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument[]>;
 }
@@ -41,6 +42,9 @@ export declare class ReportService implements IReportService {
         _id: string;
     }>>;
     findByType(type: ReportType, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Report> & Report & Required<{
+        _id: string;
+    }>>;
+    findOne(conditions: FilterQuery<Report>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Report> & Report & Required<{
         _id: string;
     }>>;
     update(conditions: FilterQuery<Report>, payload: UpdateQuery<Report>, options?: QueryOptions | undefined): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Report> & Report & Required<{

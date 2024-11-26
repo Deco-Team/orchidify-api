@@ -46,6 +46,7 @@ import { IInstructorService } from '@instructor/services/instructor.service';
 import { CancelClassDto } from '@class/dto/cancel-class.dto';
 import { INotificationService } from '@notification/services/notification.service';
 import { ICourseService } from '@course/services/course.service';
+import { IReportService } from '@report/services/report.service';
 export declare const IClassService: unique symbol;
 export interface IClassService {
     create(courseClass: CreateClassDto, options?: SaveOptions | undefined): Promise<ClassDocument>;
@@ -81,7 +82,8 @@ export declare class ClassService implements IClassService {
     private readonly settingService;
     private readonly instructorService;
     private readonly courseService;
-    constructor(notificationService: INotificationService, connection: Connection, classRepository: IClassRepository, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService, courseService: ICourseService);
+    private readonly reportService;
+    constructor(notificationService: INotificationService, connection: Connection, classRepository: IClassRepository, configService: ConfigService, paymentService: IPaymentService, transactionService: ITransactionService, learnerService: ILearnerService, learnerClassService: ILearnerClassService, gardenTimesheetService: IGardenTimesheetService, settingService: ISettingService, instructorService: IInstructorService, courseService: ICourseService, reportService: IReportService);
     create(createClassDto: CreateClassDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>>;

@@ -40,6 +40,14 @@ let ReportService = class ReportService {
         });
         return report;
     }
+    async findOne(conditions, projection, populates) {
+        const report = await this.reportRepository.findOne({
+            conditions,
+            projection,
+            populates
+        });
+        return report;
+    }
     update(conditions, payload, options) {
         return this.reportRepository.findOneAndUpdate(conditions, payload, options);
     }

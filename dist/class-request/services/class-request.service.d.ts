@@ -44,6 +44,7 @@ import { CreateCancelClassRequestDto } from '@class-request/dto/create-cancel-cl
 import { ILearnerClassService } from '@class/services/learner-class.service';
 import { INotificationService } from '@notification/services/notification.service';
 import { IStaffService } from '@staff/services/staff.service';
+import { IReportService } from '@report/services/report.service';
 export declare const IClassRequestService: unique symbol;
 export interface IClassRequestService {
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<ClassRequestDocument>;
@@ -73,8 +74,9 @@ export declare class ClassRequestService implements IClassRequestService {
     private readonly learnerClassService;
     private readonly notificationService;
     private readonly staffService;
+    private readonly reportService;
     private readonly appLogger;
-    constructor(helperService: HelperService, classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, notificationService: INotificationService, staffService: IStaffService);
+    constructor(helperService: HelperService, classRequestRepository: IClassRequestRepository, courseService: ICourseService, gardenTimesheetService: IGardenTimesheetService, classService: IClassService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, learnerClassService: ILearnerClassService, notificationService: INotificationService, staffService: IStaffService, reportService: IReportService);
     createPublishClassRequest(createPublishClassRequestDto: CreatePublishClassRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, ClassRequest> & ClassRequest & Required<{
         _id: string;
     }>>;

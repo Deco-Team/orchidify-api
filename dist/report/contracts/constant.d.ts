@@ -3,5 +3,8 @@ export declare enum ReportType {
     LearnerSum = "LearnerSum",
     InstructorSum = "InstructorSum",
     RecruitmentApplicationSum = "RecruitmentApplicationSum",
-    CourseComboSum = "CourseComboSum"
+    CourseComboSum = "CourseComboSum",
+    ClassSum = "ClassSum",
+    LearnerSumByMonth = "LearnerSumByMonth",
+    InstructorSumByMonth = "InstructorSumByMonth"
 }

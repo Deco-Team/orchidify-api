@@ -39,6 +39,8 @@ import { Types } from 'mongoose'
 import { IClassService } from '@src/class/services/class.service'
 import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
+import { IReportService } from '@report/services/report.service'
+import { ReportType } from '@report/contracts/constant'
 
 @ApiTags('Instructor - Management')
 @ApiBearerAuth()
@@ -54,7 +56,9 @@ export class ManagementInstructorController {
     @Inject(IClassService)
     private readonly classService: IClassService,
     @Inject(IRecruitmentService)
-    private readonly recruitmentService: IRecruitmentService
+    private readonly recruitmentService: IRecruitmentService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   @ApiOperation({
@@ -102,6 +106,29 @@ export class ManagementInstructorController {
 
     const instructor = await this.instructorService.create(createInstructorDto)
     await this.recruitmentService.update({ _id: selectedRecruitment._id }, { $set: { isInstructorAdded: true } })
+
+    // update instructor report
+    this.reportService.update(
+      { type: ReportType.InstructorSum },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
+
+    // update instructor sum by month report
+    const month = new Date().getMonth() + 1
+    const year = new Date().getFullYear()
+    this.reportService.update(
+      { type: ReportType.InstructorSumByMonth, 'data.year': year },
+      {
+        $inc: {
+          [`data.${month}.quantity`]: 1
+        }
+      }
+    )
+
     return new IDResponse(instructor._id)
   }
 

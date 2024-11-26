@@ -32,10 +32,13 @@ const pagination_decorator_1 = require("../../common/decorators/pagination.decor
 const course_combo_service_1 = require("../services/course-combo.service");
 const view_course_combo_dto_1 = require("../dto/view-course-combo.dto");
 const constant_2 = require("../contracts/constant");
+const constant_3 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 let InstructorCourseComboController = class InstructorCourseComboController {
-    constructor(courseComboService, courseService) {
+    constructor(courseComboService, courseService, reportService) {
         this.courseComboService = courseComboService;
         this.courseService = courseService;
+        this.reportService = reportService;
     }
     async list(req, pagination, queryCourseDto) {
         const { _id } = _.get(req, 'user');
@@ -82,6 +85,11 @@ let InstructorCourseComboController = class InstructorCourseComboController {
         createCourseComboDto['instructorId'] = new mongoose_1.Types.ObjectId(_id);
         createCourseComboDto['childCourseIds'] = formatChildCourseIds;
         const course = await this.courseComboService.create(createCourseComboDto);
+        this.reportService.update({ type: constant_3.ReportType.CourseComboSum }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
         return new dto_1.IDResponse(course._id);
     }
     async update(req, courseId, updateCourseComboDto) {
@@ -124,6 +132,11 @@ let InstructorCourseComboController = class InstructorCourseComboController {
         if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === constant_1.CourseStatus.DELETED)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_NOT_FOUND);
         await this.courseComboService.update({ _id: courseId }, { status: constant_1.CourseStatus.DELETED });
+        this.reportService.update({ type: constant_3.ReportType.CourseComboSum }, {
+            $inc: {
+                'data.quantity': -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
 };
@@ -204,6 +217,7 @@ exports.InstructorCourseComboController = InstructorCourseComboController = __de
     (0, common_1.Controller)('instructor'),
     __param(0, (0, common_1.Inject)(course_combo_service_1.ICourseComboService)),
     __param(1, (0, common_1.Inject)(course_service_1.ICourseService)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, Object, Object])
 ], InstructorCourseComboController);
 //# sourceMappingURL=instructor.course-combo.controller.js.map

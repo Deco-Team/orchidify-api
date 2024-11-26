@@ -41,6 +41,8 @@ import { ILearnerClassService } from '@class/services/learner-class.service'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { IStaffService } from '@staff/services/staff.service'
+import { IReportService } from '@report/services/report.service'
+import { ReportType } from '@report/contracts/constant'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -115,7 +117,9 @@ export class ClassRequestService implements IClassRequestService {
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
     @Inject(IStaffService)
-    private readonly staffService: IStaffService
+    private readonly staffService: IStaffService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
   public async createPublishClassRequest(
     createPublishClassRequestDto: CreatePublishClassRequestDto,
@@ -132,7 +136,7 @@ export class ClassRequestService implements IClassRequestService {
       }
     )
     this.addClassRequestAutoExpiredJob(classRequest)
-    
+
     // Send notification to staff
     this.sendNotificationToStaffWhenClassRequestIsCreated({ classRequest })
 
@@ -437,6 +441,17 @@ export class ClassRequestService implements IClassRequestService {
             { session }
           )
 
+          // update course report
+          await this.reportService.update(
+            { type: ReportType.CourseSum },
+            {
+              $inc: {
+                'data.quantity': 1
+              }
+            },
+            { session }
+          )
+
           // create new class
           const classData = _.pick(classRequest.metadata, [
             'title',
@@ -475,6 +490,18 @@ export class ClassRequestService implements IClassRequestService {
           classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays })
 
           const createdClass = await this.classService.create(classData, { session })
+
+          // update class report
+          this.reportService.update(
+            { type: ReportType.ClassSum },
+            {
+              $inc: {
+                'data.quantity': 1,
+                [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
+              }
+            },
+            { session }
+          )
 
           // gen slots for class
           await this.gardenTimesheetService.generateSlotsForClass(
@@ -549,6 +576,19 @@ export class ClassRequestService implements IClassRequestService {
             },
             { new: true, session }
           )
+
+          // update class report
+          this.reportService.update(
+            { type: ReportType.ClassSum },
+            {
+              $inc: {
+                [`data.${courseClass.status}.quantity`]: -1,
+                [`data.${ClassStatus.CANCELED}.quantity`]: 1
+              }
+            },
+            { session }
+          )
+
           // clear class timesheet
           const { startDate, duration, weekdays, gardenId } = courseClass
           const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
@@ -599,7 +639,7 @@ export class ClassRequestService implements IClassRequestService {
         id: classRequestId
       }
     })
-    
+
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
     return new SuccessResponse(true)
   }
