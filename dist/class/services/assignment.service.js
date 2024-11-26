@@ -57,7 +57,10 @@ let AssignmentService = class AssignmentService {
             populates: [
                 {
                     path: 'learnerClass',
-                    select: ['learnerId']
+                    select: ['learnerId'],
+                    match: {
+                        learnerId: new mongoose_1.Types.ObjectId(learnerId)
+                    }
                 }
             ],
             options: { lean: true }

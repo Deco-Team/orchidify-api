@@ -33,6 +33,7 @@ import { FeedbackModule } from '@feedback/feedback.module'
 import { FirebaseModule } from './firebase/firebase.module'
 import { CertificateModule } from '@certificate/certificate.module'
 import { NotificationModule } from '@notification/notification.module'
+import { ReportModule } from '@report/report.module'
 
 @Module({
   imports: [
@@ -168,6 +169,10 @@ import { NotificationModule } from '@notification/notification.module'
       {
         path: 'notifications',
         module: NotificationModule
+      },
+      {
+        path: 'reports',
+        module: ReportModule
       }
     ]),
     TerminusModule.forRoot({
@@ -194,7 +199,8 @@ import { NotificationModule } from '@notification/notification.module'
     FeedbackModule,
     FirebaseModule,
     CertificateModule,
-    NotificationModule
+    NotificationModule,
+    ReportModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -41,6 +41,7 @@ const feedback_module_1 = require("./feedback/feedback.module");
 const firebase_module_1 = require("./firebase/firebase.module");
 const certificate_module_1 = require("./certificate/certificate.module");
 const notification_module_1 = require("./notification/notification.module");
+const report_module_1 = require("./report/report.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -179,6 +180,10 @@ exports.AppModule = AppModule = __decorate([
                 {
                     path: 'notifications',
                     module: notification_module_1.NotificationModule
+                },
+                {
+                    path: 'reports',
+                    module: report_module_1.ReportModule
                 }
             ]),
             terminus_1.TerminusModule.forRoot({
@@ -205,7 +210,8 @@ exports.AppModule = AppModule = __decorate([
             feedback_module_1.FeedbackModule,
             firebase_module_1.FirebaseModule,
             certificate_module_1.CertificateModule,
-            notification_module_1.NotificationModule
+            notification_module_1.NotificationModule,
+            report_module_1.ReportModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

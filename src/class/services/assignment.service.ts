@@ -66,7 +66,10 @@ export class AssignmentService implements IAssignmentService {
       populates: [
         {
           path: 'learnerClass',
-          select: ['learnerId']
+          select: ['learnerId'],
+          match: {
+            learnerId: new Types.ObjectId(learnerId)
+          }
         }
       ],
       options: { lean: true }

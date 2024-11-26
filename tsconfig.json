@@ -96,6 +96,9 @@
       "@notification/*": [
         "src/notification/*"
       ],
+      "@report/*": [
+        "src/report/*"
+      ],
       "@src/*": [
         "src/*"
       ]

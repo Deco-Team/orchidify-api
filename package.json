@@ -167,6 +167,7 @@
       "^@firebase/(.*)$": "<rootDir>/firebase/$1",
       "^@certificate/(.*)$": "<rootDir>/certificate/$1",
       "^@notification/(.*)$": "<rootDir>/notification/$1",
+      "^@report/(.*)$": "<rootDir>/report/$1",
       "^@src/(.*)$": "<rootDir>/$1"
     }
   }
