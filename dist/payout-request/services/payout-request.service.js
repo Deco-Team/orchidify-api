@@ -37,9 +37,11 @@ const constant_5 = require("../../transaction/contracts/constant");
 const constant_6 = require("../../notification/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
 const staff_service_1 = require("../../staff/services/staff.service");
+const constant_7 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 exports.IPayoutRequestService = Symbol('IPayoutRequestService');
 let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
-    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService, notificationService, staffService) {
+    constructor(payoutRequestRepository, instructorService, connection, queueProducerService, settingService, helperService, transactionService, notificationService, staffService, reportService) {
         this.payoutRequestRepository = payoutRequestRepository;
         this.instructorService = instructorService;
         this.connection = connection;
@@ -49,6 +51,7 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         this.transactionService = transactionService;
         this.notificationService = notificationService;
         this.staffService = staffService;
+        this.reportService = reportService;
         this.appLogger = new app_logger_service_1.AppLogger(PayoutRequestService_1.name);
     }
     async createPayoutRequest(createPayoutRequestDto, options) {
@@ -73,6 +76,12 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         }
         this.addPayoutRequestAutoExpiredJob(payoutRequest);
         this.sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest });
+        this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: 1
+            }
+        });
         return payoutRequest;
     }
     async findById(payoutRequestId, projection, populates) {
@@ -165,6 +174,11 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             await session.endSession();
         }
         this.queueProducerService.removeJob(constant_3.QueueName.PAYOUT_REQUEST, payoutRequestId);
+        this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async approvePayoutRequest(payoutRequestId, userAuth) {
@@ -227,6 +241,11 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             }
         });
         this.queueProducerService.removeJob(constant_3.QueueName.PAYOUT_REQUEST, payoutRequestId);
+        this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async rejectPayoutRequest(payoutRequestId, rejectPayoutRequestDto, userAuth) {
@@ -275,6 +294,11 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             }
         });
         this.queueProducerService.removeJob(constant_3.QueueName.PAYOUT_REQUEST, payoutRequestId);
+        this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async expirePayoutRequest(payoutRequestId, userAuth) {
@@ -316,6 +340,11 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             data: {
                 type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
                 id: payoutRequestId
+            }
+        });
+        this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: -1
             }
         });
         return new dto_1.SuccessResponse(true);
@@ -379,6 +408,7 @@ exports.PayoutRequestService = PayoutRequestService = PayoutRequestService_1 = _
     __param(6, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
     __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __param(8, (0, common_1.Inject)(staff_service_1.IStaffService)),
-    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object, Object, Object])
+    __param(9, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, Object, mongoose_1.Connection, Object, Object, helper_service_1.HelperService, Object, Object, Object, Object])
 ], PayoutRequestService);
 //# sourceMappingURL=payout-request.service.js.map

@@ -33,12 +33,14 @@ import { QueryCourseDto } from '@course/dto/view-course.dto';
 import { CreateCourseDto } from '@course/dto/create-course.dto';
 import { UpdateCourseDto } from '@course/dto/update-course.dto';
 import { ISettingService } from '@setting/services/setting.service';
+import { IReportService } from '@report/services/report.service';
 export declare class InstructorCourseController {
     private readonly courseService;
     private readonly courseSessionService;
     private readonly courseAssignmentService;
     private readonly settingService;
-    constructor(courseService: ICourseService, courseSessionService: ICourseSessionService, courseAssignmentService: ICourseAssignmentService, settingService: ISettingService);
+    private readonly reportService;
+    constructor(courseService: ICourseService, courseSessionService: ICourseSessionService, courseAssignmentService: ICourseAssignmentService, settingService: ISettingService, reportService: IReportService);
     list(req: any, pagination: PaginationParams, queryCourseDto: QueryCourseDto): Promise<any>;
     getDetail(req: any, courseId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/course.schema").Course> & import("../schemas/course.schema").Course & Required<{
         _id: string;

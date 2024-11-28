@@ -151,6 +151,10 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             fromDate = dateMoment.clone().startOf('isoWeek').toDate();
             toDate = dateMoment.clone().endOf('isoWeek').toDate();
         }
+        else if (type === constant_1.TimesheetType.DAY) {
+            fromDate = dateMoment.clone().startOf('date').toDate();
+            toDate = dateMoment.clone().endOf('date').toDate();
+        }
         const timesheets = await this.gardenTimesheetRepository.findMany({
             projection: constant_2.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
             options: { lean: true },
@@ -160,7 +164,13 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
                     $lte: toDate
                 },
                 'slots.instructorId': new mongoose_1.Types.ObjectId(instructorId)
-            }
+            },
+            populates: [
+                {
+                    path: 'garden',
+                    select: ['name']
+                }
+            ]
         });
         return this.transformDataToTeachingCalendar(timesheets, instructorId);
     }
@@ -482,6 +492,7 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             for (const slot of timesheet.slots) {
                 if (slot.status === constant_1.SlotStatus.NOT_AVAILABLE && slot.instructorId.toString() === instructorId) {
                     _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass);
+                    _.set(slot, 'garden', timesheet['garden']);
                     calendars.push(slot);
                 }
             }

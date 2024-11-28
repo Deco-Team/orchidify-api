@@ -23,13 +23,15 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
-import { HydratedDocument } from 'mongoose';
-import { ReportType } from '@report/contracts/constant';
+import { HydratedDocument, Types } from 'mongoose';
+import { ReportTag, ReportType } from '@report/contracts/constant';
 export type ReportDocument = HydratedDocument<Report>;
 export declare class Report {
     constructor(id?: string);
-    _id: string;
+    _id?: string;
     type: ReportType;
+    tag: ReportTag;
+    ownerId: Types.ObjectId;
     data: Record<string, any>;
 }
 export declare const ReportSchema: import("mongoose").Schema<Report, import("mongoose").Model<Report, any, any, any, import("mongoose").Document<unknown, any, Report> & Report & Required<{

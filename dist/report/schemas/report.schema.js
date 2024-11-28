@@ -30,6 +30,14 @@ __decorate([
     __metadata("design:type", String)
 ], Report.prototype, "type", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: String, enum: constant_1.ReportTag, required: true }),
+    __metadata("design:type", String)
+], Report.prototype, "tag", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Report.prototype, "ownerId", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.Map, required: true }),
     __metadata("design:type", Object)
 ], Report.prototype, "data", void 0);
@@ -50,5 +58,5 @@ exports.Report = Report = __decorate([
 ], Report);
 exports.ReportSchema = mongoose_1.SchemaFactory.createForClass(Report);
 exports.ReportSchema.plugin(paginate);
-exports.ReportSchema.index({ key: 1 });
+exports.ReportSchema.index({ type: 1, tag: 1 });
 //# sourceMappingURL=report.schema.js.map

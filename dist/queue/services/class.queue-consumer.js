@@ -99,6 +99,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             const updateClassStatusPromises = [];
             const updateClassToInProgress = [];
             const updateClassToCanceled = [];
+            const updateClassReportPromises = [];
             const classAutoCancelMinLearners = Number((await this.settingService.findByKey(constant_3.SettingKey.ClassAutoCancelMinLearners)).value) || 5;
             for await (const courseClass of courseClasses) {
                 const startOfDate = moment(courseClass.startDate).tz(config_1.VN_TIMEZONE).startOf('date');
@@ -120,11 +121,22 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
                                 }
                             }
                         }));
+                        updateClassReportPromises.push(this.reportService.update({
+                            type: constant_5.ReportType.ClassSum,
+                            tag: constant_5.ReportTag.User,
+                            ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId)
+                        }, {
+                            $inc: {
+                                [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: -1,
+                                [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: 1
+                            }
+                        }));
                     }
                 }
             }
             await Promise.all(updateClassStatusPromises);
-            this.reportService.update({ type: constant_5.ReportType.ClassSum }, {
+            await Promise.all(updateClassReportPromises);
+            this.reportService.update({ type: constant_5.ReportType.ClassSum, tag: constant_5.ReportTag.System }, {
                 $inc: {
                     [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: -updateClassToInProgress.length,
                     [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: updateClassToInProgress.length

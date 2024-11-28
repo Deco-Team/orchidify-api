@@ -12,7 +12,8 @@ export declare enum UserRole {
 }
 export declare enum TimesheetType {
     MONTH = "MONTH",
-    WEEK = "WEEK"
+    WEEK = "WEEK",
+    DAY = "DAY"
 }
 export declare enum LearnerStatus {
     UNVERIFIED = "UNVERIFIED",

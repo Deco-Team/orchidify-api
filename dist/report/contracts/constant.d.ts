@@ -5,6 +5,15 @@ export declare enum ReportType {
     RecruitmentApplicationSum = "RecruitmentApplicationSum",
     CourseComboSum = "CourseComboSum",
     ClassSum = "ClassSum",
+    ClassRequestSum = "ClassRequestSum",
+    PayoutRequestSum = "PayoutRequestSum",
+    RevenueSum = "RevenueSum",
     LearnerSumByMonth = "LearnerSumByMonth",
-    InstructorSumByMonth = "InstructorSumByMonth"
+    InstructorSumByMonth = "InstructorSumByMonth",
+    LearnerEnrolledSumByMonth = "LearnerEnrolledSumByMonth",
+    RevenueSumByMonth = "RevenueSumByMonth"
+}
+export declare enum ReportTag {
+    System = "System",
+    User = "User"
 }

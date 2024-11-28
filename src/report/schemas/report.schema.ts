@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { HydratedDocument, Types } from 'mongoose'
 import * as paginate from 'mongoose-paginate-v2'
 import { Transform } from 'class-transformer'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 export type ReportDocument = HydratedDocument<Report>
 
@@ -23,10 +23,16 @@ export class Report {
     this._id = id
   }
   @Transform(({ value }) => value?.toString())
-  _id: string
+  _id?: string
 
   @Prop({ type: String, enum: ReportType, required: true })
   type: ReportType
+
+  @Prop({ type: String, enum: ReportTag, required: true })
+  tag: ReportTag
+
+  @Prop({ type: Types.ObjectId })
+  ownerId: Types.ObjectId
 
   @Prop({ type: Types.Map, required: true })
   data: Record<string, any>
@@ -34,4 +40,4 @@ export class Report {
 
 export const ReportSchema = SchemaFactory.createForClass(Report)
 ReportSchema.plugin(paginate)
-ReportSchema.index({ key: 1 })
+ReportSchema.index({ type: 1, tag: 1 })

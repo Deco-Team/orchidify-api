@@ -5,6 +5,7 @@ import { SlotNumber, TimesheetType } from '@common/contracts/constant'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
 import { PastMaxMonth } from '@common/validators/past-max-month.validator'
 import { BaseSlotMetadataDto } from './slot.dto'
+import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 
 export class QueryInstructorTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
@@ -25,6 +26,7 @@ export class QueryTeachingTimesheetDto extends PickType(QueryInstructorTimesheet
   instructorId: string
 }
 
+class TeachingTimesheetGardenDetailResponse extends PickType(BaseGardenDto, ['name']) {}
 export class ViewTeachingTimesheetItemResponse {
   @ApiProperty({ type: String })
   @IsMongoId()
@@ -47,6 +49,9 @@ export class ViewTeachingTimesheetItemResponse {
 
   @ApiPropertyOptional({ type: BaseSlotMetadataDto })
   metadata: BaseSlotMetadataDto
+
+  @ApiPropertyOptional({ type: TeachingTimesheetGardenDetailResponse })
+  garden: TeachingTimesheetGardenDetailResponse
 }
 class ViewTeachingTimesheetListResponse {
   @ApiProperty({ type: ViewTeachingTimesheetItemResponse, isArray: true })

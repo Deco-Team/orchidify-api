@@ -39,6 +39,7 @@ import { IInstructorService } from '@instructor/services/instructor.service';
 import { ITransactionService } from '@transaction/services/transaction.service';
 import { INotificationService } from '@notification/services/notification.service';
 import { IStaffService } from '@staff/services/staff.service';
+import { IReportService } from '@report/services/report.service';
 export declare const IPayoutRequestService: unique symbol;
 export interface IPayoutRequestService {
     createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined): Promise<PayoutRequestDocument>;
@@ -62,8 +63,9 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     private readonly transactionService;
     private readonly notificationService;
     private readonly staffService;
+    private readonly reportService;
     private readonly appLogger;
-    constructor(payoutRequestRepository: IPayoutRequestRepository, instructorService: IInstructorService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, helperService: HelperService, transactionService: ITransactionService, notificationService: INotificationService, staffService: IStaffService);
+    constructor(payoutRequestRepository: IPayoutRequestRepository, instructorService: IInstructorService, connection: Connection, queueProducerService: IQueueProducerService, settingService: ISettingService, helperService: HelperService, transactionService: ITransactionService, notificationService: INotificationService, staffService: IStaffService, reportService: IReportService);
     createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
         _id: string;
     }>>;

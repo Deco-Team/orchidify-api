@@ -28,6 +28,8 @@ import { TransactionType } from '@transaction/contracts/constant'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
 import { IStaffService } from '@staff/services/staff.service'
+import { ReportTag, ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 export const IPayoutRequestService = Symbol('IPayoutRequestService')
 
@@ -87,7 +89,9 @@ export class PayoutRequestService implements IPayoutRequestService {
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
     @Inject(IStaffService)
-    private readonly staffService: IStaffService
+    private readonly staffService: IStaffService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   public async createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined) {
@@ -121,6 +125,17 @@ export class PayoutRequestService implements IPayoutRequestService {
 
     // Send notification to staff
     this.sendNotificationToStaffWhenPayoutRequestIsCreated({ payoutRequest })
+
+    // update payout request report
+    this.reportService.update(
+      { type: ReportType.PayoutRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(payoutRequest.createdBy) },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${PayoutRequestStatus.PENDING}.quantity`]: 1
+        }
+      }
+    )
 
     return payoutRequest
   }
@@ -255,6 +270,16 @@ export class PayoutRequestService implements IPayoutRequestService {
     }
 
     this.queueProducerService.removeJob(QueueName.PAYOUT_REQUEST, payoutRequestId)
+
+    // update payout request report
+    this.reportService.update(
+      { type: ReportType.PayoutRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(payoutRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${PayoutRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 
@@ -332,6 +357,17 @@ export class PayoutRequestService implements IPayoutRequestService {
     })
 
     this.queueProducerService.removeJob(QueueName.PAYOUT_REQUEST, payoutRequestId)
+
+    // update payout request report
+    this.reportService.update(
+      { type: ReportType.PayoutRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(payoutRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${PayoutRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 
@@ -397,6 +433,17 @@ export class PayoutRequestService implements IPayoutRequestService {
       }
     })
     this.queueProducerService.removeJob(QueueName.PAYOUT_REQUEST, payoutRequestId)
+
+    // update payout request report
+    this.reportService.update(
+      { type: ReportType.PayoutRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(payoutRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${PayoutRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 
@@ -453,6 +500,16 @@ export class PayoutRequestService implements IPayoutRequestService {
         id: payoutRequestId
       }
     })
+
+    // update payout request report
+    this.reportService.update(
+      { type: ReportType.PayoutRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(payoutRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${PayoutRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 

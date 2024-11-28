@@ -14,6 +14,7 @@ const report_repository_1 = require("./repositories/report.repository");
 const garden_module_1 = require("../garden/garden.module");
 const report_schema_1 = require("./schemas/report.schema");
 const management_report_controller_1 = require("./controllers/management.report.controller");
+const instructor_report_controller_1 = require("./controllers/instructor.report.controller");
 let ReportModule = class ReportModule {
 };
 exports.ReportModule = ReportModule;
@@ -21,7 +22,7 @@ exports.ReportModule = ReportModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
         imports: [mongoose_1.MongooseModule.forFeature([{ name: report_schema_1.Report.name, schema: report_schema_1.ReportSchema }]), garden_module_1.GardenModule],
-        controllers: [management_report_controller_1.ManagementReportController],
+        controllers: [management_report_controller_1.ManagementReportController, instructor_report_controller_1.InstructorReportController],
         providers: [
             {
                 provide: report_service_1.IReportService,

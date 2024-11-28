@@ -20,6 +20,10 @@ let ReportService = class ReportService {
     constructor(reportRepository) {
         this.reportRepository = reportRepository;
     }
+    async createMany(createManyReportDto, options) {
+        const reports = await this.reportRepository.model.insertMany(createManyReportDto, options);
+        return reports;
+    }
     async findById(reportId, projection, populates) {
         const report = await this.reportRepository.findOne({
             conditions: {

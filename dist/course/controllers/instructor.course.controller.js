@@ -37,12 +37,15 @@ const update_course_dto_1 = require("../dto/update-course.dto");
 const view_course_assignment_dto_1 = require("../dto/view-course-assignment.dto");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
+const constant_4 = require("../../report/contracts/constant");
 let InstructorCourseController = class InstructorCourseController {
-    constructor(courseService, courseSessionService, courseAssignmentService, settingService) {
+    constructor(courseService, courseSessionService, courseAssignmentService, settingService, reportService) {
         this.courseService = courseService;
         this.courseSessionService = courseSessionService;
         this.courseAssignmentService = courseAssignmentService;
         this.settingService = settingService;
+        this.reportService = reportService;
     }
     async list(req, pagination, queryCourseDto) {
         const { _id } = _.get(req, 'user');
@@ -90,6 +93,11 @@ let InstructorCourseController = class InstructorCourseController {
             return { ...session, sessionNumber: index + 1 };
         });
         const course = await this.courseService.create(createCourseDto);
+        this.reportService.update({ type: constant_4.ReportType.CourseSum, tag: constant_4.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
         return new dto_1.IDResponse(course._id);
     }
     async update(req, courseId, updateCourseDto) {
@@ -125,6 +133,11 @@ let InstructorCourseController = class InstructorCourseController {
         if (course.status !== constant_1.CourseStatus.DRAFT || course.isRequesting === true)
             throw new app_exception_1.AppException(error_1.Errors.CAN_NOT_DELETE_COURSE);
         await this.courseService.update({ _id: courseId }, { status: constant_1.CourseStatus.DELETED });
+        this.reportService.update({ type: constant_4.ReportType.CourseSum, tag: constant_4.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+            $inc: {
+                'data.quantity': -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
 };
@@ -239,6 +252,7 @@ exports.InstructorCourseController = InstructorCourseController = __decorate([
     __param(1, (0, common_1.Inject)(course_session_service_1.ICourseSessionService)),
     __param(2, (0, common_1.Inject)(course_assignment_service_1.ICourseAssignmentService)),
     __param(3, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __metadata("design:paramtypes", [Object, Object, Object, Object])
+    __param(4, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object, Object])
 ], InstructorCourseController);
 //# sourceMappingURL=instructor.course.controller.js.map

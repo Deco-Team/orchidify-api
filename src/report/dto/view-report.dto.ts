@@ -1,12 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseReportDto } from './base.report.dto'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsInt, IsOptional, Max, Min } from 'class-validator'
 import { ClassStatus } from '@common/contracts/constant'
+import { Type } from 'class-transformer'
 
-export class QueryReportClassByMonthDto {
+export class QueryReportByMonthDto {
   @ApiPropertyOptional()
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @Min(2024)
   @Max(2024)
@@ -14,7 +16,7 @@ export class QueryReportClassByMonthDto {
 }
 
 // View Report Data Total Summary
-class ReportTotalSummaryReportListItemResponse extends BaseReportDto {}
+class ReportTotalSummaryReportListItemResponse extends PickType(BaseReportDto, ['_id', 'type', 'data']) {}
 class ReportTotalSummaryListResponse {
   @ApiProperty({ type: ReportTotalSummaryReportListItemResponse, isArray: true })
   docs: ReportTotalSummaryReportListItemResponse[]
@@ -55,3 +57,19 @@ class ReportClassByStatusListResponse {
   docs: ReportClassByStatusListItemResponse[]
 }
 export class ReportClassByStatusListDataResponse extends DataResponse(ReportClassByStatusListResponse) {}
+
+
+// View Report Revenue Data By Month
+class ReportRevenueResponse {
+  @ApiProperty({ type: Number })
+  total: number
+}
+class ReportRevenueByMonthListItemResponse {
+  @ApiProperty({ type: ReportRevenueResponse })
+  revenue: ReportRevenueResponse
+}
+class ReportRevenueByMonthListResponse {
+  @ApiProperty({ type: ReportRevenueByMonthListItemResponse, isArray: true })
+  docs: ReportRevenueByMonthListItemResponse[]
+}
+export class ReportRevenueByMonthListDataResponse extends DataResponse(ReportRevenueByMonthListResponse) {}

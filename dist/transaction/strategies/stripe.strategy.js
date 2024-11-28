@@ -33,8 +33,10 @@ const constant_3 = require("../../setting/contracts/constant");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_4 = require("../../notification/contracts/constant");
 const course_service_1 = require("../../course/services/course.service");
+const constant_5 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrategy {
-    constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService, courseService) {
+    constructor(connection, configService, transactionRepository, classService, learnerClassService, learnerService, settingService, notificationService, courseService, reportService) {
         this.connection = connection;
         this.configService = configService;
         this.transactionRepository = transactionRepository;
@@ -44,6 +46,7 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
         this.settingService = settingService;
         this.notificationService = notificationService;
         this.courseService = courseService;
+        this.reportService = reportService;
         this.logger = new common_1.Logger(StripePaymentStrategy_1.name);
     }
     async onModuleInit() {
@@ -199,6 +202,18 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                         payment: newPayment
                     }, { session });
                     this.sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId });
+                    const month = new Date().getMonth() + 1;
+                    const year = new Date().getFullYear();
+                    this.reportService.update({
+                        type: constant_5.ReportType.LearnerEnrolledSumByMonth,
+                        tag: constant_5.ReportTag.User,
+                        ownerId: new mongoose_2.Types.ObjectId(courseClass.instructorId),
+                        'data.year': year
+                    }, {
+                        $inc: {
+                            [`data.${month}.quantity`]: 1
+                        }
+                    });
                 }
             });
             this.logger.log('handleChargeSucceeded: [completed]');
@@ -323,7 +338,8 @@ exports.StripePaymentStrategy = StripePaymentStrategy = StripePaymentStrategy_1 
     __param(6, (0, common_1.Inject)(setting_service_1.ISettingService)),
     __param(7, (0, common_1.Inject)(notification_service_1.INotificationService)),
     __param(8, (0, common_1.Inject)(course_service_1.ICourseService)),
+    __param(9, (0, common_1.Inject)(report_service_1.IReportService)),
     __metadata("design:paramtypes", [mongoose_2.Connection,
-        config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object])
+        config_1.ConfigService, Object, Object, Object, Object, Object, Object, Object, Object])
 ], StripePaymentStrategy);
 //# sourceMappingURL=stripe.strategy.js.map

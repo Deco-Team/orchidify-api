@@ -25,10 +25,11 @@
 /// <reference types="mongoose-paginate-v2" />
 import { IReportRepository } from '@report/repositories/report.repository';
 import { Report, ReportDocument } from '@report/schemas/report.schema';
-import { FilterQuery, PopulateOptions, QueryOptions, UpdateQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
 import { ReportType } from '@report/contracts/constant';
 export declare const IReportService: unique symbol;
 export interface IReportService {
+    createMany(createReportDto: any[], options?: SaveOptions | undefined): Promise<ReportDocument[]>;
     findById(reportId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
     findByType(type: ReportType, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
     findOne(conditions: FilterQuery<Report>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<ReportDocument>;
@@ -38,6 +39,11 @@ export interface IReportService {
 export declare class ReportService implements IReportService {
     private readonly reportRepository;
     constructor(reportRepository: IReportRepository);
+    createMany(createManyReportDto: any[], options?: SaveOptions | undefined): Promise<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Report> & Report & Required<{
+        _id: string;
+    }>> & import("mongoose").Document<unknown, {}, Report> & Report & Required<{
+        _id: string;
+    }>)[]>;
     findById(reportId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Report> & Report & Required<{
         _id: string;
     }>>;

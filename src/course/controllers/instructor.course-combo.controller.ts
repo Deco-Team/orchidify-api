@@ -37,7 +37,7 @@ import {
   QueryCourseComboDto
 } from '@course/dto/view-course-combo.dto'
 import { CHILD_COURSE_COMBO_DETAIL_PROJECTION, COURSE_COMBO_DETAIL_PROJECTION } from '@course/contracts/constant'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 import { IReportService } from '@report/services/report.service'
 
 @ApiTags('CourseCombo - Instructor')
@@ -128,7 +128,7 @@ export class InstructorCourseComboController {
 
     // update course combo report
     this.reportService.update(
-      { type: ReportType.CourseComboSum },
+      { type: ReportType.CourseComboSum, tag: ReportTag.System },
       {
         $inc: {
           'data.quantity': 1
@@ -208,7 +208,7 @@ export class InstructorCourseComboController {
 
     // update course combo report
     this.reportService.update(
-      { type: ReportType.CourseComboSum },
+      { type: ReportType.CourseComboSum, tag: ReportTag.System },
       {
         $inc: {
           'data.quantity': -1

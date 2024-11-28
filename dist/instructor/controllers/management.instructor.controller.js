@@ -61,14 +61,14 @@ let ManagementInstructorController = class ManagementInstructorController {
             throw new app_exception_1.AppException(error_1.Errors.INSTRUCTOR_HAS_NO_SELECTED_APPLICATIONS);
         const instructor = await this.instructorService.create(createInstructorDto);
         await this.recruitmentService.update({ _id: selectedRecruitment._id }, { $set: { isInstructorAdded: true } });
-        this.reportService.update({ type: constant_3.ReportType.InstructorSum }, {
+        this.reportService.update({ type: constant_3.ReportType.InstructorSum, tag: constant_3.ReportTag.System }, {
             $inc: {
                 'data.quantity': 1
             }
         });
         const month = new Date().getMonth() + 1;
         const year = new Date().getFullYear();
-        this.reportService.update({ type: constant_3.ReportType.InstructorSumByMonth, 'data.year': year }, {
+        this.reportService.update({ type: constant_3.ReportType.InstructorSumByMonth, tag: constant_3.ReportTag.System, 'data.year': year }, {
             $inc: {
                 [`data.${month}.quantity`]: 1
             }

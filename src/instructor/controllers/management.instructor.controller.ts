@@ -40,7 +40,7 @@ import { IClassService } from '@src/class/services/class.service'
 import { CreateInstructorDto } from '@instructor/dto/create-instructor.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 import { IReportService } from '@report/services/report.service'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 @ApiTags('Instructor - Management')
 @ApiBearerAuth()
@@ -109,7 +109,7 @@ export class ManagementInstructorController {
 
     // update instructor report
     this.reportService.update(
-      { type: ReportType.InstructorSum },
+      { type: ReportType.InstructorSum, tag: ReportTag.System },
       {
         $inc: {
           'data.quantity': 1
@@ -121,7 +121,7 @@ export class ManagementInstructorController {
     const month = new Date().getMonth() + 1
     const year = new Date().getFullYear()
     this.reportService.update(
-      { type: ReportType.InstructorSumByMonth, 'data.year': year },
+      { type: ReportType.InstructorSumByMonth, tag: ReportTag.System, 'data.year': year },
       {
         $inc: {
           [`data.${month}.quantity`]: 1

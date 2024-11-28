@@ -1,5 +1,6 @@
 import { SlotNumber, TimesheetType } from '@common/contracts/constant';
 import { BaseSlotMetadataDto } from './slot.dto';
+import { BaseGardenDto } from '@garden/dto/base.garden.dto';
 export declare class QueryInstructorTimesheetDto {
     date: Date;
     type: TimesheetType;
@@ -9,6 +10,9 @@ declare const QueryTeachingTimesheetDto_base: import("@nestjs/common").Type<Pick
 export declare class QueryTeachingTimesheetDto extends QueryTeachingTimesheetDto_base {
     instructorId: string;
 }
+declare const TeachingTimesheetGardenDetailResponse_base: import("@nestjs/common").Type<Pick<BaseGardenDto, "name">>;
+declare class TeachingTimesheetGardenDetailResponse extends TeachingTimesheetGardenDetailResponse_base {
+}
 export declare class ViewTeachingTimesheetItemResponse {
     _id: string;
     slotNumber: SlotNumber;
@@ -17,6 +21,7 @@ export declare class ViewTeachingTimesheetItemResponse {
     status: string;
     classId: string;
     metadata: BaseSlotMetadataDto;
+    garden: TeachingTimesheetGardenDetailResponse;
 }
 declare class ViewTeachingTimesheetListResponse {
     docs: ViewTeachingTimesheetItemResponse[];

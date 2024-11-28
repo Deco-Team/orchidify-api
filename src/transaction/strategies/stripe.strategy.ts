@@ -24,6 +24,8 @@ import { SettingKey } from '@setting/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { ICourseService } from '@course/services/course.service'
+import { ReportTag, ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 @Injectable()
 export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
@@ -47,6 +49,8 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
     private readonly notificationService: INotificationService,
     @Inject(ICourseService)
     private readonly courseService: ICourseService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
   async onModuleInit() {
     this.stripe = new Stripe(this.configService.get('payment.stripe.apiKey'))
@@ -259,6 +263,23 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
           )
           // 4. Send notification to learner/instructor
           this.sendNotificationWhenChargeSucceeded({ classId, courseClass, learnerId })
+
+          // update learner sum by month report
+          const month = new Date().getMonth() + 1
+          const year = new Date().getFullYear()
+          this.reportService.update(
+            {
+              type: ReportType.LearnerEnrolledSumByMonth,
+              tag: ReportTag.User,
+              ownerId: new Types.ObjectId(courseClass.instructorId),
+              'data.year': year
+            },
+            {
+              $inc: {
+                [`data.${month}.quantity`]: 1
+              }
+            }
+          )
         }
       })
       this.logger.log('handleChargeSucceeded: [completed]')

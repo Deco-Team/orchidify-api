@@ -5,11 +5,12 @@ import { ReportRepository, IReportRepository } from './repositories/report.repos
 import { GardenModule } from '@garden/garden.module'
 import { Report, ReportSchema } from './schemas/report.schema'
 import { ManagementReportController } from './controllers/management.report.controller'
+import { InstructorReportController } from './controllers/instructor.report.controller'
 
 @Global()
 @Module({
   imports: [MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }]), GardenModule],
-  controllers: [ManagementReportController],
+  controllers: [ManagementReportController, InstructorReportController],
   providers: [
     {
       provide: IReportService,

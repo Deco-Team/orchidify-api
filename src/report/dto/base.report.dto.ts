@@ -1,6 +1,6 @@
 import { IsMongoId } from 'class-validator'
-import { ApiProperty } from '@nestjs/swagger'
-import { ReportType } from '@report/contracts/constant'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 export class BaseReportDto {
   @ApiProperty({ type: String })
@@ -9,6 +9,13 @@ export class BaseReportDto {
 
   @ApiProperty({ type: String, enum: ReportType })
   type: ReportType
+
+  @ApiProperty({ type: String, enum: ReportTag })
+  tag: ReportTag
+
+  @ApiPropertyOptional({ type: String })
+  @IsMongoId()
+  ownerId: string
 
   @ApiProperty({ type: Object })
   data: Record<string, any>

@@ -85,7 +85,7 @@ let InstructorCourseComboController = class InstructorCourseComboController {
         createCourseComboDto['instructorId'] = new mongoose_1.Types.ObjectId(_id);
         createCourseComboDto['childCourseIds'] = formatChildCourseIds;
         const course = await this.courseComboService.create(createCourseComboDto);
-        this.reportService.update({ type: constant_3.ReportType.CourseComboSum }, {
+        this.reportService.update({ type: constant_3.ReportType.CourseComboSum, tag: constant_3.ReportTag.System }, {
             $inc: {
                 'data.quantity': 1
             }
@@ -132,7 +132,7 @@ let InstructorCourseComboController = class InstructorCourseComboController {
         if (!courseCombo || courseCombo.instructorId?.toString() !== _id || courseCombo.status === constant_1.CourseStatus.DELETED)
             throw new app_exception_1.AppException(error_1.Errors.COURSE_COMBO_NOT_FOUND);
         await this.courseComboService.update({ _id: courseId }, { status: constant_1.CourseStatus.DELETED });
-        this.reportService.update({ type: constant_3.ReportType.CourseComboSum }, {
+        this.reportService.update({ type: constant_3.ReportType.CourseComboSum, tag: constant_3.ReportTag.System }, {
             $inc: {
                 'data.quantity': -1
             }

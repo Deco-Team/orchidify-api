@@ -38,6 +38,8 @@ import { UpdateCourseDto } from '@course/dto/update-course.dto'
 import { ViewCourseAssignmentDetailDataResponse } from '@course/dto/view-course-assignment.dto'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { IReportService } from '@report/services/report.service'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 @ApiTags('Course - Instructor')
 @ApiBearerAuth()
@@ -54,7 +56,9 @@ export class InstructorCourseController {
     @Inject(ICourseAssignmentService)
     private readonly courseAssignmentService: ICourseAssignmentService,
     @Inject(ISettingService)
-    private readonly settingService: ISettingService
+    private readonly settingService: ISettingService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   @ApiOperation({
@@ -151,6 +155,17 @@ export class InstructorCourseController {
       return { ...session, sessionNumber: index + 1 }
     })
     const course = await this.courseService.create(createCourseDto)
+
+    // update course report
+    this.reportService.update(
+      { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
+
     return new IDResponse(course._id)
   }
 
@@ -211,6 +226,16 @@ export class InstructorCourseController {
       throw new AppException(Errors.CAN_NOT_DELETE_COURSE)
 
     await this.courseService.update({ _id: courseId }, { status: CourseStatus.DELETED })
+
+    // update course report
+    this.reportService.update(
+      { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+      {
+        $inc: {
+          'data.quantity': -1
+        }
+      }
+    )
 
     return new SuccessResponse(true)
   }

@@ -25,7 +25,7 @@ import { INotificationService } from '@notification/services/notification.servic
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { Types } from 'mongoose'
 import { IGardenService } from '@garden/services/garden.service'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 import { IReportService } from '@report/services/report.service'
 
 @Processor(QueueName.CLASS)
@@ -101,6 +101,7 @@ export class ClassQueueConsumer extends WorkerHost {
       const updateClassStatusPromises = []
       const updateClassToInProgress = []
       const updateClassToCanceled = []
+      const updateClassReportPromises = []
       const classAutoCancelMinLearners =
         Number((await this.settingService.findByKey(SettingKey.ClassAutoCancelMinLearners)).value) || 5
 
@@ -135,13 +136,30 @@ export class ClassQueueConsumer extends WorkerHost {
                 }
               )
             )
+            // update class report
+            updateClassReportPromises.push(
+              this.reportService.update(
+                {
+                  type: ReportType.ClassSum,
+                  tag: ReportTag.User,
+                  ownerId: new Types.ObjectId(courseClass.instructorId)
+                },
+                {
+                  $inc: {
+                    [`data.${ClassStatus.PUBLISHED}.quantity`]: -1,
+                    [`data.${ClassStatus.IN_PROGRESS}.quantity`]: 1
+                  }
+                }
+              )
+            )
           }
         }
       }
       await Promise.all(updateClassStatusPromises)
+      await Promise.all(updateClassReportPromises)
       // update class report
       this.reportService.update(
-        { type: ReportType.ClassSum },
+        { type: ReportType.ClassSum, tag: ReportTag.System },
         {
           $inc: {
             [`data.${ClassStatus.PUBLISHED}.quantity`]: -updateClassToInProgress.length,

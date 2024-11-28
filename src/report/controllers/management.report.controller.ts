@@ -5,7 +5,7 @@ import * as _ from 'lodash'
 import { ErrorResponse } from '@common/contracts/dto'
 import { IReportService } from '@report/services/report.service'
 import {
-  QueryReportClassByMonthDto,
+  QueryReportByMonthDto,
   ReportClassByStatusListDataResponse,
   ReportTotalSummaryListDataResponse,
   ReportUserByMonthListDataResponse
@@ -14,9 +14,9 @@ import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { ClassStatus, UserRole } from '@common/contracts/constant'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
-@ApiTags('Report')
+@ApiTags('Report - Management')
 @ApiBearerAuth()
 @ApiBadRequestResponse({ type: ErrorResponse })
 @UseGuards(JwtAuthGuard.ACCESS_TOKEN, RolesGuard)
@@ -30,34 +30,40 @@ export class ManagementReportController {
   @ApiOperation({
     summary: `[${UserRole.STAFF}] View Report Data Total Summary`
   })
-  @ApiBearerAuth()
   @ApiOkResponse({ type: ReportTotalSummaryListDataResponse })
   @Roles(UserRole.STAFF)
   @Get('total-summary')
   async viewReportTotalSummary() {
-    const reports = await this.reportService.findMany({
-      type: {
-        $in: [ReportType.CourseSum, ReportType.LearnerSum, ReportType.InstructorSum, ReportType.CourseComboSum]
-      }
-    })
+    const reports = await this.reportService.findMany(
+      {
+        type: {
+          $in: [ReportType.CourseSum, ReportType.LearnerSum, ReportType.InstructorSum, ReportType.CourseComboSum]
+        },
+        tag: ReportTag.System
+      },
+      ['type', 'data']
+    )
     return { docs: reports }
   }
 
   @ApiOperation({
     summary: `[${UserRole.STAFF}] View Report User Data By Month`
   })
-  @ApiBearerAuth()
   @ApiOkResponse({ type: ReportUserByMonthListDataResponse })
   @Roles(UserRole.STAFF)
   @Get('user-by-month')
-  async viewReportUserDataByMonth(@Query() queryReportClassByMonthDto: QueryReportClassByMonthDto) {
-    const { year = 2024 } = queryReportClassByMonthDto
-    const [learnerReport, instructorReport] = await this.reportService.findMany({
-      type: {
-        $in: [ReportType.LearnerSumByMonth, ReportType.InstructorSumByMonth]
+  async viewReportUserDataByMonth(@Query() queryReportByMonthDto: QueryReportByMonthDto) {
+    const { year = 2024 } = queryReportByMonthDto
+    const [learnerReport, instructorReport] = await this.reportService.findMany(
+      {
+        type: {
+          $in: [ReportType.LearnerSumByMonth, ReportType.InstructorSumByMonth]
+        },
+        tag: ReportTag.System,
+        'data.year': year
       },
-      'data.year': year
-    })
+      ['type', 'data']
+    )
     const docs = []
     if (learnerReport && instructorReport) {
       for (let month = 1; month <= 12; month++) {
@@ -75,12 +81,14 @@ export class ManagementReportController {
   @ApiOperation({
     summary: `[${UserRole.STAFF}] View Report Class Data By Status`
   })
-  @ApiBearerAuth()
   @ApiOkResponse({ type: ReportClassByStatusListDataResponse })
   @Roles(UserRole.STAFF)
   @Get('class-by-status')
   async viewReportClassDataByStatus() {
-    const report = await this.reportService.findOne({ type: ReportType.ClassSum })
+    const report = await this.reportService.findOne({ type: ReportType.ClassSum, tag: ReportTag.System }, [
+      'type',
+      'data'
+    ])
     return {
       quantity: report.data.quantity,
       docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({

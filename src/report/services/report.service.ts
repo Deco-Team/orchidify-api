@@ -8,6 +8,7 @@ import { ReportType } from '@report/contracts/constant'
 export const IReportService = Symbol('IReportService')
 
 export interface IReportService {
+  createMany(createReportDto: any[], options?: SaveOptions | undefined): Promise<ReportDocument[]>
   findById(
     reportId: string,
     projection?: string | Record<string, any>,
@@ -41,6 +42,12 @@ export class ReportService implements IReportService {
     @Inject(IReportRepository)
     private readonly reportRepository: IReportRepository
   ) {}
+
+  public async createMany(createManyReportDto: any[], options?: SaveOptions | undefined) {
+    const reports = await this.reportRepository.model.insertMany(createManyReportDto, options)
+
+    return reports
+  }
 
   public async findById(
     reportId: string,

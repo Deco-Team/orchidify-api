@@ -19,6 +19,7 @@ var TimesheetType;
 (function (TimesheetType) {
     TimesheetType["MONTH"] = "MONTH";
     TimesheetType["WEEK"] = "WEEK";
+    TimesheetType["DAY"] = "DAY";
 })(TimesheetType || (exports.TimesheetType = TimesheetType = {}));
 var LearnerStatus;
 (function (LearnerStatus) {

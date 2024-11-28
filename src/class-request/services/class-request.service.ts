@@ -42,7 +42,7 @@ import { INotificationService } from '@notification/services/notification.servic
 import { FCMNotificationDataType } from '@notification/contracts/constant'
 import { IStaffService } from '@staff/services/staff.service'
 import { IReportService } from '@report/services/report.service'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 export const IClassRequestService = Symbol('IClassRequestService')
 
@@ -140,6 +140,17 @@ export class ClassRequestService implements IClassRequestService {
     // Send notification to staff
     this.sendNotificationToStaffWhenClassRequestIsCreated({ classRequest })
 
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: 1
+        }
+      }
+    )
+
     return classRequest
   }
 
@@ -149,6 +160,17 @@ export class ClassRequestService implements IClassRequestService {
   ) {
     const classRequest = await this.classRequestRepository.create(createCancelClassRequestDto, options)
     this.addClassRequestAutoExpiredJob(classRequest)
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: 1
+        }
+      }
+    )
 
     return classRequest
   }
@@ -357,6 +379,16 @@ export class ClassRequestService implements IClassRequestService {
     }
 
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 
@@ -443,10 +475,21 @@ export class ClassRequestService implements IClassRequestService {
 
           // update course report
           await this.reportService.update(
-            { type: ReportType.CourseSum },
+            { type: ReportType.CourseSum, tag: ReportTag.System },
             {
               $inc: {
                 'data.quantity': 1
+              }
+            },
+            { session }
+          )
+
+          // update course report
+          await this.reportService.update(
+            { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+            {
+              $inc: {
+                [`data.${CourseStatus.ACTIVE}.quantity`]: 1
               }
             },
             { session }
@@ -492,8 +535,19 @@ export class ClassRequestService implements IClassRequestService {
           const createdClass = await this.classService.create(classData, { session })
 
           // update class report
-          this.reportService.update(
-            { type: ReportType.ClassSum },
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.System },
+            {
+              $inc: {
+                'data.quantity': 1,
+                [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
+              }
+            },
+            { session }
+          )
+
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
             {
               $inc: {
                 'data.quantity': 1,
@@ -578,8 +632,19 @@ export class ClassRequestService implements IClassRequestService {
           )
 
           // update class report
-          this.reportService.update(
-            { type: ReportType.ClassSum },
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.System },
+            {
+              $inc: {
+                [`data.${courseClass.status}.quantity`]: -1,
+                [`data.${ClassStatus.CANCELED}.quantity`]: 1
+              }
+            },
+            { session }
+          )
+
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
             {
               $inc: {
                 [`data.${courseClass.status}.quantity`]: -1,
@@ -641,6 +706,17 @@ export class ClassRequestService implements IClassRequestService {
     })
 
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 
@@ -749,6 +825,16 @@ export class ClassRequestService implements IClassRequestService {
       }
     })
     this.queueProducerService.removeJob(QueueName.CLASS_REQUEST, classRequestId)
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 
@@ -812,6 +898,16 @@ export class ClassRequestService implements IClassRequestService {
         id: classRequestId
       }
     })
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 
@@ -863,6 +959,16 @@ export class ClassRequestService implements IClassRequestService {
         id: classRequestId
       }
     })
+
+    // update class request report
+    this.reportService.update(
+      { type: ReportType.ClassRequestSum, tag: ReportTag.User, ownerId: new Types.ObjectId(classRequest.createdBy) },
+      {
+        $inc: {
+          [`data.${ClassRequestStatus.PENDING}.quantity`]: -1
+        }
+      }
+    )
     return new SuccessResponse(true)
   }
 

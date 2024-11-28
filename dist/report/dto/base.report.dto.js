@@ -26,6 +26,15 @@ __decorate([
     __metadata("design:type", String)
 ], BaseReportDto.prototype, "type", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.ReportTag }),
+    __metadata("design:type", String)
+], BaseReportDto.prototype, "tag", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String }),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], BaseReportDto.prototype, "ownerId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Object }),
     __metadata("design:type", Object)
 ], BaseReportDto.prototype, "data", void 0);

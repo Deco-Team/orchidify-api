@@ -14,7 +14,8 @@ export enum UserRole {
 
 export enum TimesheetType {
   MONTH = 'MONTH',
-  WEEK = 'WEEK'
+  WEEK = 'WEEK',
+  DAY = 'DAY'
 }
 
 export enum LearnerStatus {

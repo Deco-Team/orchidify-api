@@ -122,14 +122,14 @@ let AuthService = class AuthService {
                 expirationMinutes: 5
             }
         });
-        this.reportService.update({ type: constant_3.ReportType.LearnerSum }, {
+        this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
             $inc: {
                 'data.quantity': 1
             }
         });
         const month = new Date().getMonth() + 1;
         const year = new Date().getFullYear();
-        this.reportService.update({ type: constant_3.ReportType.LearnerSumByMonth, 'data.year': year }, {
+        this.reportService.update({ type: constant_3.ReportType.LearnerSumByMonth, tag: constant_3.ReportTag.System, 'data.year': year }, {
             $inc: {
                 [`data.${month}.quantity`]: 1
             }
@@ -210,7 +210,7 @@ let AuthService = class AuthService {
                 daysToRespond: 7
             }
         });
-        this.reportService.update({ type: constant_3.ReportType.RecruitmentApplicationSum }, {
+        this.reportService.update({ type: constant_3.ReportType.RecruitmentApplicationSum, tag: constant_3.ReportTag.System }, {
             $inc: {
                 'data.quantity': 1
             }

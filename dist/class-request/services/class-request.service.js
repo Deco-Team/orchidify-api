@@ -68,11 +68,23 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         });
         this.addClassRequestAutoExpiredJob(classRequest);
         this.sendNotificationToStaffWhenClassRequestIsCreated({ classRequest });
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: 1
+            }
+        });
         return classRequest;
     }
     async createCancelClassRequest(createCancelClassRequestDto, options) {
         const classRequest = await this.classRequestRepository.create(createCancelClassRequestDto, options);
         this.addClassRequestAutoExpiredJob(classRequest);
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: 1
+            }
+        });
         return classRequest;
     }
     async findById(classRequestId, projection, populates) {
@@ -225,6 +237,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             }
         }
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async approveClassRequest(classRequestId, approveClassRequestDto, userAuth) {
@@ -284,9 +301,14 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             isRequesting: false
                         }
                     }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.CourseSum }, {
+                    await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.System }, {
                         $inc: {
                             'data.quantity': 1
+                        }
+                    }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+                        $inc: {
+                            [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1
                         }
                     }, { session });
                     const classData = _.pick(classRequest.metadata, [
@@ -323,7 +345,13 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                     let sessions = _.get(classRequest, 'metadata.sessions');
                     classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
                     const createdClass = await this.classService.create(classData, { session });
-                    this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+                        $inc: {
+                            'data.quantity': 1,
+                            [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
+                        }
+                    }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
                         $inc: {
                             'data.quantity': 1,
                             [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
@@ -387,7 +415,13 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             }
                         }
                     }, { new: true, session });
-                    this.reportService.update({ type: constant_6.ReportType.ClassSum }, {
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+                        $inc: {
+                            [`data.${courseClass.status}.quantity`]: -1,
+                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+                        }
+                    }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
                         $inc: {
                             [`data.${courseClass.status}.quantity`]: -1,
                             [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
@@ -436,6 +470,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             }
         });
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async rejectClassRequest(classRequestId, RejectClassRequestDto, userAuth) {
@@ -519,6 +558,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             }
         });
         this.queueProducerService.removeJob(constant_3.QueueName.CLASS_REQUEST, classRequestId);
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async expirePublishClassRequest(classRequestId, userAuth) {
@@ -567,6 +611,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 id: classRequestId
             }
         });
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
     async expireCancelClassRequest(classRequestId, userAuth) {
@@ -606,6 +655,11 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,
                 id: classRequestId
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.ClassRequestSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(classRequest.createdBy) }, {
+            $inc: {
+                [`data.${constant_1.ClassRequestStatus.PENDING}.quantity`]: -1
             }
         });
         return new dto_1.SuccessResponse(true);

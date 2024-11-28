@@ -17,6 +17,7 @@ const constant_1 = require("../../common/contracts/constant");
 const future_max_month_validator_1 = require("../../common/validators/future-max-month.validator");
 const past_max_month_validator_1 = require("../../common/validators/past-max-month.validator");
 const slot_dto_1 = require("./slot.dto");
+const base_garden_dto_1 = require("../../garden/dto/base.garden.dto");
 class QueryInstructorTimesheetDto {
 }
 exports.QueryInstructorTimesheetDto = QueryInstructorTimesheetDto;
@@ -39,6 +40,8 @@ __decorate([
 class QueryTeachingTimesheetDto extends (0, swagger_1.PickType)(QueryInstructorTimesheetDto, ['date', 'type']) {
 }
 exports.QueryTeachingTimesheetDto = QueryTeachingTimesheetDto;
+class TeachingTimesheetGardenDetailResponse extends (0, swagger_1.PickType)(base_garden_dto_1.BaseGardenDto, ['name']) {
+}
 class ViewTeachingTimesheetItemResponse {
 }
 exports.ViewTeachingTimesheetItemResponse = ViewTeachingTimesheetItemResponse;
@@ -71,6 +74,10 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: slot_dto_1.BaseSlotMetadataDto }),
     __metadata("design:type", slot_dto_1.BaseSlotMetadataDto)
 ], ViewTeachingTimesheetItemResponse.prototype, "metadata", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: TeachingTimesheetGardenDetailResponse }),
+    __metadata("design:type", TeachingTimesheetGardenDetailResponse)
+], ViewTeachingTimesheetItemResponse.prototype, "garden", void 0);
 class ViewTeachingTimesheetListResponse {
 }
 __decorate([

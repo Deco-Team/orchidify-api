@@ -235,6 +235,9 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     } else if (type === TimesheetType.WEEK) {
       fromDate = dateMoment.clone().startOf('isoWeek').toDate()
       toDate = dateMoment.clone().endOf('isoWeek').toDate()
+    } else if (type === TimesheetType.DAY) {
+      fromDate = dateMoment.clone().startOf('date').toDate()
+      toDate = dateMoment.clone().endOf('date').toDate()
     }
 
     const timesheets = await this.gardenTimesheetRepository.findMany({
@@ -246,7 +249,13 @@ export class GardenTimesheetService implements IGardenTimesheetService {
           $lte: toDate
         },
         'slots.instructorId': new Types.ObjectId(instructorId)
-      }
+      },
+      populates: [
+        {
+          path: 'garden',
+          select: ['name']
+        }
+      ]
     })
     return this.transformDataToTeachingCalendar(timesheets, instructorId)
   }
@@ -643,6 +652,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       for (const slot of timesheet.slots) {
         if (slot.status === SlotStatus.NOT_AVAILABLE && slot.instructorId.toString() === instructorId) {
           _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass)
+          _.set(slot, 'garden', timesheet['garden'])
           calendars.push(slot)
         }
       }

@@ -32,7 +32,7 @@ import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
 import { INotificationService } from '@notification/services/notification.service'
 import { IReportService } from '@report/services/report.service'
-import { ReportType } from '@report/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 export interface IAuthUserService {
   findByEmail(email: string, projection?: string | Record<string, any>)
@@ -169,7 +169,7 @@ export class AuthService implements IAuthService {
 
     // update learner report
     this.reportService.update(
-      { type: ReportType.LearnerSum },
+      { type: ReportType.LearnerSum, tag: ReportTag.System },
       {
         $inc: {
           'data.quantity': 1
@@ -181,7 +181,7 @@ export class AuthService implements IAuthService {
     const month = new Date().getMonth() + 1
     const year = new Date().getFullYear()
     this.reportService.update(
-      { type: ReportType.LearnerSumByMonth, 'data.year': year },
+      { type: ReportType.LearnerSumByMonth, tag: ReportTag.System, 'data.year': year },
       {
         $inc: {
           [`data.${month}.quantity`]: 1
@@ -277,7 +277,7 @@ export class AuthService implements IAuthService {
 
     // update recruitment report
     this.reportService.update(
-      { type: ReportType.RecruitmentApplicationSum },
+      { type: ReportType.RecruitmentApplicationSum, tag: ReportTag.System },
       {
         $inc: {
           'data.quantity': 1

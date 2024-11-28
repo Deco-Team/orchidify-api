@@ -32,18 +32,20 @@ let ManagementReportController = class ManagementReportController {
         const reports = await this.reportService.findMany({
             type: {
                 $in: [constant_2.ReportType.CourseSum, constant_2.ReportType.LearnerSum, constant_2.ReportType.InstructorSum, constant_2.ReportType.CourseComboSum]
-            }
-        });
+            },
+            tag: constant_2.ReportTag.System
+        }, ['type', 'data']);
         return { docs: reports };
     }
-    async viewReportUserDataByMonth(queryReportClassByMonthDto) {
-        const { year = 2024 } = queryReportClassByMonthDto;
+    async viewReportUserDataByMonth(queryReportByMonthDto) {
+        const { year = 2024 } = queryReportByMonthDto;
         const [learnerReport, instructorReport] = await this.reportService.findMany({
             type: {
                 $in: [constant_2.ReportType.LearnerSumByMonth, constant_2.ReportType.InstructorSumByMonth]
             },
+            tag: constant_2.ReportTag.System,
             'data.year': year
-        });
+        }, ['type', 'data']);
         const docs = [];
         if (learnerReport && instructorReport) {
             for (let month = 1; month <= 12; month++) {
@@ -58,7 +60,10 @@ let ManagementReportController = class ManagementReportController {
         return { docs };
     }
     async viewReportClassDataByStatus() {
-        const report = await this.reportService.findOne({ type: constant_2.ReportType.ClassSum });
+        const report = await this.reportService.findOne({ type: constant_2.ReportType.ClassSum, tag: constant_2.ReportTag.System }, [
+            'type',
+            'data'
+        ]);
         return {
             quantity: report.data.quantity,
             docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
@@ -73,7 +78,6 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: `[${constant_1.UserRole.STAFF}] View Report Data Total Summary`
     }),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportTotalSummaryListDataResponse }),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Get)('total-summary'),
@@ -85,20 +89,18 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: `[${constant_1.UserRole.STAFF}] View Report User Data By Month`
     }),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportUserByMonthListDataResponse }),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Get)('user-by-month'),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [view_report_dto_1.QueryReportClassByMonthDto]),
+    __metadata("design:paramtypes", [view_report_dto_1.QueryReportByMonthDto]),
     __metadata("design:returntype", Promise)
 ], ManagementReportController.prototype, "viewReportUserDataByMonth", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
         summary: `[${constant_1.UserRole.STAFF}] View Report Class Data By Status`
     }),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportClassByStatusListDataResponse }),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Get)('class-by-status'),
@@ -107,7 +109,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ManagementReportController.prototype, "viewReportClassDataByStatus", null);
 exports.ManagementReportController = ManagementReportController = __decorate([
-    (0, swagger_1.ApiTags)('Report'),
+    (0, swagger_1.ApiTags)('Report - Management'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiBadRequestResponse)({ type: dto_1.ErrorResponse }),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard.ACCESS_TOKEN, roles_guard_1.RolesGuard),
