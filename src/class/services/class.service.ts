@@ -612,7 +612,7 @@ export class ClassService implements IClassService {
         )
 
         await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
           {
             $inc: {
               [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
@@ -773,7 +773,7 @@ export class ClassService implements IClassService {
         )
 
         await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
           {
             $inc: {
               [`data.${courseClass.status}.quantity`]: -1,

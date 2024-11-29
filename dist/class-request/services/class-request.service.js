@@ -351,7 +351,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
                         }
                     }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(createdClass.instructorId) }, {
                         $inc: {
                             'data.quantity': 1,
                             [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
@@ -421,7 +421,7 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
                         }
                     }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
                         $inc: {
                             [`data.${courseClass.status}.quantity`]: -1,
                             [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
