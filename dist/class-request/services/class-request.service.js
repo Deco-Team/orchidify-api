@@ -731,10 +731,10 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
         });
         const staffIds = staffs.map((staff) => staff._id.toString());
         await this.notificationService.sendTopicFirebaseCloudMessaging({
-            title: 'Yêu cầu lớp học của bạn đã được tạo',
+            title: 'Yêu cầu lớp học được tạo gần đây',
             body: classRequest.type === constant_1.ClassRequestType.PUBLISH_CLASS
-                ? 'Yêu cầu mở lớp được tạo. Bấm để xem chi tiết.'
-                : 'Yêu cầu hủy lớp. Bấm để xem chi tiết',
+                ? 'Yêu cầu mở lớp được tạo gần đây. Bấm để xem chi tiết.'
+                : 'Yêu cầu hủy lớp được tạo gần đây. Bấm để xem chi tiết',
             receiverIds: staffIds,
             data: {
                 type: constant_5.FCMNotificationDataType.CLASS_REQUEST,

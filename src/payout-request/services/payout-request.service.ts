@@ -561,8 +561,8 @@ export class PayoutRequestService implements IPayoutRequestService {
     })
     const staffIds = staffs.map((staff) => staff._id.toString())
     await this.notificationService.sendTopicFirebaseCloudMessaging({
-      title: 'Yêu cầu rút tiền của bạn đã được tạo',
-      body: 'Yêu cầu rút tiền được tạo. Bấm để xem chi tiết.',
+      title: 'Yêu cầu rút tiền được tạo gần đây',
+      body: 'Yêu cầu rút tiền được tạo gần đây. Bấm để xem chi tiết.',
       receiverIds: staffIds,
       data: {
         type: FCMNotificationDataType.PAYOUT_REQUEST,
