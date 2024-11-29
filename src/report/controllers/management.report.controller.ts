@@ -6,15 +6,22 @@ import { ErrorResponse } from '@common/contracts/dto'
 import { IReportService } from '@report/services/report.service'
 import {
   QueryReportByMonthDto,
+  QueryReportByWeekDto,
   ReportClassByStatusListDataResponse,
+  ReportRevenueByMonthListDataResponse,
+  ReportStaffByStatusListDataResponse,
   ReportTotalSummaryListDataResponse,
+  ReportTransactionByDateListDataResponse,
   ReportUserByMonthListDataResponse
 } from '@report/dto/view-report.dto'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
-import { ClassStatus, UserRole } from '@common/contracts/constant'
+import { ClassStatus, StaffStatus, UserRole } from '@common/contracts/constant'
 import { Roles } from '@auth/decorators/roles.decorator'
 import { ReportTag, ReportType } from '@report/contracts/constant'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
+import { ITransactionService } from '@transaction/services/transaction.service'
 
 @ApiTags('Report - Management')
 @ApiBearerAuth()
@@ -24,7 +31,9 @@ import { ReportTag, ReportType } from '@report/contracts/constant'
 export class ManagementReportController {
   constructor(
     @Inject(IReportService)
-    private readonly reportService: IReportService
+    private readonly reportService: IReportService,
+    @Inject(ITransactionService)
+    private readonly transactionService: ITransactionService
   ) {}
 
   @ApiOperation({
@@ -99,5 +108,94 @@ export class ManagementReportController {
         quantity: report.data[statusKey].quantity
       }))
     }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.ADMIN}] View Report Data Total Summary`
+  })
+  @ApiOkResponse({ type: ReportTotalSummaryListDataResponse })
+  @Roles(UserRole.ADMIN)
+  @Get('admin/total-summary')
+  async adminViewReportTotalSummary() {
+    const reports = await this.reportService.findMany(
+      {
+        type: {
+          $in: [ReportType.CourseSum, ReportType.LearnerSum, ReportType.InstructorSum, ReportType.RevenueSum]
+        },
+        tag: ReportTag.System
+      },
+      ['type', 'data']
+    )
+    return { docs: reports }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.ADMIN}] View Report Staff Data By Status`
+  })
+  @ApiOkResponse({ type: ReportStaffByStatusListDataResponse })
+  @Roles(UserRole.ADMIN)
+  @Get('admin/staff-by-status')
+  async adminViewReportStaffDataByStatus() {
+    const report = await this.reportService.findOne({ type: ReportType.StaffSum, tag: ReportTag.System }, [
+      'type',
+      'data'
+    ])
+    return {
+      quantity: report.data.quantity,
+      docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
+        status: StaffStatus[statusKey],
+        quantity: report.data[statusKey].quantity
+      }))
+    }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.ADMIN}] View Report Revenue Data By Month`
+  })
+  @ApiOkResponse({ type: ReportRevenueByMonthListDataResponse })
+  @Roles(UserRole.ADMIN)
+  @Get('admin/revenue-by-month')
+  async adminViewReportRevenueDataByMonth(@Query() queryReportByMonthDto: QueryReportByMonthDto) {
+    const { year = 2024 } = queryReportByMonthDto
+    let [revenueSumByMonth] = await this.reportService.findMany(
+      {
+        type: {
+          $in: [ReportType.RevenueSumByMonth]
+        },
+        tag: ReportTag.System,
+        'data.year': year
+      },
+      ['type', 'data']
+    )
+
+    const docs = []
+    if (revenueSumByMonth) {
+      for (let month = 1; month <= 12; month++) {
+        const revenue = _.get(revenueSumByMonth.data, `${month}`) || { total: 0 }
+        docs.push({
+          revenue
+        })
+      }
+    }
+    return { docs }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.ADMIN}] View Report Transaction Data By Date`
+  })
+  @ApiOkResponse({ type: ReportTransactionByDateListDataResponse })
+  @Roles(UserRole.ADMIN)
+  @Get('admin/transaction-by-date')
+  async adminViewReportTransactionByDate(@Query() queryReportByWeekDto: QueryReportByWeekDto) {
+    const { date } = queryReportByWeekDto
+    const dateMoment = moment(date).tz(VN_TIMEZONE)
+
+    let fromDate: Date, toDate: Date
+    fromDate = dateMoment.clone().startOf('isoWeek').toDate()
+    toDate = dateMoment.clone().endOf('isoWeek').toDate()
+
+    const reports = await this.transactionService.viewReportTransactionByDate({ fromDate, toDate })
+
+    return { docs: reports }
   }
 }

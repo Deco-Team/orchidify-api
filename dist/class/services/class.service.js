@@ -465,9 +465,15 @@ let ClassService = class ClassService {
                 const commissionRate = Number((await this.settingService.findByKey(constant_4.SettingKey.CommissionRate)).value) || 0.2;
                 const { instructorId } = courseClass;
                 const earnings = Math.floor(totalPrice * (1 - commissionRate));
+                const systemEarnings = totalPrice - earnings;
                 await this.instructorService.update({ _id: instructorId }, {
                     $inc: { balance: earnings }
                 }, { session });
+                this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.System }, {
+                    $inc: {
+                        'data.total': systemEarnings
+                    }
+                });
                 this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
                     $inc: {
                         'data.total': earnings
@@ -475,6 +481,15 @@ let ClassService = class ClassService {
                 });
                 const month = new Date().getMonth() + 1;
                 const year = new Date().getFullYear();
+                this.reportService.update({
+                    type: constant_6.ReportType.RevenueSumByMonth,
+                    tag: constant_6.ReportTag.System,
+                    'data.year': year
+                }, {
+                    $inc: {
+                        [`data.${month}.total`]: earnings
+                    }
+                });
                 this.reportService.update({
                     type: constant_6.ReportType.RevenueSumByMonth,
                     tag: constant_6.ReportTag.User,

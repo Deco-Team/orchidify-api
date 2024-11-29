@@ -78,6 +78,64 @@ let TransactionService = TransactionService_1 = class TransactionService {
             populate
         });
     }
+    async viewReportTransactionByDate({ fromDate, toDate }) {
+        return this.transactionRepository.model.aggregate([
+            {
+                $match: {
+                    status: constant_1.TransactionStatus.CAPTURED,
+                    updatedAt: {
+                        $gte: fromDate,
+                        $lte: toDate
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$updatedAt'
+                        }
+                    },
+                    paymentAmount: {
+                        $sum: {
+                            $switch: {
+                                branches: [
+                                    {
+                                        case: {
+                                            $eq: ['$type', constant_2.TransactionType.PAYMENT]
+                                        },
+                                        then: '$amount'
+                                    }
+                                ],
+                                default: 0
+                            }
+                        }
+                    },
+                    payoutAmount: {
+                        $sum: {
+                            $switch: {
+                                branches: [
+                                    {
+                                        case: {
+                                            $eq: ['$type', constant_2.TransactionType.PAYOUT]
+                                        },
+                                        then: '$amount'
+                                    }
+                                ],
+                                default: 0
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            }
+        ]);
+    }
 };
 exports.TransactionService = TransactionService;
 exports.TransactionService = TransactionService = TransactionService_1 = __decorate([

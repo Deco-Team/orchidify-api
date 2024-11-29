@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByMonthDto = void 0;
+exports.ReportTransactionByDateListDataResponse = exports.ReportStaffByStatusListDataResponse = exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByWeekDto = exports.QueryReportByMonthDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_report_dto_1 = require("./base.report.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -28,6 +28,14 @@ __decorate([
     (0, class_validator_1.Max)(2024),
     __metadata("design:type", Number)
 ], QueryReportByMonthDto.prototype, "year", void 0);
+class QueryReportByWeekDto {
+}
+exports.QueryReportByWeekDto = QueryReportByWeekDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Date, example: '2024-09-20' }),
+    (0, class_validator_1.IsDateString)({ strict: true }),
+    __metadata("design:type", Date)
+], QueryReportByWeekDto.prototype, "date", void 0);
 class ReportTotalSummaryReportListItemResponse extends (0, swagger_1.PickType)(base_report_dto_1.BaseReportDto, ['_id', 'type', 'data']) {
 }
 class ReportTotalSummaryListResponse {
@@ -108,4 +116,50 @@ __decorate([
 class ReportRevenueByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportRevenueByMonthListResponse) {
 }
 exports.ReportRevenueByMonthListDataResponse = ReportRevenueByMonthListDataResponse;
+class ReportStaffByStatusListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportStaffByStatusListItemResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.StaffStatus }),
+    __metadata("design:type", String)
+], ReportStaffByStatusListItemResponse.prototype, "status", void 0);
+class ReportStaffByStatusListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportStaffByStatusListResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportStaffByStatusListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportStaffByStatusListResponse.prototype, "docs", void 0);
+class ReportStaffByStatusListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportStaffByStatusListResponse) {
+}
+exports.ReportStaffByStatusListDataResponse = ReportStaffByStatusListDataResponse;
+class ReportTransactionByDateListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    __metadata("design:type", String)
+], ReportTransactionByDateListItemResponse.prototype, "_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportTransactionByDateListItemResponse.prototype, "paymentAmount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportTransactionByDateListItemResponse.prototype, "payoutAmount", void 0);
+class ReportTransactionByDateListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportTransactionByDateListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportTransactionByDateListResponse.prototype, "docs", void 0);
+class ReportTransactionByDateListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportTransactionByDateListResponse) {
+}
+exports.ReportTransactionByDateListDataResponse = ReportTransactionByDateListDataResponse;
 //# sourceMappingURL=view-report.dto.js.map

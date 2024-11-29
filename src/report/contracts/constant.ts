@@ -8,6 +8,7 @@ export enum ReportType {
   ClassRequestSum = 'ClassRequestSum',
   PayoutRequestSum = 'PayoutRequestSum',
   RevenueSum = 'RevenueSum',
+  StaffSum = 'StaffSum',
 
   LearnerSumByMonth = 'LearnerSumByMonth',
   InstructorSumByMonth = 'InstructorSumByMonth',

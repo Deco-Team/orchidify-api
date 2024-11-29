@@ -25,10 +25,12 @@
 /// <reference types="mongoose/types/inferschematype" />
 /// <reference types="mongoose-paginate-v2" />
 import { IReportService } from '@report/services/report.service';
-import { QueryReportByMonthDto } from '@report/dto/view-report.dto';
+import { QueryReportByMonthDto, QueryReportByWeekDto } from '@report/dto/view-report.dto';
+import { ITransactionService } from '@transaction/services/transaction.service';
 export declare class ManagementReportController {
     private readonly reportService;
-    constructor(reportService: IReportService);
+    private readonly transactionService;
+    constructor(reportService: IReportService, transactionService: ITransactionService);
     viewReportTotalSummary(): Promise<{
         docs: (import("mongoose").Document<unknown, {}, import("../schemas/report.schema").Report> & import("../schemas/report.schema").Report & Required<{
             _id: string;
@@ -43,5 +45,23 @@ export declare class ManagementReportController {
             status: any;
             quantity: any;
         }[];
+    }>;
+    adminViewReportTotalSummary(): Promise<{
+        docs: (import("mongoose").Document<unknown, {}, import("../schemas/report.schema").Report> & import("../schemas/report.schema").Report & Required<{
+            _id: string;
+        }>)[];
+    }>;
+    adminViewReportStaffDataByStatus(): Promise<{
+        quantity: any;
+        docs: {
+            status: any;
+            quantity: any;
+        }[];
+    }>;
+    adminViewReportRevenueDataByMonth(queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    adminViewReportTransactionByDate(queryReportByWeekDto: QueryReportByWeekDto): Promise<{
+        docs: any[];
     }>;
 }

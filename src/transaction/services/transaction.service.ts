@@ -30,6 +30,7 @@ export interface ITransactionService {
     projection?: string | Record<string, any>,
     populate?: Array<PopulateOptions>
   )
+  viewReportTransactionByDate({ fromDate, toDate }: { fromDate: Date; toDate: Date }): Promise<any[]>
 }
 
 @Injectable()
@@ -117,5 +118,64 @@ export class TransactionService implements ITransactionService {
       projection,
       populate
     })
+  }
+
+  async viewReportTransactionByDate({ fromDate, toDate }) {
+    return this.transactionRepository.model.aggregate([
+      {
+        $match: {
+          status: TransactionStatus.CAPTURED,
+          updatedAt: {
+            $gte: fromDate,
+            $lte: toDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$updatedAt'
+            }
+          },
+          paymentAmount: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: {
+                      $eq: ['$type', TransactionType.PAYMENT]
+                    },
+                    then: '$amount'
+                  }
+                ],
+                default: 0
+              }
+            }
+          },
+          payoutAmount: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: {
+                      $eq: ['$type', TransactionType.PAYOUT]
+                    },
+                    then: '$amount'
+                  }
+                ],
+                default: 0
+              }
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
   }
 }

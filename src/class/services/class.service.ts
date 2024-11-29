@@ -640,12 +640,23 @@ export class ClassService implements IClassService {
         const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
         const { instructorId } = courseClass
         const earnings = Math.floor(totalPrice * (1 - commissionRate))
+        const systemEarnings = totalPrice - earnings
         await this.instructorService.update(
           { _id: instructorId },
           {
             $inc: { balance: earnings }
           },
           { session }
+        )
+
+        // update revenue report
+        this.reportService.update(
+          { type: ReportType.RevenueSum, tag: ReportTag.System },
+          {
+            $inc: {
+              'data.total': systemEarnings
+            }
+          }
         )
 
         // update revenue report
@@ -661,6 +672,20 @@ export class ClassService implements IClassService {
         // update revenue sum by month report
         const month = new Date().getMonth() + 1
         const year = new Date().getFullYear()
+        this.reportService.update(
+          {
+            type: ReportType.RevenueSumByMonth,
+            tag: ReportTag.System,
+            'data.year': year
+          },
+          {
+            $inc: {
+              [`data.${month}.total`]: earnings
+            }
+          }
+        )
+
+        // update revenue sum by month report
         this.reportService.update(
           {
             type: ReportType.RevenueSumByMonth,

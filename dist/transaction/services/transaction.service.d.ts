@@ -36,6 +36,10 @@ export interface ITransactionService {
     findById(transactionId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<TransactionDocument>;
     update(conditions: FilterQuery<Transaction>, payload: UpdateQuery<Transaction>, options?: QueryOptions | undefined): Promise<TransactionDocument>;
     list(pagination: PaginationParams, queryTransactionDto: QueryTransactionDto, projection?: string | Record<string, any>, populate?: Array<PopulateOptions>): any;
+    viewReportTransactionByDate({ fromDate, toDate }: {
+        fromDate: Date;
+        toDate: Date;
+    }): Promise<any[]>;
 }
 export declare class TransactionService implements ITransactionService {
     private readonly transactionRepository;
@@ -57,4 +61,8 @@ export declare class TransactionService implements ITransactionService {
     }>> & import("mongoose").Document<unknown, {}, Transaction> & Transaction & Required<{
         _id: string;
     }>>>;
+    viewReportTransactionByDate({ fromDate, toDate }: {
+        fromDate: any;
+        toDate: any;
+    }): Promise<any[]>;
 }

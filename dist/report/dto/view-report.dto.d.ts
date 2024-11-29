@@ -1,7 +1,10 @@
 import { BaseReportDto } from './base.report.dto';
-import { ClassStatus } from '@common/contracts/constant';
+import { ClassStatus, StaffStatus } from '@common/contracts/constant';
 export declare class QueryReportByMonthDto {
     year: number;
+}
+export declare class QueryReportByWeekDto {
+    date: Date;
 }
 declare const ReportTotalSummaryReportListItemResponse_base: import("@nestjs/common").Type<Pick<BaseReportDto, "data" | "type" | "_id">>;
 declare class ReportTotalSummaryReportListItemResponse extends ReportTotalSummaryReportListItemResponse_base {
@@ -55,5 +58,31 @@ declare const ReportRevenueByMonthListDataResponse_base: import("@nestjs/common"
     data: typeof ReportRevenueByMonthListResponse;
 }>;
 export declare class ReportRevenueByMonthListDataResponse extends ReportRevenueByMonthListDataResponse_base {
+}
+declare class ReportStaffByStatusListItemResponse {
+    quantity: number;
+    status: StaffStatus;
+}
+declare class ReportStaffByStatusListResponse {
+    quantity: number;
+    docs: ReportStaffByStatusListItemResponse[];
+}
+declare const ReportStaffByStatusListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportStaffByStatusListResponse;
+}>;
+export declare class ReportStaffByStatusListDataResponse extends ReportStaffByStatusListDataResponse_base {
+}
+declare class ReportTransactionByDateListItemResponse {
+    _id: string;
+    paymentAmount: number;
+    payoutAmount: number;
+}
+declare class ReportTransactionByDateListResponse {
+    docs: ReportTransactionByDateListItemResponse[];
+}
+declare const ReportTransactionByDateListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportTransactionByDateListResponse;
+}>;
+export declare class ReportTransactionByDateListDataResponse extends ReportTransactionByDateListDataResponse_base {
 }
 export {};

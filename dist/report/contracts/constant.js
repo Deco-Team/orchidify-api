@@ -12,6 +12,7 @@ var ReportType;
     ReportType["ClassRequestSum"] = "ClassRequestSum";
     ReportType["PayoutRequestSum"] = "PayoutRequestSum";
     ReportType["RevenueSum"] = "RevenueSum";
+    ReportType["StaffSum"] = "StaffSum";
     ReportType["LearnerSumByMonth"] = "LearnerSumByMonth";
     ReportType["InstructorSumByMonth"] = "InstructorSumByMonth";
     ReportType["LearnerEnrolledSumByMonth"] = "LearnerEnrolledSumByMonth";
