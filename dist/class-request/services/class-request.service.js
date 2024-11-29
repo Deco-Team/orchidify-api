@@ -301,16 +301,6 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             isRequesting: false
                         }
                     }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.System }, {
-                        $inc: {
-                            'data.quantity': 1
-                        }
-                    }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
-                        $inc: {
-                            [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1
-                        }
-                    }, { session });
                     const classData = _.pick(classRequest.metadata, [
                         'title',
                         'description',
@@ -345,6 +335,29 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                     let sessions = _.get(classRequest, 'metadata.sessions');
                     classData['sessions'] = this.generateDeadlineClassAssignment({ sessions, startDate, duration, weekdays });
                     const createdClass = await this.classService.create(classData, { session });
+                    await this.gardenTimesheetService.generateSlotsForClass({
+                        startDate,
+                        duration,
+                        weekdays,
+                        slotNumbers,
+                        gardenId: new mongoose_1.Types.ObjectId(gardenId),
+                        instructorId: course.instructorId,
+                        classId: new mongoose_1.Types.ObjectId(createdClass._id),
+                        metadata: { code: createdClass.code, title: createdClass.title },
+                        courseData: course
+                    }, { session });
+                    if (course.status === constant_1.CourseStatus.DRAFT) {
+                        await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.System }, {
+                            $inc: {
+                                'data.quantity': 1
+                            }
+                        }, { session });
+                        await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
+                            $inc: {
+                                [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1
+                            }
+                        }, { session });
+                    }
                     await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
                         $inc: {
                             'data.quantity': 1,
@@ -356,17 +369,6 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             'data.quantity': 1,
                             [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
                         }
-                    }, { session });
-                    await this.gardenTimesheetService.generateSlotsForClass({
-                        startDate,
-                        duration,
-                        weekdays,
-                        slotNumbers,
-                        gardenId: new mongoose_1.Types.ObjectId(gardenId),
-                        instructorId: course.instructorId,
-                        classId: new mongoose_1.Types.ObjectId(createdClass._id),
-                        metadata: { code: createdClass.code, title: createdClass.title },
-                        courseData: course
                     }, { session });
                 });
             }
@@ -415,18 +417,6 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             }
                         }
                     }, { new: true, session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
-                        $inc: {
-                            [`data.${courseClass.status}.quantity`]: -1,
-                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                        }
-                    }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
-                        $inc: {
-                            [`data.${courseClass.status}.quantity`]: -1,
-                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                        }
-                    }, { session });
                     const { startDate, duration, weekdays, gardenId } = courseClass;
                     const startOfDate = moment(startDate).tz(config_1.VN_TIMEZONE).startOf('date');
                     const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
@@ -450,6 +440,18 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                     }, {
                         $pull: {
                             slots: { classId: new mongoose_1.Types.ObjectId(courseClass._id) }
+                        }
+                    }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+                        $inc: {
+                            [`data.${courseClass.status}.quantity`]: -1,
+                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+                        }
+                    }, { session });
+                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
+                        $inc: {
+                            [`data.${courseClass.status}.quantity`]: -1,
+                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
                         }
                     }, { session });
                 });

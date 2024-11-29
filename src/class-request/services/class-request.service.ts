@@ -473,28 +473,6 @@ export class ClassRequestService implements IClassRequestService {
             { session }
           )
 
-          // update course report
-          await this.reportService.update(
-            { type: ReportType.CourseSum, tag: ReportTag.System },
-            {
-              $inc: {
-                'data.quantity': 1
-              }
-            },
-            { session }
-          )
-
-          // update course report
-          await this.reportService.update(
-            { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
-            {
-              $inc: {
-                [`data.${CourseStatus.ACTIVE}.quantity`]: 1
-              }
-            },
-            { session }
-          )
-
           // create new class
           const classData = _.pick(classRequest.metadata, [
             'title',
@@ -534,6 +512,46 @@ export class ClassRequestService implements IClassRequestService {
 
           const createdClass = await this.classService.create(classData, { session })
 
+          // gen slots for class
+          await this.gardenTimesheetService.generateSlotsForClass(
+            {
+              startDate,
+              duration,
+              weekdays,
+              slotNumbers,
+              gardenId: new Types.ObjectId(gardenId),
+              instructorId: course.instructorId,
+              classId: new Types.ObjectId(createdClass._id),
+              metadata: { code: createdClass.code, title: createdClass.title },
+              courseData: course
+            },
+            { session }
+          )
+
+          if (course.status === CourseStatus.DRAFT) {
+            // update course report
+            await this.reportService.update(
+              { type: ReportType.CourseSum, tag: ReportTag.System },
+              {
+                $inc: {
+                  'data.quantity': 1
+                }
+              },
+              { session }
+            )
+
+            // update course report
+            await this.reportService.update(
+              { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
+              {
+                $inc: {
+                  [`data.${CourseStatus.ACTIVE}.quantity`]: 1
+                }
+              },
+              { session }
+            )
+          }
+
           // update class report
           await this.reportService.update(
             { type: ReportType.ClassSum, tag: ReportTag.System },
@@ -553,22 +571,6 @@ export class ClassRequestService implements IClassRequestService {
                 'data.quantity': 1,
                 [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
               }
-            },
-            { session }
-          )
-
-          // gen slots for class
-          await this.gardenTimesheetService.generateSlotsForClass(
-            {
-              startDate,
-              duration,
-              weekdays,
-              slotNumbers,
-              gardenId: new Types.ObjectId(gardenId),
-              instructorId: course.instructorId,
-              classId: new Types.ObjectId(createdClass._id),
-              metadata: { code: createdClass.code, title: createdClass.title },
-              courseData: course
             },
             { session }
           )
@@ -631,29 +633,6 @@ export class ClassRequestService implements IClassRequestService {
             { new: true, session }
           )
 
-          // update class report
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.System },
-            {
-              $inc: {
-                [`data.${courseClass.status}.quantity`]: -1,
-                [`data.${ClassStatus.CANCELED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
-
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
-            {
-              $inc: {
-                [`data.${courseClass.status}.quantity`]: -1,
-                [`data.${ClassStatus.CANCELED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
-
           // clear class timesheet
           const { startDate, duration, weekdays, gardenId } = courseClass
           const startOfDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
@@ -681,6 +660,29 @@ export class ClassRequestService implements IClassRequestService {
             {
               $pull: {
                 slots: { classId: new Types.ObjectId(courseClass._id) }
+              }
+            },
+            { session }
+          )
+
+          // update class report
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.System },
+            {
+              $inc: {
+                [`data.${courseClass.status}.quantity`]: -1,
+                [`data.${ClassStatus.CANCELED}.quantity`]: 1
+              }
+            },
+            { session }
+          )
+
+          await this.reportService.update(
+            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
+            {
+              $inc: {
+                [`data.${courseClass.status}.quantity`]: -1,
+                [`data.${ClassStatus.CANCELED}.quantity`]: 1
               }
             },
             { session }
