@@ -54,7 +54,7 @@ export class ManagementReportController {
   @Get('user-by-month')
   async viewReportUserDataByMonth(@Query() queryReportByMonthDto: QueryReportByMonthDto) {
     const { year = 2024 } = queryReportByMonthDto
-    const [learnerReport, instructorReport] = await this.reportService.findMany(
+    const reports = await this.reportService.findMany(
       {
         type: {
           $in: [ReportType.LearnerSumByMonth, ReportType.InstructorSumByMonth]
@@ -64,6 +64,9 @@ export class ManagementReportController {
       },
       ['type', 'data']
     )
+    const learnerReport = _.find(reports, { type: ReportType.LearnerSumByMonth })
+    const instructorReport = _.find(reports, { type: ReportType.InstructorSumByMonth })
+
     const docs = []
     if (learnerReport && instructorReport) {
       for (let month = 1; month <= 12; month++) {
