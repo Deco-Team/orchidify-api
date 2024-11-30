@@ -38,7 +38,12 @@ let ManagementRecruitmentController = class ManagementRecruitmentController {
         return await this.recruitmentService.list(pagination, queryRecruitmentDto);
     }
     async getDetail(recruitmentId) {
-        const recruitment = await this.recruitmentService.findById(recruitmentId, constant_2.RECRUITMENT_DETAIL_PROJECTION);
+        const recruitment = await this.recruitmentService.findById(recruitmentId, constant_2.RECRUITMENT_DETAIL_PROJECTION, [
+            {
+                path: 'handledBy',
+                select: ['name']
+            }
+        ]);
         if (!recruitment)
             throw new app_exception_1.AppException(error_1.Errors.RECRUITMENT_NOT_FOUND);
         return recruitment;

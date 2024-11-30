@@ -138,8 +138,9 @@ export class AssignmentService implements IAssignmentService {
       .tz(VN_TIMEZONE)
       .startOf('date')
 
+    const nowMoment = moment().tz(VN_TIMEZONE)
     const assignmentDeadline = moment(deadline).tz(VN_TIMEZONE).endOf('date')
-    if (assignmentDeadline.isAfter(classEndOfDate) || assignmentDeadline.isBefore(sessionStartDate))
+    if (assignmentDeadline.isBefore(nowMoment) || assignmentDeadline.isAfter(classEndOfDate) || assignmentDeadline.isBefore(sessionStartDate))
       throw new AppException(Errors.ASSIGNMENT_DEADLINE_INVALID)
 
     classSession.assignments = classSession.assignments.map((assignment) => {

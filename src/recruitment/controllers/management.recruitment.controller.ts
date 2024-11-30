@@ -52,7 +52,12 @@ export class ManagementRecruitmentController {
   @Roles(UserRole.STAFF)
   @Get(':id([0-9a-f]{24})')
   async getDetail(@Param('id') recruitmentId: string) {
-    const recruitment = await this.recruitmentService.findById(recruitmentId, RECRUITMENT_DETAIL_PROJECTION)
+    const recruitment = await this.recruitmentService.findById(recruitmentId, RECRUITMENT_DETAIL_PROJECTION, [
+      {
+        path: 'handledBy',
+        select: ['name']
+      }
+    ])
     if (!recruitment) throw new AppException(Errors.RECRUITMENT_NOT_FOUND)
 
     return recruitment

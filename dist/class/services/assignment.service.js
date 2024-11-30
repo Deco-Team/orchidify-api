@@ -120,8 +120,9 @@ let AssignmentService = class AssignmentService {
         const sessionStartDate = moment(classDates[classSession.sessionNumber - 1])
             .tz(config_1.VN_TIMEZONE)
             .startOf('date');
+        const nowMoment = moment().tz(config_1.VN_TIMEZONE);
         const assignmentDeadline = moment(deadline).tz(config_1.VN_TIMEZONE).endOf('date');
-        if (assignmentDeadline.isAfter(classEndOfDate) || assignmentDeadline.isBefore(sessionStartDate))
+        if (assignmentDeadline.isBefore(nowMoment) || assignmentDeadline.isAfter(classEndOfDate) || assignmentDeadline.isBefore(sessionStartDate))
             throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_DEADLINE_INVALID);
         classSession.assignments = classSession.assignments.map((assignment) => {
             if (assignment._id.toString() === assignmentId) {

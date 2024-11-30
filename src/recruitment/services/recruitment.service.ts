@@ -19,13 +19,17 @@ import { SettingKey } from '@setting/contracts/constant'
 import { ISettingService } from '@setting/services/setting.service'
 import { VN_TIMEZONE } from '@src/config'
 import * as moment from 'moment-timezone'
-import { FilterQuery, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose'
 
 export const IRecruitmentService = Symbol('IRecruitmentService')
 
 export interface IRecruitmentService {
   create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<RecruitmentDocument>
-  findById(recruitmentId: string, projection?: string | Record<string, any>): Promise<RecruitmentDocument>
+  findById(
+    recruitmentId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ): Promise<RecruitmentDocument>
   findOneByApplicationEmailAndStatus(
     applicationEmail: string,
     status: RecruitmentStatus[]
@@ -63,7 +67,7 @@ export class RecruitmentService implements IRecruitmentService {
     @Inject(IQueueProducerService)
     private readonly queueProducerService: IQueueProducerService,
     @Inject(INotificationService)
-    private readonly notificationService: INotificationService,
+    private readonly notificationService: INotificationService
   ) {}
 
   public async create(createRecruitmentDto: any, options?: SaveOptions | undefined) {
@@ -73,18 +77,17 @@ export class RecruitmentService implements IRecruitmentService {
     return recruitment
   }
 
-  public async findById(recruitmentId: string, projection?: string | Record<string, any>) {
+  public async findById(
+    recruitmentId: string,
+    projection?: string | Record<string, any>,
+    populates?: Array<PopulateOptions>
+  ) {
     const recruitment = await this.recruitmentRepository.findOne({
       conditions: {
         _id: recruitmentId
       },
       projection,
-      populates: [
-        {
-          path: 'handledBy',
-          select: ['name']
-        }
-      ]
+      populates
     })
     return recruitment
   }

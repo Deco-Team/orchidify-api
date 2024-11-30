@@ -36,11 +36,11 @@ import { QueryRecruitmentDto } from '@recruitment/dto/view-recruitment.dto';
 import { IRecruitmentRepository } from '@recruitment/repositories/recruitment.repository';
 import { Recruitment, RecruitmentDocument } from '@recruitment/schemas/recruitment.schema';
 import { ISettingService } from '@setting/services/setting.service';
-import { FilterQuery, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
 export declare const IRecruitmentService: unique symbol;
 export interface IRecruitmentService {
     create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<RecruitmentDocument>;
-    findById(recruitmentId: string, projection?: string | Record<string, any>): Promise<RecruitmentDocument>;
+    findById(recruitmentId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<RecruitmentDocument>;
     findOneByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument>;
     findByHandledByAndStatus(handledBy: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument[]>;
     update(conditions: FilterQuery<Recruitment>, payload: UpdateQuery<Recruitment>, options?: QueryOptions | undefined): Promise<RecruitmentDocument>;
@@ -61,7 +61,7 @@ export declare class RecruitmentService implements IRecruitmentService {
     create(createRecruitmentDto: any, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Recruitment> & Recruitment & Required<{
         _id: string;
     }>>;
-    findById(recruitmentId: string, projection?: string | Record<string, any>): Promise<import("mongoose").Document<unknown, {}, Recruitment> & Recruitment & Required<{
+    findById(recruitmentId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<import("mongoose").Document<unknown, {}, Recruitment> & Recruitment & Required<{
         _id: string;
     }>>;
     findOneByApplicationEmailAndStatus(applicationEmail: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument>;

@@ -46,18 +46,13 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
         this.addAutoExpiredJobWhenCreateRecruitmentApplication(recruitment);
         return recruitment;
     }
-    async findById(recruitmentId, projection) {
+    async findById(recruitmentId, projection, populates) {
         const recruitment = await this.recruitmentRepository.findOne({
             conditions: {
                 _id: recruitmentId
             },
             projection,
-            populates: [
-                {
-                    path: 'handledBy',
-                    select: ['name']
-                }
-            ]
+            populates
         });
         return recruitment;
     }
