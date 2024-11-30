@@ -34,6 +34,8 @@ import { CreateStaffDto } from '@staff/dto/create-staff.dto'
 import { UpdateStaffDto } from '@staff/dto/update-staff.dto'
 import { IRecruitmentService } from '@recruitment/services/recruitment.service'
 import { STAFF_DETAIL_PROJECTION } from '@staff/contracts/constant'
+import { ReportTag, ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 
 @ApiTags('Staff')
 @ApiBearerAuth()
@@ -47,7 +49,9 @@ export class ManagementStaffController {
     @Inject(IUserTokenService)
     private readonly userTokenService: IUserTokenService,
     @Inject(IRecruitmentService)
-    private readonly recruitmentService: IRecruitmentService
+    private readonly recruitmentService: IRecruitmentService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   @ApiOperation({
@@ -85,7 +89,7 @@ export class ManagementStaffController {
   async create(@Body() createStaffDto: CreateStaffDto) {
     const existedStaff = await this.staffService.findByEmail(createStaffDto.email)
     if (existedStaff) throw new AppException(Errors.EMAIL_ALREADY_EXIST)
-      
+
     const staff = await this.staffService.create(createStaffDto)
     return new IDResponse(staff._id)
   }
@@ -129,7 +133,17 @@ export class ManagementStaffController {
         },
         { status: StaffStatus.INACTIVE }
       ),
-      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(staffId), UserRole.STAFF)
+      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(staffId), UserRole.STAFF),
+      // update staff report
+      this.reportService.update(
+        { type: ReportType.StaffSum, tag: ReportTag.System },
+        {
+          $inc: {
+            [`data.${StaffStatus.ACTIVE}.quantity`]: -1,
+            [`data.${StaffStatus.INACTIVE}.quantity`]: 1
+          }
+        }
+      )
     ])
 
     // TODO: remove fcmToken, inactive user device for staff when deactive
@@ -151,6 +165,17 @@ export class ManagementStaffController {
       },
       { status: StaffStatus.ACTIVE }
     )
+    // update staff report
+    this.reportService.update(
+      { type: ReportType.StaffSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${StaffStatus.ACTIVE}.quantity`]: 1,
+          [`data.${StaffStatus.INACTIVE}.quantity`]: -1
+        }
+      }
+    )
+
     return new SuccessResponse(true)
   }
 }

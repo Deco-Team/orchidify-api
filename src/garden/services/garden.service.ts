@@ -117,7 +117,7 @@ export class GardenService implements IGardenService {
   async findManyByGardenManagerId(gardenManagerId: string): Promise<GardenDocument[]> {
     const gardens = await this.gardenRepository.findMany({
       conditions: {
-        gardenManagerId
+        gardenManagerId: new Types.ObjectId(gardenManagerId)
       }
     })
     return gardens

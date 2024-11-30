@@ -32,11 +32,13 @@ import { IStaffService } from '@staff/services/staff.service';
 import { CreateStaffDto } from '@staff/dto/create-staff.dto';
 import { UpdateStaffDto } from '@staff/dto/update-staff.dto';
 import { IRecruitmentService } from '@recruitment/services/recruitment.service';
+import { IReportService } from '@report/services/report.service';
 export declare class ManagementStaffController {
     private readonly staffService;
     private readonly userTokenService;
     private readonly recruitmentService;
-    constructor(staffService: IStaffService, userTokenService: IUserTokenService, recruitmentService: IRecruitmentService);
+    private readonly reportService;
+    constructor(staffService: IStaffService, userTokenService: IUserTokenService, recruitmentService: IRecruitmentService, reportService: IReportService);
     list(pagination: PaginationParams, queryStaffDto: QueryStaffDto): Promise<any>;
     getDetail(staffId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/staff.schema").Staff> & import("../schemas/staff.schema").Staff & Required<{
         _id: string;

@@ -31,6 +31,7 @@ import { IGardenService } from '@garden/services/garden.service';
 import { QueryInstructorTimesheetDto } from '@garden-timesheet/dto/view-teaching-timesheet.dto';
 import { UpdateGardenTimesheetDto } from '@garden-timesheet/dto/update-garden-timesheet.dto';
 import { INotificationService } from '@notification/services/notification.service';
+import { QuerySlotByGardenIdsDto, QueryInactiveTimesheetByGardenDto } from '@garden-timesheet/dto/garden-manager-view-timesheet.dto';
 export declare class ManagementGardenTimesheetController {
     private readonly gardenTimesheetService;
     private readonly gardenService;
@@ -47,4 +48,14 @@ export declare class ManagementGardenTimesheetController {
         }>)[];
     }>;
     updateGardenTimesheet(updateGardenTimesheetDto: UpdateGardenTimesheetDto): Promise<SuccessResponse>;
+    gardenManagerViewSlotList(req: any, querySlotByGardenIdsDto: QuerySlotByGardenIdsDto): Promise<{
+        docs: (import("mongoose").Document<unknown, {}, import("../schemas/garden-timesheet.schema").GardenTimesheet> & import("../schemas/garden-timesheet.schema").GardenTimesheet & Required<{
+            _id: string;
+        }>)[];
+    }>;
+    gardenManagerViewUnavailableTimesheet(req: any, queryInactiveTimesheetByGardenDto: QueryInactiveTimesheetByGardenDto): Promise<{
+        docs: (import("mongoose").Document<unknown, {}, import("../schemas/garden-timesheet.schema").GardenTimesheet> & import("../schemas/garden-timesheet.schema").GardenTimesheet & Required<{
+            _id: string;
+        }>)[];
+    }>;
 }

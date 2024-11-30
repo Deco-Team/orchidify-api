@@ -32,6 +32,7 @@ const update_garden_timesheet_dto_1 = require("../dto/update-garden-timesheet.dt
 const mongoose_1 = require("mongoose");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_2 = require("../../notification/contracts/constant");
+const garden_manager_view_timesheet_dto_1 = require("../dto/garden-manager-view-timesheet.dto");
 let ManagementGardenTimesheetController = class ManagementGardenTimesheetController {
     constructor(gardenTimesheetService, gardenService, notificationService) {
         this.gardenTimesheetService = gardenTimesheetService;
@@ -79,6 +80,23 @@ let ManagementGardenTimesheetController = class ManagementGardenTimesheetControl
         });
         return new dto_1.SuccessResponse(true);
     }
+    async gardenManagerViewSlotList(req, querySlotByGardenIdsDto) {
+        const { _id } = _.get(req, 'user');
+        const gardens = await this.gardenService.findManyByGardenManagerId(_id);
+        const gardenIds = gardens.map((garden) => garden._id);
+        querySlotByGardenIdsDto.type = constant_1.TimesheetType.DAY;
+        querySlotByGardenIdsDto.gardenIds = gardenIds;
+        const docs = await this.gardenTimesheetService.viewSlotsByGardenIds(querySlotByGardenIdsDto);
+        return { docs };
+    }
+    async gardenManagerViewUnavailableTimesheet(req, queryInactiveTimesheetByGardenDto) {
+        const { _id } = _.get(req, 'user');
+        const garden = await this.gardenService.findById(queryInactiveTimesheetByGardenDto.gardenId);
+        if (!garden || garden?.gardenManagerId?.toString() !== _id)
+            return { docs: [] };
+        const docs = await this.gardenTimesheetService.viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto);
+        return { docs };
+    }
 };
 exports.ManagementGardenTimesheetController = ManagementGardenTimesheetController;
 __decorate([
@@ -120,6 +138,32 @@ __decorate([
     __metadata("design:paramtypes", [update_garden_timesheet_dto_1.UpdateGardenTimesheetDto]),
     __metadata("design:returntype", Promise)
 ], ManagementGardenTimesheetController.prototype, "updateGardenTimesheet", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.GARDEN_MANAGER}] View Slot List`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: garden_manager_view_timesheet_dto_1.ViewSlotListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.GARDEN_MANAGER),
+    (0, common_1.Get)('garden-manager/slots'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, garden_manager_view_timesheet_dto_1.QuerySlotByGardenIdsDto]),
+    __metadata("design:returntype", Promise)
+], ManagementGardenTimesheetController.prototype, "gardenManagerViewSlotList", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.GARDEN_MANAGER}] View Slot List`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_garden_timesheet_dto_1.ViewGardenTimesheetListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.GARDEN_MANAGER),
+    (0, common_1.Get)('garden-manager/unavailable-timesheets'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, garden_manager_view_timesheet_dto_1.QueryInactiveTimesheetByGardenDto]),
+    __metadata("design:returntype", Promise)
+], ManagementGardenTimesheetController.prototype, "gardenManagerViewUnavailableTimesheet", null);
 exports.ManagementGardenTimesheetController = ManagementGardenTimesheetController = __decorate([
     (0, swagger_1.ApiTags)('GardenTimesheet - Management'),
     (0, swagger_1.ApiBearerAuth)(),

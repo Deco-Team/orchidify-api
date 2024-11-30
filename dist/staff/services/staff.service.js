@@ -19,14 +19,17 @@ const app_exception_1 = require("../../common/exceptions/app.exception");
 const helper_service_1 = require("../../common/services/helper.service");
 const common_1 = require("@nestjs/common");
 const notification_service_1 = require("../../notification/services/notification.service");
-const constant_2 = require("../contracts/constant");
+const constant_2 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
+const constant_3 = require("../contracts/constant");
 const staff_repository_1 = require("../repositories/staff.repository");
 exports.IStaffService = Symbol('IStaffService');
 let StaffService = class StaffService {
-    constructor(helperService, staffRepository, notificationService) {
+    constructor(helperService, staffRepository, notificationService, reportService) {
         this.helperService = helperService;
         this.staffRepository = staffRepository;
         this.notificationService = notificationService;
+        this.reportService = reportService;
     }
     async create(createStaffDto, options) {
         const password = this.helperService.generateRandomString(10, 'abcdefghijklmnopqrstuvwxyz0123456789');
@@ -43,6 +46,12 @@ let StaffService = class StaffService {
                 email: staff.email,
                 name: staff.name,
                 password
+            }
+        });
+        this.reportService.update({ type: constant_2.ReportType.StaffSum, tag: constant_2.ReportTag.System }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.StaffStatus.ACTIVE}.quantity`]: 1
             }
         });
         return staff;
@@ -69,7 +78,7 @@ let StaffService = class StaffService {
     update(conditions, payload, options) {
         return this.staffRepository.findOneAndUpdate(conditions, payload, options);
     }
-    async list(pagination, QueryStaffDto, projection = constant_2.STAFF_LIST_PROJECTION) {
+    async list(pagination, QueryStaffDto, projection = constant_3.STAFF_LIST_PROJECTION) {
         const { name, email, status } = QueryStaffDto;
         const filter = {
             role: constant_1.UserRole.STAFF
@@ -124,6 +133,7 @@ exports.StaffService = StaffService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Inject)(staff_repository_1.IStaffRepository)),
     __param(2, (0, common_1.Inject)(notification_service_1.INotificationService)),
-    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object])
+    __param(3, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [helper_service_1.HelperService, Object, Object, Object])
 ], StaffService);
 //# sourceMappingURL=staff.service.js.map

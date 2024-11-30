@@ -11,15 +11,15 @@ export class QueryInstructorTimesheetDto {
   @ApiProperty({ type: Date, example: '2024-09-20' })
   @FutureMaxMonth(12)
   @PastMaxMonth(24)
-  date: Date
+  readonly date: Date
 
   @ApiProperty({ enum: TimesheetType })
   @IsEnum(TimesheetType)
-  type: TimesheetType
+  readonly type: TimesheetType
 
   @ApiProperty({ type: String })
   @IsMongoId()
-  instructorId: string
+  readonly instructorId: string
 }
 
 export class QueryTeachingTimesheetDto extends PickType(QueryInstructorTimesheetDto, ['date', 'type']) {

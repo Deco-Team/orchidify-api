@@ -28,6 +28,7 @@ import { IAuthUserService } from '@auth/services/auth.service';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { HelperService } from '@common/services/helper.service';
 import { INotificationService } from '@notification/services/notification.service';
+import { IReportService } from '@report/services/report.service';
 import { CreateStaffDto } from '@staff/dto/create-staff.dto';
 import { QueryStaffDto } from '@staff/dto/view-staff.dto';
 import { IStaffRepository } from '@staff/repositories/staff.repository';
@@ -46,7 +47,8 @@ export declare class StaffService implements IStaffService {
     private readonly helperService;
     private readonly staffRepository;
     private readonly notificationService;
-    constructor(helperService: HelperService, staffRepository: IStaffRepository, notificationService: INotificationService);
+    private readonly reportService;
+    constructor(helperService: HelperService, staffRepository: IStaffRepository, notificationService: INotificationService, reportService: IReportService);
     create(createStaffDto: CreateStaffDto, options?: SaveOptions | undefined): Promise<import("mongoose").Document<unknown, {}, Staff> & Staff & Required<{
         _id: string;
     }>>;

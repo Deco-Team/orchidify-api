@@ -32,11 +32,14 @@ const create_staff_dto_1 = require("../dto/create-staff.dto");
 const update_staff_dto_1 = require("../dto/update-staff.dto");
 const recruitment_service_1 = require("../../recruitment/services/recruitment.service");
 const constant_2 = require("../contracts/constant");
+const constant_3 = require("../../report/contracts/constant");
+const report_service_1 = require("../../report/services/report.service");
 let ManagementStaffController = class ManagementStaffController {
-    constructor(staffService, userTokenService, recruitmentService) {
+    constructor(staffService, userTokenService, recruitmentService, reportService) {
         this.staffService = staffService;
         this.userTokenService = userTokenService;
         this.recruitmentService = recruitmentService;
+        this.reportService = reportService;
     }
     async list(pagination, queryStaffDto) {
         return await this.staffService.list(pagination, queryStaffDto);
@@ -73,7 +76,13 @@ let ManagementStaffController = class ManagementStaffController {
                 _id: staffId,
                 role: constant_1.UserRole.STAFF
             }, { status: constant_1.StaffStatus.INACTIVE }),
-            this.userTokenService.clearAllRefreshTokensOfUser(new mongoose_1.Types.ObjectId(staffId), constant_1.UserRole.STAFF)
+            this.userTokenService.clearAllRefreshTokensOfUser(new mongoose_1.Types.ObjectId(staffId), constant_1.UserRole.STAFF),
+            this.reportService.update({ type: constant_3.ReportType.StaffSum, tag: constant_3.ReportTag.System }, {
+                $inc: {
+                    [`data.${constant_1.StaffStatus.ACTIVE}.quantity`]: -1,
+                    [`data.${constant_1.StaffStatus.INACTIVE}.quantity`]: 1
+                }
+            })
         ]);
         return new dto_1.SuccessResponse(true);
     }
@@ -82,6 +91,12 @@ let ManagementStaffController = class ManagementStaffController {
             _id: staffId,
             role: constant_1.UserRole.STAFF
         }, { status: constant_1.StaffStatus.ACTIVE });
+        this.reportService.update({ type: constant_3.ReportType.StaffSum, tag: constant_3.ReportTag.System }, {
+            $inc: {
+                [`data.${constant_1.StaffStatus.ACTIVE}.quantity`]: 1,
+                [`data.${constant_1.StaffStatus.INACTIVE}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
 };
@@ -174,6 +189,7 @@ exports.ManagementStaffController = ManagementStaffController = __decorate([
     __param(0, (0, common_1.Inject)(staff_service_1.IStaffService)),
     __param(1, (0, common_1.Inject)(user_token_service_1.IUserTokenService)),
     __param(2, (0, common_1.Inject)(recruitment_service_1.IRecruitmentService)),
-    __metadata("design:paramtypes", [Object, Object, Object])
+    __param(3, (0, common_1.Inject)(report_service_1.IReportService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], ManagementStaffController);
 //# sourceMappingURL=management.staff.controller.js.map

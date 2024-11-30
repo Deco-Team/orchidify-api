@@ -117,6 +117,10 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             fromDate = dateMoment.clone().startOf('isoWeek').toDate();
             toDate = dateMoment.clone().endOf('isoWeek').toDate();
         }
+        else if (type === constant_1.TimesheetType.DAY) {
+            fromDate = dateMoment.clone().startOf('date').toDate();
+            toDate = dateMoment.clone().endOf('date').toDate();
+        }
         const timesheets = await this.gardenTimesheetRepository.findMany({
             projection: constant_2.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
             options: { lean: true },
@@ -174,6 +178,41 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
         });
         return this.transformDataToTeachingCalendar(timesheets, instructorId);
     }
+    async viewSlotsByGardenIds(querySlotByGardenIdsDto) {
+        const { type, gardenIds, date } = querySlotByGardenIdsDto;
+        const dateMoment = moment(date).tz(config_1.VN_TIMEZONE);
+        this.appLogger.log(`viewTimesheetByGardenIds: type=${type}, gardenIds=${gardenIds}, date=${date}`);
+        let fromDate, toDate;
+        if (type === constant_1.TimesheetType.DAY) {
+            fromDate = dateMoment.clone().startOf('date').toDate();
+            toDate = dateMoment.clone().endOf('date').toDate();
+        }
+        const timesheets = await this.gardenTimesheetRepository.findMany({
+            projection: constant_2.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
+            options: { lean: true },
+            conditions: {
+                date: {
+                    $gte: fromDate,
+                    $lte: toDate
+                },
+                gardenId: {
+                    $in: gardenIds.map((id) => new mongoose_1.Types.ObjectId(id))
+                },
+                'slots.status': constant_1.SlotStatus.NOT_AVAILABLE
+            },
+            populates: [
+                {
+                    path: 'garden',
+                    select: ['name']
+                },
+                {
+                    path: 'slots.instructor',
+                    select: ['name']
+                }
+            ]
+        });
+        return this.transformDataToGardenIdsCalendar(timesheets);
+    }
     async viewMyTimesheet(queryMyTimesheetDto) {
         const { type, learnerId, date } = queryMyTimesheetDto;
         const dateMoment = moment(date).tz(config_1.VN_TIMEZONE);
@@ -222,6 +261,34 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             ]
         });
         return this.transformDataToMyCalendar(timesheets, classIds.map((classId) => classId.toString()));
+    }
+    async viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto) {
+        const { gardenId, date } = queryInactiveTimesheetByGardenDto;
+        const dateMoment = moment(date).tz(config_1.VN_TIMEZONE);
+        this.appLogger.log(`viewGardenTimesheetList: gardenId=${gardenId}, date=${date}`);
+        let fromDate, toDate;
+        const type = constant_1.TimesheetType.MONTH;
+        if (type === constant_1.TimesheetType.MONTH) {
+            fromDate = dateMoment.clone().toDate();
+            toDate = dateMoment.clone().add(1, 'month').toDate();
+        }
+        const timesheets = await this.gardenTimesheetRepository.findMany({
+            projection: constant_2.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION,
+            options: { lean: true },
+            conditions: {
+                gardenId: new mongoose_1.Types.ObjectId(gardenId),
+                date: {
+                    $gte: fromDate,
+                    $lte: toDate
+                },
+                $or: [
+                    {
+                        status: constant_1.GardenTimesheetStatus.INACTIVE
+                    }
+                ]
+            }
+        });
+        return this.transformDataToCalendar(timesheets);
     }
     async viewAvailableTime(queryAvailableTimeDto) {
         const { startDate, duration, weekdays, instructorId } = queryAvailableTimeDto;
@@ -511,6 +578,19 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
                             status: constant_1.AttendanceStatus.NOT_YET
                         });
                     }
+                    calendars.push(slot);
+                }
+            }
+        }
+        return calendars;
+    }
+    transformDataToGardenIdsCalendar(timesheets) {
+        const calendars = [];
+        for (const timesheet of timesheets) {
+            for (const slot of timesheet.slots) {
+                if (slot.status === constant_1.SlotStatus.NOT_AVAILABLE) {
+                    _.set(slot, 'gardenMaxClass', timesheet.gardenMaxClass);
+                    _.set(slot, 'garden', timesheet['garden']);
                     calendars.push(slot);
                 }
             }

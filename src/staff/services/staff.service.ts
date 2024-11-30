@@ -6,6 +6,8 @@ import { AppException } from '@common/exceptions/app.exception'
 import { HelperService } from '@common/services/helper.service'
 import { Injectable, Inject } from '@nestjs/common'
 import { INotificationService } from '@notification/services/notification.service'
+import { ReportTag, ReportType } from '@report/contracts/constant'
+import { IReportService } from '@report/services/report.service'
 import { STAFF_LIST_PROJECTION } from '@staff/contracts/constant'
 import { CreateStaffDto } from '@staff/dto/create-staff.dto'
 import { QueryStaffDto } from '@staff/dto/view-staff.dto'
@@ -44,6 +46,8 @@ export class StaffService implements IStaffService {
     private readonly staffRepository: IStaffRepository,
     @Inject(INotificationService)
     private readonly notificationService: INotificationService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   public async create(createStaffDto: CreateStaffDto, options?: SaveOptions | undefined) {
@@ -66,6 +70,17 @@ export class StaffService implements IStaffService {
         password
       }
     })
+
+    // update staff report
+    this.reportService.update(
+      { type: ReportType.StaffSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${StaffStatus.ACTIVE}.quantity`]: 1
+        }
+      }
+    )
     return staff
   }
 

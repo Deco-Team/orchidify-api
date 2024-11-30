@@ -3,7 +3,7 @@ import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiT
 import * as _ from 'lodash'
 import { ErrorResponse, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
 import { Roles } from '@auth/decorators/roles.decorator'
-import { GardenStatus, GardenTimesheetStatus, UserRole } from '@common/contracts/constant'
+import { GardenStatus, GardenTimesheetStatus, TimesheetType, UserRole } from '@common/contracts/constant'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
 import { RolesGuard } from '@auth/guards/roles.guard'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
@@ -23,6 +23,11 @@ import { UpdateGardenTimesheetDto } from '@garden-timesheet/dto/update-garden-ti
 import { Types } from 'mongoose'
 import { INotificationService } from '@notification/services/notification.service'
 import { FCMNotificationDataType } from '@notification/contracts/constant'
+import {
+  QuerySlotByGardenIdsDto,
+  QueryInactiveTimesheetByGardenDto,
+  ViewSlotListDataResponse
+} from '@garden-timesheet/dto/garden-manager-view-timesheet.dto'
 
 @ApiTags('GardenTimesheet - Management')
 @ApiBearerAuth()
@@ -110,5 +115,40 @@ export class ManagementGardenTimesheetController {
     })
 
     return new SuccessResponse(true)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.GARDEN_MANAGER}] View Slot List`
+  })
+  @ApiOkResponse({ type: ViewSlotListDataResponse })
+  @Roles(UserRole.GARDEN_MANAGER)
+  @Get('garden-manager/slots')
+  async gardenManagerViewSlotList(@Req() req, @Query() querySlotByGardenIdsDto: QuerySlotByGardenIdsDto) {
+    const { _id } = _.get(req, 'user')
+    const gardens = await this.gardenService.findManyByGardenManagerId(_id)
+    const gardenIds = gardens.map((garden) => garden._id)
+    querySlotByGardenIdsDto.type = TimesheetType.DAY
+    querySlotByGardenIdsDto.gardenIds = gardenIds
+
+    const docs = await this.gardenTimesheetService.viewSlotsByGardenIds(querySlotByGardenIdsDto)
+    return { docs }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.GARDEN_MANAGER}] View Slot List`
+  })
+  @ApiOkResponse({ type: ViewGardenTimesheetListDataResponse })
+  @Roles(UserRole.GARDEN_MANAGER)
+  @Get('garden-manager/unavailable-timesheets')
+  async gardenManagerViewUnavailableTimesheet(
+    @Req() req,
+    @Query() queryInactiveTimesheetByGardenDto: QueryInactiveTimesheetByGardenDto
+  ) {
+    const { _id } = _.get(req, 'user')
+    const garden = await this.gardenService.findById(queryInactiveTimesheetByGardenDto.gardenId)
+    if (!garden || garden?.gardenManagerId?.toString() !== _id) return { docs: [] }
+
+    const docs = await this.gardenTimesheetService.viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto)
+    return { docs }
   }
 }

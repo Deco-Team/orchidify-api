@@ -39,6 +39,7 @@ import { Course } from '@course/schemas/course.schema';
 import { IClassService } from '@class/services/class.service';
 import { QueryMyTimesheetDto } from '@garden-timesheet/dto/view-my-timesheet.dto';
 import { ILearnerClassService } from '@class/services/learner-class.service';
+import { QuerySlotByGardenIdsDto, QueryInactiveTimesheetByGardenDto } from '@garden-timesheet/dto/garden-manager-view-timesheet.dto';
 export declare const IGardenTimesheetService: unique symbol;
 export interface IGardenTimesheetService {
     findById(gardenTimesheetId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<GardenTimesheetDocument>;
@@ -47,6 +48,8 @@ export interface IGardenTimesheetService {
     viewGardenTimesheetList(queryGardenTimesheetDto: QueryGardenTimesheetDto, garden: Garden): Promise<GardenTimesheetDocument[]>;
     viewTeachingTimesheet(queryTeachingTimesheetDto: QueryTeachingTimesheetDto): Promise<GardenTimesheetDocument[]>;
     viewMyTimesheet(queryMyTimesheetDto: QueryMyTimesheetDto): Promise<GardenTimesheetDocument[]>;
+    viewSlotsByGardenIds(querySlotByGardenIdsDto: QuerySlotByGardenIdsDto): Promise<GardenTimesheetDocument[]>;
+    viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto: QueryInactiveTimesheetByGardenDto): Promise<GardenTimesheetDocument[]>;
     viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse>;
     generateSlotsForClass(params: {
         startDate: Date;
@@ -110,7 +113,9 @@ export declare class GardenTimesheetService implements IGardenTimesheetService {
     }>, never>>;
     viewGardenTimesheetList(queryGardenTimesheetDto: QueryGardenTimesheetDto, garden: Garden): Promise<any[]>;
     viewTeachingTimesheet(queryTeachingTimesheetDto: QueryTeachingTimesheetDto): Promise<GardenTimesheetDocument[]>;
+    viewSlotsByGardenIds(querySlotByGardenIdsDto: QuerySlotByGardenIdsDto): Promise<GardenTimesheetDocument[]>;
     viewMyTimesheet(queryMyTimesheetDto: QueryMyTimesheetDto): Promise<GardenTimesheetDocument[]>;
+    viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto: QueryInactiveTimesheetByGardenDto): Promise<any[]>;
     viewAvailableTime(queryAvailableTimeDto: QueryAvailableTimeDto): Promise<ViewAvailableTimeResponse>;
     generateSlotsForClass(params: {
         startDate: Date;
@@ -133,4 +138,5 @@ export declare class GardenTimesheetService implements IGardenTimesheetService {
     private transformDataToCalendar;
     private transformDataToTeachingCalendar;
     private transformDataToMyCalendar;
+    private transformDataToGardenIdsCalendar;
 }

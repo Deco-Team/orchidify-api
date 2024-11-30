@@ -78,7 +78,7 @@ let GardenService = GardenService_1 = class GardenService {
     async findManyByGardenManagerId(gardenManagerId) {
         const gardens = await this.gardenRepository.findMany({
             conditions: {
-                gardenManagerId
+                gardenManagerId: new mongoose_1.Types.ObjectId(gardenManagerId)
             }
         });
         return gardens;

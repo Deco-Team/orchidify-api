@@ -2,9 +2,9 @@ import { SlotNumber, TimesheetType } from '@common/contracts/constant';
 import { BaseSlotMetadataDto } from './slot.dto';
 import { BaseGardenDto } from '@garden/dto/base.garden.dto';
 export declare class QueryInstructorTimesheetDto {
-    date: Date;
-    type: TimesheetType;
-    instructorId: string;
+    readonly date: Date;
+    readonly type: TimesheetType;
+    readonly instructorId: string;
 }
 declare const QueryTeachingTimesheetDto_base: import("@nestjs/common").Type<Pick<QueryInstructorTimesheetDto, "type" | "date">>;
 export declare class QueryTeachingTimesheetDto extends QueryTeachingTimesheetDto_base {
