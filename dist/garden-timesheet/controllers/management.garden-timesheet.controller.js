@@ -153,11 +153,11 @@ __decorate([
 ], ManagementGardenTimesheetController.prototype, "gardenManagerViewSlotList", null);
 __decorate([
     (0, swagger_1.ApiOperation)({
-        summary: `[${constant_1.UserRole.GARDEN_MANAGER}] View Slot List`
+        summary: `[${constant_1.UserRole.GARDEN_MANAGER}] View Inactive timesheet List`
     }),
     (0, swagger_1.ApiOkResponse)({ type: view_garden_timesheet_dto_1.ViewGardenTimesheetListDataResponse }),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.GARDEN_MANAGER),
-    (0, common_1.Get)('garden-manager/unavailable-timesheets'),
+    (0, common_1.Get)('garden-manager/inactive-timesheets'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),

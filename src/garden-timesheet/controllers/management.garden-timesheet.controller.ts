@@ -135,11 +135,11 @@ export class ManagementGardenTimesheetController {
   }
 
   @ApiOperation({
-    summary: `[${UserRole.GARDEN_MANAGER}] View Slot List`
+    summary: `[${UserRole.GARDEN_MANAGER}] View Inactive timesheet List`
   })
   @ApiOkResponse({ type: ViewGardenTimesheetListDataResponse })
   @Roles(UserRole.GARDEN_MANAGER)
-  @Get('garden-manager/unavailable-timesheets')
+  @Get('garden-manager/inactive-timesheets')
   async gardenManagerViewUnavailableTimesheet(
     @Req() req,
     @Query() queryInactiveTimesheetByGardenDto: QueryInactiveTimesheetByGardenDto
