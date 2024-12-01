@@ -68,6 +68,7 @@ export interface IPayoutRequestService {
     rejectPayoutRequestDto: RejectPayoutRequestDto,
     userAuth: UserAuth
   ): Promise<SuccessResponse>
+  getPayoutUsage({ createdBy, date }: { createdBy: string; date: Date }): Promise<number>
 }
 
 @Injectable()
@@ -291,6 +292,15 @@ export class PayoutRequestService implements IPayoutRequestService {
     if (payoutRequest.status !== PayoutRequestStatus.PENDING)
       throw new AppException(Errors.PAYOUT_REQUEST_STATUS_INVALID)
 
+    const [payoutUsage, payoutAmountLimitPerDay] = await Promise.all([
+      this.getPayoutUsage({ createdBy: payoutRequest.createdBy, date: new Date() }),
+      this.settingService.findByKey(SettingKey.PayoutAmountLimitPerDay)
+    ])
+    //BR-57: Daily maximum amount of payout requests is 50,000,000 VND.
+    const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50_000_000
+    if (payoutUsage + payoutRequest.amount > payoutAmountLimit)
+      throw new AppException(Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY)
+
     // Execute in transaction
     const session = await this.connection.startSession()
     try {
@@ -511,6 +521,30 @@ export class PayoutRequestService implements IPayoutRequestService {
       }
     )
     return new SuccessResponse(true)
+  }
+
+  async getPayoutUsage({ createdBy, date }) {
+    const startOfDate = moment(date).tz(VN_TIMEZONE).startOf('date')
+    const endOfDate = moment(date).tz(VN_TIMEZONE).endOf('date')
+    const result = await this.payoutRequestRepository.model.aggregate([
+      {
+        $match: {
+          createdBy: new Types.ObjectId(createdBy),
+          status: PayoutRequestStatus.APPROVED,
+          updatedAt: {
+            $gte: startOfDate.toDate(),
+            $lte: endOfDate.toDate()
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$createdBy',
+          totalAmount: { $sum: '$amount' }
+        }
+      }
+    ])
+    return _.get(result, '[0].totalAmount', 0)
   }
 
   async getExpiredAt(date: Date): Promise<Date> {

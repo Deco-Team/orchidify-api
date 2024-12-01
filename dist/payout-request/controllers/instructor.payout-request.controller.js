@@ -32,10 +32,12 @@ const constant_2 = require("../contracts/constant");
 const mongoose_1 = require("mongoose");
 const setting_service_1 = require("../../setting/services/setting.service");
 const constant_3 = require("../../setting/contracts/constant");
+const instructor_service_1 = require("../../instructor/services/instructor.service");
 let InstructorPayoutRequestController = class InstructorPayoutRequestController {
-    constructor(payoutRequestService, settingService) {
+    constructor(payoutRequestService, settingService, instructorService) {
         this.payoutRequestService = payoutRequestService;
         this.settingService = settingService;
+        this.instructorService = instructorService;
     }
     async list(req, pagination, queryPayoutRequestDto) {
         const { _id } = _.get(req, 'user');
@@ -51,10 +53,20 @@ let InstructorPayoutRequestController = class InstructorPayoutRequestController 
     }
     async createPayoutRequest(req, createPayoutRequestDto) {
         const { _id, role } = _.get(req, 'user');
-        const createPayoutRequestLimit = Number((await this.settingService.findByKey(constant_3.SettingKey.CreatePayoutRequestLimitPerDay)).value) || 5;
-        const payoutRequestsCount = await this.payoutRequestService.countByCreatedByAndDate(_id, new Date());
+        const [payoutRequestsCount, payoutUsage] = await Promise.all([
+            this.payoutRequestService.countByCreatedByAndDate(_id, new Date()),
+            this.payoutRequestService.getPayoutUsage({ createdBy: _id, date: new Date() })
+        ]);
+        const [createPayoutRequestLimitPerDay, payoutAmountLimitPerDay] = await Promise.all([
+            this.settingService.findByKey(constant_3.SettingKey.CreatePayoutRequestLimitPerDay),
+            this.settingService.findByKey(constant_3.SettingKey.PayoutAmountLimitPerDay)
+        ]);
+        const createPayoutRequestLimit = Number(createPayoutRequestLimitPerDay.value) || 5;
         if (payoutRequestsCount > createPayoutRequestLimit)
             throw new app_exception_1.AppException(error_1.Errors.CREATE_PAYOUT_REQUEST_LIMIT);
+        const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50000000;
+        if (payoutUsage + createPayoutRequestDto.amount > payoutAmountLimit)
+            throw new app_exception_1.AppException(error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY);
         createPayoutRequestDto['status'] = constant_1.PayoutRequestStatus.PENDING;
         createPayoutRequestDto['histories'] = [
             {
@@ -71,6 +83,19 @@ let InstructorPayoutRequestController = class InstructorPayoutRequestController 
     async cancel(req, payoutRequestId) {
         const user = _.get(req, 'user');
         return this.payoutRequestService.cancelPayoutRequest(payoutRequestId, user);
+    }
+    async getPayoutUsage(req) {
+        const { _id } = _.get(req, 'user');
+        const [instructor, usage, count] = await Promise.all([
+            this.instructorService.findById(_id),
+            this.payoutRequestService.getPayoutUsage({ createdBy: _id, date: new Date() }),
+            this.payoutRequestService.countByCreatedByAndDate(_id, new Date())
+        ]);
+        return {
+            balance: instructor.balance,
+            usage,
+            count
+        };
     }
 };
 exports.InstructorPayoutRequestController = InstructorPayoutRequestController;
@@ -106,7 +131,11 @@ __decorate([
         summary: `Create Payout Request`
     }),
     (0, swagger_1.ApiCreatedResponse)({ type: dto_1.IDDataResponse }),
-    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.CREATE_PAYOUT_REQUEST_LIMIT, error_1.Errors.NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST]),
+    (0, api_response_decorator_1.ApiErrorResponse)([
+        error_1.Errors.CREATE_PAYOUT_REQUEST_LIMIT,
+        error_1.Errors.NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST,
+        error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY
+    ]),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -127,6 +156,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], InstructorPayoutRequestController.prototype, "cancel", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `View Payout Usage, Balance, Payout Request count`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_payout_request_dto_1.ViewPayoutUsageDataResponse }),
+    (0, common_1.Get)('usage'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], InstructorPayoutRequestController.prototype, "getPayoutUsage", null);
 exports.InstructorPayoutRequestController = InstructorPayoutRequestController = __decorate([
     (0, swagger_1.ApiTags)('PayoutRequest - Instructor'),
     (0, swagger_1.ApiBearerAuth)(),
@@ -136,6 +176,7 @@ exports.InstructorPayoutRequestController = InstructorPayoutRequestController = 
     (0, common_1.Controller)('instructor'),
     __param(0, (0, common_1.Inject)(payout_request_service_1.IPayoutRequestService)),
     __param(1, (0, common_1.Inject)(setting_service_1.ISettingService)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, common_1.Inject)(instructor_service_1.IInstructorService)),
+    __metadata("design:paramtypes", [Object, Object, Object])
 ], InstructorPayoutRequestController);
 //# sourceMappingURL=instructor.payout-request.controller.js.map

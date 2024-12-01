@@ -380,6 +380,11 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    PAYOUT_AMOUNT_LIMIT_PER_DAY: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     FEEDBACK_NOT_FOUND: {
         error: string;
         message: string;

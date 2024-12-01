@@ -70,3 +70,16 @@ class StaffViewPayoutRequestDetailResponse extends InstructorViewPayoutRequestDe
   createdBy: Types.ObjectId | BaseInstructorDto
 }
 export class StaffViewPayoutRequestDetailDataResponse extends DataResponse(StaffViewPayoutRequestDetailResponse) {}
+
+
+class ViewPayoutUsageResponse {
+  @ApiProperty({ type: Number })
+  balance: number
+
+  @ApiProperty({ type: Number })
+  usage: number
+
+  @ApiProperty({ type: Number })
+  count: number
+}
+export class ViewPayoutUsageDataResponse extends DataResponse(ViewPayoutUsageResponse) {}

@@ -102,4 +102,5 @@ exports.PayoutRequest = PayoutRequest = __decorate([
 ], PayoutRequest);
 exports.PayoutRequestSchema = mongoose_1.SchemaFactory.createForClass(PayoutRequest);
 exports.PayoutRequestSchema.plugin(paginate);
+exports.PayoutRequestSchema.index({ createdBy: 1 });
 //# sourceMappingURL=payout-request.schema.js.map

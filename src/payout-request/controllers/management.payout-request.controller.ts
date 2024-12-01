@@ -73,6 +73,7 @@ export class ManagementPayoutRequestController {
   @ApiErrorResponse([
     Errors.PAYOUT_REQUEST_NOT_FOUND,
     Errors.CLASS_REQUEST_STATUS_INVALID,
+    Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY,
     Errors.COURSE_NOT_FOUND,
     Errors.COURSE_STATUS_INVALID
   ])

@@ -383,6 +383,11 @@ exports.Errors = {
         message: 'Số dư không đủ để tạo yêu cầu rút tiền.',
         httpStatus: common_1.HttpStatus.BAD_REQUEST
     },
+    PAYOUT_AMOUNT_LIMIT_PER_DAY: {
+        error: 'PAYOUT_AMOUNT_LIMIT_PER_DAY',
+        message: 'Bạn đã đạt hạn mức rút tiền trong ngày.',
+        httpStatus: common_1.HttpStatus.BAD_REQUEST
+    },
     FEEDBACK_NOT_FOUND: {
         error: 'FEEDBACK_NOT_FOUND',
         message: 'Không tìm thấy đánh giá của bạn.',

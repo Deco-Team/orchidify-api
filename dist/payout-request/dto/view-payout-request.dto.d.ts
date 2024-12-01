@@ -94,4 +94,14 @@ declare const StaffViewPayoutRequestDetailDataResponse_base: import("@nestjs/com
 }>;
 export declare class StaffViewPayoutRequestDetailDataResponse extends StaffViewPayoutRequestDetailDataResponse_base {
 }
+declare class ViewPayoutUsageResponse {
+    balance: number;
+    usage: number;
+    count: number;
+}
+declare const ViewPayoutUsageDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ViewPayoutUsageResponse;
+}>;
+export declare class ViewPayoutUsageDataResponse extends ViewPayoutUsageDataResponse_base {
+}
 export {};

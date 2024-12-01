@@ -52,6 +52,10 @@ export interface IPayoutRequestService {
     expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     approvePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     rejectPayoutRequest(payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    getPayoutUsage({ createdBy, date }: {
+        createdBy: string;
+        date: Date;
+    }): Promise<number>;
 }
 export declare class PayoutRequestService implements IPayoutRequestService {
     private readonly payoutRequestRepository;
@@ -90,6 +94,10 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     approvePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     rejectPayoutRequest(payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
     expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    getPayoutUsage({ createdBy, date }: {
+        createdBy: any;
+        date: any;
+    }): Promise<number>;
     getExpiredAt(date: Date): Promise<Date>;
     addPayoutRequestAutoExpiredJob(payoutRequest: PayoutRequest): Promise<void>;
     private sendNotificationToStaffWhenPayoutRequestIsCreated;

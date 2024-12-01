@@ -16,6 +16,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PayoutRequestService = exports.IPayoutRequestService = void 0;
 const common_1 = require("@nestjs/common");
 const moment = require("moment-timezone");
+const _ = require("lodash");
 const payout_request_repository_1 = require("../repositories/payout-request.repository");
 const mongoose_1 = require("mongoose");
 const constant_1 = require("../../common/contracts/constant");
@@ -188,6 +189,13 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             throw new app_exception_1.AppException(error_1.Errors.PAYOUT_REQUEST_NOT_FOUND);
         if (payoutRequest.status !== constant_1.PayoutRequestStatus.PENDING)
             throw new app_exception_1.AppException(error_1.Errors.PAYOUT_REQUEST_STATUS_INVALID);
+        const [payoutUsage, payoutAmountLimitPerDay] = await Promise.all([
+            this.getPayoutUsage({ createdBy: payoutRequest.createdBy, date: new Date() }),
+            this.settingService.findByKey(constant_4.SettingKey.PayoutAmountLimitPerDay)
+        ]);
+        const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50000000;
+        if (payoutUsage + payoutRequest.amount > payoutAmountLimit)
+            throw new app_exception_1.AppException(error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY);
         const session = await this.connection.startSession();
         try {
             await session.withTransaction(async () => {
@@ -348,6 +356,29 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
             }
         });
         return new dto_1.SuccessResponse(true);
+    }
+    async getPayoutUsage({ createdBy, date }) {
+        const startOfDate = moment(date).tz(config_1.VN_TIMEZONE).startOf('date');
+        const endOfDate = moment(date).tz(config_1.VN_TIMEZONE).endOf('date');
+        const result = await this.payoutRequestRepository.model.aggregate([
+            {
+                $match: {
+                    createdBy: new mongoose_1.Types.ObjectId(createdBy),
+                    status: constant_1.PayoutRequestStatus.APPROVED,
+                    updatedAt: {
+                        $gte: startOfDate.toDate(),
+                        $lte: endOfDate.toDate()
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: '$createdBy',
+                    totalAmount: { $sum: '$amount' }
+                }
+            }
+        ]);
+        return _.get(result, '[0].totalAmount', 0);
     }
     async getExpiredAt(date) {
         const payoutRequestAutoExpiration = await this.settingService.findByKey(constant_4.SettingKey.PayoutRequestAutoExpiration);

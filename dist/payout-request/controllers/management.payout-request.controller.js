@@ -97,6 +97,7 @@ __decorate([
     (0, api_response_decorator_1.ApiErrorResponse)([
         error_1.Errors.PAYOUT_REQUEST_NOT_FOUND,
         error_1.Errors.CLASS_REQUEST_STATUS_INVALID,
+        error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY,
         error_1.Errors.COURSE_NOT_FOUND,
         error_1.Errors.COURSE_STATUS_INVALID
     ]),

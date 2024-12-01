@@ -76,4 +76,4 @@ export class PayoutRequest {
 
 export const PayoutRequestSchema = SchemaFactory.createForClass(PayoutRequest)
 PayoutRequestSchema.plugin(paginate)
-// PayoutRequestSchema.index({ createdBy: 1 })
+PayoutRequestSchema.index({ createdBy: 1 })

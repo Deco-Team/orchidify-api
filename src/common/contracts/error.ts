@@ -467,6 +467,11 @@ export const Errors = {
     message: 'Số dư không đủ để tạo yêu cầu rút tiền.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  PAYOUT_AMOUNT_LIMIT_PER_DAY: {
+    error: 'PAYOUT_AMOUNT_LIMIT_PER_DAY',
+    message: 'Bạn đã đạt hạn mức rút tiền trong ngày.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Feedback

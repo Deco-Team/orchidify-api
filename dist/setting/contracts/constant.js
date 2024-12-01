@@ -11,6 +11,7 @@ var SettingKey;
     SettingKey["AssignmentsCountRange"] = "AssignmentsCountRange";
     SettingKey["PayoutRequestAutoExpiration"] = "PayoutRequestAutoExpiration";
     SettingKey["CreatePayoutRequestLimitPerDay"] = "CreatePayoutRequestLimitPerDay";
+    SettingKey["PayoutAmountLimitPerDay"] = "PayoutAmountLimitPerDay";
     SettingKey["RecruitmentProcessAutoExpiration"] = "RecruitmentProcessAutoExpiration";
     SettingKey["CommissionRate"] = "CommissionRate";
     SettingKey["FirebaseConfig"] = "FirebaseConfig";

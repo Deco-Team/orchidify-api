@@ -24,12 +24,14 @@ import { CreatePayoutRequestDto } from '@payout-request/dto/create-payout-reques
 import {
   InstructorViewPayoutRequestDetailDataResponse,
   InstructorViewPayoutRequestListDataResponse,
-  QueryPayoutRequestDto
+  QueryPayoutRequestDto,
+  ViewPayoutUsageDataResponse
 } from '@payout-request/dto/view-payout-request.dto'
 import { PAYOUT_REQUEST_DETAIL_PROJECTION } from '@payout-request/contracts/constant'
 import { Types } from 'mongoose'
 import { ISettingService } from '@setting/services/setting.service'
 import { SettingKey } from '@setting/contracts/constant'
+import { IInstructorService } from '@instructor/services/instructor.service'
 
 @ApiTags('PayoutRequest - Instructor')
 @ApiBearerAuth()
@@ -42,7 +44,9 @@ export class InstructorPayoutRequestController {
     @Inject(IPayoutRequestService)
     private readonly payoutRequestService: IPayoutRequestService,
     @Inject(ISettingService)
-    private readonly settingService: ISettingService
+    private readonly settingService: ISettingService,
+    @Inject(IInstructorService)
+    private readonly instructorService: IInstructorService
   ) {}
 
   @ApiOperation({
@@ -80,16 +84,32 @@ export class InstructorPayoutRequestController {
     summary: `Create Payout Request`
   })
   @ApiCreatedResponse({ type: IDDataResponse })
-  @ApiErrorResponse([Errors.CREATE_PAYOUT_REQUEST_LIMIT, Errors.NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST])
+  @ApiErrorResponse([
+    Errors.CREATE_PAYOUT_REQUEST_LIMIT,
+    Errors.NOT_ENOUGH_BALANCE_TO_CREATE_PAYOUT_REQUEST,
+    Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY
+  ])
   @Post()
   async createPayoutRequest(@Req() req, @Body() createPayoutRequestDto: CreatePayoutRequestDto) {
     const { _id, role } = _.get(req, 'user')
 
+    const [payoutRequestsCount, payoutUsage] = await Promise.all([
+      this.payoutRequestService.countByCreatedByAndDate(_id, new Date()),
+      this.payoutRequestService.getPayoutUsage({ createdBy: _id, date: new Date() })
+    ])
+
+    const [createPayoutRequestLimitPerDay, payoutAmountLimitPerDay] = await Promise.all([
+      this.settingService.findByKey(SettingKey.CreatePayoutRequestLimitPerDay),
+      this.settingService.findByKey(SettingKey.PayoutAmountLimitPerDay)
+    ])
     // BR-56: Instructors can create a maximum of 5 payout requests per day.
-    const createPayoutRequestLimit =
-      Number((await this.settingService.findByKey(SettingKey.CreatePayoutRequestLimitPerDay)).value) || 5
-    const payoutRequestsCount = await this.payoutRequestService.countByCreatedByAndDate(_id, new Date())
+    const createPayoutRequestLimit = Number(createPayoutRequestLimitPerDay.value) || 5
     if (payoutRequestsCount > createPayoutRequestLimit) throw new AppException(Errors.CREATE_PAYOUT_REQUEST_LIMIT)
+
+    //BR-57: Daily maximum amount of payout requests is 50,000,000 VND.
+    const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50_000_000
+    if (payoutUsage + createPayoutRequestDto.amount > payoutAmountLimit)
+      throw new AppException(Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY)
 
     createPayoutRequestDto['status'] = PayoutRequestStatus.PENDING
     createPayoutRequestDto['histories'] = [
@@ -117,5 +137,26 @@ export class InstructorPayoutRequestController {
   async cancel(@Req() req, @Param('id') payoutRequestId: string) {
     const user = _.get(req, 'user')
     return this.payoutRequestService.cancelPayoutRequest(payoutRequestId, user)
+  }
+
+  @ApiOperation({
+    summary: `View Payout Usage, Balance, Payout Request count`
+  })
+  @ApiOkResponse({ type: ViewPayoutUsageDataResponse })
+  @Get('usage')
+  async getPayoutUsage(@Req() req) {
+    const { _id } = _.get(req, 'user')
+
+    const [instructor, usage, count] = await Promise.all([
+      this.instructorService.findById(_id),
+      this.payoutRequestService.getPayoutUsage({ createdBy: _id, date: new Date() }),
+      this.payoutRequestService.countByCreatedByAndDate(_id, new Date())
+    ])
+
+    return {
+      balance: instructor.balance,
+      usage,
+      count
+    }
   }
 }

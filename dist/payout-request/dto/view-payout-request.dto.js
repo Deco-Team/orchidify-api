@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StaffViewPayoutRequestDetailDataResponse = exports.StaffViewPayoutRequestListDataResponse = exports.InstructorViewPayoutRequestDetailDataResponse = exports.InstructorViewPayoutRequestListDataResponse = exports.QueryPayoutRequestDto = void 0;
+exports.ViewPayoutUsageDataResponse = exports.StaffViewPayoutRequestDetailDataResponse = exports.StaffViewPayoutRequestListDataResponse = exports.InstructorViewPayoutRequestDetailDataResponse = exports.InstructorViewPayoutRequestListDataResponse = exports.QueryPayoutRequestDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_payout_request_dto_1 = require("./base.payout-request.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -78,4 +78,21 @@ __decorate([
 class StaffViewPayoutRequestDetailDataResponse extends (0, openapi_builder_1.DataResponse)(StaffViewPayoutRequestDetailResponse) {
 }
 exports.StaffViewPayoutRequestDetailDataResponse = StaffViewPayoutRequestDetailDataResponse;
+class ViewPayoutUsageResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ViewPayoutUsageResponse.prototype, "balance", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ViewPayoutUsageResponse.prototype, "usage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ViewPayoutUsageResponse.prototype, "count", void 0);
+class ViewPayoutUsageDataResponse extends (0, openapi_builder_1.DataResponse)(ViewPayoutUsageResponse) {
+}
+exports.ViewPayoutUsageDataResponse = ViewPayoutUsageDataResponse;
 //# sourceMappingURL=view-payout-request.dto.js.map

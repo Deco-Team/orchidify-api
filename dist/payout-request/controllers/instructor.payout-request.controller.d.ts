@@ -30,14 +30,21 @@ import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { CreatePayoutRequestDto } from '@payout-request/dto/create-payout-request.dto';
 import { QueryPayoutRequestDto } from '@payout-request/dto/view-payout-request.dto';
 import { ISettingService } from '@setting/services/setting.service';
+import { IInstructorService } from '@instructor/services/instructor.service';
 export declare class InstructorPayoutRequestController {
     private readonly payoutRequestService;
     private readonly settingService;
-    constructor(payoutRequestService: IPayoutRequestService, settingService: ISettingService);
+    private readonly instructorService;
+    constructor(payoutRequestService: IPayoutRequestService, settingService: ISettingService, instructorService: IInstructorService);
     list(req: any, pagination: PaginationParams, queryPayoutRequestDto: QueryPayoutRequestDto): Promise<any>;
     getDetail(req: any, payoutRequestId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/payout-request.schema").PayoutRequest> & import("../schemas/payout-request.schema").PayoutRequest & Required<{
         _id: string;
     }>>;
     createPayoutRequest(req: any, createPayoutRequestDto: CreatePayoutRequestDto): Promise<IDResponse>;
     cancel(req: any, payoutRequestId: string): Promise<import("@common/contracts/dto").SuccessResponse>;
+    getPayoutUsage(req: any): Promise<{
+        balance: number;
+        usage: number;
+        count: number;
+    }>;
 }

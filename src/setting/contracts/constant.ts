@@ -18,6 +18,7 @@ export enum SettingKey {
   // Payout Request
   PayoutRequestAutoExpiration = 'PayoutRequestAutoExpiration',
   CreatePayoutRequestLimitPerDay = 'CreatePayoutRequestLimitPerDay',
+  PayoutAmountLimitPerDay = 'PayoutAmountLimitPerDay',
 
   // Recruitment
   RecruitmentProcessAutoExpiration = 'RecruitmentProcessAutoExpiration',
