@@ -385,6 +385,11 @@ export declare const Errors: {
         message: string;
         httpStatus: HttpStatus;
     };
+    REQUEST_ALREADY_HAS_MADE_PAYOUT: {
+        error: string;
+        message: string;
+        httpStatus: HttpStatus;
+    };
     FEEDBACK_NOT_FOUND: {
         error: string;
         message: string;

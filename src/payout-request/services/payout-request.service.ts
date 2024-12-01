@@ -30,6 +30,7 @@ import { INotificationService } from '@notification/services/notification.servic
 import { IStaffService } from '@staff/services/staff.service'
 import { ReportTag, ReportType } from '@report/contracts/constant'
 import { IReportService } from '@report/services/report.service'
+import { MarkHasMadePayoutDto } from '@payout-request/dto/mark-has-made-payout.dto'
 
 export const IPayoutRequestService = Symbol('IPayoutRequestService')
 
@@ -66,6 +67,11 @@ export interface IPayoutRequestService {
   rejectPayoutRequest(
     payoutRequestId: string,
     rejectPayoutRequestDto: RejectPayoutRequestDto,
+    userAuth: UserAuth
+  ): Promise<SuccessResponse>
+  markHasMadePayout(
+    payoutRequestId: string,
+    markHasMadePayoutDto: MarkHasMadePayoutDto,
     userAuth: UserAuth
   ): Promise<SuccessResponse>
   getPayoutUsage({ createdBy, date }: { createdBy: string; date: Date }): Promise<number>
@@ -170,11 +176,15 @@ export class PayoutRequestService implements IPayoutRequestService {
     projection = PAYOUT_REQUEST_LIST_PROJECTION,
     populates?: Array<PopulateOptions>
   ) {
-    const { status, createdBy } = queryPayoutRequestDto
+    const { status, createdBy, hasMadePayout } = queryPayoutRequestDto
     const filter: Record<string, any> = {}
 
     if (createdBy) {
       filter['createdBy'] = new Types.ObjectId(createdBy)
+    }
+
+    if (hasMadePayout) {
+      filter['hasMadePayout'] = hasMadePayout
     }
 
     const validStatus = status?.filter((status) =>
@@ -520,6 +530,56 @@ export class PayoutRequestService implements IPayoutRequestService {
         }
       }
     )
+    return new SuccessResponse(true)
+  }
+
+  async markHasMadePayout(
+    payoutRequestId: string,
+    markHasMadePayoutDto: MarkHasMadePayoutDto,
+    userAuth: UserAuth
+  ): Promise<SuccessResponse> {
+    const { transactionCode, attachment } = markHasMadePayoutDto
+    // const { _id, role } = userAuth
+
+    // validate payout request
+    const payoutRequest = await this.findById(payoutRequestId)
+    if (!payoutRequest) throw new AppException(Errors.PAYOUT_REQUEST_NOT_FOUND)
+    if (payoutRequest.status !== PayoutRequestStatus.APPROVED)
+      throw new AppException(Errors.PAYOUT_REQUEST_STATUS_INVALID)
+
+    if (payoutRequest.hasMadePayout === true) throw new AppException(Errors.REQUEST_ALREADY_HAS_MADE_PAYOUT)
+
+    // Execute in transaction
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        // update payout request
+        await this.update(
+          { _id: payoutRequestId },
+          {
+            $set: {
+              hasMadePayout: true,
+              transactionCode,
+              attachment
+            }
+          },
+          { session }
+        )
+      })
+    } finally {
+      await session.endSession()
+    }
+
+    this.notificationService.sendFirebaseCloudMessaging({
+      title: 'Yêu cầu rút tiền đã được thanh toán',
+      body: 'Yêu cầu rút tiền đã được thanh toán. Bấm để xem chi tiết.',
+      receiverIds: [payoutRequest.createdBy.toString()],
+      data: {
+        type: FCMNotificationDataType.PAYOUT_REQUEST,
+        id: payoutRequestId
+      }
+    })
+
     return new SuccessResponse(true)
   }
 

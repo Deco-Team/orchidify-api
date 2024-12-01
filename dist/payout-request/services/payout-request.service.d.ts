@@ -40,6 +40,7 @@ import { ITransactionService } from '@transaction/services/transaction.service';
 import { INotificationService } from '@notification/services/notification.service';
 import { IStaffService } from '@staff/services/staff.service';
 import { IReportService } from '@report/services/report.service';
+import { MarkHasMadePayoutDto } from '@payout-request/dto/mark-has-made-payout.dto';
 export declare const IPayoutRequestService: unique symbol;
 export interface IPayoutRequestService {
     createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto, options?: SaveOptions | undefined): Promise<PayoutRequestDocument>;
@@ -52,6 +53,7 @@ export interface IPayoutRequestService {
     expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     approvePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     rejectPayoutRequest(payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
+    markHasMadePayout(payoutRequestId: string, markHasMadePayoutDto: MarkHasMadePayoutDto, userAuth: UserAuth): Promise<SuccessResponse>;
     getPayoutUsage({ createdBy, date }: {
         createdBy: string;
         date: Date;
@@ -81,7 +83,7 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     }>> & Omit<import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
         _id: string;
     }>, never>>;
-    list(pagination: PaginationParams, queryPayoutRequestDto: QueryPayoutRequestDto, projection?: readonly ["_id", "amount", "status", "rejectReason", "description", "createdBy", "createdAt", "updatedAt"], populates?: Array<PopulateOptions>): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
+    list(pagination: PaginationParams, queryPayoutRequestDto: QueryPayoutRequestDto, projection?: readonly ["_id", "amount", "status", "rejectReason", "description", "createdBy", "hasMadePayout", "createdAt", "updatedAt"], populates?: Array<PopulateOptions>): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
         _id: string;
     }>> & import("mongoose").Document<unknown, {}, PayoutRequest> & PayoutRequest & Required<{
         _id: string;
@@ -94,6 +96,7 @@ export declare class PayoutRequestService implements IPayoutRequestService {
     approvePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
     rejectPayoutRequest(payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto, userAuth: UserAuth): Promise<SuccessResponse>;
     expirePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>;
+    markHasMadePayout(payoutRequestId: string, markHasMadePayoutDto: MarkHasMadePayoutDto, userAuth: UserAuth): Promise<SuccessResponse>;
     getPayoutUsage({ createdBy, date }: {
         createdBy: any;
         date: any;

@@ -28,6 +28,7 @@ import { IPayoutRequestService } from '@payout-request/services/payout-request.s
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { QueryPayoutRequestDto } from '@payout-request/dto/view-payout-request.dto';
 import { RejectPayoutRequestDto } from '@payout-request/dto/reject-payout-request.dto';
+import { MarkHasMadePayoutDto } from '@payout-request/dto/mark-has-made-payout.dto';
 export declare class ManagementPayoutRequestController {
     private readonly payoutRequestService;
     constructor(payoutRequestService: IPayoutRequestService);
@@ -37,4 +38,5 @@ export declare class ManagementPayoutRequestController {
     }>>;
     approve(req: any, payoutRequestId: string): Promise<import("@common/contracts/dto").SuccessResponse>;
     reject(req: any, payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto): Promise<import("@common/contracts/dto").SuccessResponse>;
+    markAsHasMadePayout(req: any, payoutRequestId: string, markHasMadePayoutDto: MarkHasMadePayoutDto): Promise<import("@common/contracts/dto").SuccessResponse>;
 }

@@ -8,6 +8,7 @@ exports.PAYOUT_REQUEST_LIST_PROJECTION = [
     'rejectReason',
     'description',
     'createdBy',
+    'hasMadePayout',
     'createdAt',
     'updatedAt'
 ];
@@ -21,6 +22,9 @@ exports.PAYOUT_REQUEST_DETAIL_PROJECTION = [
     'createdBy',
     'handledBy',
     'transactionId',
+    'hasMadePayout',
+    'transactionCode',
+    'attachment',
     'createdAt',
     'updatedAt'
 ];

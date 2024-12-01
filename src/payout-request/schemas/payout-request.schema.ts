@@ -7,6 +7,7 @@ import { Instructor } from '@instructor/schemas/instructor.schema'
 import { Course } from '@course/schemas/course.schema'
 import { Staff } from '@staff/schemas/staff.schema'
 import { Transaction } from '@transaction/schemas/transaction.schema'
+import { BaseMediaDto } from '@media/dto/base-media.dto'
 
 export type PayoutRequestDocument = HydratedDocument<PayoutRequest>
 
@@ -72,6 +73,15 @@ export class PayoutRequest {
 
   @Prop({ type: Types.ObjectId, ref: Transaction.name })
   transactionId: Types.ObjectId
+
+  @Prop({ type: Boolean })
+  hasMadePayout: boolean
+
+  @Prop({ type: String })
+  transactionCode: string
+
+  @Prop({ type: BaseMediaDto })
+  attachments: BaseMediaDto
 }
 
 export const PayoutRequestSchema = SchemaFactory.createForClass(PayoutRequest)

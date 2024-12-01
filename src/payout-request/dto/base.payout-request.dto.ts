@@ -1,10 +1,12 @@
-import { IsEnum, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
+import { IsEnum, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min, ValidateNested } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { PayoutRequestStatus } from '@common/contracts/constant'
 import { PayoutRequestStatusHistory } from '@src/payout-request/schemas/payout-request.schema'
 import { Types } from 'mongoose'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 import { BaseStaffDto } from '@staff/dto/base.staff.dto'
+import { BaseMediaDto } from '@media/dto/base-media.dto'
+import { Type } from 'class-transformer'
 
 export class BasePayoutRequestDto {
   @ApiProperty({ type: String })
@@ -44,6 +46,19 @@ export class BasePayoutRequestDto {
   @IsOptional()
   @IsMongoId()
   transactionId: Types.ObjectId | string
+
+  @ApiPropertyOptional({ type: Boolean })
+  hasMadePayout: boolean
+
+  @ApiProperty({ type: String, example: 'Transaction Code' })
+  @IsString()
+  @MaxLength(500)
+  transactionCode: string
+
+  @ApiProperty({ type: BaseMediaDto })
+  @Type(() => BaseMediaDto)
+  @ValidateNested({ each: true })
+  attachment: BaseMediaDto[]
 
   @ApiProperty({ type: Date })
   createdAt: Date

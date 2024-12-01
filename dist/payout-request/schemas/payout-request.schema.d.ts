@@ -25,6 +25,7 @@
 /// <reference types="mongoose-paginate-v2" />
 import { HydratedDocument, Types } from 'mongoose';
 import { PayoutRequestStatus, UserRole } from '@common/contracts/constant';
+import { BaseMediaDto } from '@media/dto/base-media.dto';
 export type PayoutRequestDocument = HydratedDocument<PayoutRequest>;
 export declare class PayoutRequestStatusHistory {
     status: PayoutRequestStatus;
@@ -43,6 +44,9 @@ export declare class PayoutRequest {
     createdBy: Types.ObjectId;
     handledBy: Types.ObjectId;
     transactionId: Types.ObjectId;
+    hasMadePayout: boolean;
+    transactionCode: string;
+    attachments: BaseMediaDto;
 }
 export declare const PayoutRequestSchema: import("mongoose").Schema<PayoutRequest, import("mongoose").Model<PayoutRequest, any, any, any, import("mongoose").Document<unknown, any, PayoutRequest> & PayoutRequest & Required<{
     _id: string;

@@ -99,10 +99,13 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         return this.payoutRequestRepository.findOneAndUpdate(conditions, payload, options);
     }
     async list(pagination, queryPayoutRequestDto, projection = constant_2.PAYOUT_REQUEST_LIST_PROJECTION, populates) {
-        const { status, createdBy } = queryPayoutRequestDto;
+        const { status, createdBy, hasMadePayout } = queryPayoutRequestDto;
         const filter = {};
         if (createdBy) {
             filter['createdBy'] = new mongoose_1.Types.ObjectId(createdBy);
+        }
+        if (hasMadePayout) {
+            filter['hasMadePayout'] = hasMadePayout;
         }
         const validStatus = status?.filter((status) => [
             constant_1.PayoutRequestStatus.PENDING,
@@ -353,6 +356,41 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         this.reportService.update({ type: constant_7.ReportType.PayoutRequestSum, tag: constant_7.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(payoutRequest.createdBy) }, {
             $inc: {
                 [`data.${constant_1.PayoutRequestStatus.PENDING}.quantity`]: -1
+            }
+        });
+        return new dto_1.SuccessResponse(true);
+    }
+    async markHasMadePayout(payoutRequestId, markHasMadePayoutDto, userAuth) {
+        const { transactionCode, attachment } = markHasMadePayoutDto;
+        const payoutRequest = await this.findById(payoutRequestId);
+        if (!payoutRequest)
+            throw new app_exception_1.AppException(error_1.Errors.PAYOUT_REQUEST_NOT_FOUND);
+        if (payoutRequest.status !== constant_1.PayoutRequestStatus.APPROVED)
+            throw new app_exception_1.AppException(error_1.Errors.PAYOUT_REQUEST_STATUS_INVALID);
+        if (payoutRequest.hasMadePayout === true)
+            throw new app_exception_1.AppException(error_1.Errors.REQUEST_ALREADY_HAS_MADE_PAYOUT);
+        const session = await this.connection.startSession();
+        try {
+            await session.withTransaction(async () => {
+                await this.update({ _id: payoutRequestId }, {
+                    $set: {
+                        hasMadePayout: true,
+                        transactionCode,
+                        attachment
+                    }
+                }, { session });
+            });
+        }
+        finally {
+            await session.endSession();
+        }
+        this.notificationService.sendFirebaseCloudMessaging({
+            title: 'Yêu cầu rút tiền đã được thanh toán',
+            body: 'Yêu cầu rút tiền đã được thanh toán. Bấm để xem chi tiết.',
+            receiverIds: [payoutRequest.createdBy.toString()],
+            data: {
+                type: constant_6.FCMNotificationDataType.PAYOUT_REQUEST,
+                id: payoutRequestId
             }
         });
         return new dto_1.SuccessResponse(true);

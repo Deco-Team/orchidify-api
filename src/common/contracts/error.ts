@@ -472,6 +472,11 @@ export const Errors = {
     message: 'Bạn đã đạt hạn mức rút tiền trong ngày.',
     httpStatus: HttpStatus.BAD_REQUEST
   },
+  REQUEST_ALREADY_HAS_MADE_PAYOUT: {
+    error: 'REQUEST_ALREADY_HAS_MADE_PAYOUT',
+    message: 'Yêu cầu rút tiền đã được thanh toán.',
+    httpStatus: HttpStatus.BAD_REQUEST
+  },
 
   /**
    * Feedback

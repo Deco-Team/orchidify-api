@@ -26,6 +26,13 @@ export class QueryPayoutRequestDto {
   @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
   status: PayoutRequestStatus[]
 
+  @ApiPropertyOptional({ type: Boolean })
+  @IsOptional()
+  @Transform(({ value }) => {
+    return [true, 'enabled', 'true', 1, '1'].indexOf(value) > -1
+  })
+  hasMadePayout: boolean
+
   createdBy: string
 }
 
@@ -70,7 +77,6 @@ class StaffViewPayoutRequestDetailResponse extends InstructorViewPayoutRequestDe
   createdBy: Types.ObjectId | BaseInstructorDto
 }
 export class StaffViewPayoutRequestDetailDataResponse extends DataResponse(StaffViewPayoutRequestDetailResponse) {}
-
 
 class ViewPayoutUsageResponse {
   @ApiProperty({ type: Number })

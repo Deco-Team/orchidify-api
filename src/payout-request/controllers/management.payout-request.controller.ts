@@ -19,6 +19,7 @@ import {
 } from '@payout-request/dto/view-payout-request.dto'
 import { PAYOUT_REQUEST_DETAIL_PROJECTION, PAYOUT_REQUEST_LIST_PROJECTION } from '@payout-request/contracts/constant'
 import { RejectPayoutRequestDto } from '@payout-request/dto/reject-payout-request.dto'
+import { MarkHasMadePayoutDto } from '@payout-request/dto/mark-has-made-payout.dto'
 
 @ApiTags('PayoutRequest - Management')
 @ApiBearerAuth()
@@ -72,10 +73,8 @@ export class ManagementPayoutRequestController {
   @ApiOkResponse({ type: SuccessDataResponse })
   @ApiErrorResponse([
     Errors.PAYOUT_REQUEST_NOT_FOUND,
-    Errors.CLASS_REQUEST_STATUS_INVALID,
-    Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY,
-    Errors.COURSE_NOT_FOUND,
-    Errors.COURSE_STATUS_INVALID
+    Errors.PAYOUT_REQUEST_STATUS_INVALID,
+    Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY
   ])
   @Roles(UserRole.STAFF)
   @Patch(':id([0-9a-f]{24})/approve')
@@ -88,12 +87,7 @@ export class ManagementPayoutRequestController {
     summary: `[${UserRole.STAFF}] Reject Payout Request`
   })
   @ApiOkResponse({ type: SuccessDataResponse })
-  @ApiErrorResponse([
-    Errors.PAYOUT_REQUEST_NOT_FOUND,
-    Errors.CLASS_REQUEST_STATUS_INVALID,
-    Errors.COURSE_NOT_FOUND,
-    Errors.COURSE_STATUS_INVALID
-  ])
+  @ApiErrorResponse([Errors.PAYOUT_REQUEST_NOT_FOUND, Errors.PAYOUT_REQUEST_STATUS_INVALID])
   @Roles(UserRole.STAFF)
   @Patch(':id([0-9a-f]{24})/reject')
   async reject(
@@ -103,5 +97,25 @@ export class ManagementPayoutRequestController {
   ) {
     const user = _.get(req, 'user')
     return this.payoutRequestService.rejectPayoutRequest(payoutRequestId, rejectPayoutRequestDto, user)
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.STAFF}] Mask Payout Request as Has made payout`
+  })
+  @ApiOkResponse({ type: SuccessDataResponse })
+  @ApiErrorResponse([
+    Errors.PAYOUT_REQUEST_NOT_FOUND,
+    Errors.PAYOUT_REQUEST_STATUS_INVALID,
+    Errors.REQUEST_ALREADY_HAS_MADE_PAYOUT
+  ])
+  @Roles(UserRole.STAFF)
+  @Patch(':id([0-9a-f]{24})/make-payout')
+  async markAsHasMadePayout(
+    @Req() req,
+    @Param('id') payoutRequestId: string,
+    @Body() markHasMadePayoutDto: MarkHasMadePayoutDto
+  ) {
+    const user = _.get(req, 'user')
+    return this.payoutRequestService.markHasMadePayout(payoutRequestId, markHasMadePayoutDto, user)
   }
 }

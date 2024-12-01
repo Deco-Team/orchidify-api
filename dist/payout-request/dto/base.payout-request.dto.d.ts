@@ -28,6 +28,7 @@ import { PayoutRequestStatusHistory } from '@src/payout-request/schemas/payout-r
 import { Types } from 'mongoose';
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto';
 import { BaseStaffDto } from '@staff/dto/base.staff.dto';
+import { BaseMediaDto } from '@media/dto/base-media.dto';
 export declare class BasePayoutRequestDto {
     _id: string;
     amount: number;
@@ -38,6 +39,9 @@ export declare class BasePayoutRequestDto {
     createdBy: Types.ObjectId | BaseInstructorDto;
     handledBy: Types.ObjectId | BaseStaffDto;
     transactionId: Types.ObjectId | string;
+    hasMadePayout: boolean;
+    transactionCode: string;
+    attachment: BaseMediaDto[];
     createdAt: Date;
     updatedAt: Date;
 }

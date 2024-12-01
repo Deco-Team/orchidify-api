@@ -14,6 +14,8 @@ const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const constant_1 = require("../../common/contracts/constant");
 const payout_request_schema_1 = require("../schemas/payout-request.schema");
+const base_media_dto_1 = require("../../media/dto/base-media.dto");
+const class_transformer_1 = require("class-transformer");
 class BasePayoutRequestDto {
 }
 exports.BasePayoutRequestDto = BasePayoutRequestDto;
@@ -64,6 +66,22 @@ __decorate([
     (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", Object)
 ], BasePayoutRequestDto.prototype, "transactionId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: Boolean }),
+    __metadata("design:type", Boolean)
+], BasePayoutRequestDto.prototype, "hasMadePayout", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, example: 'Transaction Code' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], BasePayoutRequestDto.prototype, "transactionCode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: base_media_dto_1.BaseMediaDto }),
+    (0, class_transformer_1.Type)(() => base_media_dto_1.BaseMediaDto),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], BasePayoutRequestDto.prototype, "attachment", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),
     __metadata("design:type", Date)

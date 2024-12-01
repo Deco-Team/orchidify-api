@@ -36,6 +36,14 @@ __decorate([
     (0, class_transformer_1.Transform)(({ value }) => (Array.isArray(value) ? value : Array(value))),
     __metadata("design:type", Array)
 ], QueryPayoutRequestDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: Boolean }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        return [true, 'enabled', 'true', 1, '1'].indexOf(value) > -1;
+    }),
+    __metadata("design:type", Boolean)
+], QueryPayoutRequestDto.prototype, "hasMadePayout", void 0);
 class InstructorViewPayoutRequestListItemResponse extends (0, swagger_1.PickType)(base_payout_request_dto_1.BasePayoutRequestDto, constant_2.PAYOUT_REQUEST_LIST_PROJECTION) {
 }
 class InstructorViewPayoutRequestListResponse extends (0, openapi_builder_1.PaginateResponse)(InstructorViewPayoutRequestListItemResponse) {

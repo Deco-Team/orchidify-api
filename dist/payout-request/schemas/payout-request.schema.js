@@ -18,6 +18,7 @@ const constant_1 = require("../../common/contracts/constant");
 const instructor_schema_1 = require("../../instructor/schemas/instructor.schema");
 const staff_schema_1 = require("../../staff/schemas/staff.schema");
 const transaction_schema_1 = require("../../transaction/schemas/transaction.schema");
+const base_media_dto_1 = require("../../media/dto/base-media.dto");
 class PayoutRequestStatusHistory {
 }
 exports.PayoutRequestStatusHistory = PayoutRequestStatusHistory;
@@ -84,6 +85,18 @@ __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: transaction_schema_1.Transaction.name }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], PayoutRequest.prototype, "transactionId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Boolean }),
+    __metadata("design:type", Boolean)
+], PayoutRequest.prototype, "hasMadePayout", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String }),
+    __metadata("design:type", String)
+], PayoutRequest.prototype, "transactionCode", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: base_media_dto_1.BaseMediaDto }),
+    __metadata("design:type", base_media_dto_1.BaseMediaDto)
+], PayoutRequest.prototype, "attachments", void 0);
 exports.PayoutRequest = PayoutRequest = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'payout-requests',

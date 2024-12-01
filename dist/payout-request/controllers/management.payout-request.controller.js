@@ -29,6 +29,7 @@ const pagination_decorator_1 = require("../../common/decorators/pagination.decor
 const view_payout_request_dto_1 = require("../dto/view-payout-request.dto");
 const constant_2 = require("../contracts/constant");
 const reject_payout_request_dto_1 = require("../dto/reject-payout-request.dto");
+const mark_has_made_payout_dto_1 = require("../dto/mark-has-made-payout.dto");
 let ManagementPayoutRequestController = class ManagementPayoutRequestController {
     constructor(payoutRequestService) {
         this.payoutRequestService = payoutRequestService;
@@ -59,6 +60,10 @@ let ManagementPayoutRequestController = class ManagementPayoutRequestController 
     async reject(req, payoutRequestId, rejectPayoutRequestDto) {
         const user = _.get(req, 'user');
         return this.payoutRequestService.rejectPayoutRequest(payoutRequestId, rejectPayoutRequestDto, user);
+    }
+    async markAsHasMadePayout(req, payoutRequestId, markHasMadePayoutDto) {
+        const user = _.get(req, 'user');
+        return this.payoutRequestService.markHasMadePayout(payoutRequestId, markHasMadePayoutDto, user);
     }
 };
 exports.ManagementPayoutRequestController = ManagementPayoutRequestController;
@@ -96,10 +101,8 @@ __decorate([
     (0, swagger_1.ApiOkResponse)({ type: dto_1.SuccessDataResponse }),
     (0, api_response_decorator_1.ApiErrorResponse)([
         error_1.Errors.PAYOUT_REQUEST_NOT_FOUND,
-        error_1.Errors.CLASS_REQUEST_STATUS_INVALID,
-        error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY,
-        error_1.Errors.COURSE_NOT_FOUND,
-        error_1.Errors.COURSE_STATUS_INVALID
+        error_1.Errors.PAYOUT_REQUEST_STATUS_INVALID,
+        error_1.Errors.PAYOUT_AMOUNT_LIMIT_PER_DAY
     ]),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Patch)(':id([0-9a-f]{24})/approve'),
@@ -114,12 +117,7 @@ __decorate([
         summary: `[${constant_1.UserRole.STAFF}] Reject Payout Request`
     }),
     (0, swagger_1.ApiOkResponse)({ type: dto_1.SuccessDataResponse }),
-    (0, api_response_decorator_1.ApiErrorResponse)([
-        error_1.Errors.PAYOUT_REQUEST_NOT_FOUND,
-        error_1.Errors.CLASS_REQUEST_STATUS_INVALID,
-        error_1.Errors.COURSE_NOT_FOUND,
-        error_1.Errors.COURSE_STATUS_INVALID
-    ]),
+    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.PAYOUT_REQUEST_NOT_FOUND, error_1.Errors.PAYOUT_REQUEST_STATUS_INVALID]),
     (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
     (0, common_1.Patch)(':id([0-9a-f]{24})/reject'),
     __param(0, (0, common_1.Req)()),
@@ -129,6 +127,25 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, reject_payout_request_dto_1.RejectPayoutRequestDto]),
     __metadata("design:returntype", Promise)
 ], ManagementPayoutRequestController.prototype, "reject", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.STAFF}] Mask Payout Request as Has made payout`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: dto_1.SuccessDataResponse }),
+    (0, api_response_decorator_1.ApiErrorResponse)([
+        error_1.Errors.PAYOUT_REQUEST_NOT_FOUND,
+        error_1.Errors.PAYOUT_REQUEST_STATUS_INVALID,
+        error_1.Errors.REQUEST_ALREADY_HAS_MADE_PAYOUT
+    ]),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.STAFF),
+    (0, common_1.Patch)(':id([0-9a-f]{24})/make-payout'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, mark_has_made_payout_dto_1.MarkHasMadePayoutDto]),
+    __metadata("design:returntype", Promise)
+], ManagementPayoutRequestController.prototype, "markAsHasMadePayout", null);
 exports.ManagementPayoutRequestController = ManagementPayoutRequestController = __decorate([
     (0, swagger_1.ApiTags)('PayoutRequest - Management'),
     (0, swagger_1.ApiBearerAuth)(),
