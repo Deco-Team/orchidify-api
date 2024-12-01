@@ -14,6 +14,9 @@ const openapi_builder_1 = require("../../common/contracts/openapi-builder");
 const assignment_dto_1 = require("./assignment.dto");
 const swagger_1 = require("@nestjs/swagger");
 const assignment_submission_dto_1 = require("./assignment-submission.dto");
+const base_instructor_dto_1 = require("../../instructor/dto/base.instructor.dto");
+class AssignmentInstructorDetailResponse extends (0, swagger_1.PickType)(base_instructor_dto_1.BaseInstructorDto, ['_id', 'name', 'idCardPhoto', 'avatar']) {
+}
 class ViewAssignmentDetailResponse extends assignment_dto_1.BaseAssignmentDto {
 }
 __decorate([
@@ -24,6 +27,10 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: assignment_submission_dto_1.BaseAssignmentSubmissionDto }),
     __metadata("design:type", assignment_submission_dto_1.BaseAssignmentSubmissionDto)
 ], ViewAssignmentDetailResponse.prototype, "submission", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: AssignmentInstructorDetailResponse }),
+    __metadata("design:type", AssignmentInstructorDetailResponse)
+], ViewAssignmentDetailResponse.prototype, "instructor", void 0);
 class ViewAssignmentDetailDataResponse extends (0, openapi_builder_1.DataResponse)(ViewAssignmentDetailResponse) {
 }
 exports.ViewAssignmentDetailDataResponse = ViewAssignmentDetailDataResponse;

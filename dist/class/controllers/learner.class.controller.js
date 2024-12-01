@@ -105,6 +105,14 @@ let LearnerClassController = class LearnerClassController {
     }
     async getAssignmentDetail(req, classId, assignmentId) {
         const { _id: learnerId } = _.get(req, 'user');
+        const courseClass = await this.classService.findById(classId, undefined, [
+            {
+                path: 'instructor',
+                select: ['_id', 'name', 'idCardPhoto', 'avatar']
+            }
+        ]);
+        if (!courseClass)
+            throw new app_exception_1.AppException(error_1.Errors.CLASS_NOT_FOUND);
         const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId });
         if (!assignment)
             throw new app_exception_1.AppException(error_1.Errors.ASSIGNMENT_NOT_FOUND);
@@ -112,7 +120,7 @@ let LearnerClassController = class LearnerClassController {
             assignmentId: assignment._id,
             learnerId: learnerId
         });
-        return { ...assignment, submission };
+        return { ...assignment, submission, instructor: courseClass['instructor'] };
     }
     async submitAssignment(req, classId, createAssignmentSubmissionDto) {
         const { _id: learnerId } = _.get(req, 'user');
@@ -217,7 +225,7 @@ __decorate([
         summary: `View My Assignment Detail`
     }),
     (0, swagger_1.ApiOkResponse)({ type: view_assignment_dto_1.ViewAssignmentDetailDataResponse }),
-    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.ASSIGNMENT_NOT_FOUND]),
+    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.CLASS_NOT_FOUND, error_1.Errors.ASSIGNMENT_NOT_FOUND]),
     (0, common_1.Get)('my-classes/:classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('classId')),

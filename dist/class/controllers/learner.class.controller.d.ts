@@ -23,6 +23,7 @@ export declare class LearnerClassController {
     getLessonDetail(req: any, classId: string, sessionId: string): Promise<import("../schemas/session.schema").Session>;
     getAssignmentDetail(req: any, classId: string, assignmentId: string): Promise<{
         submission: import("../schemas/assignment-submission.schema").AssignmentSubmission;
+        instructor: any;
         _id: string;
         title: string;
         description: string;

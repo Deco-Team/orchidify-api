@@ -170,7 +170,7 @@ export class LearnerClassController {
     summary: `View My Assignment Detail`
   })
   @ApiOkResponse({ type: ViewAssignmentDetailDataResponse })
-  @ApiErrorResponse([Errors.ASSIGNMENT_NOT_FOUND])
+  @ApiErrorResponse([Errors.CLASS_NOT_FOUND, Errors.ASSIGNMENT_NOT_FOUND])
   @Get('my-classes/:classId([0-9a-f]{24})/assignments/:assignmentId([0-9a-f]{24})')
   async getAssignmentDetail(
     @Req() req,
@@ -178,8 +178,16 @@ export class LearnerClassController {
     @Param('assignmentId') assignmentId: string
   ) {
     const { _id: learnerId } = _.get(req, 'user')
-    const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
 
+    const courseClass = await this.classService.findById(classId, undefined, [
+      {
+        path: 'instructor',
+        select: ['_id', 'name', 'idCardPhoto', 'avatar']
+      }
+    ])
+    if (!courseClass) throw new AppException(Errors.CLASS_NOT_FOUND)
+
+    const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
 
     // get my submission
@@ -187,7 +195,7 @@ export class LearnerClassController {
       assignmentId: assignment._id,
       learnerId: learnerId
     })
-    return { ...assignment, submission }
+    return { ...assignment, submission, instructor: courseClass['instructor'] }
   }
 
   @ApiOperation({
@@ -217,8 +225,7 @@ export class LearnerClassController {
     const { startDate } = courseClass
     const classStartDate = moment(startDate).tz(VN_TIMEZONE).startOf('date')
     const nowMoment = moment().tz(VN_TIMEZONE)
-    if (nowMoment.isBefore(classStartDate))
-      throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
+    if (nowMoment.isBefore(classStartDate)) throw new AppException(Errors.ASSIGNMENT_SUBMISSION_NOT_START_YET)
 
     const assignment = await this.assignmentService.findMyAssignment({ assignmentId, classId, learnerId })
     if (!assignment) throw new AppException(Errors.ASSIGNMENT_NOT_FOUND)
@@ -226,8 +233,7 @@ export class LearnerClassController {
     // BR-71: Learners are only allowed to submit assignments before the deadline.
     if (assignment.deadline) {
       const assignmentDeadline = moment(assignment.deadline).tz(VN_TIMEZONE)
-      if (nowMoment.isAfter(assignmentDeadline))
-        throw new AppException(Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER)
+      if (nowMoment.isAfter(assignmentDeadline)) throw new AppException(Errors.ASSIGNMENT_SUBMISSION_DEADLINE_IS_OVER)
     }
 
     const existedSubmission = await this.assignmentSubmissionService.findMyAssignmentSubmission({
