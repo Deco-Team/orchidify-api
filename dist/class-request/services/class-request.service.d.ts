@@ -111,4 +111,7 @@ export declare class ClassRequestService implements IClassRequestService {
     addClassRequestAutoExpiredJob(classRequest: ClassRequest): Promise<void>;
     private generateDeadlineClassAssignment;
     private sendNotificationToStaffWhenClassRequestIsCreated;
+    private updateCourseReportWhenPublishClassRequestApproved;
+    private updateClassReportWhenPublishClassRequestApproved;
+    private updateClassReportWhenCancelClassRequestApproved;
 }

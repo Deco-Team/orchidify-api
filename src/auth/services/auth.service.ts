@@ -168,27 +168,7 @@ export class AuthService implements IAuthService {
     })
 
     // update learner report
-    this.reportService.update(
-      { type: ReportType.LearnerSum, tag: ReportTag.System },
-      {
-        $inc: {
-          'data.quantity': 1,
-          [`data.${LearnerStatus.UNVERIFIED}.quantity`]: 1
-        }
-      }
-    )
-
-    // update learner sum by month report
-    const month = new Date().getMonth() + 1
-    const year = new Date().getFullYear()
-    this.reportService.update(
-      { type: ReportType.LearnerSumByMonth, tag: ReportTag.System, 'data.year': year },
-      {
-        $inc: {
-          [`data.${month}.quantity`]: 1
-        }
-      }
-    )
+    this.updateReportWhenLearnerRegistered()
 
     return new SuccessResponse(true)
   }
@@ -207,16 +187,7 @@ export class AuthService implements IAuthService {
     await Promise.all([
       this.learnerService.update({ _id: learner._id }, { status: LearnerStatus.ACTIVE }),
       this.otpService.clearOtp(learnerVerifyAccountDto.code),
-      // update learner report
-      this.reportService.update(
-        { type: ReportType.LearnerSum, tag: ReportTag.System },
-        {
-          $inc: {
-            [`data.${LearnerStatus.UNVERIFIED}.quantity`]: -1,
-            [`data.${LearnerStatus.ACTIVE}.quantity`]: 1
-          }
-        }
-      )
+      this.updateReportWhenLearnerVerified()
     ])
 
     return new SuccessResponse(true)
@@ -286,15 +257,7 @@ export class AuthService implements IAuthService {
       }
     })
 
-    // update recruitment report
-    this.reportService.update(
-      { type: ReportType.RecruitmentApplicationSum, tag: ReportTag.System },
-      {
-        $inc: {
-          'data.quantity': 1
-        }
-      }
-    )
+    this.updateReportWhenInstructorRegistered()
 
     return new SuccessResponse(true)
   }
@@ -314,5 +277,55 @@ export class AuthService implements IAuthService {
         expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION')
       })
     }
+  }
+
+  private updateReportWhenLearnerRegistered() {
+    // update learner report
+    this.reportService.update(
+      { type: ReportType.LearnerSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${LearnerStatus.UNVERIFIED}.quantity`]: 1
+        }
+      }
+    )
+
+    // update learner sum by month report
+    const month = new Date().getMonth() + 1
+    const year = new Date().getFullYear()
+    this.reportService.update(
+      { type: ReportType.LearnerSumByMonth, tag: ReportTag.System, 'data.year': year },
+      {
+        $inc: {
+          [`data.${month}.quantity`]: 1
+        }
+      }
+    )
+  }
+
+  private updateReportWhenLearnerVerified() {
+    // update learner report
+    this.reportService.update(
+      { type: ReportType.LearnerSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${LearnerStatus.UNVERIFIED}.quantity`]: -1,
+          [`data.${LearnerStatus.ACTIVE}.quantity`]: 1
+        }
+      }
+    )
+  }
+
+  private updateReportWhenInstructorRegistered() {
+    // update recruitment report
+    this.reportService.update(
+      { type: ReportType.RecruitmentApplicationSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
   }
 }

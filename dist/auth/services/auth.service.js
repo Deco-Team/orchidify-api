@@ -122,19 +122,7 @@ let AuthService = class AuthService {
                 expirationMinutes: 5
             }
         });
-        this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
-            $inc: {
-                'data.quantity': 1,
-                [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: 1
-            }
-        });
-        const month = new Date().getMonth() + 1;
-        const year = new Date().getFullYear();
-        this.reportService.update({ type: constant_3.ReportType.LearnerSumByMonth, tag: constant_3.ReportTag.System, 'data.year': year }, {
-            $inc: {
-                [`data.${month}.quantity`]: 1
-            }
-        });
+        this.updateReportWhenLearnerRegistered();
         return new dto_1.SuccessResponse(true);
     }
     async verifyOtpByLearner(learnerVerifyAccountDto) {
@@ -153,12 +141,7 @@ let AuthService = class AuthService {
         await Promise.all([
             this.learnerService.update({ _id: learner._id }, { status: constant_1.LearnerStatus.ACTIVE }),
             this.otpService.clearOtp(learnerVerifyAccountDto.code),
-            this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
-                $inc: {
-                    [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: -1,
-                    [`data.${constant_1.LearnerStatus.ACTIVE}.quantity`]: 1
-                }
-            })
+            this.updateReportWhenLearnerVerified()
         ]);
         return new dto_1.SuccessResponse(true);
     }
@@ -217,11 +200,7 @@ let AuthService = class AuthService {
                 daysToRespond: 7
             }
         });
-        this.reportService.update({ type: constant_3.ReportType.RecruitmentApplicationSum, tag: constant_3.ReportTag.System }, {
-            $inc: {
-                'data.quantity': 1
-            }
-        });
+        this.updateReportWhenInstructorRegistered();
         return new dto_1.SuccessResponse(true);
     }
     generateTokens(accessTokenPayload, refreshTokenPayload) {
@@ -235,6 +214,36 @@ let AuthService = class AuthService {
                 expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION')
             })
         };
+    }
+    updateReportWhenLearnerRegistered() {
+        this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: 1
+            }
+        });
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        this.reportService.update({ type: constant_3.ReportType.LearnerSumByMonth, tag: constant_3.ReportTag.System, 'data.year': year }, {
+            $inc: {
+                [`data.${month}.quantity`]: 1
+            }
+        });
+    }
+    updateReportWhenLearnerVerified() {
+        this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
+            $inc: {
+                [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: -1,
+                [`data.${constant_1.LearnerStatus.ACTIVE}.quantity`]: 1
+            }
+        });
+    }
+    updateReportWhenInstructorRegistered() {
+        this.reportService.update({ type: constant_3.ReportType.RecruitmentApplicationSum, tag: constant_3.ReportTag.System }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
     }
 };
 exports.AuthService = AuthService;

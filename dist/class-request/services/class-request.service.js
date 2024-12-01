@@ -347,36 +347,9 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                         courseData: course
                     }, { session });
                     if (course.status === constant_1.CourseStatus.DRAFT) {
-                        await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.System }, {
-                            $inc: {
-                                'data.quantity': 1
-                            }
-                        }, { session });
-                        const month = new Date().getMonth() + 1;
-                        const year = new Date().getFullYear();
-                        this.reportService.update({ type: constant_6.ReportType.CourseSumByMonth, tag: constant_6.ReportTag.System, 'data.year': year }, {
-                            $inc: {
-                                [`data.${month}.quantity`]: 1
-                            }
-                        });
-                        await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
-                            $inc: {
-                                [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1
-                            }
-                        }, { session });
+                        this.updateCourseReportWhenPublishClassRequestApproved({ instructorId: createdClass.instructorId });
                     }
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
-                        $inc: {
-                            'data.quantity': 1,
-                            [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
-                        }
-                    }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(createdClass.instructorId) }, {
-                        $inc: {
-                            'data.quantity': 1,
-                            [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
-                        }
-                    }, { session });
+                    this.updateClassReportWhenPublishClassRequestApproved({ instructorId: createdClass.instructorId });
                 });
             }
             finally {
@@ -449,18 +422,10 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                             slots: { classId: new mongoose_1.Types.ObjectId(courseClass._id) }
                         }
                     }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
-                        $inc: {
-                            [`data.${courseClass.status}.quantity`]: -1,
-                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                        }
-                    }, { session });
-                    await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
-                        $inc: {
-                            [`data.${courseClass.status}.quantity`]: -1,
-                            [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                        }
-                    }, { session });
+                    this.updateClassReportWhenCancelClassRequestApproved({
+                        instructorId: courseClass.instructorId,
+                        status: courseClass.status
+                    });
                 });
             }
             finally {
@@ -748,6 +713,53 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                 id: classRequest._id.toString()
             },
             topic: 'STAFF_NOTIFICATION_TOPIC'
+        });
+    }
+    updateCourseReportWhenPublishClassRequestApproved({ instructorId }) {
+        this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                'data.quantity': 1
+            }
+        });
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        this.reportService.update({ type: constant_6.ReportType.CourseSumByMonth, tag: constant_6.ReportTag.System, 'data.year': year }, {
+            $inc: {
+                [`data.${month}.quantity`]: 1
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1
+            }
+        });
+    }
+    updateClassReportWhenPublishClassRequestApproved({ instructorId }) {
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                'data.quantity': 1,
+                [`data.${constant_1.ClassStatus.PUBLISHED}.quantity`]: 1
+            }
+        });
+    }
+    updateClassReportWhenCancelClassRequestApproved({ instructorId, status }) {
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                [`data.${status}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                [`data.${status}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+            }
         });
     }
 };

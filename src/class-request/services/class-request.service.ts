@@ -530,62 +530,11 @@ export class ClassRequestService implements IClassRequestService {
 
           if (course.status === CourseStatus.DRAFT) {
             // update course report
-            await this.reportService.update(
-              { type: ReportType.CourseSum, tag: ReportTag.System },
-              {
-                $inc: {
-                  'data.quantity': 1
-                }
-              },
-              { session }
-            )
-
-            // update course sum by month report
-            const month = new Date().getMonth() + 1
-            const year = new Date().getFullYear()
-            this.reportService.update(
-              { type: ReportType.CourseSumByMonth, tag: ReportTag.System, 'data.year': year },
-              {
-                $inc: {
-                  [`data.${month}.quantity`]: 1
-                }
-              }
-            )
-
-            // update course report
-            await this.reportService.update(
-              { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },
-              {
-                $inc: {
-                  [`data.${CourseStatus.ACTIVE}.quantity`]: 1
-                }
-              },
-              { session }
-            )
+            this.updateCourseReportWhenPublishClassRequestApproved({ instructorId: createdClass.instructorId })
           }
 
           // update class report
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.System },
-            {
-              $inc: {
-                'data.quantity': 1,
-                [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
-
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(createdClass.instructorId) },
-            {
-              $inc: {
-                'data.quantity': 1,
-                [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
+          this.updateClassReportWhenPublishClassRequestApproved({ instructorId: createdClass.instructorId })
         })
       } finally {
         await session.endSession()
@@ -678,27 +627,10 @@ export class ClassRequestService implements IClassRequestService {
           )
 
           // update class report
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.System },
-            {
-              $inc: {
-                [`data.${courseClass.status}.quantity`]: -1,
-                [`data.${ClassStatus.CANCELED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
-
-          await this.reportService.update(
-            { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
-            {
-              $inc: {
-                [`data.${courseClass.status}.quantity`]: -1,
-                [`data.${ClassStatus.CANCELED}.quantity`]: 1
-              }
-            },
-            { session }
-          )
+          this.updateClassReportWhenCancelClassRequestApproved({
+            instructorId: courseClass.instructorId,
+            status: courseClass.status
+          })
         })
       } finally {
         await session.endSession()
@@ -1082,5 +1014,84 @@ export class ClassRequestService implements IClassRequestService {
       },
       topic: 'STAFF_NOTIFICATION_TOPIC'
     })
+  }
+
+  private updateCourseReportWhenPublishClassRequestApproved({ instructorId }) {
+    this.reportService.update(
+      { type: ReportType.CourseSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.quantity': 1
+        }
+      }
+    )
+
+    // update course sum by month report
+    const month = new Date().getMonth() + 1
+    const year = new Date().getFullYear()
+    this.reportService.update(
+      { type: ReportType.CourseSumByMonth, tag: ReportTag.System, 'data.year': year },
+      {
+        $inc: {
+          [`data.${month}.quantity`]: 1
+        }
+      }
+    )
+
+    // update course report
+    this.reportService.update(
+      { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          [`data.${CourseStatus.ACTIVE}.quantity`]: 1
+        }
+      }
+    )
+  }
+
+  private updateClassReportWhenPublishClassRequestApproved({ instructorId }) {
+    // update class report
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
+        }
+      }
+    )
+
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          'data.quantity': 1,
+          [`data.${ClassStatus.PUBLISHED}.quantity`]: 1
+        }
+      }
+    )
+  }
+
+  private updateClassReportWhenCancelClassRequestApproved({ instructorId, status }) {
+    // update class report
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${status}.quantity`]: -1,
+          [`data.${ClassStatus.CANCELED}.quantity`]: 1
+        }
+      }
+    )
+
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          [`data.${status}.quantity`]: -1,
+          [`data.${ClassStatus.CANCELED}.quantity`]: 1
+        }
+      }
+    )
   }
 }

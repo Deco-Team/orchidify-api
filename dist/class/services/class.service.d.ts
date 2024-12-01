@@ -128,4 +128,7 @@ export declare class ClassService implements IClassService {
     cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void>;
     viewReportClassByRate(): Promise<any[]>;
     private sendCancelClassNotificationForLearner;
+    private updateClassReportWhenClassCompleted;
+    private updateRevenueReportWhenClassCompleted;
+    private updateClassReportWhenClassCanceled;
 }

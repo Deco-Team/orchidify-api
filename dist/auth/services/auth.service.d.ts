@@ -55,4 +55,7 @@ export declare class AuthService implements IAuthService {
     resendOtpByLearner(learnerResendOtpDto: LearnerResendOtpDto): Promise<SuccessResponse>;
     registerByInstructor(instructorRegisterDto: InstructorRegisterDto): Promise<SuccessResponse>;
     private generateTokens;
+    private updateReportWhenLearnerRegistered;
+    private updateReportWhenLearnerVerified;
+    private updateReportWhenInstructorRegistered;
 }

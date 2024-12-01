@@ -600,29 +600,6 @@ export class ClassService implements IClassService {
           { new: true, session }
         )
 
-        // update class report
-        await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.System },
-          {
-            $inc: {
-              [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
-              [`data.${ClassStatus.COMPLETED}.quantity`]: 1
-            }
-          },
-          { session }
-        )
-
-        await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
-          {
-            $inc: {
-              [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
-              [`data.${ClassStatus.COMPLETED}.quantity`]: 1
-            }
-          },
-          { session }
-        )
-
         // 2. process earnings for instructor
         // BR-53: Once the staff completes the class, the earnings will be settled (transferred to the balance) for the instructor.
         let totalPrice: number = 0
@@ -650,56 +627,15 @@ export class ClassService implements IClassService {
           { session }
         )
 
-        // update revenue report
-        this.reportService.update(
-          { type: ReportType.RevenueSum, tag: ReportTag.System },
-          {
-            $inc: {
-              'data.total': systemEarnings
-            }
-          }
-        )
+        // update class report
+        this.updateClassReportWhenClassCompleted({ instructorId: courseClass.instructorId })
 
         // update revenue report
-        this.reportService.update(
-          { type: ReportType.RevenueSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
-          {
-            $inc: {
-              'data.total': earnings
-            }
-          }
-        )
-
-        // update revenue sum by month report
-        const month = new Date().getMonth() + 1
-        const year = new Date().getFullYear()
-        this.reportService.update(
-          {
-            type: ReportType.RevenueSumByMonth,
-            tag: ReportTag.System,
-            'data.year': year
-          },
-          {
-            $inc: {
-              [`data.${month}.total`]: earnings
-            }
-          }
-        )
-
-        // update revenue sum by month report
-        this.reportService.update(
-          {
-            type: ReportType.RevenueSumByMonth,
-            tag: ReportTag.User,
-            ownerId: new Types.ObjectId(instructorId),
-            'data.year': year
-          },
-          {
-            $inc: {
-              [`data.${month}.total`]: earnings
-            }
-          }
-        )
+        this.updateRevenueReportWhenClassCompleted({
+          instructorId,
+          earnings,
+          systemEarnings
+        })
       })
     } finally {
       await session.endSession()
@@ -786,28 +722,6 @@ export class ClassService implements IClassService {
           },
           { new: true, session }
         )
-        // update class report
-        await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.System },
-          {
-            $inc: {
-              [`data.${courseClass.status}.quantity`]: -1,
-              [`data.${ClassStatus.CANCELED}.quantity`]: 1
-            }
-          },
-          { session }
-        )
-
-        await this.reportService.update(
-          { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(courseClass.instructorId) },
-          {
-            $inc: {
-              [`data.${courseClass.status}.quantity`]: -1,
-              [`data.${ClassStatus.CANCELED}.quantity`]: 1
-            }
-          },
-          { session }
-        )
 
         // clear class timesheet
         const { startDate, duration, weekdays, gardenId } = courseClass
@@ -891,6 +805,12 @@ export class ClassService implements IClassService {
           }
         })
         await Promise.all(refundTransactionPromises)
+
+        // update class report
+        this.updateClassReportWhenClassCanceled({
+          instructorId: courseClass.instructorId,
+          status: courseClass.status
+        })
       })
     } finally {
       await session.endSession()
@@ -962,5 +882,103 @@ export class ClassService implements IClassService {
       })
     )
     await Promise.all(sendCancelClassEmailPromises)
+  }
+
+  private updateClassReportWhenClassCompleted({ instructorId }) {
+    // update class report
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
+          [`data.${ClassStatus.COMPLETED}.quantity`]: 1
+        }
+      }
+    )
+
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          [`data.${ClassStatus.IN_PROGRESS}.quantity`]: -1,
+          [`data.${ClassStatus.COMPLETED}.quantity`]: 1
+        }
+      }
+    )
+  }
+
+  private updateRevenueReportWhenClassCompleted({ instructorId, systemEarnings, earnings }) {
+    // update revenue report
+    this.reportService.update(
+      { type: ReportType.RevenueSum, tag: ReportTag.System },
+      {
+        $inc: {
+          'data.total': systemEarnings
+        }
+      }
+    )
+
+    // update revenue report
+    this.reportService.update(
+      { type: ReportType.RevenueSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          'data.total': earnings
+        }
+      }
+    )
+
+    // update revenue sum by month report
+    const month = new Date().getMonth() + 1
+    const year = new Date().getFullYear()
+    this.reportService.update(
+      {
+        type: ReportType.RevenueSumByMonth,
+        tag: ReportTag.System,
+        'data.year': year
+      },
+      {
+        $inc: {
+          [`data.${month}.total`]: earnings
+        }
+      }
+    )
+
+    // update revenue sum by month report
+    this.reportService.update(
+      {
+        type: ReportType.RevenueSumByMonth,
+        tag: ReportTag.User,
+        ownerId: new Types.ObjectId(instructorId),
+        'data.year': year
+      },
+      {
+        $inc: {
+          [`data.${month}.total`]: earnings
+        }
+      }
+    )
+  }
+
+  private updateClassReportWhenClassCanceled({ instructorId, status }) {
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${status}.quantity`]: -1,
+          [`data.${ClassStatus.CANCELED}.quantity`]: 1
+        }
+      }
+    )
+
+    this.reportService.update(
+      { type: ReportType.ClassSum, tag: ReportTag.User, ownerId: new Types.ObjectId(instructorId) },
+      {
+        $inc: {
+          [`data.${status}.quantity`]: -1,
+          [`data.${ClassStatus.CANCELED}.quantity`]: 1
+        }
+      }
+    )
   }
 }

@@ -438,18 +438,6 @@ let ClassService = class ClassService {
                         }
                     }
                 }, { new: true, session });
-                await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
-                    $inc: {
-                        [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: -1,
-                        [`data.${constant_1.ClassStatus.COMPLETED}.quantity`]: 1
-                    }
-                }, { session });
-                await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
-                    $inc: {
-                        [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: -1,
-                        [`data.${constant_1.ClassStatus.COMPLETED}.quantity`]: 1
-                    }
-                }, { session });
                 let totalPrice = 0;
                 const learnerClasses = await this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(classId) }, [
                     'learnerId',
@@ -469,36 +457,11 @@ let ClassService = class ClassService {
                 await this.instructorService.update({ _id: instructorId }, {
                     $inc: { balance: earnings }
                 }, { session });
-                this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.System }, {
-                    $inc: {
-                        'data.total': systemEarnings
-                    }
-                });
-                this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
-                    $inc: {
-                        'data.total': earnings
-                    }
-                });
-                const month = new Date().getMonth() + 1;
-                const year = new Date().getFullYear();
-                this.reportService.update({
-                    type: constant_6.ReportType.RevenueSumByMonth,
-                    tag: constant_6.ReportTag.System,
-                    'data.year': year
-                }, {
-                    $inc: {
-                        [`data.${month}.total`]: earnings
-                    }
-                });
-                this.reportService.update({
-                    type: constant_6.ReportType.RevenueSumByMonth,
-                    tag: constant_6.ReportTag.User,
-                    ownerId: new mongoose_1.Types.ObjectId(instructorId),
-                    'data.year': year
-                }, {
-                    $inc: {
-                        [`data.${month}.total`]: earnings
-                    }
+                this.updateClassReportWhenClassCompleted({ instructorId: courseClass.instructorId });
+                this.updateRevenueReportWhenClassCompleted({
+                    instructorId,
+                    earnings,
+                    systemEarnings
                 });
             });
         }
@@ -571,18 +534,6 @@ let ClassService = class ClassService {
                         }
                     }
                 }, { new: true, session });
-                await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
-                    $inc: {
-                        [`data.${courseClass.status}.quantity`]: -1,
-                        [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                    }
-                }, { session });
-                await this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(courseClass.instructorId) }, {
-                    $inc: {
-                        [`data.${courseClass.status}.quantity`]: -1,
-                        [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
-                    }
-                }, { session });
                 const { startDate, duration, weekdays, gardenId } = courseClass;
                 const startOfDate = moment(startDate).tz(config_2.VN_TIMEZONE).startOf('date');
                 const endOfDate = startOfDate.clone().add(duration, 'week').startOf('date');
@@ -651,6 +602,10 @@ let ClassService = class ClassService {
                     }
                 });
                 await Promise.all(refundTransactionPromises);
+                this.updateClassReportWhenClassCanceled({
+                    instructorId: courseClass.instructorId,
+                    status: courseClass.status
+                });
             });
         }
         finally {
@@ -708,6 +663,67 @@ let ClassService = class ClassService {
             }
         }));
         await Promise.all(sendCancelClassEmailPromises);
+    }
+    updateClassReportWhenClassCompleted({ instructorId }) {
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.COMPLETED}.quantity`]: 1
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                [`data.${constant_1.ClassStatus.IN_PROGRESS}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.COMPLETED}.quantity`]: 1
+            }
+        });
+    }
+    updateRevenueReportWhenClassCompleted({ instructorId, systemEarnings, earnings }) {
+        this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                'data.total': systemEarnings
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.RevenueSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                'data.total': earnings
+            }
+        });
+        const month = new Date().getMonth() + 1;
+        const year = new Date().getFullYear();
+        this.reportService.update({
+            type: constant_6.ReportType.RevenueSumByMonth,
+            tag: constant_6.ReportTag.System,
+            'data.year': year
+        }, {
+            $inc: {
+                [`data.${month}.total`]: earnings
+            }
+        });
+        this.reportService.update({
+            type: constant_6.ReportType.RevenueSumByMonth,
+            tag: constant_6.ReportTag.User,
+            ownerId: new mongoose_1.Types.ObjectId(instructorId),
+            'data.year': year
+        }, {
+            $inc: {
+                [`data.${month}.total`]: earnings
+            }
+        });
+    }
+    updateClassReportWhenClassCanceled({ instructorId, status }) {
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.System }, {
+            $inc: {
+                [`data.${status}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+            }
+        });
+        this.reportService.update({ type: constant_6.ReportType.ClassSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(instructorId) }, {
+            $inc: {
+                [`data.${status}.quantity`]: -1,
+                [`data.${constant_1.ClassStatus.CANCELED}.quantity`]: 1
+            }
+        });
     }
 };
 exports.ClassService = ClassService;
