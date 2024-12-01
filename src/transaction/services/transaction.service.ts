@@ -31,6 +31,24 @@ export interface ITransactionService {
     populate?: Array<PopulateOptions>
   )
   viewReportTransactionByDate({ fromDate, toDate }: { fromDate: Date; toDate: Date }): Promise<any[]>
+  viewInstructorReportTransactionByDate({
+    fromDate,
+    toDate,
+    instructorId
+  }: {
+    fromDate: Date
+    toDate: Date
+    instructorId: Types.ObjectId
+  }): Promise<any[]>
+  viewInstructorReportTransactionCountByMonth({
+    fromDate,
+    toDate,
+    instructorId
+  }: {
+    fromDate: Date
+    toDate: Date
+    instructorId: Types.ObjectId
+  }): Promise<any[]>
 }
 
 @Injectable()
@@ -168,6 +186,86 @@ export class TransactionService implements ITransactionService {
                 default: 0
               }
             }
+          }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
+  }
+
+  async viewInstructorReportTransactionByDate({ fromDate, toDate, instructorId }) {
+    return this.transactionRepository.model.aggregate([
+      {
+        $match: {
+          status: TransactionStatus.CAPTURED,
+          type: TransactionType.PAYOUT,
+          'creditAccount.userId': instructorId,
+          updatedAt: {
+            $gte: fromDate,
+            $lte: toDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: '$updatedAt'
+            }
+          },
+          payoutAmount: {
+            $sum: {
+              $switch: {
+                branches: [
+                  {
+                    case: {
+                      $eq: ['$type', TransactionType.PAYOUT]
+                    },
+                    then: '$amount'
+                  }
+                ],
+                default: 0
+              }
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
+      }
+    ])
+  }
+
+  async viewInstructorReportTransactionCountByMonth({ fromDate, toDate, instructorId }) {
+    return this.transactionRepository.model.aggregate([
+      {
+        $match: {
+          status: TransactionStatus.CAPTURED,
+          type: TransactionType.PAYOUT,
+          'creditAccount.userId': instructorId,
+          updatedAt: {
+            $gte: fromDate,
+            $lte: toDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: {
+              format: '%Y-%m',
+              date: '$updatedAt'
+            }
+          },
+          quantity: {
+            $sum: 1
           }
         }
       },

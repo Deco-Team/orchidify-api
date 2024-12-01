@@ -74,6 +74,7 @@ export declare class ReportStaffByStatusListDataResponse extends ReportStaffBySt
 }
 declare class ReportTransactionByDateListItemResponse {
     _id: string;
+    date: Date;
     paymentAmount: number;
     payoutAmount: number;
 }
@@ -84,5 +85,18 @@ declare const ReportTransactionByDateListDataResponse_base: import("@nestjs/comm
     data: typeof ReportTransactionByDateListResponse;
 }>;
 export declare class ReportTransactionByDateListDataResponse extends ReportTransactionByDateListDataResponse_base {
+}
+declare class ReportTransactionCountByMonthListItemResponse {
+    _id: string;
+    quantity: number;
+    month: number;
+}
+declare class ReportTransactionCountByMonthListResponse {
+    docs: ReportTransactionCountByMonthListItemResponse[];
+}
+declare const ReportTransactionCountByMonthListDataResponse_base: import("@nestjs/common").Type<{
+    data: typeof ReportTransactionCountByMonthListResponse;
+}>;
+export declare class ReportTransactionCountByMonthListDataResponse extends ReportTransactionCountByMonthListDataResponse_base {
 }
 export {};

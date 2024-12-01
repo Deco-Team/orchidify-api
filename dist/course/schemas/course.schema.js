@@ -90,7 +90,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Course.prototype, "learnerQuantity", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: Number }),
+    (0, mongoose_1.Prop)({ type: Number, default: 0 }),
     __metadata("design:type", Number)
 ], Course.prototype, "rate", void 0);
 __decorate([

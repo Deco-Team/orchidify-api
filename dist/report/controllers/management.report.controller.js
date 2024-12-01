@@ -127,7 +127,14 @@ let ManagementReportController = class ManagementReportController {
         fromDate = dateMoment.clone().startOf('isoWeek').toDate();
         toDate = dateMoment.clone().endOf('isoWeek').toDate();
         const reports = await this.transactionService.viewReportTransactionByDate({ fromDate, toDate });
-        return { docs: reports };
+        return {
+            docs: reports.map((report) => {
+                return {
+                    ...report,
+                    date: new Date(_.get(report, '_id'))
+                };
+            })
+        };
     }
 };
 exports.ManagementReportController = ManagementReportController;

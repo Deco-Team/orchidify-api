@@ -25,9 +25,13 @@ const constant_1 = require("../../common/contracts/constant");
 const roles_decorator_1 = require("../../auth/decorators/roles.decorator");
 const constant_2 = require("../contracts/constant");
 const mongoose_1 = require("mongoose");
+const config_1 = require("../../config");
+const moment = require("moment-timezone");
+const transaction_service_1 = require("../../transaction/services/transaction.service");
 let InstructorReportController = class InstructorReportController {
-    constructor(reportService) {
+    constructor(reportService, transactionService) {
         this.reportService = reportService;
+        this.transactionService = transactionService;
     }
     async viewReportTotalSummary(req) {
         const { _id } = _.get(req, 'user');
@@ -310,6 +314,49 @@ let InstructorReportController = class InstructorReportController {
         }
         return { docs };
     }
+    async viewReportTransactionCountByMonth(req, queryReportByMonthDto) {
+        const { _id } = _.get(req, 'user');
+        const { year = 2024 } = queryReportByMonthDto;
+        const dateMoment = moment().tz(config_1.VN_TIMEZONE).year(year);
+        let fromDate, toDate;
+        fromDate = dateMoment.clone().startOf('year').toDate();
+        toDate = dateMoment.clone().endOf('year').toDate();
+        const reports = await this.transactionService.viewInstructorReportTransactionCountByMonth({
+            fromDate,
+            toDate,
+            instructorId: new mongoose_1.Types.ObjectId(_id)
+        });
+        return {
+            docs: reports.map((report) => {
+                return {
+                    _id: _.get(report, '_id'),
+                    quantity: _.get(report, 'quantity'),
+                    month: _.get(report, '_id').split('-')[1]
+                };
+            })
+        };
+    }
+    async viewReportTransactionByDate(req, queryReportByWeekDto) {
+        const { _id } = _.get(req, 'user');
+        const { date } = queryReportByWeekDto;
+        const dateMoment = moment(date).tz(config_1.VN_TIMEZONE);
+        let fromDate, toDate;
+        fromDate = dateMoment.clone().startOf('isoWeek').toDate();
+        toDate = dateMoment.clone().endOf('isoWeek').toDate();
+        const reports = await this.transactionService.viewInstructorReportTransactionByDate({
+            fromDate,
+            toDate,
+            instructorId: new mongoose_1.Types.ObjectId(_id)
+        });
+        return {
+            docs: reports.map((report) => {
+                return {
+                    ...report,
+                    date: new Date(_.get(report, '_id'))
+                };
+            })
+        };
+    }
 };
 exports.InstructorReportController = InstructorReportController;
 __decorate([
@@ -358,6 +405,30 @@ __decorate([
     __metadata("design:paramtypes", [Object, view_report_dto_1.QueryReportByMonthDto]),
     __metadata("design:returntype", Promise)
 ], InstructorReportController.prototype, "viewReportRevenueDataByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `View Report Transaction Count By Month`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportTransactionCountByMonthListDataResponse }),
+    (0, common_1.Get)('transaction-count-by-month'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, view_report_dto_1.QueryReportByMonthDto]),
+    __metadata("design:returntype", Promise)
+], InstructorReportController.prototype, "viewReportTransactionCountByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `View Report Transaction Data By Date`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportTransactionByDateListDataResponse }),
+    (0, common_1.Get)('transaction-by-date'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, view_report_dto_1.QueryReportByWeekDto]),
+    __metadata("design:returntype", Promise)
+], InstructorReportController.prototype, "viewReportTransactionByDate", null);
 exports.InstructorReportController = InstructorReportController = __decorate([
     (0, swagger_1.ApiTags)('Report - Instructor'),
     (0, swagger_1.ApiBearerAuth)(),
@@ -366,6 +437,7 @@ exports.InstructorReportController = InstructorReportController = __decorate([
     (0, roles_decorator_1.Roles)(constant_1.UserRole.INSTRUCTOR),
     (0, common_1.Controller)('instructor'),
     __param(0, (0, common_1.Inject)(report_service_1.IReportService)),
-    __metadata("design:paramtypes", [Object])
+    __param(1, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
+    __metadata("design:paramtypes", [Object, Object])
 ], InstructorReportController);
 //# sourceMappingURL=instructor.report.controller.js.map

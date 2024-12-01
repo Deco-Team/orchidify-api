@@ -101,6 +101,9 @@ class ReportTransactionByDateListItemResponse {
   @ApiProperty({ type: String })
   _id: string
 
+  @ApiProperty({ type: Date })
+  date: Date
+
   @ApiProperty({ type: Number })
   paymentAmount: number
 
@@ -112,3 +115,20 @@ class ReportTransactionByDateListResponse {
   docs: ReportTransactionByDateListItemResponse[]
 }
 export class ReportTransactionByDateListDataResponse extends DataResponse(ReportTransactionByDateListResponse) {}
+
+// View Report Transaction Count By Month
+class ReportTransactionCountByMonthListItemResponse {
+  @ApiProperty({ type: String })
+  _id: string
+
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: Number })
+  month: number
+}
+class ReportTransactionCountByMonthListResponse {
+  @ApiProperty({ type: ReportTransactionCountByMonthListItemResponse, isArray: true })
+  docs: ReportTransactionCountByMonthListItemResponse[]
+}
+export class ReportTransactionCountByMonthListDataResponse extends DataResponse(ReportTransactionCountByMonthListResponse) {}

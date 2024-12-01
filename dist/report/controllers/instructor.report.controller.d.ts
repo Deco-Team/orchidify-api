@@ -1,8 +1,10 @@
 import { IReportService } from '@report/services/report.service';
-import { QueryReportByMonthDto } from '@report/dto/view-report.dto';
+import { QueryReportByMonthDto, QueryReportByWeekDto } from '@report/dto/view-report.dto';
+import { ITransactionService } from '@transaction/services/transaction.service';
 export declare class InstructorReportController {
     private readonly reportService;
-    constructor(reportService: IReportService);
+    private readonly transactionService;
+    constructor(reportService: IReportService, transactionService: ITransactionService);
     viewReportTotalSummary(req: any): Promise<{
         docs: any[];
     }>;
@@ -17,6 +19,16 @@ export declare class InstructorReportController {
         docs: any[];
     }>;
     viewReportRevenueDataByMonth(req: any, queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    viewReportTransactionCountByMonth(req: any, queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: {
+            _id: any;
+            quantity: any;
+            month: any;
+        }[];
+    }>;
+    viewReportTransactionByDate(req: any, queryReportByWeekDto: QueryReportByWeekDto): Promise<{
         docs: any[];
     }>;
 }

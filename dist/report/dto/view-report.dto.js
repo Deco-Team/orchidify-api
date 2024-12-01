@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportTransactionByDateListDataResponse = exports.ReportStaffByStatusListDataResponse = exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByWeekDto = exports.QueryReportByMonthDto = void 0;
+exports.ReportTransactionCountByMonthListDataResponse = exports.ReportTransactionByDateListDataResponse = exports.ReportStaffByStatusListDataResponse = exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByWeekDto = exports.QueryReportByMonthDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_report_dto_1 = require("./base.report.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -146,6 +146,10 @@ __decorate([
     __metadata("design:type", String)
 ], ReportTransactionByDateListItemResponse.prototype, "_id", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: Date }),
+    __metadata("design:type", Date)
+], ReportTransactionByDateListItemResponse.prototype, "date", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: Number }),
     __metadata("design:type", Number)
 ], ReportTransactionByDateListItemResponse.prototype, "paymentAmount", void 0);
@@ -162,4 +166,27 @@ __decorate([
 class ReportTransactionByDateListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportTransactionByDateListResponse) {
 }
 exports.ReportTransactionByDateListDataResponse = ReportTransactionByDateListDataResponse;
+class ReportTransactionCountByMonthListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    __metadata("design:type", String)
+], ReportTransactionCountByMonthListItemResponse.prototype, "_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportTransactionCountByMonthListItemResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportTransactionCountByMonthListItemResponse.prototype, "month", void 0);
+class ReportTransactionCountByMonthListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportTransactionCountByMonthListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportTransactionCountByMonthListResponse.prototype, "docs", void 0);
+class ReportTransactionCountByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportTransactionCountByMonthListResponse) {
+}
+exports.ReportTransactionCountByMonthListDataResponse = ReportTransactionCountByMonthListDataResponse;
 //# sourceMappingURL=view-report.dto.js.map

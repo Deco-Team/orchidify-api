@@ -79,7 +79,7 @@ export class Course {
   @Prop({ type: Number, default: 0 })
   learnerQuantity: number
 
-  @Prop({ type: Number })
+  @Prop({ type: Number, default: 0 })
   rate: number
 
   @Prop({ type: Number })

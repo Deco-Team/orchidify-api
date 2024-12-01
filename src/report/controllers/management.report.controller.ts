@@ -196,6 +196,13 @@ export class ManagementReportController {
 
     const reports = await this.transactionService.viewReportTransactionByDate({ fromDate, toDate })
 
-    return { docs: reports }
+    return {
+      docs: reports.map((report) => {
+        return {
+          ...report,
+          date: new Date(_.get(report, '_id'))
+        }
+      })
+    }
   }
 }

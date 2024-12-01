@@ -26,7 +26,7 @@
 /// <reference types="mongoose-paginate-v2" />
 import { ITransactionRepository } from '@src/transaction/repositories/transaction.repository';
 import { Transaction, TransactionDocument } from '@src/transaction/schemas/transaction.schema';
-import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, UpdateQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions, QueryOptions, SaveOptions, Types, UpdateQuery } from 'mongoose';
 import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { CreateTransactionDto } from '@transaction/dto/create-transaction.dto';
 import { QueryTransactionDto } from '@transaction/dto/view-transaction.dto';
@@ -39,6 +39,16 @@ export interface ITransactionService {
     viewReportTransactionByDate({ fromDate, toDate }: {
         fromDate: Date;
         toDate: Date;
+    }): Promise<any[]>;
+    viewInstructorReportTransactionByDate({ fromDate, toDate, instructorId }: {
+        fromDate: Date;
+        toDate: Date;
+        instructorId: Types.ObjectId;
+    }): Promise<any[]>;
+    viewInstructorReportTransactionCountByMonth({ fromDate, toDate, instructorId }: {
+        fromDate: Date;
+        toDate: Date;
+        instructorId: Types.ObjectId;
     }): Promise<any[]>;
 }
 export declare class TransactionService implements ITransactionService {
@@ -64,5 +74,15 @@ export declare class TransactionService implements ITransactionService {
     viewReportTransactionByDate({ fromDate, toDate }: {
         fromDate: any;
         toDate: any;
+    }): Promise<any[]>;
+    viewInstructorReportTransactionByDate({ fromDate, toDate, instructorId }: {
+        fromDate: any;
+        toDate: any;
+        instructorId: any;
+    }): Promise<any[]>;
+    viewInstructorReportTransactionCountByMonth({ fromDate, toDate, instructorId }: {
+        fromDate: any;
+        toDate: any;
+        instructorId: any;
     }): Promise<any[]>;
 }

@@ -117,9 +117,9 @@ export class Class {
   @Prop({ type: [Number], enum: SlotNumber })
   slotNumbers: SlotNumber[]
 
-  @Prop({ type: Number })
+  @Prop({ type: Number, default: 0 })
   rate: number
-
+  
   @Prop({ type: String })
   cancelReason: string
 

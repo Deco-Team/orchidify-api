@@ -6,9 +6,12 @@ import { ErrorResponse } from '@common/contracts/dto'
 import { IReportService } from '@report/services/report.service'
 import {
   QueryReportByMonthDto,
+  QueryReportByWeekDto,
   ReportClassByStatusListDataResponse,
   ReportRevenueByMonthListDataResponse,
   ReportTotalSummaryListDataResponse,
+  ReportTransactionByDateListDataResponse,
+  ReportTransactionCountByMonthListDataResponse,
   ReportUserByMonthListDataResponse
 } from '@report/dto/view-report.dto'
 import { JwtAuthGuard } from '@auth/guards/jwt-auth.guard'
@@ -23,6 +26,9 @@ import {
 import { Roles } from '@auth/decorators/roles.decorator'
 import { ReportTag, ReportType } from '@report/contracts/constant'
 import { Types } from 'mongoose'
+import { VN_TIMEZONE } from '@src/config'
+import * as moment from 'moment-timezone'
+import { ITransactionService } from '@transaction/services/transaction.service'
 
 @ApiTags('Report - Instructor')
 @ApiBearerAuth()
@@ -33,7 +39,9 @@ import { Types } from 'mongoose'
 export class InstructorReportController {
   constructor(
     @Inject(IReportService)
-    private readonly reportService: IReportService
+    private readonly reportService: IReportService,
+    @Inject(ITransactionService)
+    private readonly transactionService: ITransactionService
   ) {}
 
   @ApiOperation({
@@ -367,5 +375,66 @@ export class InstructorReportController {
       }
     }
     return { docs }
+  }
+
+  @ApiOperation({
+    summary: `View Report Transaction Count By Month`
+  })
+  @ApiOkResponse({ type: ReportTransactionCountByMonthListDataResponse })
+  @Get('transaction-count-by-month')
+  async viewReportTransactionCountByMonth(@Req() req, @Query() queryReportByMonthDto: QueryReportByMonthDto) {
+    const { _id } = _.get(req, 'user')
+    const { year = 2024 } = queryReportByMonthDto
+    const dateMoment = moment().tz(VN_TIMEZONE).year(year)
+
+    let fromDate: Date, toDate: Date
+    fromDate = dateMoment.clone().startOf('year').toDate()
+    toDate = dateMoment.clone().endOf('year').toDate()
+
+    const reports = await this.transactionService.viewInstructorReportTransactionCountByMonth({
+      fromDate,
+      toDate,
+      instructorId: new Types.ObjectId(_id)
+    })
+
+    return {
+      docs: reports.map((report) => {
+        return {
+          _id: _.get(report, '_id'),
+          quantity: _.get(report, 'quantity'),
+          month: _.get(report, '_id').split('-')[1]
+        }
+      })
+    }
+  }
+
+  @ApiOperation({
+    summary: `View Report Transaction Data By Date`
+  })
+  @ApiOkResponse({ type: ReportTransactionByDateListDataResponse })
+  @Get('transaction-by-date')
+  async viewReportTransactionByDate(@Req() req, @Query() queryReportByWeekDto: QueryReportByWeekDto) {
+    const { _id } = _.get(req, 'user')
+    const { date } = queryReportByWeekDto
+    const dateMoment = moment(date).tz(VN_TIMEZONE)
+
+    let fromDate: Date, toDate: Date
+    fromDate = dateMoment.clone().startOf('isoWeek').toDate()
+    toDate = dateMoment.clone().endOf('isoWeek').toDate()
+
+    const reports = await this.transactionService.viewInstructorReportTransactionByDate({
+      fromDate,
+      toDate,
+      instructorId: new Types.ObjectId(_id)
+    })
+
+    return {
+      docs: reports.map((report) => {
+        return {
+          ...report,
+          date: new Date(_.get(report, '_id'))
+        }
+      })
+    }
   }
 }

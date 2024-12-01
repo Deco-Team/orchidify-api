@@ -136,6 +136,84 @@ let TransactionService = TransactionService_1 = class TransactionService {
             }
         ]);
     }
+    async viewInstructorReportTransactionByDate({ fromDate, toDate, instructorId }) {
+        return this.transactionRepository.model.aggregate([
+            {
+                $match: {
+                    status: constant_1.TransactionStatus.CAPTURED,
+                    type: constant_2.TransactionType.PAYOUT,
+                    'creditAccount.userId': instructorId,
+                    updatedAt: {
+                        $gte: fromDate,
+                        $lte: toDate
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$updatedAt'
+                        }
+                    },
+                    payoutAmount: {
+                        $sum: {
+                            $switch: {
+                                branches: [
+                                    {
+                                        case: {
+                                            $eq: ['$type', constant_2.TransactionType.PAYOUT]
+                                        },
+                                        then: '$amount'
+                                    }
+                                ],
+                                default: 0
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            }
+        ]);
+    }
+    async viewInstructorReportTransactionCountByMonth({ fromDate, toDate, instructorId }) {
+        return this.transactionRepository.model.aggregate([
+            {
+                $match: {
+                    status: constant_1.TransactionStatus.CAPTURED,
+                    type: constant_2.TransactionType.PAYOUT,
+                    'creditAccount.userId': instructorId,
+                    updatedAt: {
+                        $gte: fromDate,
+                        $lte: toDate
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: '%Y-%m',
+                            date: '$updatedAt'
+                        }
+                    },
+                    quantity: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $sort: {
+                    _id: 1
+                }
+            }
+        ]);
+    }
 };
 exports.TransactionService = TransactionService;
 exports.TransactionService = TransactionService = TransactionService_1 = __decorate([
