@@ -33,6 +33,7 @@ const mongoose_1 = require("mongoose");
 const notification_service_1 = require("../../notification/services/notification.service");
 const constant_2 = require("../../notification/contracts/constant");
 const garden_manager_view_timesheet_dto_1 = require("../dto/garden-manager-view-timesheet.dto");
+const slot_dto_1 = require("../dto/slot.dto");
 let ManagementGardenTimesheetController = class ManagementGardenTimesheetController {
     constructor(gardenTimesheetService, gardenService, notificationService) {
         this.gardenTimesheetService = gardenTimesheetService;
@@ -96,6 +97,15 @@ let ManagementGardenTimesheetController = class ManagementGardenTimesheetControl
             return { docs: [] };
         const docs = await this.gardenTimesheetService.viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto);
         return { docs };
+    }
+    async gardenManagerViewSlotDetail(req, slotId) {
+        const { _id } = _.get(req, 'user');
+        const gardens = await this.gardenService.findManyByGardenManagerId(_id);
+        const gardenIds = gardens.map((garden) => garden._id.toString());
+        const slot = await this.gardenTimesheetService.findSlotBy({ slotId, gardenIds });
+        if (!slot)
+            throw new app_exception_1.AppException(error_1.Errors.SLOT_NOT_FOUND);
+        return slot;
     }
 };
 exports.ManagementGardenTimesheetController = ManagementGardenTimesheetController;
@@ -164,6 +174,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, garden_manager_view_timesheet_dto_1.QueryInactiveTimesheetByGardenDto]),
     __metadata("design:returntype", Promise)
 ], ManagementGardenTimesheetController.prototype, "gardenManagerViewUnavailableTimesheet", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.GARDEN_MANAGER}] View Slot Detail`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: slot_dto_1.ViewSlotDto }),
+    (0, api_response_decorator_1.ApiErrorResponse)([error_1.Errors.SLOT_NOT_FOUND]),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.GARDEN_MANAGER),
+    (0, common_1.Get)('garden-manager/slots/:slotId([0-9a-f]{24})'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('slotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], ManagementGardenTimesheetController.prototype, "gardenManagerViewSlotDetail", null);
 exports.ManagementGardenTimesheetController = ManagementGardenTimesheetController = __decorate([
     (0, swagger_1.ApiTags)('GardenTimesheet - Management'),
     (0, swagger_1.ApiBearerAuth)(),

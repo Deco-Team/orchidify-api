@@ -65,6 +65,7 @@ export interface IGardenTimesheetService {
     findSlotBy(params: {
         slotId: string;
         instructorId?: string;
+        gardenIds?: string[];
     }): Promise<Slot>;
     findMany(conditions: FilterQuery<GardenTimesheetDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<GardenTimesheetDocument[]>;
     updateMany(conditions: FilterQuery<GardenTimesheetDocument>, payload: UpdateQuery<GardenTimesheetDocument>, options?: import('mongodb').UpdateOptions | null): Promise<void>;
@@ -86,6 +87,7 @@ export declare class GardenTimesheetService implements IGardenTimesheetService {
     findSlotBy(params: {
         slotId: string;
         instructorId?: string;
+        gardenIds?: string[];
     }): Promise<{
         garden: import("mongoose").Document<unknown, {}, Garden> & Garden & Required<{
             _id: string;

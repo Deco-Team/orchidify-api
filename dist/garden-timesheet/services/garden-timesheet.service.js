@@ -60,7 +60,7 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
         return gardenTimesheet;
     }
     async findSlotBy(params) {
-        const { slotId, instructorId } = params;
+        const { slotId, instructorId, gardenIds } = params;
         const conditions = { 'slots._id': new mongoose_1.Types.ObjectId(slotId) };
         if (instructorId)
             conditions['slots.instructorId'] = new mongoose_1.Types.ObjectId(instructorId);
@@ -69,6 +69,8 @@ let GardenTimesheetService = GardenTimesheetService_1 = class GardenTimesheetSer
             options: { lean: true }
         });
         if (!gardenTimesheet)
+            return null;
+        if (gardenIds && gardenIds.length > 0 && !gardenIds.includes(gardenTimesheet.gardenId.toString()))
             return null;
         const slot = gardenTimesheet?.slots.find((slot) => slot._id.toString() === slotId);
         const [garden, courseClass] = await Promise.all([

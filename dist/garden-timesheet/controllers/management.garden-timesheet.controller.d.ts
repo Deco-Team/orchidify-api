@@ -58,4 +58,5 @@ export declare class ManagementGardenTimesheetController {
             _id: string;
         }>)[];
     }>;
+    gardenManagerViewSlotDetail(req: any, slotId: string): Promise<import("../schemas/slot.schema").Slot>;
 }

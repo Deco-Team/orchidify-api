@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Inject, Query, Req, Put, Body } from '@nestjs/common'
+import { Controller, Get, UseGuards, Inject, Query, Req, Put, Body, Param } from '@nestjs/common'
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as _ from 'lodash'
 import { ErrorResponse, SuccessDataResponse, SuccessResponse } from '@common/contracts/dto'
@@ -28,6 +28,7 @@ import {
   QueryInactiveTimesheetByGardenDto,
   ViewSlotListDataResponse
 } from '@garden-timesheet/dto/garden-manager-view-timesheet.dto'
+import { ViewSlotDto } from '@garden-timesheet/dto/slot.dto'
 
 @ApiTags('GardenTimesheet - Management')
 @ApiBearerAuth()
@@ -150,5 +151,22 @@ export class ManagementGardenTimesheetController {
 
     const docs = await this.gardenTimesheetService.viewInactiveTimesheetByGarden(queryInactiveTimesheetByGardenDto)
     return { docs }
+  }
+
+  @ApiOperation({
+    summary: `[${UserRole.GARDEN_MANAGER}] View Slot Detail`
+  })
+  @ApiOkResponse({ type: ViewSlotDto })
+  @ApiErrorResponse([Errors.SLOT_NOT_FOUND])
+  @Roles(UserRole.GARDEN_MANAGER)
+  @Get('garden-manager/slots/:slotId([0-9a-f]{24})')
+  async gardenManagerViewSlotDetail(@Req() req, @Param('slotId') slotId: string) {
+    const { _id } = _.get(req, 'user')
+    const gardens = await this.gardenService.findManyByGardenManagerId(_id)
+    const gardenIds = gardens.map((garden) => garden._id.toString())
+    const slot = await this.gardenTimesheetService.findSlotBy({ slotId, gardenIds })
+
+    if (!slot) throw new AppException(Errors.SLOT_NOT_FOUND)
+    return slot
   }
 }

@@ -83,7 +83,7 @@ export interface IGardenTimesheetService {
     },
     options?: QueryOptions | undefined
   ): Promise<boolean>
-  findSlotBy(params: { slotId: string; instructorId?: string }): Promise<Slot>
+  findSlotBy(params: { slotId: string; instructorId?: string; gardenIds?: string[] }): Promise<Slot>
   findMany(
     conditions: FilterQuery<GardenTimesheetDocument>,
     projection?: Record<string, any>,
@@ -139,8 +139,8 @@ export class GardenTimesheetService implements IGardenTimesheetService {
     return gardenTimesheet
   }
 
-  public async findSlotBy(params: { slotId: string; instructorId?: string }) {
-    const { slotId, instructorId } = params
+  public async findSlotBy(params: { slotId: string; instructorId?: string; gardenIds?: string[] }) {
+    const { slotId, instructorId, gardenIds } = params
     const conditions = { 'slots._id': new Types.ObjectId(slotId) }
     if (instructorId) conditions['slots.instructorId'] = new Types.ObjectId(instructorId)
 
@@ -149,6 +149,7 @@ export class GardenTimesheetService implements IGardenTimesheetService {
       options: { lean: true }
     })
     if (!gardenTimesheet) return null
+    if (gardenIds && gardenIds.length > 0 && !gardenIds.includes(gardenTimesheet.gardenId.toString())) return null
 
     const slot = gardenTimesheet?.slots.find((slot) => slot._id.toString() === slotId)
     const [garden, courseClass] = await Promise.all([

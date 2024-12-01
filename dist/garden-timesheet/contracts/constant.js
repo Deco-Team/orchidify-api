@@ -9,5 +9,12 @@ exports.VIEW_GARDEN_TIMESHEET_LIST_PROJECTION = [
     'slots',
     'gardenMaxClass'
 ];
-exports.SLOT_CLASS_DETAIL_PROJECTION = ['code', 'title', 'learnerLimit', 'learnerQuantity', 'courseId'];
+exports.SLOT_CLASS_DETAIL_PROJECTION = [
+    'code',
+    'title',
+    'learnerLimit',
+    'learnerQuantity',
+    'courseId',
+    'gardenRequiredToolkits'
+];
 //# sourceMappingURL=constant.js.map
