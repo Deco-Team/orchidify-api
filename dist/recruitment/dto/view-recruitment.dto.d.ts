@@ -6,7 +6,7 @@ export declare class QueryRecruitmentDto {
     email: string;
     status: RecruitmentStatus[];
 }
-declare const RecruitmentDetailResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "status" | "createdAt" | "updatedAt" | "_id" | "applicationInfo" | "meetingUrl" | "histories" | "rejectReason" | "handledBy" | "isInstructorAdded">>;
+declare const RecruitmentDetailResponse_base: import("@nestjs/common").Type<Pick<BaseRecruitmentDto, "status" | "createdAt" | "updatedAt" | "_id" | "applicationInfo" | "meetingUrl" | "meetingDate" | "histories" | "rejectReason" | "handledBy" | "isInstructorAdded">>;
 declare class RecruitmentDetailResponse extends RecruitmentDetailResponse_base {
     handledBy: Staff;
 }

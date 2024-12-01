@@ -74,6 +74,10 @@ __decorate([
     __metadata("design:type", String)
 ], BaseRecruitmentDto.prototype, "meetingUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: Date }),
+    __metadata("design:type", String)
+], BaseRecruitmentDto.prototype, "meetingDate", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.RecruitmentStatus }),
     (0, class_validator_1.IsEnum)(constant_1.RecruitmentStatus),
     __metadata("design:type", String)

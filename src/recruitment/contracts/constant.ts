@@ -2,6 +2,7 @@ export const RECRUITMENT_DETAIL_PROJECTION = [
   '_id',
   'applicationInfo',
   'meetingUrl',
+  'meetingDate',
   'status',
   'histories',
   'rejectReason',

@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProcessRecruitmentApplicationDto = void 0;
+const future_min_day_validator_1 = require("../../common/validators/future-min-day.validator");
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class ProcessRecruitmentApplicationDto {
@@ -20,4 +21,9 @@ __decorate([
     (0, class_validator_1.IsUrl)(),
     __metadata("design:type", String)
 ], ProcessRecruitmentApplicationDto.prototype, "meetingUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Date }),
+    (0, future_min_day_validator_1.FutureMinDay)(0),
+    __metadata("design:type", Date)
+], ProcessRecruitmentApplicationDto.prototype, "meetingDate", void 0);
 //# sourceMappingURL=process-recruitment-application.dto.js.map

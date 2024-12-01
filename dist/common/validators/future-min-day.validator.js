@@ -15,11 +15,11 @@ let FutureMinDayValidator = class FutureMinDayValidator {
     validate(value, validationArguments) {
         const now = moment().tz(config_1.VN_TIMEZONE);
         const dateMoment = moment(value).tz(config_1.VN_TIMEZONE);
-        const day = validationArguments.constraints[0] || 1;
+        const day = validationArguments.constraints[0] ?? 1;
         return dateMoment.subtract(day, 'day').isSameOrAfter(now, 'day');
     }
     defaultMessage(args) {
-        const day = args.constraints[0] || 1;
+        const day = args.constraints[0] ?? 1;
         return `Date must be after ${day} days from now`;
     }
 };

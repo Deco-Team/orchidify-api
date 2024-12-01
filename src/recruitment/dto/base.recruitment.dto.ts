@@ -47,6 +47,10 @@ export class BaseRecruitmentDto {
   @IsUrl()
   meetingUrl: string
 
+  @ApiProperty({ type: String })
+  @Í()
+  meetingDate: string
+
   @ApiProperty({ type: String, enum: RecruitmentStatus })
   @IsEnum(RecruitmentStatus)
   status: RecruitmentStatus

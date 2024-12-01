@@ -12,11 +12,11 @@ const class_validator_1 = require("class-validator");
 let PastYearValidator = class PastYearValidator {
     validate(value, validationArguments) {
         const now = new Date();
-        const yearsAgo = validationArguments.constraints[0] || 10;
+        const yearsAgo = validationArguments.constraints[0] ?? 10;
         return now.getFullYear() - new Date(value).getFullYear() >= yearsAgo;
     }
     defaultMessage(args) {
-        const yearsAgo = args.constraints[0] || 10;
+        const yearsAgo = args.constraints[0] ?? 10;
         return `Date must be older than ${yearsAgo} years from now`;
     }
 };

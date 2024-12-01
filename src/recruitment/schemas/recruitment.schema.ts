@@ -63,6 +63,9 @@ export class Recruitment {
   @Prop({ type: String })
   meetingUrl: string
 
+  @Prop({ type: Date })
+  meetingDate: Date
+
   @Prop({
     enum: RecruitmentStatus,
     default: RecruitmentStatus.PENDING

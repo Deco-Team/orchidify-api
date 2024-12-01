@@ -15,11 +15,11 @@ let FutureMaxMonthValidator = class FutureMaxMonthValidator {
     validate(value, validationArguments) {
         const now = moment().tz(config_1.VN_TIMEZONE);
         const dateMoment = moment(value).tz(config_1.VN_TIMEZONE);
-        const month = validationArguments.constraints[0] || 1;
+        const month = validationArguments.constraints[0] ?? 1;
         return dateMoment.subtract(month, 'month').isSameOrBefore(now, 'day');
     }
     defaultMessage(args) {
-        const month = args.constraints[0] || 1;
+        const month = args.constraints[0] ?? 1;
         return `Date must be before ${month} months from now`;
     }
 };

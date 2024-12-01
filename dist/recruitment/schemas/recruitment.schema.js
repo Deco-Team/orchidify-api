@@ -75,6 +75,10 @@ __decorate([
     __metadata("design:type", String)
 ], Recruitment.prototype, "meetingUrl", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: Date }),
+    __metadata("design:type", Date)
+], Recruitment.prototype, "meetingDate", void 0);
+__decorate([
     (0, mongoose_1.Prop)({
         enum: constant_1.RecruitmentStatus,
         default: constant_1.RecruitmentStatus.PENDING

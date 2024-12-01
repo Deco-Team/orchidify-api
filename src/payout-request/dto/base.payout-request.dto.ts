@@ -1,9 +1,8 @@
-import { IsEnum, IsInt, IsMongoId, IsNotEmpty, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
+import { IsEnum, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { PayoutRequestStatus } from '@common/contracts/constant'
 import { PayoutRequestStatusHistory } from '@src/payout-request/schemas/payout-request.schema'
 import { Types } from 'mongoose'
-import { BaseClassDto } from '@class/dto/base.class.dto'
 import { BaseInstructorDto } from '@instructor/dto/base.instructor.dto'
 import { BaseStaffDto } from '@staff/dto/base.staff.dto'
 

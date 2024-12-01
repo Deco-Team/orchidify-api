@@ -174,7 +174,7 @@ export class RecruitmentService implements IRecruitmentService {
     processRecruitmentApplicationDto: ProcessRecruitmentApplicationDto,
     userAuth: UserAuth
   ): Promise<SuccessResponse> {
-    const { meetingUrl } = processRecruitmentApplicationDto
+    const { meetingUrl, meetingDate } = processRecruitmentApplicationDto
     const { _id, role } = userAuth
 
     // validate recruitment
@@ -188,7 +188,8 @@ export class RecruitmentService implements IRecruitmentService {
         $set: {
           status: RecruitmentStatus.INTERVIEWING,
           handledBy: new Types.ObjectId(_id),
-          meetingUrl
+          meetingUrl,
+          meetingDate
         },
         $push: {
           histories: {

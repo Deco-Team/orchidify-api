@@ -14,13 +14,13 @@ class FutureMinDayValidator implements ValidatorConstraintInterface {
   validate(value: Date, validationArguments?: ValidationArguments): boolean {
     const now = moment().tz(VN_TIMEZONE)
     const dateMoment = moment(value).tz(VN_TIMEZONE)
-    const day = validationArguments.constraints[0] || 1
+    const day = validationArguments.constraints[0] ?? 1
 
     return dateMoment.subtract(day, 'day').isSameOrAfter(now, 'day')
   }
 
   defaultMessage(args?: ValidationArguments) {
-    const day = args.constraints[0] || 1
+    const day = args.constraints[0] ?? 1
     return `Date must be after ${day} days from now`
   }
 }

@@ -45,6 +45,7 @@ export declare class Recruitment {
     _id: string;
     applicationInfo: ApplicationInfo;
     meetingUrl: string;
+    meetingDate: Date;
     status: RecruitmentStatus;
     histories: RecruitmentStatusHistory[];
     rejectReason: string;

@@ -116,7 +116,7 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
         });
     }
     async processRecruitmentApplication(recruitmentId, processRecruitmentApplicationDto, userAuth) {
-        const { meetingUrl } = processRecruitmentApplicationDto;
+        const { meetingUrl, meetingDate } = processRecruitmentApplicationDto;
         const { _id, role } = userAuth;
         const recruitment = await this.findById(recruitmentId);
         if (!recruitment)
@@ -127,7 +127,8 @@ let RecruitmentService = RecruitmentService_1 = class RecruitmentService {
             $set: {
                 status: constant_1.RecruitmentStatus.INTERVIEWING,
                 handledBy: new mongoose_1.Types.ObjectId(_id),
-                meetingUrl
+                meetingUrl,
+                meetingDate
             },
             $push: {
                 histories: {

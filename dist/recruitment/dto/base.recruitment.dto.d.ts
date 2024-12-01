@@ -43,6 +43,7 @@ export declare class BaseRecruitmentDto {
     _id: string;
     applicationInfo: ApplicationInfoDto;
     meetingUrl: string;
+    meetingDate: string;
     status: RecruitmentStatus;
     histories: RecruitmentStatusHistoryDto[];
     rejectReason: string;
