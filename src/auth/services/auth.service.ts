@@ -172,7 +172,8 @@ export class AuthService implements IAuthService {
       { type: ReportType.LearnerSum, tag: ReportTag.System },
       {
         $inc: {
-          'data.quantity': 1
+          'data.quantity': 1,
+          [`data.${LearnerStatus.UNVERIFIED}.quantity`]: 1
         }
       }
     )
@@ -205,7 +206,17 @@ export class AuthService implements IAuthService {
 
     await Promise.all([
       this.learnerService.update({ _id: learner._id }, { status: LearnerStatus.ACTIVE }),
-      this.otpService.clearOtp(learnerVerifyAccountDto.code)
+      this.otpService.clearOtp(learnerVerifyAccountDto.code),
+      // update learner report
+      this.reportService.update(
+        { type: ReportType.LearnerSum, tag: ReportTag.System },
+        {
+          $inc: {
+            [`data.${LearnerStatus.UNVERIFIED}.quantity`]: -1,
+            [`data.${LearnerStatus.ACTIVE}.quantity`]: 1
+          }
+        }
+      )
     ])
 
     return new SuccessResponse(true)

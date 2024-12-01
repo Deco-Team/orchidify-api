@@ -667,6 +667,21 @@ let ClassService = class ClassService {
             }
         });
     }
+    async viewReportClassByRate() {
+        return this.classRepository.model.aggregate([
+            {
+                $match: {
+                    status: { $ne: constant_1.ClassStatus.DELETED }
+                }
+            },
+            {
+                $bucket: {
+                    groupBy: '$rate',
+                    boundaries: [0, 1, 2, 3, 4, 5.1]
+                }
+            }
+        ]);
+    }
     async sendCancelClassNotificationForLearner(refundTransactionLearnerIds, courseClass) {
         const learners = await this.learnerService.findMany({
             _id: { $in: refundTransactionLearnerIds }

@@ -27,10 +27,14 @@ const constant_2 = require("../contracts/constant");
 const config_1 = require("../../config");
 const moment = require("moment-timezone");
 const transaction_service_1 = require("../../transaction/services/transaction.service");
+const course_service_1 = require("../../course/services/course.service");
+const class_service_1 = require("../../class/services/class.service");
 let ManagementReportController = class ManagementReportController {
-    constructor(reportService, transactionService) {
+    constructor(reportService, transactionService, courseService, classService) {
         this.reportService = reportService;
         this.transactionService = transactionService;
+        this.courseService = courseService;
+        this.classService = classService;
     }
     async viewReportTotalSummary() {
         const reports = await this.reportService.findMany({
@@ -136,6 +140,142 @@ let ManagementReportController = class ManagementReportController {
             })
         };
     }
+    async viewReportCourseDataByMonth(queryReportByMonthDto) {
+        const { year = 2024 } = queryReportByMonthDto;
+        const reports = await this.reportService.findMany({
+            type: {
+                $in: [constant_2.ReportType.CourseSumByMonth]
+            },
+            tag: constant_2.ReportTag.System,
+            'data.year': year
+        }, ['type', 'data']);
+        const courseReport = _.find(reports, { type: constant_2.ReportType.CourseSumByMonth });
+        const docs = [];
+        if (courseReport) {
+            for (let month = 1; month <= 12; month++) {
+                const course = _.get(courseReport.data, `${month}`) || { quantity: 0 };
+                docs.push({
+                    course
+                });
+            }
+        }
+        return { docs };
+    }
+    async viewReportCourseDataByRate() {
+        const reports = await this.courseService.viewReportCourseByRate();
+        const docs = [];
+        const idSet = new Set(reports.map((item) => item._id));
+        for (let i = 0; i <= 4; i++) {
+            if (idSet.has(i)) {
+                docs.push(reports.find((item) => item._id === i));
+            }
+            else {
+                docs.push({
+                    _id: i,
+                    count: 0
+                });
+            }
+        }
+        return { docs };
+    }
+    async adminViewReportClassDataByStatus() {
+        const report = await this.reportService.findOne({ type: constant_2.ReportType.ClassSum, tag: constant_2.ReportTag.System }, [
+            'type',
+            'data'
+        ]);
+        return {
+            quantity: report.data.quantity,
+            docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
+                status: constant_1.ClassStatus[statusKey],
+                quantity: report.data[statusKey].quantity
+            }))
+        };
+    }
+    async viewReportClassDataByRate() {
+        const reports = await this.classService.viewReportClassByRate();
+        const docs = [];
+        const idSet = new Set(reports.map((item) => item._id));
+        for (let i = 0; i <= 4; i++) {
+            if (idSet.has(i)) {
+                docs.push(reports.find((item) => item._id === i));
+            }
+            else {
+                docs.push({
+                    _id: i,
+                    count: 0
+                });
+            }
+        }
+        return { docs };
+    }
+    async viewReportInstructorDataByMonth(queryReportByMonthDto) {
+        const { year = 2024 } = queryReportByMonthDto;
+        const reports = await this.reportService.findMany({
+            type: {
+                $in: [constant_2.ReportType.InstructorSumByMonth]
+            },
+            tag: constant_2.ReportTag.System,
+            'data.year': year
+        }, ['type', 'data']);
+        const instructorReport = _.find(reports, { type: constant_2.ReportType.InstructorSumByMonth });
+        const docs = [];
+        if (instructorReport) {
+            for (let month = 1; month <= 12; month++) {
+                const instructor = _.get(instructorReport.data, `${month}`) || { quantity: 0 };
+                docs.push({
+                    instructor
+                });
+            }
+        }
+        return { docs };
+    }
+    async adminViewReportInstructorDataByStatus() {
+        const report = await this.reportService.findOne({ type: constant_2.ReportType.InstructorSum, tag: constant_2.ReportTag.System }, [
+            'type',
+            'data'
+        ]);
+        return {
+            quantity: report.data.quantity,
+            docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
+                status: constant_1.InstructorStatus[statusKey],
+                quantity: report.data[statusKey].quantity
+            }))
+        };
+    }
+    async viewReportLearnerDataByMonth(queryReportByMonthDto) {
+        const { year = 2024 } = queryReportByMonthDto;
+        const reports = await this.reportService.findMany({
+            type: {
+                $in: [constant_2.ReportType.LearnerSumByMonth]
+            },
+            tag: constant_2.ReportTag.System,
+            'data.year': year
+        }, ['type', 'data']);
+        const learnerReport = _.find(reports, { type: constant_2.ReportType.LearnerSumByMonth });
+        const docs = [];
+        if (learnerReport) {
+            for (let month = 1; month <= 12; month++) {
+                const learner = _.get(learnerReport.data, `${month}`) || { quantity: 0 };
+                docs.push({
+                    learner
+                });
+            }
+        }
+        return { docs };
+    }
+    async adminViewReportLearnerDataByStatus() {
+        const report = await this.reportService.findOne({ type: constant_2.ReportType.LearnerSum, tag: constant_2.ReportTag.System }, [
+            'type',
+            'data'
+        ]);
+        return {
+            quantity: report.data.quantity,
+            docs: Object.keys(_.omit(report.data, ['quantity'])).map((statusKey) => ({
+                status: constant_1.LearnerStatus[statusKey],
+                quantity: report.data[statusKey].quantity
+            }))
+        };
+    }
 };
 exports.ManagementReportController = ManagementReportController;
 __decorate([
@@ -218,6 +358,97 @@ __decorate([
     __metadata("design:paramtypes", [view_report_dto_1.QueryReportByWeekDto]),
     __metadata("design:returntype", Promise)
 ], ManagementReportController.prototype, "adminViewReportTransactionByDate", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Course Data By Month`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportCourseByMonthListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/course-by-month'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [view_report_dto_1.QueryReportByMonthDto]),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportCourseDataByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Course Data By Rate`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportCourseByRateListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/course-by-rate'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportCourseDataByRate", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Class Data By Status`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportClassByStatusListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/class-by-status'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "adminViewReportClassDataByStatus", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Class Data By Rate`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportClassByRateListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/class-by-rate'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportClassDataByRate", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Instructor Data By Month`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportInstructorByMonthListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/instructor-by-month'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [view_report_dto_1.QueryReportByMonthDto]),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportInstructorDataByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Instructor Data By Status`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportInstructorByStatusListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/instructor-by-status'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "adminViewReportInstructorDataByStatus", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Learner Data By Month`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportLearnerByMonthListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/learner-by-month'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [view_report_dto_1.QueryReportByMonthDto]),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "viewReportLearnerDataByMonth", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: `[${constant_1.UserRole.ADMIN}] View Report Learner Data By Status`
+    }),
+    (0, swagger_1.ApiOkResponse)({ type: view_report_dto_1.ReportLearnerByStatusListDataResponse }),
+    (0, roles_decorator_1.Roles)(constant_1.UserRole.ADMIN),
+    (0, common_1.Get)('admin/learner-by-status'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ManagementReportController.prototype, "adminViewReportLearnerDataByStatus", null);
 exports.ManagementReportController = ManagementReportController = __decorate([
     (0, swagger_1.ApiTags)('Report - Management'),
     (0, swagger_1.ApiBearerAuth)(),
@@ -226,6 +457,8 @@ exports.ManagementReportController = ManagementReportController = __decorate([
     (0, common_1.Controller)('management'),
     __param(0, (0, common_1.Inject)(report_service_1.IReportService)),
     __param(1, (0, common_1.Inject)(transaction_service_1.ITransactionService)),
-    __metadata("design:paramtypes", [Object, Object])
+    __param(2, (0, common_1.Inject)(course_service_1.ICourseService)),
+    __param(3, (0, common_1.Inject)(class_service_1.IClassService)),
+    __metadata("design:paramtypes", [Object, Object, Object, Object])
 ], ManagementReportController);
 //# sourceMappingURL=management.report.controller.js.map

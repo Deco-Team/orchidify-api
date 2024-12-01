@@ -68,6 +68,7 @@ export interface IClassService {
         weekdays: Weekday[];
         slotNumbers?: SlotNumber[];
     }): moment.Moment;
+    viewReportClassByRate(): Promise<any[]>;
 }
 export declare class ClassService implements IClassService {
     private readonly notificationService;
@@ -125,5 +126,6 @@ export declare class ClassService implements IClassService {
         slotNumbers?: SlotNumber[];
     }): moment.Moment;
     cancelClass(classId: string, cancelClassDto: CancelClassDto, userAuth: UserAuth): Promise<void>;
+    viewReportClassByRate(): Promise<any[]>;
     private sendCancelClassNotificationForLearner;
 }

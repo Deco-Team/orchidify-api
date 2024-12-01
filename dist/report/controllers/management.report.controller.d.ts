@@ -27,10 +27,14 @@
 import { IReportService } from '@report/services/report.service';
 import { QueryReportByMonthDto, QueryReportByWeekDto } from '@report/dto/view-report.dto';
 import { ITransactionService } from '@transaction/services/transaction.service';
+import { ICourseService } from '@course/services/course.service';
+import { IClassService } from '@class/services/class.service';
 export declare class ManagementReportController {
     private readonly reportService;
     private readonly transactionService;
-    constructor(reportService: IReportService, transactionService: ITransactionService);
+    private readonly courseService;
+    private readonly classService;
+    constructor(reportService: IReportService, transactionService: ITransactionService, courseService: ICourseService, classService: IClassService);
     viewReportTotalSummary(): Promise<{
         docs: (import("mongoose").Document<unknown, {}, import("../schemas/report.schema").Report> & import("../schemas/report.schema").Report & Required<{
             _id: string;
@@ -63,5 +67,41 @@ export declare class ManagementReportController {
     }>;
     adminViewReportTransactionByDate(queryReportByWeekDto: QueryReportByWeekDto): Promise<{
         docs: any[];
+    }>;
+    viewReportCourseDataByMonth(queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    viewReportCourseDataByRate(): Promise<{
+        docs: any[];
+    }>;
+    adminViewReportClassDataByStatus(): Promise<{
+        quantity: any;
+        docs: {
+            status: any;
+            quantity: any;
+        }[];
+    }>;
+    viewReportClassDataByRate(): Promise<{
+        docs: any[];
+    }>;
+    viewReportInstructorDataByMonth(queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    adminViewReportInstructorDataByStatus(): Promise<{
+        quantity: any;
+        docs: {
+            status: any;
+            quantity: any;
+        }[];
+    }>;
+    viewReportLearnerDataByMonth(queryReportByMonthDto: QueryReportByMonthDto): Promise<{
+        docs: any[];
+    }>;
+    adminViewReportLearnerDataByStatus(): Promise<{
+        quantity: any;
+        docs: {
+            status: any;
+            quantity: any;
+        }[];
     }>;
 }

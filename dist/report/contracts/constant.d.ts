@@ -12,7 +12,8 @@ export declare enum ReportType {
     LearnerSumByMonth = "LearnerSumByMonth",
     InstructorSumByMonth = "InstructorSumByMonth",
     LearnerEnrolledSumByMonth = "LearnerEnrolledSumByMonth",
-    RevenueSumByMonth = "RevenueSumByMonth"
+    RevenueSumByMonth = "RevenueSumByMonth",
+    CourseSumByMonth = "CourseSumByMonth"
 }
 export declare enum ReportTag {
     System = "System",

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReportTransactionCountByMonthListDataResponse = exports.ReportTransactionByDateListDataResponse = exports.ReportStaffByStatusListDataResponse = exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByWeekDto = exports.QueryReportByMonthDto = void 0;
+exports.ReportLearnerByStatusListDataResponse = exports.ReportInstructorByStatusListDataResponse = exports.ReportClassByRateListDataResponse = exports.ReportCourseByRateListDataResponse = exports.ReportCourseByMonthListDataResponse = exports.ReportTransactionCountByMonthListDataResponse = exports.ReportTransactionByDateListDataResponse = exports.ReportStaffByStatusListDataResponse = exports.ReportRevenueByMonthListDataResponse = exports.ReportClassByStatusListDataResponse = exports.ReportLearnerByMonthListDataResponse = exports.ReportInstructorByMonthListDataResponse = exports.ReportUserByMonthListDataResponse = exports.ReportTotalSummaryListDataResponse = exports.QueryReportByWeekDto = exports.QueryReportByMonthDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const base_report_dto_1 = require("./base.report.dto");
 const openapi_builder_1 = require("../../common/contracts/openapi-builder");
@@ -47,21 +47,21 @@ __decorate([
 class ReportTotalSummaryListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportTotalSummaryListResponse) {
 }
 exports.ReportTotalSummaryListDataResponse = ReportTotalSummaryListDataResponse;
-class ReportUserQuantityResponse {
+class ReportQuantityResponse {
 }
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Number }),
     __metadata("design:type", Number)
-], ReportUserQuantityResponse.prototype, "quantity", void 0);
+], ReportQuantityResponse.prototype, "quantity", void 0);
 class ReportUserByMonthListItemResponse {
 }
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: ReportUserQuantityResponse }),
-    __metadata("design:type", ReportUserQuantityResponse)
+    (0, swagger_1.ApiProperty)({ type: ReportQuantityResponse }),
+    __metadata("design:type", ReportQuantityResponse)
 ], ReportUserByMonthListItemResponse.prototype, "learner", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: ReportUserQuantityResponse }),
-    __metadata("design:type", ReportUserQuantityResponse)
+    (0, swagger_1.ApiProperty)({ type: ReportQuantityResponse }),
+    __metadata("design:type", ReportQuantityResponse)
 ], ReportUserByMonthListItemResponse.prototype, "instructor", void 0);
 class ReportUserByMonthListResponse {
 }
@@ -72,6 +72,36 @@ __decorate([
 class ReportUserByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportUserByMonthListResponse) {
 }
 exports.ReportUserByMonthListDataResponse = ReportUserByMonthListDataResponse;
+class ReportInstructorByMonthListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportQuantityResponse }),
+    __metadata("design:type", ReportQuantityResponse)
+], ReportInstructorByMonthListItemResponse.prototype, "instructor", void 0);
+class ReportInstructorByMonthListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportInstructorByMonthListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportInstructorByMonthListResponse.prototype, "docs", void 0);
+class ReportInstructorByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportInstructorByMonthListResponse) {
+}
+exports.ReportInstructorByMonthListDataResponse = ReportInstructorByMonthListDataResponse;
+class ReportLearnerByMonthListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportQuantityResponse }),
+    __metadata("design:type", ReportQuantityResponse)
+], ReportLearnerByMonthListItemResponse.prototype, "learner", void 0);
+class ReportLearnerByMonthListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportLearnerByMonthListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportLearnerByMonthListResponse.prototype, "docs", void 0);
+class ReportLearnerByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportLearnerByMonthListResponse) {
+}
+exports.ReportLearnerByMonthListDataResponse = ReportLearnerByMonthListDataResponse;
 class ReportClassByStatusListItemResponse {
 }
 __decorate([
@@ -189,4 +219,93 @@ __decorate([
 class ReportTransactionCountByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportTransactionCountByMonthListResponse) {
 }
 exports.ReportTransactionCountByMonthListDataResponse = ReportTransactionCountByMonthListDataResponse;
+class ReportCourseByMonthListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportQuantityResponse }),
+    __metadata("design:type", ReportQuantityResponse)
+], ReportCourseByMonthListItemResponse.prototype, "course", void 0);
+class ReportCourseByMonthListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportCourseByMonthListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportCourseByMonthListResponse.prototype, "docs", void 0);
+class ReportCourseByMonthListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportCourseByMonthListResponse) {
+}
+exports.ReportCourseByMonthListDataResponse = ReportCourseByMonthListDataResponse;
+class ReportCountResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String }),
+    __metadata("design:type", String)
+], ReportCountResponse.prototype, "_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportCountResponse.prototype, "count", void 0);
+class ReportCourseByRateListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportCountResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportCourseByRateListResponse.prototype, "docs", void 0);
+class ReportCourseByRateListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportCourseByRateListResponse) {
+}
+exports.ReportCourseByRateListDataResponse = ReportCourseByRateListDataResponse;
+class ReportClassByRateListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportCountResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportClassByRateListResponse.prototype, "docs", void 0);
+class ReportClassByRateListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportClassByRateListResponse) {
+}
+exports.ReportClassByRateListDataResponse = ReportClassByRateListDataResponse;
+class ReportInstructorByStatusListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportInstructorByStatusListItemResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.InstructorStatus }),
+    __metadata("design:type", String)
+], ReportInstructorByStatusListItemResponse.prototype, "status", void 0);
+class ReportInstructorByStatusListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportInstructorByStatusListResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportInstructorByStatusListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportInstructorByStatusListResponse.prototype, "docs", void 0);
+class ReportInstructorByStatusListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportInstructorByStatusListResponse) {
+}
+exports.ReportInstructorByStatusListDataResponse = ReportInstructorByStatusListDataResponse;
+class ReportLearnerByStatusListItemResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportLearnerByStatusListItemResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, enum: constant_1.LearnerStatus }),
+    __metadata("design:type", String)
+], ReportLearnerByStatusListItemResponse.prototype, "status", void 0);
+class ReportLearnerByStatusListResponse {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Number }),
+    __metadata("design:type", Number)
+], ReportLearnerByStatusListResponse.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ReportLearnerByStatusListItemResponse, isArray: true }),
+    __metadata("design:type", Array)
+], ReportLearnerByStatusListResponse.prototype, "docs", void 0);
+class ReportLearnerByStatusListDataResponse extends (0, openapi_builder_1.DataResponse)(ReportLearnerByStatusListResponse) {
+}
+exports.ReportLearnerByStatusListDataResponse = ReportLearnerByStatusListDataResponse;
 //# sourceMappingURL=view-report.dto.js.map

@@ -29,10 +29,12 @@ import { PaginationParams } from '@common/decorators/pagination.decorator';
 import { IUserTokenService } from '@auth/services/user-token.service';
 import { ILearnerService } from '@learner/services/learner.service';
 import { QueryLearnerDto } from '@learner/dto/view-learner.dto';
+import { IReportService } from '@report/services/report.service';
 export declare class ManagementLearnerController {
     private readonly learnerService;
     private readonly userTokenService;
-    constructor(learnerService: ILearnerService, userTokenService: IUserTokenService);
+    private readonly reportService;
+    constructor(learnerService: ILearnerService, userTokenService: IUserTokenService, reportService: IReportService);
     list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto): Promise<any>;
     getDetail(learnerId: string): Promise<import("mongoose").Document<unknown, {}, import("../schemas/learner.schema").Learner> & import("../schemas/learner.schema").Learner & Required<{
         _id: string;

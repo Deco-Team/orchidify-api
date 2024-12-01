@@ -540,6 +540,18 @@ export class ClassRequestService implements IClassRequestService {
               { session }
             )
 
+            // update course sum by month report
+            const month = new Date().getMonth() + 1
+            const year = new Date().getFullYear()
+            this.reportService.update(
+              { type: ReportType.CourseSumByMonth, tag: ReportTag.System, 'data.year': year },
+              {
+                $inc: {
+                  [`data.${month}.quantity`]: 1
+                }
+              }
+            )
+
             // update course report
             await this.reportService.update(
               { type: ReportType.CourseSum, tag: ReportTag.User, ownerId: new Types.ObjectId(_id) },

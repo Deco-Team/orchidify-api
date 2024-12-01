@@ -33,13 +33,18 @@ export interface ICourseService {
   listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto)
   listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth)
   listBestSellerCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth)
-  listRecommendedCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth)
+  listRecommendedCoursesByLearner(
+    pagination: PaginationParams,
+    queryCourseDto: PublicQueryCourseDto,
+    userAuth: UserAuth
+  )
   findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
   findMany(
     conditions: FilterQuery<CourseDocument>,
     projection?: Record<string, any>,
     populates?: Array<PopulateOptions>
   ): Promise<CourseDocument[]>
+  viewReportCourseByRate(): Promise<any[]>
 }
 
 @Injectable()
@@ -1046,6 +1051,23 @@ export class CourseService implements ICourseService {
       populates
     })
     return courses
+  }
+
+  async viewReportCourseByRate() {
+    return this.courseRepository.model.aggregate([
+      {
+        $match: {
+          status: CourseStatus.ACTIVE,
+          childCourseIds: []
+        }
+      },
+      {
+        $bucket: {
+          groupBy: '$rate',
+          boundaries: [0, 1, 2, 3, 4, 5.1]
+        }
+      }
+    ])
   }
 
   private async generateCode(): Promise<string> {

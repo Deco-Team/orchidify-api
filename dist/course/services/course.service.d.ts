@@ -47,6 +47,7 @@ export interface ICourseService {
     listRecommendedCoursesByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth): any;
     findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>;
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<CourseDocument[]>;
+    viewReportCourseByRate(): Promise<any[]>;
 }
 export declare class CourseService implements ICourseService {
     private readonly helperService;
@@ -126,5 +127,6 @@ export declare class CourseService implements ICourseService {
     findMany(conditions: FilterQuery<CourseDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<(import("mongoose").Document<unknown, {}, Course> & Course & Required<{
         _id: string;
     }>)[]>;
+    viewReportCourseByRate(): Promise<any[]>;
     private generateCode;
 }

@@ -124,7 +124,8 @@ let AuthService = class AuthService {
         });
         this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
             $inc: {
-                'data.quantity': 1
+                'data.quantity': 1,
+                [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: 1
             }
         });
         const month = new Date().getMonth() + 1;
@@ -151,7 +152,13 @@ let AuthService = class AuthService {
             throw new app_exception_1.AppException(error_1.Errors.OTP_CODE_IS_EXPIRED);
         await Promise.all([
             this.learnerService.update({ _id: learner._id }, { status: constant_1.LearnerStatus.ACTIVE }),
-            this.otpService.clearOtp(learnerVerifyAccountDto.code)
+            this.otpService.clearOtp(learnerVerifyAccountDto.code),
+            this.reportService.update({ type: constant_3.ReportType.LearnerSum, tag: constant_3.ReportTag.System }, {
+                $inc: {
+                    [`data.${constant_1.LearnerStatus.UNVERIFIED}.quantity`]: -1,
+                    [`data.${constant_1.LearnerStatus.ACTIVE}.quantity`]: 1
+                }
+            })
         ]);
         return new dto_1.SuccessResponse(true);
     }

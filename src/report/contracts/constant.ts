@@ -14,6 +14,7 @@ export enum ReportType {
   InstructorSumByMonth = 'InstructorSumByMonth',
   LearnerEnrolledSumByMonth = 'LearnerEnrolledSumByMonth',
   RevenueSumByMonth = 'RevenueSumByMonth',
+  CourseSumByMonth = 'CourseSumByMonth',
 }
 
 export enum ReportTag {

@@ -63,7 +63,8 @@ let ManagementInstructorController = class ManagementInstructorController {
         await this.recruitmentService.update({ _id: selectedRecruitment._id }, { $set: { isInstructorAdded: true } });
         this.reportService.update({ type: constant_3.ReportType.InstructorSum, tag: constant_3.ReportTag.System }, {
             $inc: {
-                'data.quantity': 1
+                'data.quantity': 1,
+                [`data.${constant_1.InstructorStatus.ACTIVE}.quantity`]: 1
             }
         });
         const month = new Date().getMonth() + 1;
@@ -92,7 +93,13 @@ let ManagementInstructorController = class ManagementInstructorController {
             this.instructorService.update({
                 _id: instructorId
             }, { status: constant_1.InstructorStatus.INACTIVE }),
-            this.userTokenService.clearAllRefreshTokensOfUser(new mongoose_1.Types.ObjectId(instructorId), constant_1.UserRole.INSTRUCTOR)
+            this.userTokenService.clearAllRefreshTokensOfUser(new mongoose_1.Types.ObjectId(instructorId), constant_1.UserRole.INSTRUCTOR),
+            this.reportService.update({ type: constant_3.ReportType.InstructorSum, tag: constant_3.ReportTag.System }, {
+                $inc: {
+                    [`data.${constant_1.InstructorStatus.ACTIVE}.quantity`]: -1,
+                    [`data.${constant_1.InstructorStatus.INACTIVE}.quantity`]: 1
+                }
+            })
         ]);
         return new dto_1.SuccessResponse(true);
     }
@@ -100,6 +107,12 @@ let ManagementInstructorController = class ManagementInstructorController {
         await this.instructorService.update({
             _id: instructorId
         }, { status: constant_1.InstructorStatus.ACTIVE });
+        this.reportService.update({ type: constant_3.ReportType.InstructorSum, tag: constant_3.ReportTag.System }, {
+            $inc: {
+                [`data.${constant_1.InstructorStatus.ACTIVE}.quantity`]: 1,
+                [`data.${constant_1.InstructorStatus.INACTIVE}.quantity`]: -1
+            }
+        });
         return new dto_1.SuccessResponse(true);
     }
 };

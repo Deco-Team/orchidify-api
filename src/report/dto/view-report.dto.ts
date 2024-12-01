@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { BaseReportDto } from './base.report.dto'
 import { DataResponse } from '@common/contracts/openapi-builder'
 import { IsDateString, IsInt, IsOptional, Max, Min } from 'class-validator'
-import { ClassStatus, StaffStatus } from '@common/contracts/constant'
+import { ClassStatus, InstructorStatus, LearnerStatus, StaffStatus } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 
 export class QueryReportByMonthDto {
@@ -30,22 +30,44 @@ class ReportTotalSummaryListResponse {
 export class ReportTotalSummaryListDataResponse extends DataResponse(ReportTotalSummaryListResponse) {}
 
 // View Report User Data By Month
-class ReportUserQuantityResponse {
+class ReportQuantityResponse {
   @ApiProperty({ type: Number })
   quantity: number
 }
 class ReportUserByMonthListItemResponse {
-  @ApiProperty({ type: ReportUserQuantityResponse })
-  learner: ReportUserQuantityResponse
+  @ApiProperty({ type: ReportQuantityResponse })
+  learner: ReportQuantityResponse
 
-  @ApiProperty({ type: ReportUserQuantityResponse })
-  instructor: ReportUserQuantityResponse
+  @ApiProperty({ type: ReportQuantityResponse })
+  instructor: ReportQuantityResponse
 }
 class ReportUserByMonthListResponse {
   @ApiProperty({ type: ReportUserByMonthListItemResponse, isArray: true })
   docs: ReportUserByMonthListItemResponse[]
 }
 export class ReportUserByMonthListDataResponse extends DataResponse(ReportUserByMonthListResponse) {}
+
+// View Report Instructor Data By Month
+class ReportInstructorByMonthListItemResponse {
+  @ApiProperty({ type: ReportQuantityResponse })
+  instructor: ReportQuantityResponse
+}
+class ReportInstructorByMonthListResponse {
+  @ApiProperty({ type: ReportInstructorByMonthListItemResponse, isArray: true })
+  docs: ReportInstructorByMonthListItemResponse[]
+}
+export class ReportInstructorByMonthListDataResponse extends DataResponse(ReportInstructorByMonthListResponse) {}
+
+// View Report Learner Data By Month
+class ReportLearnerByMonthListItemResponse {
+  @ApiProperty({ type: ReportQuantityResponse })
+  learner: ReportQuantityResponse
+}
+class ReportLearnerByMonthListResponse {
+  @ApiProperty({ type: ReportLearnerByMonthListItemResponse, isArray: true })
+  docs: ReportLearnerByMonthListItemResponse[]
+}
+export class ReportLearnerByMonthListDataResponse extends DataResponse(ReportLearnerByMonthListResponse) {}
 
 // View Report Class Data By Status
 class ReportClassByStatusListItemResponse {
@@ -132,3 +154,71 @@ class ReportTransactionCountByMonthListResponse {
   docs: ReportTransactionCountByMonthListItemResponse[]
 }
 export class ReportTransactionCountByMonthListDataResponse extends DataResponse(ReportTransactionCountByMonthListResponse) {}
+
+
+// View Report Course Data By Month
+class ReportCourseByMonthListItemResponse {
+  @ApiProperty({ type: ReportQuantityResponse })
+  course: ReportQuantityResponse
+}
+class ReportCourseByMonthListResponse {
+  @ApiProperty({ type: ReportCourseByMonthListItemResponse, isArray: true })
+  docs: ReportCourseByMonthListItemResponse[]
+}
+export class ReportCourseByMonthListDataResponse extends DataResponse(ReportCourseByMonthListResponse) {}
+
+class ReportCountResponse {
+  @ApiProperty({ type: String })
+  _id: string
+
+  @ApiProperty({ type: Number })
+  count: number
+}
+// View Report Course Count By Rate
+class ReportCourseByRateListResponse {
+  @ApiProperty({ type: ReportCountResponse, isArray: true })
+  docs: ReportCountResponse[]
+}
+export class ReportCourseByRateListDataResponse extends DataResponse(ReportCourseByRateListResponse) {}
+
+// View Report Class Count By Rate
+class ReportClassByRateListResponse {
+  @ApiProperty({ type: ReportCountResponse, isArray: true })
+  docs: ReportCountResponse[]
+}
+export class ReportClassByRateListDataResponse extends DataResponse(ReportClassByRateListResponse) {}
+
+// View Report Instructor Data By Status
+class ReportInstructorByStatusListItemResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: String, enum: InstructorStatus })
+  status: InstructorStatus
+}
+class ReportInstructorByStatusListResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: ReportInstructorByStatusListItemResponse, isArray: true })
+  docs: ReportInstructorByStatusListItemResponse[]
+}
+export class ReportInstructorByStatusListDataResponse extends DataResponse(ReportInstructorByStatusListResponse) {}
+
+
+// View Report Learner Data By Status
+class ReportLearnerByStatusListItemResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: String, enum: LearnerStatus })
+  status: LearnerStatus
+}
+class ReportLearnerByStatusListResponse {
+  @ApiProperty({ type: Number })
+  quantity: number
+
+  @ApiProperty({ type: ReportLearnerByStatusListItemResponse, isArray: true })
+  docs: ReportLearnerByStatusListItemResponse[]
+}
+export class ReportLearnerByStatusListDataResponse extends DataResponse(ReportLearnerByStatusListResponse) {}

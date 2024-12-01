@@ -352,6 +352,13 @@ let ClassRequestService = ClassRequestService_1 = class ClassRequestService {
                                 'data.quantity': 1
                             }
                         }, { session });
+                        const month = new Date().getMonth() + 1;
+                        const year = new Date().getFullYear();
+                        this.reportService.update({ type: constant_6.ReportType.CourseSumByMonth, tag: constant_6.ReportTag.System, 'data.year': year }, {
+                            $inc: {
+                                [`data.${month}.quantity`]: 1
+                            }
+                        });
                         await this.reportService.update({ type: constant_6.ReportType.CourseSum, tag: constant_6.ReportTag.User, ownerId: new mongoose_1.Types.ObjectId(_id) }, {
                             $inc: {
                                 [`data.${constant_1.CourseStatus.ACTIVE}.quantity`]: 1

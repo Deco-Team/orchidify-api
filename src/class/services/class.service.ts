@@ -91,6 +91,7 @@ export interface IClassService {
     weekdays: Weekday[]
     slotNumbers?: SlotNumber[]
   }): moment.Moment
+  viewReportClassByRate(): Promise<any[]>
 }
 
 @Injectable()
@@ -908,6 +909,22 @@ export class ClassService implements IClassService {
         id: classId
       }
     })
+  }
+
+  async viewReportClassByRate() {
+    return this.classRepository.model.aggregate([
+      {
+        $match: {
+          status: { $ne: ClassStatus.DELETED }
+        }
+      },
+      {
+        $bucket: {
+          groupBy: '$rate',
+          boundaries: [0, 1, 2, 3, 4, 5.1]
+        }
+      }
+    ])
   }
 
   private async sendCancelClassNotificationForLearner(

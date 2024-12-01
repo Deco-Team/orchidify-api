@@ -31,6 +31,8 @@ import { Types } from 'mongoose'
 import { ILearnerService } from '@learner/services/learner.service'
 import { LearnerDetailDataResponse, LearnerListDataResponse, QueryLearnerDto } from '@learner/dto/view-learner.dto'
 import { LEARNER_DETAIL_PROJECTION } from '@learner/contracts/constant'
+import { IReportService } from '@report/services/report.service'
+import { ReportTag, ReportType } from '@report/contracts/constant'
 
 @ApiTags('Learner - Management')
 @ApiBearerAuth()
@@ -42,7 +44,9 @@ export class ManagementLearnerController {
     @Inject(ILearnerService)
     private readonly learnerService: ILearnerService,
     @Inject(IUserTokenService)
-    private readonly userTokenService: IUserTokenService
+    private readonly userTokenService: IUserTokenService,
+    @Inject(IReportService)
+    private readonly reportService: IReportService
   ) {}
 
   @ApiOperation({
@@ -84,7 +88,17 @@ export class ManagementLearnerController {
         },
         { status: LearnerStatus.INACTIVE }
       ),
-      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(learnerId), UserRole.LEARNER)
+      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(learnerId), UserRole.LEARNER),
+      // update learner report
+      this.reportService.update(
+        { type: ReportType.LearnerSum, tag: ReportTag.System },
+        {
+          $inc: {
+            [`data.${LearnerStatus.ACTIVE}.quantity`]: -1,
+            [`data.${LearnerStatus.INACTIVE}.quantity`]: 1
+          }
+        }
+      )
     ])
     return new SuccessResponse(true)
   }
@@ -101,6 +115,16 @@ export class ManagementLearnerController {
         _id: learnerId
       },
       { status: LearnerStatus.ACTIVE }
+    )
+    // update learner report
+    this.reportService.update(
+      { type: ReportType.LearnerSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${LearnerStatus.ACTIVE}.quantity`]: 1,
+          [`data.${LearnerStatus.INACTIVE}.quantity`]: -1
+        }
+      }
     )
     return new SuccessResponse(true)
   }

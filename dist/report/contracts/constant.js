@@ -17,6 +17,7 @@ var ReportType;
     ReportType["InstructorSumByMonth"] = "InstructorSumByMonth";
     ReportType["LearnerEnrolledSumByMonth"] = "LearnerEnrolledSumByMonth";
     ReportType["RevenueSumByMonth"] = "RevenueSumByMonth";
+    ReportType["CourseSumByMonth"] = "CourseSumByMonth";
 })(ReportType || (exports.ReportType = ReportType = {}));
 var ReportTag;
 (function (ReportTag) {

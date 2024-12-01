@@ -946,6 +946,22 @@ let CourseService = class CourseService {
         });
         return courses;
     }
+    async viewReportCourseByRate() {
+        return this.courseRepository.model.aggregate([
+            {
+                $match: {
+                    status: constant_1.CourseStatus.ACTIVE,
+                    childCourseIds: []
+                }
+            },
+            {
+                $bucket: {
+                    groupBy: '$rate',
+                    boundaries: [0, 1, 2, 3, 4, 5.1]
+                }
+            }
+        ]);
+    }
     async generateCode() {
         const prefix = `OCP`;
         const lastRecord = await this.courseRepository.model.findOne().sort({ createdAt: -1 });

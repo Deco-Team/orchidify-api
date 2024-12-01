@@ -112,7 +112,8 @@ export class ManagementInstructorController {
       { type: ReportType.InstructorSum, tag: ReportTag.System },
       {
         $inc: {
-          'data.quantity': 1
+          'data.quantity': 1,
+          [`data.${InstructorStatus.ACTIVE}.quantity`]: 1
         }
       }
     )
@@ -168,7 +169,17 @@ export class ManagementInstructorController {
         },
         { status: InstructorStatus.INACTIVE }
       ),
-      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(instructorId), UserRole.INSTRUCTOR)
+      this.userTokenService.clearAllRefreshTokensOfUser(new Types.ObjectId(instructorId), UserRole.INSTRUCTOR),
+      // update instructor report
+      this.reportService.update(
+        { type: ReportType.InstructorSum, tag: ReportTag.System },
+        {
+          $inc: {
+            [`data.${InstructorStatus.ACTIVE}.quantity`]: -1,
+            [`data.${InstructorStatus.INACTIVE}.quantity`]: 1
+          }
+        }
+      )
     ])
     return new SuccessResponse(true)
   }
@@ -185,6 +196,17 @@ export class ManagementInstructorController {
         _id: instructorId
       },
       { status: InstructorStatus.ACTIVE }
+    )
+
+    // update instructor report
+    this.reportService.update(
+      { type: ReportType.InstructorSum, tag: ReportTag.System },
+      {
+        $inc: {
+          [`data.${InstructorStatus.ACTIVE}.quantity`]: 1,
+          [`data.${InstructorStatus.INACTIVE}.quantity`]: -1
+        }
+      }
     )
     return new SuccessResponse(true)
   }
