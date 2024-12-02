@@ -46,7 +46,7 @@ export declare class PayoutRequest {
     transactionId: Types.ObjectId;
     hasMadePayout: boolean;
     transactionCode: string;
-    attachments: BaseMediaDto;
+    attachment: BaseMediaDto;
 }
 export declare const PayoutRequestSchema: import("mongoose").Schema<PayoutRequest, import("mongoose").Model<PayoutRequest, any, any, any, import("mongoose").Document<unknown, any, PayoutRequest> & PayoutRequest & Required<{
     _id: string;

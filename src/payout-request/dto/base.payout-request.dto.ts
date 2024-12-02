@@ -58,7 +58,7 @@ export class BasePayoutRequestDto {
   @ApiProperty({ type: BaseMediaDto })
   @Type(() => BaseMediaDto)
   @ValidateNested({ each: true })
-  attachment: BaseMediaDto[]
+  attachment: BaseMediaDto
 
   @ApiProperty({ type: Date })
   createdAt: Date

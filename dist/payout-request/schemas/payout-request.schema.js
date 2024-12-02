@@ -96,7 +96,7 @@ __decorate([
 __decorate([
     (0, mongoose_1.Prop)({ type: base_media_dto_1.BaseMediaDto }),
     __metadata("design:type", base_media_dto_1.BaseMediaDto)
-], PayoutRequest.prototype, "attachments", void 0);
+], PayoutRequest.prototype, "attachment", void 0);
 exports.PayoutRequest = PayoutRequest = __decorate([
     (0, mongoose_1.Schema)({
         collection: 'payout-requests',

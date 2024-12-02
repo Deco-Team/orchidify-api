@@ -81,7 +81,7 @@ export class PayoutRequest {
   transactionCode: string
 
   @Prop({ type: BaseMediaDto })
-  attachments: BaseMediaDto
+  attachment: BaseMediaDto
 }
 
 export const PayoutRequestSchema = SchemaFactory.createForClass(PayoutRequest)

@@ -80,7 +80,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ type: base_media_dto_1.BaseMediaDto }),
     (0, class_transformer_1.Type)(() => base_media_dto_1.BaseMediaDto),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
+    __metadata("design:type", base_media_dto_1.BaseMediaDto)
 ], BasePayoutRequestDto.prototype, "attachment", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Date }),

@@ -41,7 +41,7 @@ export declare class BasePayoutRequestDto {
     transactionId: Types.ObjectId | string;
     hasMadePayout: boolean;
     transactionCode: string;
-    attachment: BaseMediaDto[];
+    attachment: BaseMediaDto;
     createdAt: Date;
     updatedAt: Date;
 }
