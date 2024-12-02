@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VN_TIMEZONE = exports.URL_REGEX = exports.PHONE_REGEX = exports.EMAIL_REGEX = void 0;
 exports.default = () => ({
-    mongodbUrl: decodeURIComponent(process.env.MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify',
+    mongodbUrl: process.env.NODE_ENV === 'test'
+        ? decodeURIComponent(process.env.TEST_MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify-test'
+        : decodeURIComponent(process.env.MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify',
     mail: {
         SMTP_USERNAME: process.env.SMTP_USERNAME,
         SMTP_PASSWORD: process.env.SMTP_PASSWORD,
@@ -44,13 +46,21 @@ exports.default = () => ({
         webhookId: process.env.DISCORD_WEBHOOK_ID,
         webhookToken: process.env.DISCORD_WEBHOOK_TOKEN
     },
-    redis: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT || 6379),
-        username: process.env.REDIS_USERNAME,
-        password: process.env.REDIS_PASSWORD,
-        db: Number(process.env.REDIS_DB || 0)
-    },
+    redis: process.env.NODE_ENV === 'test'
+        ? {
+            host: process.env.TEST_REDIS_HOST || 'localhost',
+            port: Number(process.env.TEST_REDIS_PORT || 6379),
+            username: process.env.TEST_REDIS_USERNAME,
+            password: process.env.TEST_REDIS_PASSWORD,
+            db: Number(process.env.TEST_REDIS_DB || 0)
+        }
+        : {
+            host: process.env.REDIS_HOST,
+            port: Number(process.env.REDIS_PORT || 6379),
+            username: process.env.REDIS_USERNAME,
+            password: process.env.REDIS_PASSWORD,
+            db: Number(process.env.REDIS_DB || 0)
+        },
     NODE_ENV: process.env.NODE_ENV,
     JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'accessSecret',
     JWT_ACCESS_EXPIRATION: Number(process.env.JWT_ACCESS_EXPIRATION) || 864000,

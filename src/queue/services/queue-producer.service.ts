@@ -1,7 +1,7 @@
 import { SlotNumber } from '@common/contracts/constant'
 import { AppLogger } from '@common/services/app-logger.service'
 import { InjectQueue } from '@nestjs/bullmq'
-import { Injectable, OnModuleInit } from '@nestjs/common'
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { JobName, JobSchedulerKey, QueueName } from '@queue/contracts/constant'
 import { VN_TIMEZONE } from '@src/config'
 import { Job, JobsOptions, Queue } from 'bullmq'
@@ -15,7 +15,7 @@ export interface IQueueProducerService {
 }
 
 @Injectable()
-export class QueueProducerService implements IQueueProducerService, OnModuleInit {
+export class QueueProducerService implements IQueueProducerService, OnModuleInit, OnModuleDestroy {
   private readonly appLogger = new AppLogger(QueueProducerService.name)
   private queueMap: Map<QueueName, Queue>
   constructor(
@@ -27,7 +27,7 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
   ) {}
 
   async onModuleInit() {
-    if (process.env.NODE_ENV !== 'local') {
+    if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
       await this.scheduleUpdateClassStatusJob()
       await this.scheduleUpdateClassProgressJob()
       await this.scheduleAutoCompleteClassJob()
@@ -51,6 +51,14 @@ export class QueueProducerService implements IQueueProducerService, OnModuleInit
 
     this.countDelayedJobs()
     this.countJobSchedulers()
+  }
+
+  async onModuleDestroy() {
+    await this.classRequestQueue.close();
+    await this.payoutRequestQueue.close();
+    await this.recruitmentQueue.close();
+    await this.classQueue.close();
+    await this.slotQueue.close();
   }
 
   async addJob(queueName: QueueName, jobName: JobName, data: any, opts?: JobsOptions): Promise<Job> {

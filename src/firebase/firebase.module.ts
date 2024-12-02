@@ -14,7 +14,7 @@ const firebaseProvider = {
   provide: 'FIREBASE_APP',
   inject: [ISettingService],
   useFactory: async (settingService: ISettingService) => {
-    const firebaseConfig = ((await settingService.findByKey(SettingKey.FirebaseConfig)).value ||
+    const firebaseConfig = ((await settingService.findByKey(SettingKey.FirebaseConfig))?.value ||
       {}) as admin.ServiceAccount
 
     return admin.initializeApp({

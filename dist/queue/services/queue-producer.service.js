@@ -32,7 +32,7 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
         this.appLogger = new app_logger_service_1.AppLogger(QueueProducerService_1.name);
     }
     async onModuleInit() {
-        if (process.env.NODE_ENV !== 'local') {
+        if (process.env.NODE_ENV !== 'local' && process.env.NODE_ENV !== 'test') {
             await this.scheduleUpdateClassStatusJob();
             await this.scheduleUpdateClassProgressJob();
             await this.scheduleAutoCompleteClassJob();
@@ -52,6 +52,13 @@ let QueueProducerService = QueueProducerService_1 = class QueueProducerService {
         this.appLogger.log(`Redis service is ready....`);
         this.countDelayedJobs();
         this.countJobSchedulers();
+    }
+    async onModuleDestroy() {
+        await this.classRequestQueue.close();
+        await this.payoutRequestQueue.close();
+        await this.recruitmentQueue.close();
+        await this.classQueue.close();
+        await this.slotQueue.close();
     }
     async addJob(queueName, jobName, data, opts) {
         const queue = this.queueMap.get(queueName);

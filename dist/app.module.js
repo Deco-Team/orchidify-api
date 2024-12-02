@@ -72,9 +72,11 @@ exports.AppModule = AppModule = __decorate([
             }),
             mongoose_1.MongooseModule.forRootAsync({
                 inject: [config_1.ConfigService],
-                useFactory: (configService) => ({
-                    uri: configService.get('mongodbUrl')
-                })
+                useFactory: async (configService) => {
+                    return {
+                        uri: configService.get('mongodbUrl')
+                    };
+                }
             }),
             mailer_1.MailerModule.forRootAsync({
                 useFactory: (configService) => ({

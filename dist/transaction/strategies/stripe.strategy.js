@@ -51,7 +51,8 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
     }
     async onModuleInit() {
         this.stripe = new stripe_1.default(this.configService.get('payment.stripe.apiKey'));
-        this.publishableKey = (await this.settingService.findByKey(constant_3.SettingKey.StripePublishableKey)).value;
+        this.publishableKey =
+            (await this.settingService.findByKey(constant_3.SettingKey.StripePublishableKey))?.value || '';
     }
     async createTransaction(createStripePaymentDto) {
         const { customerEmail, amount, description, metadata } = createStripePaymentDto;

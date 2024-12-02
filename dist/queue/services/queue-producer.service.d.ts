@@ -1,4 +1,4 @@
-import { OnModuleInit } from '@nestjs/common';
+import { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { JobName, QueueName } from '@queue/contracts/constant';
 import { Job, JobsOptions, Queue } from 'bullmq';
 export declare const IQueueProducerService: unique symbol;
@@ -7,7 +7,7 @@ export interface IQueueProducerService {
     getJob(queueName: QueueName, jobId: string): Promise<Job | null>;
     removeJob(queueName: QueueName, jobId: string): Promise<void>;
 }
-export declare class QueueProducerService implements IQueueProducerService, OnModuleInit {
+export declare class QueueProducerService implements IQueueProducerService, OnModuleInit, OnModuleDestroy {
     private readonly classRequestQueue;
     private readonly payoutRequestQueue;
     private readonly recruitmentQueue;
@@ -17,6 +17,7 @@ export declare class QueueProducerService implements IQueueProducerService, OnMo
     private queueMap;
     constructor(classRequestQueue: Queue, payoutRequestQueue: Queue, recruitmentQueue: Queue, classQueue: Queue, slotQueue: Queue);
     onModuleInit(): Promise<void>;
+    onModuleDestroy(): Promise<void>;
     addJob(queueName: QueueName, jobName: JobName, data: any, opts?: JobsOptions): Promise<Job>;
     getJob(queueName: QueueName, jobId: string): Promise<Job | null>;
     removeJob(queueName: QueueName, jobId: string): Promise<void>;

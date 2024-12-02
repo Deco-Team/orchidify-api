@@ -26,13 +26,15 @@ exports.QueueModule = QueueModule = __decorate([
     (0, common_1.Module)({
         imports: [
             bullmq_1.BullModule.forRootAsync({
-                useFactory: (configService) => ({
-                    connection: configService.get('redis'),
-                    prefix: 'orchidify',
-                    defaultJobOptions: {
-                        attempts: 3
-                    }
-                }),
+                useFactory: async (configService) => {
+                    return {
+                        connection: configService.get('redis'),
+                        prefix: 'orchidify',
+                        defaultJobOptions: {
+                            attempts: 3
+                        }
+                    };
+                },
                 inject: [config_1.ConfigService]
             }),
             bullmq_1.BullModule.registerQueue({

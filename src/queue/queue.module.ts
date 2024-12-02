@@ -15,13 +15,15 @@ import { MediaModule } from '@media/media.module'
 @Module({
   imports: [
     BullModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        connection: configService.get<ConnectionOptions>('redis'),
-        prefix: 'orchidify',
-        defaultJobOptions: {
-          attempts: 3
+      useFactory: async (configService: ConfigService) => {
+        return {
+          connection: configService.get<ConnectionOptions>('redis'),
+          prefix: 'orchidify',
+          defaultJobOptions: {
+            attempts: 3
+          }
         }
-      }),
+      },
       inject: [ConfigService]
     }),
     BullModule.registerQueue(

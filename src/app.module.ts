@@ -61,9 +61,11 @@ import { ReportModule } from '@report/report.module'
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('mongodbUrl')
-      })
+      useFactory: async (configService: ConfigService) => {
+        return {
+          uri: configService.get<string>('mongodbUrl')
+        }
+      }
     }),
     MailerModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({

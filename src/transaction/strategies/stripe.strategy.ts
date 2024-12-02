@@ -54,7 +54,8 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
   ) {}
   async onModuleInit() {
     this.stripe = new Stripe(this.configService.get('payment.stripe.apiKey'))
-    this.publishableKey = (await this.settingService.findByKey(SettingKey.StripePublishableKey)).value as string
+    this.publishableKey =
+      ((await this.settingService.findByKey(SettingKey.StripePublishableKey))?.value as string) || ''
   }
 
   async createTransaction(createStripePaymentDto: CreateStripePaymentDto) {

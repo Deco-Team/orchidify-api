@@ -22,7 +22,7 @@ const firebaseProvider = {
     provide: 'FIREBASE_APP',
     inject: [setting_service_1.ISettingService],
     useFactory: async (settingService) => {
-        const firebaseConfig = ((await settingService.findByKey(constant_1.SettingKey.FirebaseConfig)).value ||
+        const firebaseConfig = ((await settingService.findByKey(constant_1.SettingKey.FirebaseConfig))?.value ||
             {});
         return admin.initializeApp({
             credential: admin.credential.cert(firebaseConfig),
