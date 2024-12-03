@@ -4,7 +4,7 @@ import { DiscordService } from '@common/services/discord.service';
 export declare class AppExceptionFilter extends BaseExceptionFilter {
     private appLogger;
     private discordService;
-    constructor(logger: LoggerService, discordService: DiscordService);
+    constructor(logger: LoggerService, discordService?: DiscordService);
     catch(exception: any, host: ArgumentsHost): void;
     private _parseError;
 }

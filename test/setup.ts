@@ -5,6 +5,7 @@ import { useContainer } from 'class-validator'
 import { AppValidationPipe } from '@common/pipes/app-validate.pipe'
 import { TrimRequestBodyPipe } from '@common/pipes/trim-req-body.pipe'
 import { TransformInterceptor } from '@common/interceptors/transform.interceptor'
+import { AppExceptionFilter } from '@common/exceptions/app-exception.filter'
 
 module.exports = async function (globalConfig, projectConfig) {
   console.log('jest setup test')
@@ -20,6 +21,7 @@ module.exports = async function (globalConfig, projectConfig) {
   const logger = app.get(AppLogger)
   app.useLogger(logger)
   app.useGlobalInterceptors(new TransformInterceptor())
+  app.useGlobalFilters(new AppExceptionFilter(logger))
   const globalPipes = [new TrimRequestBodyPipe(), new AppValidationPipe()]
   app.useGlobalPipes(...globalPipes)
 

@@ -10,10 +10,10 @@ import { Errors } from '@common/contracts/error'
 export class AppExceptionFilter extends BaseExceptionFilter {
   private appLogger: LoggerService
   private discordService: DiscordService
-  constructor(logger: LoggerService, discordService: DiscordService) {
+  constructor(logger: LoggerService, discordService?: DiscordService) {
     super()
     this.appLogger = logger
-    this.discordService = discordService
+    if (discordService) this.discordService = discordService
   }
 
   catch(exception: any, host: ArgumentsHost): void {
@@ -43,30 +43,31 @@ export class AppExceptionFilter extends BaseExceptionFilter {
       sentryCaptureException(exception)
 
       // Discord Bot
-      this.discordService.sendMessage({
-        fields: [
-          {
-            name: `${ctx.getRequest().method} ${ctx.getRequest().url}`,
-            value: `${httpStatus} ${JSON.stringify(ctx.getRequest().body)}`
-          },
-          {
-            name: 'Error',
-            value: error
-          },
-          {
-            name: 'Message',
-            value: message
-          },
-          {
-            name: 'Data',
-            value: `${JSON.stringify(data).slice(0, 200)}...`
-          },
-          {
-            name: 'stackTrace',
-            value: `${JSON.stringify(exception.stack).slice(0, 200)}...`
-          }
-        ]
-      })
+      if (this.discordService)
+        this.discordService.sendMessage({
+          fields: [
+            {
+              name: `${ctx.getRequest().method} ${ctx.getRequest().url}`,
+              value: `${httpStatus} ${JSON.stringify(ctx.getRequest().body)}`
+            },
+            {
+              name: 'Error',
+              value: error
+            },
+            {
+              name: 'Message',
+              value: message
+            },
+            {
+              name: 'Data',
+              value: `${JSON.stringify(data).slice(0, 200)}...`
+            },
+            {
+              name: 'stackTrace',
+              value: `${JSON.stringify(exception.stack).slice(0, 200)}...`
+            }
+          ]
+        })
     }
     if (process.env.NODE_ENV !== 'test') {
       this.appLogger.error(message, httpStatus, exception.stack)
