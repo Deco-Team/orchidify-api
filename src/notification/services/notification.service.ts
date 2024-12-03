@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common'
 import * as _ from 'lodash'
-import { SaveOptions, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { SendNotificationDto, SendTopicNotificationDto } from '@notification/dto/send-notification.dto'
 import { AppLogger } from '@common/services/app-logger.service'
 import { IFirebaseFirestoreService } from '@firebase/services/firebase.firestore.service'
