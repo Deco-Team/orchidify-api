@@ -69,9 +69,9 @@ export class AppExceptionFilter extends BaseExceptionFilter {
           ]
         })
     }
-    // if (process.env.NODE_ENV !== 'test') {
-    this.appLogger.error(message, httpStatus, exception.stack)
-    // }
+    if (process.env.NODE_ENV !== 'test') {
+      this.appLogger.error(message, httpStatus, exception.stack)
+    }
   }
   private _parseError(exception) {
     let error = ''

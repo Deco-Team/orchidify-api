@@ -74,7 +74,9 @@ let AppExceptionFilter = class AppExceptionFilter extends core_1.BaseExceptionFi
                     ]
                 });
         }
-        this.appLogger.error(message, httpStatus, exception.stack);
+        if (process.env.NODE_ENV !== 'test') {
+            this.appLogger.error(message, httpStatus, exception.stack);
+        }
     }
     _parseError(exception) {
         let error = '';

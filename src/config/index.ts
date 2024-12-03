@@ -34,8 +34,8 @@ export default () => ({
       checksumKey: process.env.PAYOS_CHECKSUM_KEY
     },
     stripe: {
-      apiKey: process.env.STRIPE_API_KEY,
-      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+      apiKey: process.env.STRIPE_API_KEY || 'apiKey',
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'webhookSecret'
     }
   },
   cloudinary: {

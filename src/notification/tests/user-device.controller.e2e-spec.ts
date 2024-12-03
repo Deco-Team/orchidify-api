@@ -6,12 +6,15 @@ import { getModelToken } from '@nestjs/mongoose'
 import { IFirebaseMessagingService } from '@firebase/services/firebase.messaging.service'
 import { IUserDeviceService } from '@notification/services/user-device.service'
 import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { MessagingTopicManagementResponse } from 'firebase-admin/lib/messaging/messaging-api'
 
 describe('UserDeviceController (e2e)', () => {
   let userDeviceModel
-  let firebaseMessagingService
-  let userDeviceService
+  let firebaseMessagingService: IFirebaseMessagingService
+  let userDeviceService: IUserDeviceService
   let jwtService: JwtService
+  let configService: ConfigService
   const mockUserId = new Types.ObjectId()
   const mockFcmToken = 'mock-fcm-token-123'
   let accessToken: string
@@ -30,6 +33,7 @@ describe('UserDeviceController (e2e)', () => {
     firebaseMessagingService = global.rootModule.get(IFirebaseMessagingService)
     userDeviceService = global.rootModule.get(IUserDeviceService)
     jwtService = global.rootModule.get(JwtService)
+    configService = global.rootModule.get(ConfigService)
 
     // Create valid access token
     accessToken = jwtService.sign(
@@ -38,7 +42,7 @@ describe('UserDeviceController (e2e)', () => {
         role: UserRole.STAFF
       },
       {
-        secret: process.env.JWT_ACCESS_SECRET
+        secret: configService.get('JWT_ACCESS_SECRET')
       }
     )
 
@@ -46,7 +50,9 @@ describe('UserDeviceController (e2e)', () => {
     await userDeviceModel.create(testUserDevice)
 
     // Mock only Firebase external service
-    jest.spyOn(firebaseMessagingService, 'subscribeToTopic').mockResolvedValue(true)
+    jest
+      .spyOn(firebaseMessagingService, 'subscribeToTopic')
+      .mockResolvedValue({ success: true, response: {} as MessagingTopicManagementResponse })
   })
 
   beforeEach(() => {
@@ -89,7 +95,10 @@ describe('UserDeviceController (e2e)', () => {
     const newDeviceToken = 'new-device-token-456'
 
     it('should create new user device', async () => {
-      const { body: { data }, status } = await request(global.app.getHttpServer())
+      const {
+        body: { data },
+        status
+      } = await request(global.app.getHttpServer())
         .post('/notifications/user-devices')
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
