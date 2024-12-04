@@ -186,14 +186,21 @@ export class CourseService implements ICourseService {
     const { sort, limit, page } = pagination
     const aggregateMatch = []
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += (' ' + type.trim()).trim()
-    if (!!textSearch) {
+    if (title?.trim()) {
       aggregateMatch.push({
         $match: {
           $text: {
-            $search: textSearch
+            $search: title.trim()
+          }
+        }
+      })
+    }
+
+    if (type?.trim()) {
+      aggregateMatch.push({
+        $match: {
+          type: {
+            $all: type.trim().split(', ')
           }
         }
       })
@@ -356,14 +363,21 @@ export class CourseService implements ICourseService {
     const { sort, limit, page } = pagination
     const aggregateMatch = []
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += (' ' + type.trim()).trim()
-    if (!!textSearch) {
+    if (title?.trim()) {
       aggregateMatch.push({
         $match: {
           $text: {
-            $search: textSearch
+            $search: title.trim()
+          }
+        }
+      })
+    }
+
+    if (type?.trim()) {
+      aggregateMatch.push({
+        $match: {
+          type: {
+            $all: type.trim().split(', ')
           }
         }
       })
@@ -582,14 +596,21 @@ export class CourseService implements ICourseService {
     }
     const aggregateMatch = []
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += (' ' + type.trim()).trim()
-    if (!!textSearch) {
+    if (title?.trim()) {
       aggregateMatch.push({
         $match: {
           $text: {
-            $search: textSearch
+            $search: title.trim()
+          }
+        }
+      })
+    }
+
+    if (type?.trim()) {
+      aggregateMatch.push({
+        $match: {
+          type: {
+            $all: type.trim().split(', ')
           }
         }
       })
@@ -809,14 +830,21 @@ export class CourseService implements ICourseService {
     }
     const aggregateMatch = []
 
-    let textSearch = ''
-    if (title) textSearch += title.trim()
-    if (type) textSearch += (' ' + type.trim()).trim()
-    if (!!textSearch) {
+    if (title?.trim()) {
       aggregateMatch.push({
         $match: {
           $text: {
-            $search: textSearch
+            $search: title.trim()
+          }
+        }
+      })
+    }
+
+    if (type?.trim()) {
+      aggregateMatch.push({
+        $match: {
+          type: {
+            $all: type.trim().split(', ')
           }
         }
       })

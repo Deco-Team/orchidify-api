@@ -153,7 +153,7 @@ let AuthService = class AuthService {
             throw new app_exception_1.AppException(error_1.Errors.INACTIVE_ACCOUNT);
         if (learner.status === constant_1.LearnerStatus.ACTIVE)
             return new dto_1.SuccessResponse(true);
-        const resendOtpCodeLimit = Number((await this.settingService.findByKey(constant_2.SettingKey.ResendOtpCodeLimit)).value) || 5;
+        const resendOtpCodeLimit = Number((await this.settingService.findByKey(constant_2.SettingKey.ResendOtpCodeLimit))?.value) || 5;
         const otp = await this.otpService.findByUserIdAndRole(learner._id, constant_1.UserRole.LEARNER);
         if (otp.__v >= resendOtpCodeLimit && moment(otp['updatedAt']).isSame(new Date(), 'day'))
             throw new app_exception_1.AppException(error_1.Errors.RESEND_OTP_CODE_LIMITED);
