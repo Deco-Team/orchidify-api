@@ -4,8 +4,8 @@
 export default () => ({
   mongodbUrl:
     process.env.NODE_ENV === 'test'
-      ? decodeURIComponent(process.env.TEST_MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify-test'
-      : decodeURIComponent(process.env.MONGODB_CONNECTION_STRING) || 'mongodb://localhost:27017/orchidify',
+      ? decodeURIComponent(process.env.TEST_MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify-test')
+      : decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify'),
   mail: {
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
@@ -34,8 +34,8 @@ export default () => ({
       checksumKey: process.env.PAYOS_CHECKSUM_KEY
     },
     stripe: {
-      apiKey: process.env.STRIPE_API_KEY,
-      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
+      apiKey: process.env.STRIPE_API_KEY || 'apiKey',
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'webhookSecret'
     }
   },
   cloudinary: {
