@@ -126,16 +126,20 @@ let CourseService = class CourseService {
         const { title, type, level, fromPrice, toPrice } = queryCourseDto;
         const { sort, limit, page } = pagination;
         const aggregateMatch = [];
-        let textSearch = '';
-        if (title)
-            textSearch += title.trim();
-        if (type)
-            textSearch += (' ' + type.trim()).trim();
-        if (!!textSearch) {
+        if (title?.trim()) {
             aggregateMatch.push({
                 $match: {
                     $text: {
-                        $search: textSearch
+                        $search: title.trim()
+                    }
+                }
+            });
+        }
+        if (type?.trim()) {
+            aggregateMatch.push({
+                $match: {
+                    type: {
+                        $all: type.trim().split(', ')
                     }
                 }
             });
@@ -290,16 +294,20 @@ let CourseService = class CourseService {
         const { title, type, level, fromPrice, toPrice } = queryCourseDto;
         const { sort, limit, page } = pagination;
         const aggregateMatch = [];
-        let textSearch = '';
-        if (title)
-            textSearch += title.trim();
-        if (type)
-            textSearch += (' ' + type.trim()).trim();
-        if (!!textSearch) {
+        if (title?.trim()) {
             aggregateMatch.push({
                 $match: {
                     $text: {
-                        $search: textSearch
+                        $search: title.trim()
+                    }
+                }
+            });
+        }
+        if (type?.trim()) {
+            aggregateMatch.push({
+                $match: {
+                    type: {
+                        $all: type.trim().split(', ')
                     }
                 }
             });
@@ -503,16 +511,20 @@ let CourseService = class CourseService {
             createdAt: -1
         };
         const aggregateMatch = [];
-        let textSearch = '';
-        if (title)
-            textSearch += title.trim();
-        if (type)
-            textSearch += (' ' + type.trim()).trim();
-        if (!!textSearch) {
+        if (title?.trim()) {
             aggregateMatch.push({
                 $match: {
                     $text: {
-                        $search: textSearch
+                        $search: title.trim()
+                    }
+                }
+            });
+        }
+        if (type?.trim()) {
+            aggregateMatch.push({
+                $match: {
+                    type: {
+                        $all: type.trim().split(', ')
                     }
                 }
             });
@@ -717,16 +729,20 @@ let CourseService = class CourseService {
             createdAt: -1
         };
         const aggregateMatch = [];
-        let textSearch = '';
-        if (title)
-            textSearch += title.trim();
-        if (type)
-            textSearch += (' ' + type.trim()).trim();
-        if (!!textSearch) {
+        if (title?.trim()) {
             aggregateMatch.push({
                 $match: {
                     $text: {
-                        $search: textSearch
+                        $search: title.trim()
+                    }
+                }
+            });
+        }
+        if (type?.trim()) {
+            aggregateMatch.push({
+                $match: {
+                    type: {
+                        $all: type.trim().split(', ')
                     }
                 }
             });
