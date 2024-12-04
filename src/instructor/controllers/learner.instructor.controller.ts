@@ -11,10 +11,8 @@ import { AppException } from '@common/exceptions/app.exception'
 import { Errors } from '@common/contracts/error'
 import { ApiErrorResponse } from '@common/decorators/api-response.decorator'
 import { IInstructorService } from '@instructor/services/instructor.service'
-import { INSTRUCTOR_DETAIL_PROJECTION, VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
-import {
-  InstructorDetailDataResponse,
-  ViewerViewInstructorDetailDataResponse} from '@instructor/dto/view-instructor.dto'
+import { VIEWER_VIEW_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
+import { ViewerViewInstructorDetailDataResponse } from '@instructor/dto/view-instructor.dto'
 
 @ApiTags('Instructor - Learner')
 @ApiBearerAuth()
@@ -25,7 +23,7 @@ import {
 export class LearnerInstructorController {
   constructor(
     @Inject(IInstructorService)
-    private readonly instructorService: IInstructorService,
+    private readonly instructorService: IInstructorService
   ) {}
 
   @ApiOperation({

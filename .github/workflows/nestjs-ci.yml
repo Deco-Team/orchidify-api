@@ -37,3 +37,10 @@ jobs:
     - run: npm run build --if-present
 
     - run: npm run test
+
+    - name: Check Test Results
+      run: |
+          if [ $? -ne 0 ]; then
+            echo "Test failed. Exiting with non-zero status."
+            exit 1
+          fi
