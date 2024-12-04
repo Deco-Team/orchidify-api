@@ -6,6 +6,7 @@ import { AppValidationPipe } from '@common/pipes/app-validate.pipe'
 import { TrimRequestBodyPipe } from '@common/pipes/trim-req-body.pipe'
 import { TransformInterceptor } from '@common/interceptors/transform.interceptor'
 import { AppExceptionFilter } from '@common/exceptions/app-exception.filter'
+import { INotificationService } from '@notification/services/notification.service'
 
 module.exports = async function (globalConfig, projectConfig) {
   console.log('jest setup test')
@@ -14,7 +15,17 @@ module.exports = async function (globalConfig, projectConfig) {
     imports: [AppModule]
   })
     .overrideProvider('FIREBASE_APP')
-    .useValue({ auth: () => {}, firestore: () => {}, messaging: () => {} })
+    .useValue({
+      auth: () => {},
+      firestore: () => {},
+      messaging: () => {}
+    })
+    .overrideProvider(INotificationService)
+    .useValue({
+      sendMail: () => {},
+      sendFirebaseCloudMessaging: () => {},
+      sendTopicFirebaseCloudMessaging: () => {}
+    })
     .compile()
 
   const app = moduleRef.createNestApplication()
