@@ -199,7 +199,7 @@ export class AuthService implements IAuthService {
     if (learner.status === LearnerStatus.INACTIVE) throw new AppException(Errors.INACTIVE_ACCOUNT)
     if (learner.status === LearnerStatus.ACTIVE) return new SuccessResponse(true)
 
-    const resendOtpCodeLimit = Number((await this.settingService.findByKey(SettingKey.ResendOtpCodeLimit)).value) || 5
+    const resendOtpCodeLimit = Number((await this.settingService.findByKey(SettingKey.ResendOtpCodeLimit))?.value) || 5
     const otp = await this.otpService.findByUserIdAndRole(learner._id, UserRole.LEARNER)
     if (otp.__v >= resendOtpCodeLimit && moment(otp['updatedAt']).isSame(new Date(), 'day'))
       throw new AppException(Errors.RESEND_OTP_CODE_LIMITED)
