@@ -419,7 +419,6 @@ export class ClassRequestService implements IClassRequestService {
         weekdays,
         instructorId: course.instructorId
       })
-      console.log('availableSlots', availableSlots)
       this.appLogger.log(
         `getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${
           availableSlots.slotNumbers
@@ -434,11 +433,9 @@ export class ClassRequestService implements IClassRequestService {
         )
         return _.difference(slotNumbers, availableTimeOfGarden.slotNumbers).length === 0
       })
-      console.log('availableGardens', availableGardens)
       if (availableGardens.length === 0) throw new AppException(Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST)
 
       const garden = availableGardens.find((availableGarden) => availableGarden.gardenId?.toString() === gardenId)
-      console.log('garden', garden)
       if (!garden) throw new AppException(Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST)
 
       // Execute in transaction
