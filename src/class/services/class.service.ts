@@ -539,7 +539,7 @@ export class ClassService implements IClassService {
     paymentMethod: PaymentMethod
     session: ClientSession
   }) {
-    const { createStripePaymentDto, orderInfo, courseClass, orderCode, learnerId, paymentMethod, session } = params
+    const { createStripePaymentDto, orderInfo, orderCode, learnerId, paymentMethod, session } = params
     const paymentResponse = await this.paymentService.createTransaction(createStripePaymentDto)
     // 3. Create transaction
     const transaction = await this.paymentService.getTransaction({
@@ -615,7 +615,7 @@ export class ClassService implements IClassService {
           totalPrice += (price * (100 - discount)) / 100
         })
 
-        const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate)).value) || 0.2
+        const commissionRate = Number((await this.settingService.findByKey(SettingKey.CommissionRate))?.value) || 0.2
         const { instructorId } = courseClass
         const earnings = Math.floor(totalPrice * (1 - commissionRate))
         const systemEarnings = totalPrice - earnings
