@@ -984,7 +984,7 @@ export class ClassRequestService implements IClassRequestService {
       .tz(VN_TIMEZONE)
       .endOf('date')
 
-    return sessions.map((session) => {
+    return sessions?.map((session) => {
       if (session?.assignments?.length > 0) {
         const sessionStartDate = classDates[session.sessionNumber - 1]
         const assignmentDeadline = moment(sessionStartDate).tz(VN_TIMEZONE).add(7, 'day').endOf('date')

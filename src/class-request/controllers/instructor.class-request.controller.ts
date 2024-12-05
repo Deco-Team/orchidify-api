@@ -188,7 +188,7 @@ export class InstructorClassRequestController {
   @Post('cancel-class')
   async createCancelClassRequest(@Req() req, @Body() createCancelClassRequestDto: CreateCancelClassRequestDto) {
     const { _id, role } = _.get(req, 'user')
-    const { classId, description } = createCancelClassRequestDto
+    const { classId } = createCancelClassRequestDto
 
     // BR-39: Instructors can only create 10 class requests per day.
     const createClassRequestLimit =

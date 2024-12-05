@@ -4,7 +4,6 @@ import { BaseClassRequestDto } from './base.class-request.dto'
 import { SlotNumber, Weekday } from '@common/contracts/constant'
 import { ArrayMaxSize, ArrayMinSize, IsArray } from 'class-validator'
 import { FutureMaxMonth } from '@common/validators/future-max-month.validator'
-import { FutureMinMonth } from '@common/validators/future-min-month.validator'
 import { Transform } from 'class-transformer'
 import { VN_TIMEZONE } from '@src/config'
 
