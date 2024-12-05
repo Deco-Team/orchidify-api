@@ -91,7 +91,7 @@ describe('InstructorAttendanceController (e2e)', () => {
       {
         _id: new Types.ObjectId(),
         slotNumber: 3,
-        start: moment().tz(VN_TIMEZONE).subtract(1, 'hour').startOf('hour').toISOString(),
+        start: moment().tz(VN_TIMEZONE).startOf('hour').toISOString(),
         end: moment().tz(VN_TIMEZONE).add(1, 'hour').startOf('hour').toISOString(),
         instructorId: instructorTestData._id,
         classId: mockClassId
