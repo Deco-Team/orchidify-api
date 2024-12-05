@@ -5,7 +5,7 @@ import { AttendanceDocument } from '@attendance/schemas/attendance.schema'
 import { AttendanceService } from '@attendance/services/attendance.service'
 import { AttendanceStatus } from '@common/contracts/constant'
 import { Mocked, TestBed } from '@suites/unit'
-import { PaginateResult, Types } from 'mongoose'
+import { Types } from 'mongoose'
 
 describe('AttendanceService', () => {
   let attendanceService: AttendanceService
