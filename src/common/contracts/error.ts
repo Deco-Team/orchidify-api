@@ -222,7 +222,7 @@ export const Errors = {
   COURSE_COMBO_EXISTED: {
     error: 'COURSE_COMBO_EXISTED',
     message: 'Combo khóa học đã tồn tại.',
-    httpStatus: HttpStatus.NOT_FOUND
+    httpStatus: HttpStatus.BAD_REQUEST
   },
 
   /**
