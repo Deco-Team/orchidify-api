@@ -419,6 +419,7 @@ export class ClassRequestService implements IClassRequestService {
         weekdays,
         instructorId: course.instructorId
       })
+      console.log('availableSlots', availableSlots)
       this.appLogger.log(
         `getAvailableGardenList: slotNumbers=${slotNumbers}, availableSlotNumbers=${
           availableSlots.slotNumbers
@@ -433,9 +434,11 @@ export class ClassRequestService implements IClassRequestService {
         )
         return _.difference(slotNumbers, availableTimeOfGarden.slotNumbers).length === 0
       })
+      console.log('availableGardens', availableGardens)
       if (availableGardens.length === 0) throw new AppException(Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST)
 
       const garden = availableGardens.find((availableGarden) => availableGarden.gardenId?.toString() === gardenId)
+      console.log('garden', garden)
       if (!garden) throw new AppException(Errors.GARDEN_NOT_AVAILABLE_FOR_CLASS_REQUEST)
 
       // Execute in transaction
@@ -984,7 +987,7 @@ export class ClassRequestService implements IClassRequestService {
       .tz(VN_TIMEZONE)
       .endOf('date')
 
-    return sessions.map((session) => {
+    return sessions?.map((session) => {
       if (session?.assignments?.length > 0) {
         const sessionStartDate = classDates[session.sessionNumber - 1]
         const assignmentDeadline = moment(sessionStartDate).tz(VN_TIMEZONE).add(7, 'day').endOf('date')
