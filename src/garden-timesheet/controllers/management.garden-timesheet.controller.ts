@@ -110,7 +110,7 @@ export class ManagementGardenTimesheetController {
       data: {
         type: FCMNotificationDataType.GARDEN_TIMESHEET,
         id: gardenTimesheet._id,
-        date: date.toISOString(),
+        date: date?.toString(),
         gardenId: gardenId.toString()
       }
     })
