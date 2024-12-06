@@ -107,7 +107,7 @@ export class GardenService implements IGardenService {
       }
       return await this.gardenRepository.findOneAndUpdate(conditions, payload, options)
     } catch (error) {
-      if (error.name === MongoServerError.name && error.name === 11000 && error.name?.['name'] === 1) {
+      if (error.name === MongoServerError.name && error.code === 11000 && error.keyPattern?.['name'] === 1) {
         throw new AppException(Errors.GARDEN_NAME_EXISTED)
       }
       throw error
