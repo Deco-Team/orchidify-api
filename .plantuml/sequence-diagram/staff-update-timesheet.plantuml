@@ -1,0 +1,48 @@
+@startuml
+actor Staff
+activate Staff
+
+participant UpdateGardenTimesheetScreen
+Staff -> UpdateGardenTimesheetScreen: Access
+activate UpdateGardenTimesheetScreen
+UpdateGardenTimesheetScreen -> UpdateGardenTimesheetScreen: Click update a garden timesheet
+
+participant GardenTimesheetController
+UpdateGardenTimesheetScreen -> GardenTimesheetController: update(updateGardenTimesheetDto)
+activate GardenTimesheetController
+GardenTimesheetController -> GardenTimesheetController: validate if garden timeshet has any classes scheduled
+
+alt garden timeshet has any classes scheduled
+    GardenTimesheetController --> UpdateGardenTimesheetScreen: Show error message
+end
+
+participant IGardenTimesheetService
+GardenTimesheetController -> IGardenTimesheetService: update(id, status)
+activate IGardenTimesheetService
+
+participant IGardenTimesheetRepository
+IGardenTimesheetService -> IGardenTimesheetRepository: findOneAndUpdate(id, status)
+activate IGardenTimesheetRepository
+
+participant INotificationService
+database Database
+IGardenTimesheetRepository -> Database: execute(payload)
+activate Database
+Database --> IGardenTimesheetRepository: return data
+deactivate Database
+
+IGardenTimesheetRepository --> IGardenTimesheetService: return data
+deactivate IGardenTimesheetRepository
+
+IGardenTimesheetService -> INotificationService: Send notification to garden manager
+activate INotificationService
+
+INotificationService --> IGardenTimesheetService: return data
+deactivate INotificationService
+
+IGardenTimesheetService --> GardenTimesheetController: return data
+deactivate IGardenTimesheetService
+
+GardenTimesheetController --> UpdateGardenTimesheetScreen: show success message
+deactivate GardenTimesheetController
+@enduml

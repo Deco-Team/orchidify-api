@@ -1,0 +1,64 @@
+@startuml
+actor Staff
+activate Staff
+
+participant AddInstructorScreen
+Staff -> AddInstructorScreen: Access
+activate AddInstructorScreen
+AddInstructorScreen -> AddInstructorScreen: Fill instructor form
+
+participant InstructorController
+AddInstructorScreen -> InstructorController: create(createInstructorDto)
+activate InstructorController
+InstructorController -> InstructorController: validate if email existed, recruitment is approved
+
+alt email is existed, recruitment is approved
+    InstructorController --> AddInstructorScreen: Show error message
+end
+
+participant IInstructorService
+InstructorController -> IInstructorService: create(createInstructorDto)
+activate IInstructorService
+
+participant HelperService
+IInstructorService -> HelperService: hashPassword(password)
+activate HelperService
+
+HelperService -> IInstructorService: return hashed password
+deactivate HelperService
+
+participant IInstructorRepository
+IInstructorService -> IInstructorRepository: create(createInstructorDto)
+activate IInstructorRepository
+
+participant INotificationService
+database Database
+IInstructorRepository -> Database: save(payload)
+activate Database
+Database --> IInstructorRepository: return data
+deactivate Database
+
+IInstructorRepository --> IInstructorService: return data
+deactivate IInstructorRepository
+
+IInstructorService -> INotificationService: Send notification to instructor
+activate INotificationService
+
+INotificationService --> IInstructorService: return data
+deactivate INotificationService
+
+participant IReportService
+IInstructorService -> IReportService: Update instructor report
+activate IReportService
+
+IReportService --> IInstructorService: return data
+deactivate IReportService
+
+IInstructorService --> InstructorController: return data
+deactivate IInstructorService
+
+InstructorController --> AddInstructorScreen: show success message
+deactivate InstructorController
+
+database Database
+@enduml

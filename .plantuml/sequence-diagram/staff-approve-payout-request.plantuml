@@ -1,0 +1,80 @@
+@startuml
+actor Staff
+activate Staff
+
+participant PayoutRequestScreen
+Staff -> PayoutRequestScreen: Access payout request
+activate PayoutRequestScreen
+PayoutRequestScreen -> PayoutRequestScreen: Click Approve payout request
+
+participant PayoutRequestController
+PayoutRequestScreen -> PayoutRequestController: approve(id)
+activate PayoutRequestController
+
+participant IPayoutRequestService
+PayoutRequestController -> IPayoutRequestService: approvePayoutRequest(id)
+activate IPayoutRequestService
+
+IPayoutRequestService -> IPayoutRequestService: Validate payout request
+alt invalid payout request and garden
+    IPayoutRequestService --> PayoutRequestController: Show error message
+    PayoutRequestController --> PayoutRequestScreen: Show error message
+end
+
+participant IPayoutRequestService
+participant IPayoutRequestRepository
+IPayoutRequestService -> IPayoutRequestRepository: findOneAndUpdate(id, APPROVED)
+activate IPayoutRequestRepository
+
+database Database
+IPayoutRequestRepository -> Database: execute(payload)
+activate Database
+Database --> IPayoutRequestRepository: return data
+deactivate Database
+
+IPayoutRequestRepository --> IPayoutRequestService: return data
+deactivate IPayoutRequestRepository
+
+participant ITransactionService
+IPayoutRequestService -> ITransactionService: Create new payout transaction
+activate ITransactionService
+
+ITransactionService --> IPayoutRequestService: return result
+deactivate ITransactionService
+
+participant IQueueProducerService
+IPayoutRequestService -> IQueueProducerService: removeJob(PayoutRequestAutoExpired, id)
+activate IQueueProducerService
+
+queue Queue
+IQueueProducerService -> Queue: remove(payload)
+activate Queue
+Queue --> IQueueProducerService: return result
+deactivate Queue
+
+IQueueProducerService --> IPayoutRequestService: return result
+deactivate IQueueProducerService
+
+participant INotificationService
+IPayoutRequestService -> INotificationService: Send notification to instructor
+activate INotificationService
+
+INotificationService --> IPayoutRequestService: return result
+deactivate INotificationService
+
+participant IReportService
+IPayoutRequestService -> IReportService: Update report
+activate IReportService
+
+IReportService --> IPayoutRequestService: return result
+deactivate IReportService
+
+IPayoutRequestService --> PayoutRequestController: return data
+deactivate IPayoutRequestService
+database Database
+
+PayoutRequestController --> PayoutRequestScreen: show success message
+deactivate PayoutRequestController
+
+queue Queue
+@enduml
