@@ -1,0 +1,193 @@
+@startuml
+actor Learner
+activate Learner
+
+participant CourseScreen
+Learner -> CourseScreen: Access
+activate CourseScreen
+CourseScreen -> CourseScreen: Choose class to enroll
+
+participant PurchaseConfirmation
+CourseScreen -> PurchaseConfirmation: Click enroll
+activate PurchaseConfirmation
+
+participant ClassController
+PurchaseConfirmation -> ClassController: enrollClass(enrollClassDto)
+activate ClassController
+
+participant IClassService
+ClassController -> IClassService: enrollClass(enrollClassDto)
+activate IClassService
+IClassService -> IClassService: validate learner had enrolled class before, duplicate timesheet
+
+alt invalid class, duplicate timesheet
+    IClassService --> ClassController: Throw error
+    ClassController --> PurchaseConfirmation: Show error message
+end
+
+IClassService -> IClassService: calculate discount, final price
+
+participant IPaymentService
+IClassService -> IPaymentService: createTransaction(data)
+activate IPaymentService
+
+participant PaymentScreen
+participant MyClassesScreen
+participant PaymentGateway
+IPaymentService -> PaymentGateway: createPayment(data)
+activate PaymentGateway
+PaymentGateway --> IPaymentService: return paymentResponse
+deactivate PaymentGateway
+
+IPaymentService --> IClassService: return paymentResponse
+deactivate IPaymentService
+
+participant ITransactionService
+IClassService -> ITransactionService: create(createTransactionDto)
+activate ITransactionService
+
+participant ITransactionRepository
+ITransactionService -> ITransactionRepository: create(createTransactionDto)
+activate ITransactionRepository
+
+database Database
+ITransactionRepository -> Database: save(payload)
+activate Database
+Database --> ITransactionRepository: return data
+deactivate Database
+
+ITransactionRepository --> ITransactionService: return data
+deactivate ITransactionRepository
+
+ITransactionService --> IClassService: return data
+deactivate ITransactionService
+
+IClassService --> ClassController: return payment response
+deactivate IClassService
+
+ClassController --> PurchaseConfirmation: return payment response
+deactivate ClassController
+
+
+PurchaseConfirmation -> PaymentScreen: render payment gateway screen
+deactivate PurchaseConfirmation
+
+activate PaymentScreen
+PaymentScreen -> PaymentScreen: fill payment form
+PaymentScreen -> PaymentGateway: process payment
+
+alt payment failed
+    activate PaymentGateway
+    participant PaymentController
+    activate PaymentController
+    PaymentGateway --> PaymentController: Send failed webhook
+    PaymentController -> PaymentController: Verify signature data
+
+    participant IPaymentService
+    PaymentController -> IPaymentService: processWebhook(data)
+    activate IPaymentService
+
+    participant ITransactionService
+    IPaymentService -> ITransactionService: update Transaction to ERROR
+    activate ITransactionService
+
+    participant ITransactionRepository
+    ITransactionService -> ITransactionRepository: findOneAndUpdate(id, ERROR)
+    activate ITransactionRepository
+
+    database Database
+    ITransactionRepository -> Database: execute(payload)
+    activate Database
+    Database --> ITransactionRepository: return data
+    deactivate Database
+
+    ITransactionRepository --> ITransactionService: return data
+    deactivate ITransactionRepository
+
+    ITransactionService --> IPaymentService: return data
+    deactivate ITransactionService
+
+    IPaymentService --> PaymentController: return data
+    deactivate IPaymentService
+
+    PaymentController --> PaymentGateway: return data
+    deactivate PaymentController
+    
+    PaymentGateway --> PaymentScreen: show error
+    deactivate PaymentGateway
+    PaymentScreen --> CourseScreen: Redirect & retry
+    deactivate CourseScreen
+else payment succeeded
+    activate PaymentGateway
+    participant PaymentController
+    activate PaymentController
+    PaymentGateway --> PaymentController: Send succeeded webhook
+    PaymentController -> PaymentController: Verify signature data
+
+    participant IPaymentService
+    PaymentController -> IPaymentService: processWebhook(data)
+    activate IPaymentService
+
+    participant IClassService
+    IPaymentService -> IClassService: Update learnerQuantity in class
+    activate IClassService
+    IClassService --> IPaymentService: return data
+    deactivate IClassService
+
+    participant ICourseService
+    IPaymentService -> ICourseService: Update learnerQuantity in course
+    activate ICourseService
+    ICourseService --> IPaymentService: return data
+    deactivate ICourseService
+
+    participant ILearnerClassService
+    IPaymentService -> ILearnerClassService: Create LearnerClass record
+    activate ILearnerClassService
+    ILearnerClassService --> IPaymentService: return data
+    deactivate ILearnerClassService
+
+    participant ITransactionService
+    IPaymentService -> ITransactionService: update Transaction to CAPTURED
+    activate ITransactionService
+
+    participant ITransactionRepository
+    ITransactionService -> ITransactionRepository: findOneAndUpdate(id, CAPTURED)
+    activate ITransactionRepository
+
+    database Database
+    ITransactionRepository -> Database: execute(payload)
+    activate Database
+    Database --> ITransactionRepository: return data
+    deactivate Database
+
+    ITransactionRepository --> ITransactionService: return data
+    deactivate ITransactionRepository
+
+    ITransactionService --> IPaymentService: return data
+    deactivate ITransactionService
+
+
+    participant INotificationService
+    IPaymentService -> INotificationService: Send notification to learner/instructor
+    activate INotificationService
+    INotificationService --> IPaymentService: return data
+    deactivate INotificationService
+
+    IPaymentService --> PaymentController: return data
+    deactivate IPaymentService
+
+    PaymentController --> PaymentGateway: return data
+    deactivate PaymentController
+    
+    PaymentGateway --> PaymentScreen: show success message
+    deactivate PaymentGateway
+
+    PaymentScreen --> MyClassesScreen: Redirect
+    deactivate PaymentScreen
+    activate MyClassesScreen
+    MyClassesScreen -> MyClassesScreen: View my classes
+end
+
+
+database Database
+@enduml

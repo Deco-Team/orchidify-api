@@ -1,0 +1,51 @@
+@startuml
+actor Instructor
+activate Instructor
+
+participant CreateCourseScreen
+Instructor -> CreateCourseScreen: Access
+activate CreateCourseScreen
+CreateCourseScreen -> CreateCourseScreen: Fill course form
+
+participant InstructorCourseController
+CreateCourseScreen -> InstructorCourseController: create(createCourseDto)
+activate InstructorCourseController
+InstructorCourseController -> InstructorCourseController: validate sessions & assignments
+
+alt invalid sessions count, assignment count
+    InstructorCourseController --> CreateCourseScreen: Show error message
+end
+
+participant ICourseService
+InstructorCourseController -> ICourseService: create(createCourseDto)
+activate ICourseService
+ICourseService -> ICourseService: generateCode()
+
+participant ICourseRepository
+ICourseService -> ICourseRepository: create(createCourseDto)
+activate ICourseRepository
+
+database Database
+ICourseRepository -> Database: save(payload)
+activate Database
+Database --> ICourseRepository: return data
+deactivate Database
+
+ICourseRepository --> ICourseService: return data
+deactivate ICourseRepository
+
+participant IReportService
+ICourseService -> IReportService: Update course report
+activate IReportService
+
+IReportService --> ICourseService: return data
+deactivate IReportService
+
+ICourseService --> InstructorCourseController: return data
+deactivate ICourseService
+
+InstructorCourseController --> CreateCourseScreen: show success message
+deactivate InstructorCourseController
+
+database Database
+@enduml

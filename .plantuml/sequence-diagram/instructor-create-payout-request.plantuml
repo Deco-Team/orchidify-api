@@ -1,0 +1,84 @@
+@startuml
+actor Instructor
+activate Instructor
+
+participant PayoutRequestScreen
+Instructor -> PayoutRequestScreen: Access course
+activate PayoutRequestScreen
+PayoutRequestScreen -> PayoutRequestScreen: Click Create payout request
+
+participant CreatePayoutRequestScreen
+PayoutRequestScreen -> CreatePayoutRequestScreen: Redirect
+activate CreatePayoutRequestScreen
+CreatePayoutRequestScreen -> CreatePayoutRequestScreen: Fill payout request information form
+
+participant PayoutRequestController
+CreatePayoutRequestScreen -> PayoutRequestController: createPayoutRequest(createRequestDto)
+activate PayoutRequestController
+PayoutRequestController -> PayoutRequestController: check create request limit per day
+PayoutRequestController -> PayoutRequestController: check daily maximun amount of payout request
+PayoutRequestController -> PayoutRequestController: check instructor balance remain
+
+alt invalid data
+    PayoutRequestController --> CreatePayoutRequestScreen: Show error message
+end
+
+participant IPayoutRequestService
+PayoutRequestController -> IPayoutRequestService: createPayoutRequest(createRequestDto)
+activate IPayoutRequestService
+
+participant IPayoutRequestRepository
+IPayoutRequestService -> IPayoutRequestRepository: create(createRequestDto)
+activate IPayoutRequestRepository
+
+database Database
+IPayoutRequestRepository -> Database: save(payload)
+activate Database
+Database --> IPayoutRequestRepository: return data
+deactivate Database
+
+IPayoutRequestRepository --> IPayoutRequestService: return data
+deactivate IPayoutRequestRepository
+
+participant IInstructorService
+IPayoutRequestService -> IInstructorService: updateBalance(_id, -amount)
+activate IInstructorService
+
+IInstructorService --> IPayoutRequestService: return data
+deactivate IInstructorService
+
+participant IQueueProducerService
+IPayoutRequestService -> IQueueProducerService: addJob(PayoutRequestAutoExpired, id)
+activate IQueueProducerService
+
+participant INotificationService
+participant IReportService
+database Database
+
+queue Queue
+IQueueProducerService -> Queue: add(payload)
+activate Queue
+Queue --> IQueueProducerService: return job
+deactivate Queue
+
+IQueueProducerService --> IPayoutRequestService: return job
+deactivate IQueueProducerService
+
+IPayoutRequestService -> INotificationService: Send notification to staff
+activate INotificationService
+
+INotificationService --> IPayoutRequestService: return data
+deactivate INotificationService
+
+IPayoutRequestService -> IReportService: Update payout request report
+activate IReportService
+
+IReportService --> IPayoutRequestService: return data
+deactivate IReportService
+
+IPayoutRequestService --> PayoutRequestController: return data
+deactivate IPayoutRequestService
+
+PayoutRequestController --> CreatePayoutRequestScreen: show success message
+deactivate PayoutRequestController
+@enduml
