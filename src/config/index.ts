@@ -3,9 +3,9 @@
  */
 export default () => ({
   mongodbUrl:
-    process.env.NODE_ENV === 'test'
-      ? decodeURIComponent(process.env.TEST_MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify-test')
-      : decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify'),
+    process.env.NODE_ENV !== 'test'
+      ? decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify')
+      : undefined,
   mail: {
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,

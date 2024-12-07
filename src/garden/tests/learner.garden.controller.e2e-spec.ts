@@ -10,7 +10,7 @@ import { Model, Types } from 'mongoose'
 import * as request from 'supertest'
 
 describe('LearnerGardenController (e2e)', () => {
-  const app: INestApplication = global.app
+  let app: INestApplication
   let accessToken: string
   let gardenModel: Model<GardenDocument>
   let gardenTestData = {
@@ -26,6 +26,7 @@ describe('LearnerGardenController (e2e)', () => {
 
   beforeAll(async () => {
     const module: TestingModule = global.rootModule
+    app = global.app
 
     const jwtService = module.get(JwtService)
     const configService = module.get(ConfigService)

@@ -159,6 +159,7 @@ describe('LearnerCourseController (e2e)', () => {
       childCourseIds: [],
       gardenRequiredToolkits: faker.lorem.sentence()
     })
+    await courseModel.ensureIndexes()
   })
 
   afterAll(async () => {

@@ -127,6 +127,7 @@ describe('ManagementClassController (e2e)', () => {
     // Initialize test data
     await staffModel.create(testStaff)
     await classModel.create(testClass)
+    await classModel.ensureIndexes()
   })
 
   afterAll(async () => {

@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { v2 as cloudinary, SignApiOptions } from 'cloudinary'
+import { SignApiOptions, v2 } from 'cloudinary'
 import { GenerateSignedUrlDto } from '@media/dto/generate-signed-url.dto'
 import * as _ from 'lodash'
 import { UploadMediaViaBase64Dto } from '@media/dto/upload-media-via-base64.dto'
@@ -11,8 +11,10 @@ import { AppLogger } from '@common/services/app-logger.service'
 @Injectable()
 export class MediaService implements OnModuleInit {
   private readonly appLogger = new AppLogger(MediaService.name)
-  private readonly cloudinary = cloudinary
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject('CLOUDINARY_V2') private readonly cloudinary: typeof v2
+  ) {}
   onModuleInit() {
     const config = this.configService.get('cloudinary')
     this.cloudinary.config({ ...config, secure: true })
@@ -49,7 +51,7 @@ export class MediaService implements OnModuleInit {
   public async uploadMultiple(images: string[]) {
     const uploadPromises = []
     images.forEach((image) => {
-      uploadPromises.push(cloudinary.uploader.upload(image))
+      uploadPromises.push(this.cloudinary.uploader.upload(image))
     })
 
     const uploadResponses = await Promise.all(uploadPromises)

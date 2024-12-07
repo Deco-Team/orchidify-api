@@ -37,6 +37,7 @@ describe('ManagementLearnerController (e2e)', () => {
 
     // Insert test data
     await learnerModel.create(learnerTestData)
+    await learnerModel.ensureIndexes()
   })
 
   afterAll(async () => {

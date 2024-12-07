@@ -21,6 +21,13 @@ describe('ManagementGardenManagerController (e2e)', () => {
     password: 'hashedpassword123',
     idCardPhoto: 'https://idCardPhoto3.com'
   }
+  let gardenManagerNoGarden = {
+    _id: new Types.ObjectId(),
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    password: 'hashedpassword123',
+    idCardPhoto: 'https://idCardPhoto3.com'
+  }
   let gardenTestData = {
     _id: new Types.ObjectId(),
     name: 'Rose Garden',
@@ -50,8 +57,9 @@ describe('ManagementGardenManagerController (e2e)', () => {
     )
 
     // Insert test data
-    await gardenManagerModel.create(gardenManagerTestData)
+    await gardenManagerModel.insertMany([gardenManagerTestData, gardenManagerNoGarden])
     await gardenModel.create(gardenTestData)
+    await gardenManagerModel.ensureIndexes()
   })
 
   afterAll(async () => {
@@ -155,9 +163,8 @@ describe('ManagementGardenManagerController (e2e)', () => {
 
   describe('PATCH /garden-managers/:id/deactivate', () => {
     it('should deactivate a garden manager', async () => {
-      const gardenManagerId = new Types.ObjectId().toString()
       const { status, body } = await request(global.app.getHttpServer())
-        .patch(`/garden-managers/${gardenManagerId}/deactivate`)
+        .patch(`/garden-managers/${gardenManagerNoGarden._id}/deactivate`)
         .set('Authorization', `Bearer ${accessToken}`)
       expect(status).toBe(200)
       expect(body.data).toMatchObject({ success: true })
@@ -174,9 +181,8 @@ describe('ManagementGardenManagerController (e2e)', () => {
 
   describe('PATCH /garden-managers/:id/active', () => {
     it('should activate a garden manager', async () => {
-      const gardenManagerId = new Types.ObjectId().toString()
       const { status, body } = await request(global.app.getHttpServer())
-        .patch(`/garden-managers/${gardenManagerId}/active`)
+        .patch(`/garden-managers/${gardenManagerTestData._id}/active`)
         .set('Authorization', `Bearer ${accessToken}`)
       expect(status).toBe(200)
       expect(body.data).toMatchObject({ success: true })

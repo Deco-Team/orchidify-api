@@ -151,6 +151,7 @@ describe('InstructorClassController (e2e)', () => {
     await instructorModel.create(testInstructor)
     await courseModel.create(testCourse)
     await classModel.create(testClass)
+    await classModel.ensureIndexes()
   })
 
   afterAll(async () => {
