@@ -113,7 +113,7 @@
     "setupFilesAfterEnv": [
       "<rootDir>/../test/setup.ts"
     ],
-    "maxWorkers": 4,
+    "maxWorkers": "50%",
     "modulePaths": [
       "<rootDir>",
       "<rootDir>/src"
