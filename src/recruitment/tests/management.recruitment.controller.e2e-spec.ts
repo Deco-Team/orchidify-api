@@ -67,6 +67,7 @@ describe('ManagementRecruitmentController (e2e)', () => {
 
     // Insert test data
     await recruitmentModel.insertMany([recruitmentTestData, interviewingRecruitmentTest])
+    await recruitmentModel.ensureIndexes()
   })
 
   afterAll(async () => {

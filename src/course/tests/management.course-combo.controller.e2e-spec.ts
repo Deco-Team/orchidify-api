@@ -112,6 +112,7 @@ describe('ManagementCourseComboController (e2e)', () => {
     await courseModel.create(testChildCourse)
     await courseModel.create(testSecondChildCourse)
     await courseModel.create(testCourseCombo)
+    await courseModel.ensureIndexes()
   })
 
   afterAll(async () => {

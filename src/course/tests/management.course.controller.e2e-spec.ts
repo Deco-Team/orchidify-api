@@ -105,6 +105,7 @@ describe('ManagementCourseController (e2e)', () => {
     )
 
     await courseModel.create(testCourse)
+    await courseModel.ensureIndexes()
   })
 
   afterAll(async () => {
@@ -131,7 +132,7 @@ describe('ManagementCourseController (e2e)', () => {
         body: { data }
       } = await request(global.app.getHttpServer())
         .get('/courses/management')
-        .query({ title: testCourse.title })
+        .query({ title: testCourse.title, sort: 'createdAt.desc_title.asc' })
         .set('Authorization', `Bearer ${staffAccessToken}`)
         .expect(200)
 
@@ -143,7 +144,7 @@ describe('ManagementCourseController (e2e)', () => {
         body: { data }
       } = await request(global.app.getHttpServer())
         .get('/courses/management')
-        .query({ type: testCourse.type[0] })
+        .query({ page: 1, limit: 10, type: testCourse.type[0], sort: '_' })
         .set('Authorization', `Bearer ${staffAccessToken}`)
         .expect(200)
 

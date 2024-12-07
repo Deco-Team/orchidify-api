@@ -62,8 +62,11 @@ import { ReportModule } from '@report/report.module'
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
+        const mongodbUri =
+          configService.get('NODE_ENV') !== 'test' ? configService.get<string>('mongodbUrl') : global.__MONGODB_URI__
+
         return {
-          uri: configService.get<string>('mongodbUrl')
+          uri: mongodbUri
         }
       }
     }),

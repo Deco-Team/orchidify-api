@@ -13,7 +13,7 @@ import { Model, Types } from 'mongoose'
 import * as request from 'supertest'
 
 describe('ManagementGardenController', () => {
-  const app: INestApplication = global.app
+  let app: INestApplication
   let staffAccessToken: string
   let gardenManagerAccessToken: string
   let gardenModel: Model<GardenDocument>
@@ -50,6 +50,7 @@ describe('ManagementGardenController', () => {
 
   beforeAll(async () => {
     const module: TestingModule = global.rootModule
+    app = global.app
 
     const jwtService = module.get(JwtService)
     const configService = module.get(ConfigService)
@@ -79,6 +80,7 @@ describe('ManagementGardenController', () => {
     // Insert test data
     await gardenManagerModel.create(gardenManagerTestData)
     await gardenModel.insertMany(gardenTestData)
+    await gardenModel.ensureIndexes()
   })
 
   afterAll(async () => {
