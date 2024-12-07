@@ -16,9 +16,9 @@ module.exports = async function (globalConfig, projectConfig) {
   })
     .overrideProvider('FIREBASE_APP')
     .useValue({
-      auth: () => {},
-      firestore: () => {},
-      messaging: () => {}
+      auth: () => ({}),
+      firestore: () => ({ collection: () => ({}) }),
+      messaging: () => ({})
     })
     .overrideProvider(INotificationService)
     .useValue({
