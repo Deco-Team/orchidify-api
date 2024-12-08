@@ -3,9 +3,9 @@ actor Staff
 activate Staff
 
 participant PayoutRequestScreen
-Staff -> PayoutRequestScreen: Access payout request
+Staff -> PayoutRequestScreen: access payout request
 activate PayoutRequestScreen
-PayoutRequestScreen -> PayoutRequestScreen: Click Approve payout request
+PayoutRequestScreen -> PayoutRequestScreen: click Approve payout request
 
 participant PayoutRequestController
 PayoutRequestScreen -> PayoutRequestController: approve(id)
@@ -15,10 +15,10 @@ participant IPayoutRequestService
 PayoutRequestController -> IPayoutRequestService: approvePayoutRequest(id)
 activate IPayoutRequestService
 
-IPayoutRequestService -> IPayoutRequestService: Validate payout request
+IPayoutRequestService -> IPayoutRequestService: validate payout request
 alt invalid payout request and garden
-    IPayoutRequestService --> PayoutRequestController: Show error message
-    PayoutRequestController --> PayoutRequestScreen: Show error message
+    IPayoutRequestService --> PayoutRequestController: show error message
+    PayoutRequestController --> PayoutRequestScreen: show error message
 end
 
 participant IPayoutRequestService
@@ -36,7 +36,7 @@ IPayoutRequestRepository --> IPayoutRequestService: return data
 deactivate IPayoutRequestRepository
 
 participant ITransactionService
-IPayoutRequestService -> ITransactionService: Create new payout transaction
+IPayoutRequestService -> ITransactionService: create new payout transaction
 activate ITransactionService
 
 ITransactionService --> IPayoutRequestService: return result
@@ -56,14 +56,14 @@ IQueueProducerService --> IPayoutRequestService: return result
 deactivate IQueueProducerService
 
 participant INotificationService
-IPayoutRequestService -> INotificationService: Send notification to instructor
+IPayoutRequestService -> INotificationService: send notification to instructor
 activate INotificationService
 
 INotificationService --> IPayoutRequestService: return result
 deactivate INotificationService
 
 participant IReportService
-IPayoutRequestService -> IReportService: Update report
+IPayoutRequestService -> IReportService: update report
 activate IReportService
 
 IReportService --> IPayoutRequestService: return result

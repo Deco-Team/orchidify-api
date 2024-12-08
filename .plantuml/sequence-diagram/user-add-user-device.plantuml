@@ -3,9 +3,9 @@ actor User
 activate User
 
 participant Screen
-User -> Screen: Access
+User -> Screen: access
 activate Screen
-Screen -> Screen: Request grant notification
+Screen -> Screen: request grant notification
 
 participant UserDeviceController
 Screen -> UserDeviceController: create(createInstructorDto)

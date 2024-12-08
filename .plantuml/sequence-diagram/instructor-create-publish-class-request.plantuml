@@ -2,18 +2,13 @@
 actor Instructor
 activate Instructor
 
-participant CourseScreen
-Instructor -> CourseScreen: Access course
-activate CourseScreen
-CourseScreen -> CourseScreen: Click Create class request
-
-participant CreateClassRequestScreen
-CourseScreen -> CreateClassRequestScreen: Redirect
-activate CreateClassRequestScreen
-CreateClassRequestScreen -> CreateClassRequestScreen: Fill class request information form
+participant CreatePublishClassRequestScreen
+Instructor -> CreatePublishClassRequestScreen: access
+activate CreatePublishClassRequestScreen
+CreatePublishClassRequestScreen -> CreatePublishClassRequestScreen: fill class request information form
 
 participant GardenTimesheetController
-CreateClassRequestScreen -> GardenTimesheetController: viewAvailableTime(queryAvailableTimeDto)
+CreatePublishClassRequestScreen -> GardenTimesheetController: viewAvailableTime(queryAvailableTimeDto)
 activate GardenTimesheetController
 
 participant IGardenTimesheetService
@@ -38,20 +33,20 @@ IGardenTimesheetService -> IGardenTimesheetService: calculate available slots
 IGardenTimesheetService --> GardenTimesheetController: return slots
 deactivate IGardenTimesheetService
 
-GardenTimesheetController --> CreateClassRequestScreen: show available slots
+GardenTimesheetController --> CreatePublishClassRequestScreen: show available slots
 deactivate GardenTimesheetController
 
-CreateClassRequestScreen -> CreateClassRequestScreen: select available slots & submit
+CreatePublishClassRequestScreen -> CreatePublishClassRequestScreen: select available slots & submit
 
 participant ClassRequestController
-CreateClassRequestScreen -> ClassRequestController: createPublishClassRequest(createRequestDto)
+CreatePublishClassRequestScreen -> ClassRequestController: createPublishClassRequest(createRequestDto)
 activate ClassRequestController
 ClassRequestController -> ClassRequestController: check create request limit per day
 ClassRequestController -> ClassRequestController: check class request for course has been made
 ClassRequestController -> ClassRequestController: validate slots
 
 alt invalid data
-    ClassRequestController --> CreateClassRequestScreen: Show error message
+    ClassRequestController --> CreatePublishClassRequestScreen: show error message
 end
 
 participant IClassRequestService
@@ -85,14 +80,14 @@ IQueueProducerService --> IClassRequestService: return job
 deactivate IQueueProducerService
 
 participant INotificationService
-IClassRequestService -> INotificationService: Send notification to staff
+IClassRequestService -> INotificationService: send notification to staff
 activate INotificationService
 
 INotificationService --> IClassRequestService: return data
 deactivate INotificationService
 
 participant IReportService
-IClassRequestService -> IReportService: Update class request report
+IClassRequestService -> IReportService: update class request report
 activate IReportService
 
 IReportService --> IClassRequestService: return data
@@ -101,7 +96,7 @@ deactivate IReportService
 IClassRequestService --> ClassRequestController: return data
 deactivate IClassRequestService
 
-ClassRequestController --> CreateClassRequestScreen: show success message
+ClassRequestController --> CreatePublishClassRequestScreen: show success message
 deactivate ClassRequestController
 
 database Database

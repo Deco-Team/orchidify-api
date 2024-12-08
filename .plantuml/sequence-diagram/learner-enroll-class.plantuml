@@ -3,12 +3,12 @@ actor Learner
 activate Learner
 
 participant CourseScreen
-Learner -> CourseScreen: Access
+Learner -> CourseScreen: access
 activate CourseScreen
-CourseScreen -> CourseScreen: Choose class to enroll
+CourseScreen -> CourseScreen: choose class to enroll
 
 participant PurchaseConfirmation
-CourseScreen -> PurchaseConfirmation: Click enroll
+CourseScreen -> PurchaseConfirmation: click enroll
 activate PurchaseConfirmation
 
 participant ClassController
@@ -21,8 +21,8 @@ activate IClassService
 IClassService -> IClassService: validate learner had enrolled class before, duplicate timesheet
 
 alt invalid class, duplicate timesheet
-    IClassService --> ClassController: Throw error
-    ClassController --> PurchaseConfirmation: Show error message
+    IClassService --> ClassController: throw error
+    ClassController --> PurchaseConfirmation: show error message
 end
 
 IClassService -> IClassService: calculate discount, final price
@@ -80,8 +80,8 @@ alt payment failed
     activate PaymentGateway
     participant PaymentController
     activate PaymentController
-    PaymentGateway --> PaymentController: Send failed webhook
-    PaymentController -> PaymentController: Verify signature data
+    PaymentGateway --> PaymentController: send failed webhook
+    PaymentController -> PaymentController: verify signature data
 
     participant IPaymentService
     PaymentController -> IPaymentService: processWebhook(data)
@@ -115,33 +115,33 @@ alt payment failed
     
     PaymentGateway --> PaymentScreen: show error
     deactivate PaymentGateway
-    PaymentScreen --> CourseScreen: Redirect & retry
+    PaymentScreen --> CourseScreen: redirect & retry
     deactivate CourseScreen
 else payment succeeded
     activate PaymentGateway
     participant PaymentController
     activate PaymentController
-    PaymentGateway --> PaymentController: Send succeeded webhook
-    PaymentController -> PaymentController: Verify signature data
+    PaymentGateway --> PaymentController: send succeeded webhook
+    PaymentController -> PaymentController: verify signature data
 
     participant IPaymentService
     PaymentController -> IPaymentService: processWebhook(data)
     activate IPaymentService
 
     participant IClassService
-    IPaymentService -> IClassService: Update learnerQuantity in class
+    IPaymentService -> IClassService: update learnerQuantity in class
     activate IClassService
     IClassService --> IPaymentService: return data
     deactivate IClassService
 
     participant ICourseService
-    IPaymentService -> ICourseService: Update learnerQuantity in course
+    IPaymentService -> ICourseService: update learnerQuantity in course
     activate ICourseService
     ICourseService --> IPaymentService: return data
     deactivate ICourseService
 
     participant ILearnerClassService
-    IPaymentService -> ILearnerClassService: Create LearnerClass record
+    IPaymentService -> ILearnerClassService: create LearnerClass record
     activate ILearnerClassService
     ILearnerClassService --> IPaymentService: return data
     deactivate ILearnerClassService
@@ -168,7 +168,7 @@ else payment succeeded
 
 
     participant INotificationService
-    IPaymentService -> INotificationService: Send notification to learner/instructor
+    IPaymentService -> INotificationService: send notification to learner/instructor
     activate INotificationService
     INotificationService --> IPaymentService: return data
     deactivate INotificationService
@@ -182,10 +182,10 @@ else payment succeeded
     PaymentGateway --> PaymentScreen: show success message
     deactivate PaymentGateway
 
-    PaymentScreen --> MyClassesScreen: Redirect
+    PaymentScreen --> MyClassesScreen: redirect
     deactivate PaymentScreen
     activate MyClassesScreen
-    MyClassesScreen -> MyClassesScreen: View my classes
+    MyClassesScreen -> MyClassesScreen: view my classes
 end
 
 

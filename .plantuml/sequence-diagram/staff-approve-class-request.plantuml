@@ -3,9 +3,9 @@ actor Staff
 activate Staff
 
 participant ClassRequestScreen
-Staff -> ClassRequestScreen: Access class request
+Staff -> ClassRequestScreen: access class request
 activate ClassRequestScreen
-ClassRequestScreen -> ClassRequestScreen: Click Approve class request
+ClassRequestScreen -> ClassRequestScreen: click Approve class request
 
 participant GardenController
 ClassRequestScreen -> GardenController: getAvailableGardenList(query)
@@ -53,11 +53,11 @@ deactivate IGardenRepository
 IGardenService --> GardenController: return data
 deactivate IGardenService
 
-GardenController --> ClassRequestScreen: Show available gardens
+GardenController --> ClassRequestScreen: show available gardens
 deactivate GardenController
 
 
-ClassRequestScreen -> ClassRequestScreen: Choose a garden
+ClassRequestScreen -> ClassRequestScreen: choose a garden
 
 participant ClassRequestController
 ClassRequestScreen -> ClassRequestController: approveClassRequest(id, gardenId)
@@ -67,10 +67,10 @@ participant IClassRequestService
 ClassRequestController -> IClassRequestService: approveClassRequest(id, gardenId)
 activate IClassRequestService
 
-IClassRequestService -> IClassRequestService: Validate class request and garden
+IClassRequestService -> IClassRequestService: validate class request and garden
 alt invalid class request and garden
-    IClassRequestService --> ClassRequestController: Show error message
-    ClassRequestController --> ClassRequestScreen: Show error message
+    IClassRequestService --> ClassRequestController: show error message
+    ClassRequestController --> ClassRequestScreen: show error message
 end
 
 participant IClassRequestService
@@ -88,20 +88,20 @@ IClassRequestRepository --> IClassRequestService: return data
 deactivate IClassRequestRepository
 
 participant ICourseService
-IClassRequestService -> ICourseService: Update course to ACTIVE
+IClassRequestService -> ICourseService: update course to ACTIVE
 activate ICourseService
 
 ICourseService --> IClassRequestService: return result
 deactivate ICourseService
 
 participant IClassService
-IClassRequestService -> IClassService: Create new class
+IClassRequestService -> IClassService: create new class
 activate IClassService
 
 IClassService --> IClassRequestService: return result
 deactivate IClassService
 
-IClassRequestService -> IGardenTimesheetService: Generate timesheet slots for class
+IClassRequestService -> IGardenTimesheetService: generate timesheet slots for class
 activate IGardenTimesheetService
 
 IGardenTimesheetService --> IClassRequestService: return result
@@ -121,14 +121,14 @@ IQueueProducerService --> IClassRequestService: return result
 deactivate IQueueProducerService
 
 participant INotificationService
-IClassRequestService -> INotificationService: Send notification to instructor
+IClassRequestService -> INotificationService: send notification to instructor
 activate INotificationService
 
 INotificationService --> IClassRequestService: return data
 deactivate INotificationService
 
 participant IReportService
-IClassRequestService -> IReportService: Update report data
+IClassRequestService -> IReportService: update report data
 activate IReportService
 
 IReportService --> IClassRequestService: return data

@@ -3,9 +3,9 @@ actor Instructor
 activate Instructor
 
 participant CreateCourseScreen
-Instructor -> CreateCourseScreen: Access
+Instructor -> CreateCourseScreen: access
 activate CreateCourseScreen
-CreateCourseScreen -> CreateCourseScreen: Fill course form
+CreateCourseScreen -> CreateCourseScreen: fill course form
 
 participant InstructorCourseController
 CreateCourseScreen -> InstructorCourseController: create(createCourseDto)
@@ -13,7 +13,7 @@ activate InstructorCourseController
 InstructorCourseController -> InstructorCourseController: validate sessions & assignments
 
 alt invalid sessions count, assignment count
-    InstructorCourseController --> CreateCourseScreen: Show error message
+    InstructorCourseController --> CreateCourseScreen: show error message
 end
 
 participant ICourseService
@@ -35,7 +35,7 @@ ICourseRepository --> ICourseService: return data
 deactivate ICourseRepository
 
 participant IReportService
-ICourseService -> IReportService: Update course report
+ICourseService -> IReportService: update course report
 activate IReportService
 
 IReportService --> ICourseService: return data

@@ -3,9 +3,9 @@ actor Staff
 activate Staff
 
 participant AddInstructorScreen
-Staff -> AddInstructorScreen: Access
+Staff -> AddInstructorScreen: access
 activate AddInstructorScreen
-AddInstructorScreen -> AddInstructorScreen: Fill instructor form
+AddInstructorScreen -> AddInstructorScreen: fill instructor form
 
 participant InstructorController
 AddInstructorScreen -> InstructorController: create(createInstructorDto)
@@ -13,7 +13,7 @@ activate InstructorController
 InstructorController -> InstructorController: validate if email existed, recruitment is approved
 
 alt email is existed, recruitment is approved
-    InstructorController --> AddInstructorScreen: Show error message
+    InstructorController --> AddInstructorScreen: show error message
 end
 
 participant IInstructorService
@@ -41,14 +41,14 @@ deactivate Database
 IInstructorRepository --> IInstructorService: return data
 deactivate IInstructorRepository
 
-IInstructorService -> INotificationService: Send notification to instructor
+IInstructorService -> INotificationService: send notification to instructor
 activate INotificationService
 
 INotificationService --> IInstructorService: return data
 deactivate INotificationService
 
 participant IReportService
-IInstructorService -> IReportService: Update instructor report
+IInstructorService -> IReportService: update instructor report
 activate IReportService
 
 IReportService --> IInstructorService: return data

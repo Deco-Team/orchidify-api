@@ -3,9 +3,9 @@ actor Staff
 activate Staff
 
 participant UpdateGardenTimesheetScreen
-Staff -> UpdateGardenTimesheetScreen: Access
+Staff -> UpdateGardenTimesheetScreen: access
 activate UpdateGardenTimesheetScreen
-UpdateGardenTimesheetScreen -> UpdateGardenTimesheetScreen: Click update a garden timesheet
+UpdateGardenTimesheetScreen -> UpdateGardenTimesheetScreen: click update a garden timesheet
 
 participant GardenTimesheetController
 UpdateGardenTimesheetScreen -> GardenTimesheetController: update(updateGardenTimesheetDto)
@@ -13,7 +13,7 @@ activate GardenTimesheetController
 GardenTimesheetController -> GardenTimesheetController: validate if garden timeshet has any classes scheduled
 
 alt garden timeshet has any classes scheduled
-    GardenTimesheetController --> UpdateGardenTimesheetScreen: Show error message
+    GardenTimesheetController --> UpdateGardenTimesheetScreen: show error message
 end
 
 participant IGardenTimesheetService
@@ -34,7 +34,7 @@ deactivate Database
 IGardenTimesheetRepository --> IGardenTimesheetService: return data
 deactivate IGardenTimesheetRepository
 
-IGardenTimesheetService -> INotificationService: Send notification to garden manager
+IGardenTimesheetService -> INotificationService: send notification to garden manager
 activate INotificationService
 
 INotificationService --> IGardenTimesheetService: return data

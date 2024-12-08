@@ -2,15 +2,10 @@
 actor Instructor
 activate Instructor
 
-participant PayoutRequestScreen
-Instructor -> PayoutRequestScreen: Access course
-activate PayoutRequestScreen
-PayoutRequestScreen -> PayoutRequestScreen: Click Create payout request
-
 participant CreatePayoutRequestScreen
-PayoutRequestScreen -> CreatePayoutRequestScreen: Redirect
+Instructor -> CreatePayoutRequestScreen: access
 activate CreatePayoutRequestScreen
-CreatePayoutRequestScreen -> CreatePayoutRequestScreen: Fill payout request information form
+CreatePayoutRequestScreen -> CreatePayoutRequestScreen: fill payout request information form
 
 participant PayoutRequestController
 CreatePayoutRequestScreen -> PayoutRequestController: createPayoutRequest(createRequestDto)
@@ -20,7 +15,7 @@ PayoutRequestController -> PayoutRequestController: check daily maximun amount o
 PayoutRequestController -> PayoutRequestController: check instructor balance remain
 
 alt invalid data
-    PayoutRequestController --> CreatePayoutRequestScreen: Show error message
+    PayoutRequestController --> CreatePayoutRequestScreen: show error message
 end
 
 participant IPayoutRequestService
@@ -64,13 +59,13 @@ deactivate Queue
 IQueueProducerService --> IPayoutRequestService: return job
 deactivate IQueueProducerService
 
-IPayoutRequestService -> INotificationService: Send notification to staff
+IPayoutRequestService -> INotificationService: send notification to staff
 activate INotificationService
 
 INotificationService --> IPayoutRequestService: return data
 deactivate INotificationService
 
-IPayoutRequestService -> IReportService: Update payout request report
+IPayoutRequestService -> IReportService: update payout request report
 activate IReportService
 
 IReportService --> IPayoutRequestService: return data
