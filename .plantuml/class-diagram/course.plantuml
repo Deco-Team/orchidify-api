@@ -139,7 +139,7 @@ class CourseRepository {
   +model: PaginateModel<CourseDocument>
 }
 
-abstract class AbstractRepository<T> {
+abstract class AbstractRepository {
   - model: PaginateModel<T>
   + constructor(model: PaginateModel<T>)
   + findOne(params: {conditions, projection?, populates?, options?}): Promise<T | undefined>
