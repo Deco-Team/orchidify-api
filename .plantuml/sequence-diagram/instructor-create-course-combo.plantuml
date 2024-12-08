@@ -1,0 +1,51 @@
+@startuml
+actor Instructor
+activate Instructor
+
+participant CreateCourseComboScreen
+Instructor -> CreateCourseComboScreen: access
+activate CreateCourseComboScreen
+CreateCourseComboScreen -> CreateCourseComboScreen: select courses & fill course combo form
+
+participant InstructorCourseComboController
+CreateCourseComboScreen -> InstructorCourseComboController: create(createCourseComboDto)
+activate InstructorCourseComboController
+InstructorCourseComboController -> InstructorCourseComboController: validate child courses & if course combo with childCourseIds has been created
+
+alt invalid data
+    InstructorCourseComboController --> CreateCourseComboScreen: show error message
+end
+
+participant ICourseComboService
+InstructorCourseComboController -> ICourseComboService: create(createCourseComboDto)
+activate ICourseComboService
+ICourseComboService -> ICourseComboService: generateCode()
+
+participant ICourseRepository
+ICourseComboService -> ICourseRepository: create(createCourseComboDto)
+activate ICourseRepository
+
+database Database
+ICourseRepository -> Database: save(payload)
+activate Database
+Database --> ICourseRepository: return data
+deactivate Database
+
+ICourseRepository --> ICourseComboService: return data
+deactivate ICourseRepository
+
+participant IReportService
+ICourseComboService -> IReportService: update course report
+activate IReportService
+
+IReportService --> ICourseComboService: return data
+deactivate IReportService
+
+ICourseComboService --> InstructorCourseComboController: return data
+deactivate ICourseComboService
+
+InstructorCourseComboController --> CreateCourseComboScreen: show success message
+deactivate InstructorCourseComboController
+
+database Database
+@enduml
