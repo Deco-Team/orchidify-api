@@ -1,0 +1,31 @@
+@startuml
+
+actor Learner
+participant CertificateListScreen
+participant LearnerCertificateController
+participant ICertificateService
+participant ICertificateRepository
+database Database
+
+activate Learner
+Learner -> CertificateListScreen: access
+activate CertificateListScreen
+CertificateListScreen -> LearnerCertificateController: list()
+activate LearnerCertificateController
+LearnerCertificateController -> ICertificateService: list(learnerId)
+activate ICertificateService
+ICertificateService -> ICertificateRepository: paginate(learnerId)
+activate ICertificateRepository
+ICertificateRepository -> Database: paginate(payload)
+activate Database
+Database -> ICertificateRepository: return data
+deactivate Database
+ICertificateRepository -> ICertificateService: return data
+deactivate ICertificateRepository
+ICertificateService -> LearnerCertificateController: return data
+deactivate ICertificateService
+LearnerCertificateController -> CertificateListScreen: return certificate list
+deactivate LearnerCertificateController
+CertificateListScreen -> Learner: show certificate list
+
+@enduml

@@ -1,0 +1,104 @@
+@startuml
+
+actor Instructor
+participant InstructorRegisterScreen
+participant InstructorAuthController
+participant IAuthService
+participant INotificationService
+participant IInstructorService
+participant IInstructorRepository
+participant IRecruitmentService
+participant IQueueProducerService
+participant IReportService
+participant IRecruitmentRepository
+participant IReportRepository
+database Database
+queue Queue
+
+activate Instructor
+Instructor -> InstructorRegisterScreen: access
+activate InstructorRegisterScreen
+InstructorRegisterScreen -> InstructorRegisterScreen: fill register form
+InstructorRegisterScreen -> InstructorAuthController: register(instructorRegisterDto)
+activate InstructorAuthController
+InstructorAuthController -> IAuthService: registerByInstructor(instructorRegisterDto)
+activate IAuthService
+IAuthService -> IInstructorService: findByEmail(email)
+activate IInstructorService
+IInstructorService -> IInstructorRepository: findOne(email)
+activate IInstructorRepository
+IInstructorRepository -> Database: query(payload)
+activate Database
+Database --> IInstructorRepository: return data
+deactivate Database
+IInstructorRepository --> IInstructorService: return data
+deactivate IInstructorRepository
+IInstructorService --> IAuthService: return data
+deactivate IInstructorService
+alt found instructor
+    IAuthService --> InstructorAuthController: return error
+    InstructorAuthController --> InstructorRegisterScreen: return error
+    InstructorRegisterScreen --> Instructor: show error message
+else not found instructor
+    IAuthService -> IRecruitmentService: findOneByApplicationEmailAndStatus(email, [PENDING, INTERVIEWING, SELECTED])
+    activate IRecruitmentService
+    IRecruitmentService -> IRecruitmentRepository: findOne(email, [PENDING, INTERVIEWING, SELECTED])
+    activate IRecruitmentRepository
+    IRecruitmentRepository -> Database: query(payload)
+    activate Database
+    Database --> IRecruitmentRepository: return data
+    deactivate Database
+    IRecruitmentRepository --> IRecruitmentService: return data
+    deactivate IRecruitmentRepository
+    IRecruitmentService --> IAuthService: return data
+    deactivate IRecruitmentService
+    alt found application
+        IAuthService --> InstructorAuthController: return error
+        InstructorAuthController --> InstructorRegisterScreen: return error
+        InstructorRegisterScreen --> Instructor: show error message
+    else not found application
+        IAuthService -> IRecruitmentService: create(createRecruitmentDto)
+        activate IRecruitmentService
+        IRecruitmentService -> IRecruitmentRepository: create(createRecruitmentDto)
+        activate IRecruitmentRepository
+        IRecruitmentRepository -> Database: save(payload)
+        activate Database
+        Database --> IRecruitmentRepository: return data
+        deactivate Database
+        IRecruitmentRepository --> IRecruitmentService: return data
+        deactivate IRecruitmentRepository
+        IRecruitmentService -> IQueueProducerService: addJob(RecruitmentAutoExpired, recruitmentId)
+        activate IQueueProducerService
+        IQueueProducerService -> Queue: add(payload)
+        activate Queue
+        Queue --> IQueueProducerService: return job
+        deactivate Queue
+        IQueueProducerService --> IRecruitmentService: return job
+        deactivate IQueueProducerService
+        IRecruitmentService --> IAuthService: return data
+        deactivate IRecruitmentService
+        IAuthService -> INotificationService: send email to instructor
+        activate INotificationService
+        INotificationService --> IAuthService: return data
+        deactivate INotificationService
+        IAuthService -> IReportService: update(RecruitmentApplicationSum, updateReportDto)
+        activate IReportService
+        IReportService -> IReportRepository: findOneAndUpdate(RecruitmentApplicationSum, updateReportDto)
+        activate IReportRepository
+        IReportRepository -> Database: findOneAndUpdate(payload)
+        activate Database
+        Database --> IReportRepository: return data
+        deactivate Database
+        IReportRepository --> IReportService: return data
+        deactivate IReportRepository
+        IReportService --> IAuthService: return data
+        deactivate IReportService
+        IAuthService --> InstructorAuthController: return data
+        deactivate IAuthService
+        InstructorAuthController --> InstructorRegisterScreen: return data
+        deactivate InstructorAuthController
+        InstructorRegisterScreen --> Instructor: show success message
+    end
+end
+
+@enduml
