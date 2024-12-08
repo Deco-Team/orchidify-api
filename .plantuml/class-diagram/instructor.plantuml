@@ -1,0 +1,133 @@
+@startuml Instructor Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementInstructorController {
+  -instructorService: IInstructorService
+  -userTokenService: IUserTokenService
+  -classService: IClassService
+  -recruitmentService: IRecruitmentService
+  -reportService: IReportService
+  +list()
+  +getDetail()
+  +create()
+  +update()
+  +deactivate()
+  +activate()
+}
+
+class LearnerInstructorController {
+  -instructorService: IInstructorService
+  +getDetail()
+}
+
+class InstructorController {
+  -instructorService: IInstructorService
+  +viewProfile()
+  +viewCertifications()
+  +updateProfile()
+}
+
+' Interfaces
+interface IInstructorService {
+  +create(createInstructorDto: CreateInstructorDto): Promise<InstructorDocument>
+  +findById(instructorId: string, projection?): Promise<InstructorDocument>
+  +findByEmail(email: string, projection?): Promise<InstructorDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<InstructorDocument>
+  +list(pagination: PaginationParams, queryInstructorDto: QueryInstructorDto)
+}
+
+interface IInstructorRepository {
+}
+
+' Services
+class InstructorService {
+  -helperService: HelperService
+  -instructorRepository: IInstructorRepository
+  -notificationService: INotificationService
+  +create()
+  +findById()
+  +findByEmail()
+  +update()
+  +list()
+}
+
+' Repository
+class InstructorRepository {
+  +model: PaginateModel<InstructorDocument>
+}
+
+abstract class AbstractRepository {
+  -model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne()
+  +firstOrFail()
+  +findMany()
+  +paginate()
+  +create()
+  +updateOneOrFail()
+  +findOneAndUpdate()
+  +updateMany()
+  +findOneAndDelete()
+  +deleteMany()
+}
+
+' DTOs
+class BaseInstructorDto {
+  +_id: string
+  +name: string
+  +password: string
+  +phone: string
+  +email: string
+  +dateOfBirth: Date
+  +certificates: InstructorCertificateDto[]
+  +bio: string
+  +idCardPhoto: string
+  +avatar: string
+  +status: InstructorStatus
+  +balance: number
+  +paymentInfo: PaymentInfoDto
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity Instructor {
+  +_id: string
+  +name: string
+  +password: string
+  +phone: string
+  +email: string
+  +dateOfBirth: Date
+  +certificates: InstructorCertificateDto[]
+  +bio: string
+  +idCardPhoto: string
+  +avatar: string
+  +status: InstructorStatus
+  +balance: number
+  +paymentInfo: PaymentInfoDto
+}
+
+' Relationships
+ManagementInstructorController ..> IInstructorService
+LearnerInstructorController ..> IInstructorService
+InstructorController ..> IInstructorService
+
+IInstructorService <|.. InstructorService
+InstructorService ..> IInstructorRepository
+
+IInstructorRepository <|.. InstructorRepository
+IInstructorRepository --|> AbstractRepository
+InstructorRepository --|> AbstractRepository
+
+InstructorRepository ..> Instructor
+BaseInstructorDto -- Instructor
+
+@enduml
