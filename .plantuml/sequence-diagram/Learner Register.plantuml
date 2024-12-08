@@ -1,0 +1,98 @@
+@startuml
+
+actor Learner
+participant LearnerRegisterScreen
+participant LearnerAuthController
+participant IAuthService
+participant IHelperService
+participant ILearnerService
+participant IOtpService
+participant INotificationService
+participant IReportService
+participant ILearnerRepository
+participant IOtpRepository
+participant IReportRepository
+database Database
+
+
+activate Learner
+Learner -> LearnerRegisterScreen: access
+activate LearnerRegisterScreen
+LearnerRegisterScreen -> LearnerRegisterScreen: fill register form
+LearnerRegisterScreen -> LearnerAuthController: register(learnerRegisterDto)
+activate LearnerAuthController
+LearnerAuthController -> IAuthService: registerByLearner(learnerRegisterDto)
+activate IAuthService
+IAuthService -> ILearnerService: findByEmail(email)
+activate ILearnerService
+ILearnerService -> ILearnerRepository: findOne(email)
+activate ILearnerRepository
+ILearnerRepository -> Database: query(payload)
+activate Database
+Database --> ILearnerRepository: return data
+deactivate Database
+ILearnerRepository --> ILearnerService: return data
+deactivate ILearnerRepository
+ILearnerService --> IAuthService: return data
+deactivate ILearnerService
+alt found learner
+    IAuthService --> LearnerAuthController: return error
+    LearnerAuthController --> LearnerRegisterScreen: return error
+    LearnerRegisterScreen --> Learner: show error message
+else not found learner
+    IAuthService -> IHelperService: hashPassword(password)
+    activate IHelperService
+    IHelperService --> IAuthService: return hashed password
+    deactivate IHelperService
+    IAuthService -> ILearnerService: create(createLearnerDto)
+    activate ILearnerService
+    ILearnerService -> ILearnerRepository: create(createLearnerDto)
+    activate ILearnerRepository
+    ILearnerRepository -> Database: save(payload)
+    activate Database
+    Database --> ILearnerRepository: return data
+    deactivate Database
+    ILearnerRepository --> ILearnerService: return data
+    deactivate ILearnerRepository
+    ILearnerService --> IAuthService: return data
+    deactivate ILearnerService
+    IAuthService -> IHelperService: generateRandomString()
+    activate IHelperService
+    IHelperService --> IAuthService: return data
+    deactivate IHelperService
+    IAuthService -> IOtpService: create(createOtpDto)
+    activate IOtpService
+    IOtpService -> IOtpRepository: create(createOtpDto)
+    activate IOtpRepository
+    IOtpRepository -> Database: save(payload)
+    activate Database
+    Database --> IOtpRepository: return data
+    deactivate Database
+    IOtpRepository --> IOtpService: return data
+    deactivate IOtpRepository
+    IOtpService --> IAuthService: return data
+    deactivate IOtpService
+    IAuthService -> INotificationService: send email to learner
+    activate INotificationService
+    INotificationService --> IAuthService: return data
+    deactivate INotificationService
+    IAuthService -> IReportService: update(LearnerSum, updateReportDto)
+    activate IReportService
+    IReportService -> IReportRepository: findOneAndUpdate(LearnerSum, updateReportDto)
+    activate IReportRepository
+    IReportRepository -> Database: findOneAndUpdate(payload)
+    activate Database
+    Database --> IReportRepository: return data
+    deactivate Database
+    IReportRepository --> IReportService: return data
+    deactivate IReportRepository
+    IReportService --> IAuthService: return data
+    deactivate IReportService
+    IAuthService --> LearnerAuthController: return data
+    deactivate IAuthService
+    LearnerAuthController --> LearnerRegisterScreen: return data
+    deactivate LearnerAuthController
+    LearnerRegisterScreen --> Learner: show success message
+end
+
+@enduml
