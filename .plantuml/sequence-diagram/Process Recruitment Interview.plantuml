@@ -1,0 +1,69 @@
+@startuml
+
+actor Staff
+participant RecruitmentDetailScreen
+participant ManagementRecruitmentController
+participant IRecruitmentService
+participant INotificationService
+participant IQueueProducerService
+participant IRecruitmentRepository
+database Database
+queue Queue
+
+activate Staff
+Staff -> RecruitmentDetailScreen: access
+activate RecruitmentDetailScreen
+RecruitmentDetailScreen -> RecruitmentDetailScreen: click approve button
+RecruitmentDetailScreen -> ManagementRecruitmentController: processInterview(recruitmentId)
+activate ManagementRecruitmentController
+ManagementRecruitmentController -> IRecruitmentService: processRecruitmentInterview(recruitmentId, user)
+activate IRecruitmentService
+IRecruitmentService -> IRecruitmentRepository: findOne(recruitmentId)
+activate IRecruitmentRepository
+IRecruitmentRepository -> Database: query(payload)
+activate Database
+Database --> IRecruitmentRepository: return data
+deactivate Database
+IRecruitmentRepository --> IRecruitmentService: return data
+deactivate IRecruitmentRepository
+alt not found recruitment
+    IRecruitmentService --> ManagementRecruitmentController: return error
+    ManagementRecruitmentController --> RecruitmentDetailScreen: return error
+    RecruitmentDetailScreen --> Staff: show error message
+else recruitment status is not interviewing
+    IRecruitmentService --> ManagementRecruitmentController: return error
+    ManagementRecruitmentController --> RecruitmentDetailScreen: return error
+    RecruitmentDetailScreen --> Staff: show error message
+else recruitment is handled by another staff
+    IRecruitmentService --> ManagementRecruitmentController: return error
+    ManagementRecruitmentController --> RecruitmentDetailScreen: return error
+    RecruitmentDetailScreen --> Staff: show error message
+else recruitment is valid
+    IRecruitmentService -> IRecruitmentRepository: findOneAndUpdate(recruitmentId, recruitmentUpdateDto)
+    activate IRecruitmentRepository
+    IRecruitmentRepository -> Database: findOneAndUpdate(condition, payload)
+    activate Database
+    Database --> IRecruitmentRepository: return data
+    deactivate Database
+    IRecruitmentRepository --> IRecruitmentService: return data
+    deactivate IRecruitmentRepository
+    IRecruitmentService -> INotificationService: send email to instructor
+    activate INotificationService
+    INotificationService --> IRecruitmentService: return data
+    deactivate INotificationService
+    IRecruitmentService -> IQueueProducerService: removeJob(recruitmentId)
+    activate IQueueProducerService
+    IQueueProducerService -> Queue: remove(payload)
+    activate Queue
+    Queue --> IQueueProducerService: return data
+    deactivate Queue
+    IQueueProducerService --> IRecruitmentService: return data
+    deactivate IQueueProducerService
+    IRecruitmentService --> ManagementRecruitmentController: return data
+    deactivate IRecruitmentService
+    ManagementRecruitmentController --> RecruitmentDetailScreen: return data
+    deactivate ManagementRecruitmentController
+    RecruitmentDetailScreen --> Staff: show success message
+end
+
+@enduml

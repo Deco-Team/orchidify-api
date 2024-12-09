@@ -1,0 +1,31 @@
+@startuml
+
+actor Staff
+participant LearnerListScreen
+participant ManagementLearnerController
+participant ILearnerService
+participant ILearnerRepository
+database Database
+
+activate Staff
+Staff -> LearnerListScreen: access
+activate LearnerListScreen
+LearnerListScreen -> ManagementLearnerController: list(queryLearnerDto)
+activate ManagementLearnerController
+ManagementLearnerController -> ILearnerService: list(queryLearnerDto)
+activate ILearnerService
+ILearnerService -> ILearnerRepository: paginate(queryLearnerDto)
+activate ILearnerRepository
+ILearnerRepository -> Database: paginate(payload)
+activate Database
+Database --> ILearnerRepository: return data
+deactivate Database
+ILearnerRepository --> ILearnerService: return data
+deactivate ILearnerRepository
+ILearnerService --> ManagementLearnerController: return data
+deactivate ILearnerService
+ManagementLearnerController --> LearnerListScreen: return learner list
+deactivate ManagementLearnerController
+LearnerListScreen --> Staff: show learner list
+
+@enduml

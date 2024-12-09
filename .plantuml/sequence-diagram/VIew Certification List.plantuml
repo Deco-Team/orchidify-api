@@ -18,14 +18,14 @@ ICertificateService -> ICertificateRepository: paginate(learnerId)
 activate ICertificateRepository
 ICertificateRepository -> Database: paginate(payload)
 activate Database
-Database -> ICertificateRepository: return data
+Database --> ICertificateRepository: return data
 deactivate Database
-ICertificateRepository -> ICertificateService: return data
+ICertificateRepository --> ICertificateService: return data
 deactivate ICertificateRepository
-ICertificateService -> LearnerCertificateController: return data
+ICertificateService --> LearnerCertificateController: return data
 deactivate ICertificateService
-LearnerCertificateController -> CertificateListScreen: return certificate list
+LearnerCertificateController --> CertificateListScreen: return certificate list
 deactivate LearnerCertificateController
-CertificateListScreen -> Learner: show certificate list
+CertificateListScreen --> Learner: show certificate list
 
 @enduml
