@@ -1,12 +1,13 @@
 import { OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { v2 } from 'cloudinary';
 import { GenerateSignedUrlDto } from '@media/dto/generate-signed-url.dto';
 import { UploadMediaViaBase64Dto } from '@media/dto/upload-media-via-base64.dto';
 export declare class MediaService implements OnModuleInit {
     private readonly configService;
-    private readonly appLogger;
     private readonly cloudinary;
-    constructor(configService: ConfigService);
+    private readonly appLogger;
+    constructor(configService: ConfigService, cloudinary: typeof v2);
     onModuleInit(): void;
     create(generateSignedUrlDto: GenerateSignedUrlDto): Promise<{
         timestamp: number;

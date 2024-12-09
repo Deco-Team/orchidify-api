@@ -75,7 +75,7 @@ let ManagementGardenTimesheetController = class ManagementGardenTimesheetControl
             data: {
                 type: constant_2.FCMNotificationDataType.GARDEN_TIMESHEET,
                 id: gardenTimesheet._id,
-                date: date.toISOString(),
+                date: date?.toString(),
                 gardenId: gardenId.toString()
             }
         });

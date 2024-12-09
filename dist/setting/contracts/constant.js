@@ -14,7 +14,6 @@ var SettingKey;
     SettingKey["PayoutAmountLimitPerDay"] = "PayoutAmountLimitPerDay";
     SettingKey["RecruitmentProcessAutoExpiration"] = "RecruitmentProcessAutoExpiration";
     SettingKey["CommissionRate"] = "CommissionRate";
-    SettingKey["FirebaseConfig"] = "FirebaseConfig";
     SettingKey["ClassAutoCompleteAfterDay"] = "ClassAutoCompleteAfterDay";
     SettingKey["ClassAttendanceRate"] = "ClassAttendanceRate";
     SettingKey["ClassAssignmentPointAverage"] = "ClassAssignmentPointAverage";

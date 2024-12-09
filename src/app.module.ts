@@ -34,6 +34,7 @@ import { FirebaseModule } from './firebase/firebase.module'
 import { CertificateModule } from '@certificate/certificate.module'
 import { NotificationModule } from '@notification/notification.module'
 import { ReportModule } from '@report/report.module'
+import { CommandModule } from './command/command.module'
 
 @Module({
   imports: [
@@ -205,7 +206,8 @@ import { ReportModule } from '@report/report.module'
     FirebaseModule,
     CertificateModule,
     NotificationModule,
-    ReportModule
+    ReportModule,
+    CommandModule
   ],
   controllers: [AppController],
   providers: [AppService]

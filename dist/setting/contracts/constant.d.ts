@@ -10,7 +10,6 @@ export declare enum SettingKey {
     PayoutAmountLimitPerDay = "PayoutAmountLimitPerDay",
     RecruitmentProcessAutoExpiration = "RecruitmentProcessAutoExpiration",
     CommissionRate = "CommissionRate",
-    FirebaseConfig = "FirebaseConfig",
     ClassAutoCompleteAfterDay = "ClassAutoCompleteAfterDay",
     ClassAttendanceRate = "ClassAttendanceRate",
     ClassAssignmentPointAverage = "ClassAssignmentPointAverage",

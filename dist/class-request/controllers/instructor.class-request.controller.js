@@ -123,7 +123,7 @@ let InstructorClassRequestController = class InstructorClassRequestController {
     }
     async createCancelClassRequest(req, createCancelClassRequestDto) {
         const { _id, role } = _.get(req, 'user');
-        const { classId, description } = createCancelClassRequestDto;
+        const { classId } = createCancelClassRequestDto;
         const createClassRequestLimit = Number((await this.settingService.findByKey(constant_3.SettingKey.CreateClassRequestLimitPerDay)).value) || 10;
         const classRequestsCount = await this.classRequestService.countByCreatedByAndDate(_id, new Date());
         if (classRequestsCount > createClassRequestLimit)

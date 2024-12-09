@@ -389,7 +389,7 @@ let ClassService = class ClassService {
         return paymentResponse;
     }
     async processPaymentWithStripe(params) {
-        const { createStripePaymentDto, orderInfo, courseClass, orderCode, learnerId, paymentMethod, session } = params;
+        const { createStripePaymentDto, orderInfo, orderCode, learnerId, paymentMethod, session } = params;
         const paymentResponse = await this.paymentService.createTransaction(createStripePaymentDto);
         const transaction = await this.paymentService.getTransaction({
             id: paymentResponse?.id
@@ -450,7 +450,7 @@ let ClassService = class ClassService {
                     const discount = learnerClass.discount || 0;
                     totalPrice += (price * (100 - discount)) / 100;
                 });
-                const commissionRate = Number((await this.settingService.findByKey(constant_4.SettingKey.CommissionRate)).value) || 0.2;
+                const commissionRate = Number((await this.settingService.findByKey(constant_4.SettingKey.CommissionRate))?.value) || 0.2;
                 const { instructorId } = courseClass;
                 const earnings = Math.floor(totalPrice * (1 - commissionRate));
                 const systemEarnings = totalPrice - earnings;
