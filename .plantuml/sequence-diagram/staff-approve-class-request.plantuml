@@ -1,0 +1,146 @@
+@startuml
+actor Staff
+activate Staff
+
+participant ClassRequestScreen
+Staff -> ClassRequestScreen: access class request
+activate ClassRequestScreen
+ClassRequestScreen -> ClassRequestScreen: click Approve class request
+
+participant GardenController
+ClassRequestScreen -> GardenController: getAvailableGardenList(query)
+activate GardenController
+
+participant IGardenService
+GardenController -> IGardenService: getAvailableGardenList(query)
+activate IGardenService
+
+participant IGardenTimesheetService
+IGardenService -> IGardenTimesheetService: viewAvailableTime(query)
+activate IGardenTimesheetService
+
+participant IGardenTimesheetRepository
+IGardenTimesheetService -> IGardenTimesheetRepository: query(dates, ACTIVE)
+activate IGardenTimesheetRepository
+
+database Database
+IGardenTimesheetRepository -> Database: aggregate(params)
+activate Database
+Database --> IGardenTimesheetRepository: return data
+deactivate Database
+
+IGardenTimesheetRepository --> IGardenTimesheetService: return data
+deactivate IGardenTimesheetRepository
+
+IGardenTimesheetService -> IGardenTimesheetService: calculate available gardens
+
+IGardenTimesheetService --> IGardenService: return availableGardenIds
+deactivate IGardenTimesheetService
+
+participant IGardenRepository
+IGardenService -> IGardenRepository: findMany(availableGardenIds, ACTIVE)
+activate IGardenRepository
+
+database Database
+IGardenRepository -> Database: query(payload)
+activate Database
+Database --> IGardenRepository: return data
+deactivate Database
+
+IGardenRepository --> IGardenService: return data
+deactivate IGardenRepository
+
+IGardenService --> GardenController: return data
+deactivate IGardenService
+
+GardenController --> ClassRequestScreen: show available gardens
+deactivate GardenController
+
+
+ClassRequestScreen -> ClassRequestScreen: choose a garden
+
+participant ClassRequestController
+ClassRequestScreen -> ClassRequestController: approveClassRequest(id, gardenId)
+activate ClassRequestController
+
+participant IClassRequestService
+ClassRequestController -> IClassRequestService: approveClassRequest(id, gardenId)
+activate IClassRequestService
+
+IClassRequestService -> IClassRequestService: validate class request and garden
+alt invalid class request and garden
+    IClassRequestService --> ClassRequestController: show error message
+    ClassRequestController --> ClassRequestScreen: show error message
+end
+
+participant IClassRequestService
+participant IClassRequestRepository
+IClassRequestService -> IClassRequestRepository: findOneAndUpdate(id, APPROVED)
+activate IClassRequestRepository
+
+database Database
+IClassRequestRepository -> Database: execute(payload)
+activate Database
+Database --> IClassRequestRepository: return data
+deactivate Database
+
+IClassRequestRepository --> IClassRequestService: return data
+deactivate IClassRequestRepository
+
+participant ICourseService
+IClassRequestService -> ICourseService: update course to ACTIVE
+activate ICourseService
+
+ICourseService --> IClassRequestService: return result
+deactivate ICourseService
+
+participant IClassService
+IClassRequestService -> IClassService: create new class
+activate IClassService
+
+IClassService --> IClassRequestService: return result
+deactivate IClassService
+
+IClassRequestService -> IGardenTimesheetService: generate timesheet slots for class
+activate IGardenTimesheetService
+
+IGardenTimesheetService --> IClassRequestService: return result
+deactivate IGardenTimesheetService
+
+participant IQueueProducerService
+IClassRequestService -> IQueueProducerService: removeJob(ClassRequestAutoExpired, classRequestId)
+activate IQueueProducerService
+
+queue Queue
+IQueueProducerService -> Queue: remove(payload)
+activate Queue
+Queue --> IQueueProducerService: return result
+deactivate Queue
+
+IQueueProducerService --> IClassRequestService: return result
+deactivate IQueueProducerService
+
+participant INotificationService
+IClassRequestService -> INotificationService: send notification to instructor
+activate INotificationService
+
+INotificationService --> IClassRequestService: return data
+deactivate INotificationService
+
+participant IReportService
+IClassRequestService -> IReportService: update report data
+activate IReportService
+
+IReportService --> IClassRequestService: return data
+deactivate IReportService
+
+IClassRequestService --> ClassRequestController: return data
+deactivate IClassRequestService
+database Database
+
+ClassRequestController --> ClassRequestScreen: show success message
+deactivate ClassRequestController
+
+database Database
+queue Queue
+@enduml
