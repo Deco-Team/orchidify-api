@@ -13,6 +13,7 @@ import { BaseGardenDto } from '@garden/dto/base.garden.dto'
 import { PUBLIC_COURSE_CLASS_DETAIL_PROJECTION } from '@class/contracts/constant'
 import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { BaseLearnerDto } from '@learner/dto/base.learner.dto'
+import { MAX_PRICE, MIN_PRICE } from '@src/config'
 
 export class QueryCourseDto {
   @ApiPropertyOptional({
@@ -63,16 +64,16 @@ export class PublicQueryCourseDto extends PickType(QueryCourseDto, ['title', 'ty
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(1_000)
-  @Max(10_000_000)
+  @Min(MIN_PRICE)
+  @Max(MAX_PRICE)
   fromPrice: number
 
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(1_000)
-  @Max(10_000_000)
+  @Min(MIN_PRICE)
+  @Max(MAX_PRICE)
   toPrice: number
 }
 

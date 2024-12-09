@@ -217,8 +217,8 @@ let ClassService = class ClassService {
             throw new app_exception_1.AppException(error_1.Errors.LEARNER_CLASS_EXISTED);
         await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() });
         const MAX_VALUE = 9007199254740991;
-        const MIM_VALUE = 1000000000000000;
-        const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE));
+        const MIN_VALUE = 1000000000000000;
+        const orderCode = Math.floor(MIN_VALUE + Math.random() * (MAX_VALUE - MIN_VALUE));
         const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`;
         const [course, learnerClasses] = await Promise.all([
             this.courseService.findById(courseClass.courseId.toString(), undefined, [
@@ -250,7 +250,8 @@ let ClassService = class ClassService {
             }
         }
         const price = _.get(courseData, 'price');
-        const finalPrice = Math.round((price * (100 - discount)) / 100);
+        let finalPrice = Math.round((price * (100 - discount)) / 100);
+        finalPrice = finalPrice < config_2.MIN_PRICE ? config_2.MIN_PRICE : finalPrice;
         const session = await this.connection.startSession();
         let paymentResponse;
         try {

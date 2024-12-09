@@ -93,3 +93,5 @@ export const URL_REGEX =
   /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi
 
 export const VN_TIMEZONE = 'Asia/Ho_Chi_Minh'
+export const MIN_PRICE = 100_000
+export const MAX_PRICE = 10_000_000

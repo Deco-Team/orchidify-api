@@ -41,7 +41,7 @@ import { ILearnerService } from '@learner/services/learner.service'
 import { ITransactionService } from '@transaction/services/transaction.service'
 import { BasePaymentDto } from '@transaction/dto/base.transaction.dto'
 import { ILearnerClassService } from './learner-class.service'
-import { VN_TIMEZONE } from '@src/config'
+import { MIN_PRICE, VN_TIMEZONE } from '@src/config'
 import { IGardenTimesheetService } from '@garden-timesheet/services/garden-timesheet.service'
 import { GardenTimesheetDocument } from '@garden-timesheet/schemas/garden-timesheet.schema'
 import { CreateStripePaymentDto } from '@transaction/dto/stripe-payment.dto'
@@ -326,8 +326,8 @@ export class ClassService implements IClassService {
     await this.checkDuplicateTimesheetWithMyClasses({ courseClass, learnerId: learnerId.toString() })
 
     const MAX_VALUE = 9_007_199_254_740_991
-    const MIM_VALUE = 1_000_000_000_000_000
-    const orderCode = Math.floor(MIM_VALUE + Math.random() * (MAX_VALUE - MIM_VALUE))
+    const MIN_VALUE = 1_000_000_000_000_000
+    const orderCode = Math.floor(MIN_VALUE + Math.random() * (MAX_VALUE - MIN_VALUE))
     const orderInfo = `Orchidify - Thanh toán đơn hàng #${orderCode}`
 
     // get discount and finalPrice
@@ -362,7 +362,8 @@ export class ClassService implements IClassService {
       }
     }
     const price = _.get(courseData, 'price')
-    const finalPrice = Math.round((price * (100 - discount)) / 100)
+    let finalPrice = Math.round((price * (100 - discount)) / 100)
+    finalPrice = finalPrice < MIN_PRICE ? MIN_PRICE : finalPrice
 
     // Execute in transaction
     const session = await this.connection.startSession()

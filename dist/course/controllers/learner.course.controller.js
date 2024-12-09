@@ -32,6 +32,7 @@ const constant_3 = require("../../class/contracts/constant");
 const constant_4 = require("../../instructor/contracts/constant");
 const mongoose_1 = require("mongoose");
 const learner_class_service_1 = require("../../class/services/learner-class.service");
+const config_1 = require("../../config");
 let CourseController = class CourseController {
     constructor(courseService, learnerClassService) {
         this.courseService = courseService;
@@ -106,7 +107,9 @@ let CourseController = class CourseController {
             }
         }
         _.set(courseData, 'discount', discount);
-        _.set(courseData, 'finalPrice', Math.round((_.get(courseData, 'price') * (100 - discount)) / 100));
+        let finalPrice = Math.round((_.get(courseData, 'price') * (100 - discount)) / 100);
+        finalPrice = finalPrice < config_1.MIN_PRICE ? config_1.MIN_PRICE : finalPrice;
+        _.set(courseData, 'finalPrice', finalPrice);
         _.unset(courseData, 'combos');
         return courseData;
     }

@@ -24,6 +24,7 @@ import { CourseLevel } from '@src/common/contracts/constant'
 import { BaseSessionDto } from './session.dto'
 import { BaseProgressDto } from './progress.dto'
 import { BaseRatingSummaryDto } from './rating-summary.dto'
+import { MAX_PRICE, MIN_PRICE } from '@src/config'
 
 export class BaseClassDto {
   @ApiProperty({ type: String })
@@ -49,9 +50,9 @@ export class BaseClassDto {
   startDate: Date
 
   @ApiProperty({ type: Number, example: 500_000 })
-  @IsNumber()
-  @Min(1_000)
-  @Max(10_000_000)
+  @IsInt()
+  @Min(MIN_PRICE)
+  @Max(MAX_PRICE)
   price: number
 
   @ApiProperty({ type: String, enum: CourseLevel })

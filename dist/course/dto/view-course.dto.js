@@ -25,6 +25,7 @@ const base_garden_dto_1 = require("../../garden/dto/base.garden.dto");
 const constant_4 = require("../../class/contracts/constant");
 const constant_5 = require("../../instructor/contracts/constant");
 const base_learner_dto_1 = require("../../learner/dto/base.learner.dto");
+const config_1 = require("../../config");
 class QueryCourseDto {
 }
 exports.QueryCourseDto = QueryCourseDto;
@@ -84,8 +85,8 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1000),
-    (0, class_validator_1.Max)(10000000),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
+    (0, class_validator_1.Max)(config_1.MAX_PRICE),
     __metadata("design:type", Number)
 ], PublicQueryCourseDto.prototype, "fromPrice", void 0);
 __decorate([
@@ -93,8 +94,8 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1000),
-    (0, class_validator_1.Max)(10000000),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
+    (0, class_validator_1.Max)(config_1.MAX_PRICE),
     __metadata("design:type", Number)
 ], PublicQueryCourseDto.prototype, "toPrice", void 0);
 class CourseInstructorDto extends (0, swagger_1.PickType)(base_instructor_dto_1.BaseInstructorDto, constant_5.COURSE_INSTRUCTOR_DETAIL_PROJECTION) {

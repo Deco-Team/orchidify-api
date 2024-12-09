@@ -23,6 +23,7 @@ const _ = require("lodash");
 const helper_service_1 = require("../../common/services/helper.service");
 const constant_4 = require("../../instructor/contracts/constant");
 const learner_class_service_1 = require("../../class/services/learner-class.service");
+const config_1 = require("../../config");
 exports.ICourseService = Symbol('ICourseService');
 let CourseService = class CourseService {
     constructor(helperService, courseRepository, learnerClassService) {
@@ -492,7 +493,9 @@ let CourseService = class CourseService {
                 }
             }
             _.set(course, 'discount', discount);
-            _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100));
+            let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100);
+            finalPrice = finalPrice < config_1.MIN_PRICE ? config_1.MIN_PRICE : finalPrice;
+            _.set(course, 'finalPrice', finalPrice);
             _.unset(course, 'combos');
             docs.push(course);
         }
@@ -710,7 +713,9 @@ let CourseService = class CourseService {
                 }
             }
             _.set(course, 'discount', discount);
-            _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100));
+            let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100);
+            finalPrice = finalPrice < config_1.MIN_PRICE ? config_1.MIN_PRICE : finalPrice;
+            _.set(course, 'finalPrice', finalPrice);
             _.unset(course, 'combos');
             docs.push(course);
         }
@@ -928,7 +933,9 @@ let CourseService = class CourseService {
                 }
             }
             _.set(course, 'discount', discount);
-            _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100));
+            let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100);
+            finalPrice = finalPrice < config_1.MIN_PRICE ? config_1.MIN_PRICE : finalPrice;
+            _.set(course, 'finalPrice', finalPrice);
             _.unset(course, 'combos');
             docs.push(course);
         }

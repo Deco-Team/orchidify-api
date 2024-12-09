@@ -16,6 +16,7 @@ const constant_1 = require("../../common/contracts/constant");
 const class_transformer_1 = require("class-transformer");
 const constant_2 = require("../contracts/constant");
 const mongoose_1 = require("mongoose");
+const config_1 = require("../../config");
 class BaseTransactionAccountUserDto {
 }
 __decorate([
@@ -104,9 +105,9 @@ __decorate([
 ], BaseTransactionDto.prototype, "paymentMethod", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Number, example: 500000 }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1000),
-    (0, class_validator_1.Max)(10000000),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
+    (0, class_validator_1.Max)(config_1.MAX_PRICE),
     __metadata("design:type", Number)
 ], BaseTransactionDto.prototype, "amount", void 0);
 __decorate([

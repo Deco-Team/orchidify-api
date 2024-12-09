@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VN_TIMEZONE = exports.URL_REGEX = exports.PHONE_REGEX = exports.EMAIL_REGEX = void 0;
+exports.MAX_PRICE = exports.MIN_PRICE = exports.VN_TIMEZONE = exports.URL_REGEX = exports.PHONE_REGEX = exports.EMAIL_REGEX = void 0;
 exports.default = () => ({
     mongodbUrl: process.env.NODE_ENV !== 'test'
         ? decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify')
@@ -85,4 +85,6 @@ exports.EMAIL_REGEX = /^([A-Z0-9_+-]+\.?)*[A-Z0-9_+-]@([A-Z0-9][A-Z0-9-]*\.)+[A-
 exports.PHONE_REGEX = /^(?:$|^[+]?\d{10,12}$)/;
 exports.URL_REGEX = /[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/gi;
 exports.VN_TIMEZONE = 'Asia/Ho_Chi_Minh';
+exports.MIN_PRICE = 100000;
+exports.MAX_PRICE = 10000000;
 //# sourceMappingURL=index.js.map

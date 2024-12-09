@@ -20,6 +20,7 @@ const constant_2 = require("../../common/contracts/constant");
 const session_dto_1 = require("./session.dto");
 const progress_dto_1 = require("./progress.dto");
 const rating_summary_dto_1 = require("./rating-summary.dto");
+const config_1 = require("../../config");
 class BaseClassDto {
 }
 exports.BaseClassDto = BaseClassDto;
@@ -52,9 +53,9 @@ __decorate([
 ], BaseClassDto.prototype, "startDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: Number, example: 500000 }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Min)(1000),
-    (0, class_validator_1.Max)(10000000),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
+    (0, class_validator_1.Max)(config_1.MAX_PRICE),
     __metadata("design:type", Number)
 ], BaseClassDto.prototype, "price", void 0);
 __decorate([

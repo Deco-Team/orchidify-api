@@ -13,6 +13,7 @@ import { HelperService } from '@common/services/helper.service'
 import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/constant'
 import { UserAuth } from '@common/contracts/dto'
 import { ILearnerClassService } from '@class/services/learner-class.service'
+import { MIN_PRICE } from '@src/config'
 
 export const ICourseService = Symbol('ICourseService')
 
@@ -570,7 +571,9 @@ export class CourseService implements ICourseService {
         }
       }
       _.set(course, 'discount', discount)
-      _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100))
+      let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100)
+      finalPrice = finalPrice < MIN_PRICE ? MIN_PRICE : finalPrice
+      _.set(course, 'finalPrice', finalPrice)
       _.unset(course, 'combos')
       docs.push(course)
     }
@@ -804,7 +807,9 @@ export class CourseService implements ICourseService {
         }
       }
       _.set(course, 'discount', discount)
-      _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100))
+      let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100)
+      finalPrice = finalPrice < MIN_PRICE ? MIN_PRICE : finalPrice
+      _.set(course, 'finalPrice', finalPrice)
       _.unset(course, 'combos')
       docs.push(course)
     }
@@ -1038,7 +1043,9 @@ export class CourseService implements ICourseService {
         }
       }
       _.set(course, 'discount', discount)
-      _.set(course, 'finalPrice', Math.round((_.get(course, 'price') * (100 - discount)) / 100))
+      let finalPrice = Math.round((_.get(course, 'price') * (100 - discount)) / 100)
+      finalPrice = finalPrice < MIN_PRICE ? MIN_PRICE : finalPrice
+      _.set(course, 'finalPrice', finalPrice)
       _.unset(course, 'combos')
       docs.push(course)
     }

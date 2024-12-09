@@ -25,6 +25,7 @@ import { COURSE_INSTRUCTOR_DETAIL_PROJECTION } from '@instructor/contracts/const
 import { Types } from 'mongoose'
 import { Course } from '@course/schemas/course.schema'
 import { ILearnerClassService } from '@class/services/learner-class.service'
+import { MIN_PRICE } from '@src/config'
 
 @ApiTags('Course - Viewer/Learner')
 @ApiBadRequestResponse({ type: ErrorResponse })
@@ -167,7 +168,9 @@ export class CourseController {
       }
     }
     _.set(courseData, 'discount', discount)
-    _.set(courseData, 'finalPrice', Math.round((_.get(courseData, 'price') * (100 - discount)) / 100))
+    let finalPrice = Math.round((_.get(courseData, 'price') * (100 - discount)) / 100)
+    finalPrice = finalPrice < MIN_PRICE ? MIN_PRICE : finalPrice
+    _.set(courseData, 'finalPrice', finalPrice)
     _.unset(courseData, 'combos')
 
     return courseData

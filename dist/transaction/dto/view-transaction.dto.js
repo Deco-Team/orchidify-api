@@ -17,6 +17,7 @@ const class_validator_1 = require("class-validator");
 const constant_1 = require("../../common/contracts/constant");
 const class_transformer_1 = require("class-transformer");
 const constant_2 = require("../contracts/constant");
+const config_1 = require("../../config");
 class QueryTransactionDto {
 }
 exports.QueryTransactionDto = QueryTransactionDto;
@@ -52,7 +53,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1000),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
     (0, class_validator_1.Max)(50000000),
     __metadata("design:type", Number)
 ], QueryTransactionDto.prototype, "fromAmount", void 0);
@@ -61,7 +62,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1000),
+    (0, class_validator_1.Min)(config_1.MIN_PRICE),
     (0, class_validator_1.Max)(50000000),
     __metadata("design:type", Number)
 ], QueryTransactionDto.prototype, "toAmount", void 0);

@@ -23,6 +23,7 @@ import { BaseSessionDto } from '@class/dto/session.dto'
 import { BaseAssignmentDto } from '@src/class/dto/assignment.dto'
 import { BaseRatingSummaryDto } from '@class/dto/rating-summary.dto'
 import { Types } from 'mongoose'
+import { MAX_PRICE, MIN_PRICE } from '@src/config'
 
 export class BaseCourseDto {
   @ApiProperty({ type: String })
@@ -44,9 +45,9 @@ export class BaseCourseDto {
   description: string
 
   @ApiProperty({ type: Number, example: 500_000 })
-  @IsNumber()
-  @Min(1_000)
-  @Max(10_000_000)
+  @IsInt()
+  @Min(MIN_PRICE)
+  @Max(MAX_PRICE)
   price: number
 
   @ApiProperty({ type: String, enum: CourseLevel })

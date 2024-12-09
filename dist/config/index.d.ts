@@ -73,3 +73,5 @@ export declare const EMAIL_REGEX: RegExp;
 export declare const PHONE_REGEX: RegExp;
 export declare const URL_REGEX: RegExp;
 export declare const VN_TIMEZONE = "Asia/Ho_Chi_Minh";
+export declare const MIN_PRICE = 100000;
+export declare const MAX_PRICE = 10000000;

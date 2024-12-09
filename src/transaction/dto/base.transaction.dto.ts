@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsInt,
   IsMongoId,
   IsNumber,
   IsOptional,
@@ -14,6 +15,7 @@ import { TransactionStatus, UserRole } from '@common/contracts/constant'
 import { Type } from 'class-transformer'
 import { PaymentMethod, TransactionType } from '@src/transaction/contracts/constant'
 import { Types } from 'mongoose'
+import { MAX_PRICE, MIN_PRICE } from '@src/config'
 
 class BaseTransactionAccountUserDto {
   @ApiProperty({ type: String })
@@ -85,9 +87,9 @@ export class BaseTransactionDto {
   paymentMethod?: PaymentMethod
 
   @ApiProperty({ type: Number, example: 500_000 })
-  @IsNumber()
-  @Min(1_000)
-  @Max(10_000_000)
+  @IsInt()
+  @Min(MIN_PRICE)
+  @Max(MAX_PRICE)
   amount: number
 
   @ApiProperty({ type: BaseTransactionAccountDto })
