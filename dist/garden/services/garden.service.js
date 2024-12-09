@@ -69,7 +69,7 @@ let GardenService = GardenService_1 = class GardenService {
             return await this.gardenRepository.findOneAndUpdate(conditions, payload, options);
         }
         catch (error) {
-            if (error.name === mongodb_1.MongoServerError.name && error.name === 11000 && error.name?.['name'] === 1) {
+            if (error.name === mongodb_1.MongoServerError.name && error.code === 11000 && error.keyPattern?.['name'] === 1) {
                 throw new app_exception_1.AppException(error_1.Errors.GARDEN_NAME_EXISTED);
             }
             throw error;

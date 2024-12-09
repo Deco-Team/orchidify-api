@@ -74,7 +74,7 @@ let AppExceptionFilter = class AppExceptionFilter extends core_1.BaseExceptionFi
                     ]
                 });
         }
-        if (process.env.NODE_ENV !== 'test') {
+        if (!(process.env.NODE_ENV === 'test' && process.env.COVERAGE)) {
             this.appLogger.error(message, httpStatus, exception.stack);
         }
     }

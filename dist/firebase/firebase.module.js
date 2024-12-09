@@ -10,20 +10,18 @@ exports.FirebaseModule = void 0;
 const common_1 = require("@nestjs/common");
 const admin = require("firebase-admin");
 const firebase_repository_1 = require("./repositories/firebase.repository");
-const setting_service_1 = require("../setting/services/setting.service");
-const constant_1 = require("../setting/contracts/constant");
 const firebase_controller_1 = require("./controllers/firebase.controller");
 const firebase_auth_service_1 = require("./services/firebase.auth.service");
 const learner_module_1 = require("../learner/learner.module");
 const instructor_module_1 = require("../instructor/instructor.module");
 const firebase_messaging_service_1 = require("./services/firebase.messaging.service");
 const firebase_firestore_service_1 = require("./services/firebase.firestore.service");
+const config_1 = require("@nestjs/config");
 const firebaseProvider = {
     provide: 'FIREBASE_APP',
-    inject: [setting_service_1.ISettingService],
-    useFactory: async (settingService) => {
-        const firebaseConfig = ((await settingService.findByKey(constant_1.SettingKey.FirebaseConfig))?.value ||
-            {});
+    inject: [config_1.ConfigService],
+    useFactory: async (configService) => {
+        const firebaseConfig = ((await configService.get('firebase')) || {});
         return admin.initializeApp({
             credential: admin.credential.cert(firebaseConfig),
             databaseURL: `https://${firebaseConfig.projectId}.firebaseio.com`
@@ -54,7 +52,7 @@ exports.FirebaseModule = FirebaseModule = __decorate([
             {
                 provide: firebase_firestore_service_1.IFirebaseFirestoreService,
                 useClass: firebase_firestore_service_1.FirebaseFirestoreService
-            },
+            }
         ],
         exports: [
             {
@@ -68,7 +66,7 @@ exports.FirebaseModule = FirebaseModule = __decorate([
             {
                 provide: firebase_firestore_service_1.IFirebaseFirestoreService,
                 useClass: firebase_firestore_service_1.FirebaseFirestoreService
-            },
+            }
         ]
     })
 ], FirebaseModule);

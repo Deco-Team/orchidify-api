@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.VN_TIMEZONE = exports.URL_REGEX = exports.PHONE_REGEX = exports.EMAIL_REGEX = void 0;
 exports.default = () => ({
-    mongodbUrl: process.env.NODE_ENV === 'test'
-        ? decodeURIComponent(process.env.TEST_MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify-test')
-        : decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify'),
+    mongodbUrl: process.env.NODE_ENV !== 'test'
+        ? decodeURIComponent(process.env.MONGODB_CONNECTION_STRING || 'mongodb://localhost:27017/orchidify')
+        : undefined,
     mail: {
         SMTP_USERNAME: process.env.SMTP_USERNAME,
         SMTP_PASSWORD: process.env.SMTP_PASSWORD,
@@ -45,6 +45,18 @@ exports.default = () => ({
     discord: {
         webhookId: process.env.DISCORD_WEBHOOK_ID,
         webhookToken: process.env.DISCORD_WEBHOOK_TOKEN
+    },
+    firebase: {
+        type: process.env.FIREBASE_TYPE,
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: process.env.FIREBASE_AUTH_URI,
+        token_uri: process.env.FIREBASE_TOKEN_URI,
+        auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+        client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+        universe_domain: process.env.FIREBASE_UNIVERSE_DOMAIN
     },
     redis: process.env.NODE_ENV === 'test'
         ? {

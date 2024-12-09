@@ -6,24 +6,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MediaModule = void 0;
+exports.CommandModule = void 0;
 const common_1 = require("@nestjs/common");
-const media_controller_1 = require("./controllers/media.controller");
-const media_service_1 = require("./services/media.service");
-const cloudinary_1 = require("cloudinary");
-const cloudinaryProvider = {
-    provide: 'CLOUDINARY_V2',
-    useFactory: () => cloudinary_1.v2
+const seeder_command_1 = require("./seeder.command");
+const report_module_1 = require("../report/report.module");
+let CommandModule = class CommandModule {
 };
-let MediaModule = class MediaModule {
-};
-exports.MediaModule = MediaModule;
-exports.MediaModule = MediaModule = __decorate([
+exports.CommandModule = CommandModule;
+exports.CommandModule = CommandModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
-        controllers: [media_controller_1.MediaController],
-        providers: [media_service_1.MediaService, cloudinaryProvider],
-        exports: [media_service_1.MediaService]
+        imports: [report_module_1.ReportModule],
+        providers: [seeder_command_1.SeederCommand],
+        exports: [seeder_command_1.SeederCommand]
     })
-], MediaModule);
-//# sourceMappingURL=media.module.js.map
+], CommandModule);
+//# sourceMappingURL=command.module.js.map

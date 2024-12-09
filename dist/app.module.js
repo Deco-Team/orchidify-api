@@ -42,6 +42,7 @@ const firebase_module_1 = require("./firebase/firebase.module");
 const certificate_module_1 = require("./certificate/certificate.module");
 const notification_module_1 = require("./notification/notification.module");
 const report_module_1 = require("./report/report.module");
+const command_module_1 = require("./command/command.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -73,8 +74,9 @@ exports.AppModule = AppModule = __decorate([
             mongoose_1.MongooseModule.forRootAsync({
                 inject: [config_1.ConfigService],
                 useFactory: async (configService) => {
+                    const mongodbUri = configService.get('NODE_ENV') !== 'test' ? configService.get('mongodbUrl') : global.__MONGODB_URI__;
                     return {
-                        uri: configService.get('mongodbUrl')
+                        uri: mongodbUri
                     };
                 }
             }),
@@ -213,7 +215,8 @@ exports.AppModule = AppModule = __decorate([
             firebase_module_1.FirebaseModule,
             certificate_module_1.CertificateModule,
             notification_module_1.NotificationModule,
-            report_module_1.ReportModule
+            report_module_1.ReportModule,
+            command_module_1.CommandModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService]

@@ -186,7 +186,7 @@ exports.Errors = {
     COURSE_COMBO_EXISTED: {
         error: 'COURSE_COMBO_EXISTED',
         message: 'Combo khóa học đã tồn tại.',
-        httpStatus: common_1.HttpStatus.NOT_FOUND
+        httpStatus: common_1.HttpStatus.BAD_REQUEST
     },
     CLASS_NOT_FOUND: {
         error: 'CLASS_NOT_FOUND',
