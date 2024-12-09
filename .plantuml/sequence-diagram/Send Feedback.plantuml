@@ -1,0 +1,99 @@
+@startuml
+
+actor Learner
+participant MyClassDetailScreen
+participant LearnerFeedbackController
+participant ILearnerClassService
+participant IFeedbackService
+participant IClassService
+participant ICourseService
+participant IFeedbackRepository
+participant ILearnerClassRepository
+participant IClassRepository
+participant ICourseRepository
+database Database
+
+activate Learner
+Learner -> MyClassDetailScreen: access
+activate MyClassDetailScreen
+MyClassDetailScreen -> MyClassDetailScreen: fill feedback form
+MyClassDetailScreen -> LearnerFeedbackController: sendFeedback(classId, sendFeedbackDto)
+activate LearnerFeedbackController
+LearnerFeedbackController -> IFeedbackService: findOneBy(classId, learnerId)
+activate IFeedbackService
+IFeedbackService -> IFeedbackRepository: findOne(classId, learnerId)
+activate IFeedbackRepository
+IFeedbackRepository -> Database: query(payload)
+activate Database
+Database --> IFeedbackRepository: return data
+deactivate Database
+IFeedbackRepository --> IFeedbackService:  return data
+deactivate IFeedbackRepository
+IFeedbackService --> LearnerFeedbackController: return data
+deactivate IFeedbackService
+alt submitted feedback
+    LearnerFeedbackController -> MyClassDetailScreen: return error
+    MyClassDetailScreen -> Learner: show error message
+else not submitted feedback
+    LearnerFeedbackController -> LearnerFeedbackController: check if feedback form is open to submit
+    alt feedback form is not open
+        LearnerFeedbackController -> MyClassDetailScreen: return error
+        MyClassDetailScreen -> Learner: show error message
+    else feedback form is open
+        LearnerFeedbackController -> ILearnerClassService: findOneBy(classId, learnerId)
+        activate ILearnerClassService
+        ILearnerClassService -> ILearnerClassRepository: findOne(classId, learnerId)
+        activate ILearnerClassRepository
+        ILearnerClassRepository -> Database: query(payload)
+        activate Database
+        Database --> ILearnerClassRepository: return data
+        deactivate Database
+        ILearnerClassRepository --> ILearnerClassService: return data
+        deactivate ILearnerClassRepository
+        ILearnerClassService --> LearnerFeedbackController: return data
+        deactivate ILearnerClassService
+        LearnerFeedbackController -> IFeedbackService: sendFeedback(sendFeedbackDto, classRatingSummary, courseRatingSummary)
+        activate IFeedbackService
+        IFeedbackService -> IFeedbackRepository: create(sendFeedbackDto)
+        activate IFeedbackRepository
+        IFeedbackRepository -> Database: save(payload)
+        activate Database
+        Database --> IFeedbackRepository: return data
+        deactivate Database
+        IFeedbackRepository --> IFeedbackService: return data
+        deactivate IFeedbackRepository
+        IFeedbackService -> IFeedbackService: calculate class rating summary
+        IFeedbackService -> IClassService: update(classId, updateClassDto)
+        activate IClassService
+        IClassService -> IClassRepository: findOneAndUpdate(classId, updateClassDto)
+        activate IClassRepository
+        IClassRepository -> Database: findOneAndUpdate(payload)
+        activate Database
+        Database --> IClassRepository: return data
+        deactivate Database
+        IClassRepository --> IClassService: return data
+        deactivate IClassRepository
+        IClassService --> IFeedbackService: return data
+        deactivate IClassService
+        IFeedbackService -> IFeedbackService: calculate course rating summary
+        IFeedbackService -> ICourseService: update(courseId, updateCourseDto)
+        activate ICourseService
+        ICourseService -> ICourseRepository: findOneAndUpdate(courseId, updateCourseDto)
+        activate ICourseRepository
+        ICourseRepository -> Database: findOneAndUpdate(payload)
+        activate Database
+        Database --> ICourseRepository: return data
+        deactivate Database
+        ICourseRepository --> ICourseService: return data
+        deactivate ICourseRepository
+        ICourseService --> IFeedbackService: return data
+        deactivate ICourseService
+        IFeedbackService --> LearnerFeedbackController: return data
+        deactivate IFeedbackService
+        LearnerFeedbackController --> MyClassDetailScreen: return data
+        deactivate LearnerFeedbackController
+        MyClassDetailScreen --> Learner: show success message
+    end 
+end
+
+@enduml

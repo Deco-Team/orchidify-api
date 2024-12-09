@@ -1,0 +1,37 @@
+@startuml
+
+actor Learner
+participant ProfileScreen
+participant LearnerAuthController
+participant IAuthService
+participant IUserTokenService
+participant IUserTokenRepository
+database Database
+
+activate Learner
+Learner -> ProfileScreen: access
+activate ProfileScreen
+ProfileScreen -> ProfileScreen: click logout button
+ProfileScreen -> LearnerAuthController: logout(refreshTokenDto)
+activate LearnerAuthController
+LearnerAuthController -> IAuthService: logout(refreshTokenDto)
+activate IAuthService
+IAuthService -> IUserTokenService: disableRefreshToken(refreshTokenDto)
+activate IUserTokenService
+IUserTokenService -> IUserTokenRepository: findOneAndUpdate(refreshTokenDto)
+activate IUserTokenRepository
+IUserTokenRepository -> Database: save(payload)
+activate Database
+Database --> IUserTokenRepository: return data
+deactivate Database
+IUserTokenRepository --> IUserTokenService: return data
+deactivate IUserTokenRepository
+IUserTokenService --> IAuthService: return data
+deactivate IUserTokenService
+IAuthService --> LearnerAuthController: return data
+deactivate IAuthService
+LearnerAuthController --> ProfileScreen: return data
+deactivate LearnerAuthController
+ProfileScreen --> Learner: logout
+
+@enduml

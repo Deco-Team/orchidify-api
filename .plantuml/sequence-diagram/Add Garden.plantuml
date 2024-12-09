@@ -1,0 +1,58 @@
+@startuml
+
+actor Staff
+participant AddGardenScreen
+participant ManagementGardenController
+participant IGardenService
+participant IGardenManagerService
+participant IGardeManagerRepository
+participant IGardenRepository
+database Database
+
+activate Staff
+Staff -> AddGardenScreen: access
+activate AddGardenScreen
+AddGardenScreen -> AddGardenScreen: fill add garden form
+AddGardenScreen -> ManagementGardenController: create(createGardenDto)
+activate ManagementGardenController
+ManagementGardenController -> IGardenManagerService: findById(gardenManagerId)
+activate IGardenManagerService
+IGardenManagerService -> IGardeManagerRepository: findOne(gardenManagerId)
+activate IGardeManagerRepository
+IGardeManagerRepository -> Database: query(payload)
+activate Database
+Database --> IGardeManagerRepository: return data
+deactivate Database
+IGardeManagerRepository --> IGardenManagerService: return data
+deactivate IGardeManagerRepository
+IGardenManagerService --> ManagementGardenController: return data
+deactivate IGardenManagerService
+alt not found garden manager
+    ManagementGardenController --> AddGardenScreen: return error
+    AddGardenScreen --> Staff: show error message
+else found garden manager
+    ManagementGardenController -> IGardenService: create(createGardenDto)
+    activate IGardenService
+    IGardenService -> IGardenRepository: create(createGardenDto)
+    activate IGardenRepository
+    IGardenRepository -> Database: save(payload)
+    activate Database
+    Database --> IGardenRepository: return data
+    deactivate Database
+    alt garden name is duplicated
+        IGardenRepository --> IGardenService: return error
+        IGardenService --> ManagementGardenController: return error
+        ManagementGardenController --> AddGardenScreen: return error
+        AddGardenScreen --> Staff: show error message
+    else save data successfully
+        IGardenRepository --> IGardenService: return data
+        deactivate IGardenRepository
+        IGardenService --> ManagementGardenController: return data
+        deactivate IGardenService
+        ManagementGardenController --> AddGardenScreen: return data
+        deactivate ManagementGardenController
+        AddGardenScreen --> Staff: show success message
+    end
+end
+
+@enduml
