@@ -1,0 +1,97 @@
+@startuml Garden Manager Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementGardenManagerController {
+  -gardenManagerService: IGardenManagerService
+  -userTokenService: IUserTokenService
+  -gardenService: IGardenService
+  +list()
+  +getDetail()
+  +create()
+  +update()
+  +deactivate()
+  +activate()
+}
+
+' Interfaces
+interface IGardenManagerService {
+  +create(createGardenManagerDto: CreateGardenManagerDto): Promise<GardenManagerDocument>
+  +findById(gardenManagerId: string, projection?, populates?): Promise<GardenManagerDocument>
+  +findByEmail(email: string, projection?): Promise<GardenManagerDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery, options?): Promise<GardenManagerDocument>
+  +list(pagination: PaginationParams, queryGardenManagerDto: QueryGardenManagerDto)
+}
+
+interface IGardenManagerRepository {
+}
+
+class GardenManagerService {
+  -gardenManagerRepository: IGardenManagerRepository
+  -helperService: HelperService
+  -notificationService: INotificationService
+  +create()
+  +findById()
+  +findByEmail()
+  +update()
+  +list()
+}
+
+class GardenManagerRepository {
+  +model: PaginateModel<GardenManagerDocument>
+}
+
+abstract class AbstractRepository {
+  +model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne(params: {conditions, projection?, populates?, options?}): Promise<T | undefined>
+  +findMany(params: {conditions, projection?, populates?, sort?, options?}): Promise<Array<T>>
+  +create(payload: Record<string, any>, options?: SaveOptions): Promise<T>
+  +findOneAndUpdate(conditions: FilterQuery<T>, payload: UpdateQuery<T>, options?: QueryOptions): Promise<T>
+}
+
+' DTOs
+class BaseGardenManagerDto {
+  +_id: string
+  +name: string
+  +password: string
+  +email: string
+  +idCardPhoto: string
+  +avatar: string
+  +status: GardenManagerStatus
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity GardenManager {
+  +_id: string
+  +name: string
+  +email: string
+  +password: string
+  +idCardPhoto: string
+  +status: GardenManagerStatus
+}
+
+' Relationships
+ManagementGardenManagerController ..> IGardenManagerService
+
+IGardenManagerService <|.. GardenManagerService
+
+GardenManagerService ..> IGardenManagerRepository
+
+IGardenManagerRepository <|.. GardenManagerRepository
+IGardenManagerRepository --|> AbstractRepository
+GardenManagerRepository --|> AbstractRepository
+
+GardenManagerRepository ..> GardenManager
+BaseGardenManagerDto -- GardenManager
+
+@enduml

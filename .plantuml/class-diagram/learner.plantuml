@@ -1,0 +1,110 @@
+@startuml Learner Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementLearnerController {
+  -learnerService: ILearnerService
+  -userTokenService: IUserTokenService
+  -reportService: IReportService
+  +list()
+  +getDetail()
+  +deactivate()
+  +activate()
+}
+
+class InstructorLearnerController {
+  -learnerService: ILearnerService
+  +getDetail()
+}
+
+class LearnerController {
+  -learnerService: ILearnerService
+  +viewProfile()
+  +updateProfile()
+}
+
+' Interfaces
+interface ILearnerService {
+  +create(learner: any): Promise<LearnerDocument>
+  +findById(learnerId: string): Promise<LearnerDocument>
+  +findByEmail(email: string): Promise<LearnerDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<LearnerDocument>
+  +list(pagination: PaginationParams, queryLearnerDto: QueryLearnerDto)
+  +findMany(conditions: FilterQuery): Promise<LearnerDocument[]>
+}
+
+interface ILearnerRepository {
+}
+
+class LearnerService {
+  -learnerRepository: ILearnerRepository
+  +create()
+  +findById()
+  +findByEmail()
+  +update()
+  +list()
+  +findMany()
+}
+
+class LearnerRepository {
+  +model: PaginateModel<LearnerDocument>
+}
+
+abstract class AbstractRepository {
+  +model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne(params: {conditions, projection?, populates?, options?}): Promise<T>
+  +findMany(params: {conditions, projection?, populates?, sort?, options?}): Promise<Array<T>>
+  +create(payload: Record<string, any>, options?: SaveOptions): Promise<T>
+  +findOneAndUpdate(conditions: FilterQuery<T>, payload: UpdateQuery<T>, options?: QueryOptions): Promise<T>
+}
+
+' DTOs
+class BaseLearnerDto {
+  +_id: string
+  +name: string
+  +email: string
+  +password: string
+  +avatar: string
+  +dateOfBirth: Date
+  +phone: string
+  +status: LearnerStatus
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity Learner {
+  +_id: string
+  +name: string
+  +email: string
+  +password: string
+  +avatar: string
+  +dateOfBirth: Date
+  +phone: string
+  +status: LearnerStatus
+}
+
+' Relationships
+ManagementLearnerController ..> ILearnerService
+InstructorLearnerController ..> ILearnerService
+LearnerController ..> ILearnerService
+
+ILearnerService <|.. LearnerService
+LearnerService ..> ILearnerRepository
+
+ILearnerRepository <|.. LearnerRepository
+ILearnerRepository --|> AbstractRepository
+LearnerRepository --|> AbstractRepository
+
+LearnerRepository ..> Learner
+BaseLearnerDto -- Learner
+
+@enduml
