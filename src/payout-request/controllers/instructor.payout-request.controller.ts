@@ -104,7 +104,7 @@ export class InstructorPayoutRequestController {
     ])
     // BR-56: Instructors can create a maximum of 5 payout requests per day.
     const createPayoutRequestLimit = Number(createPayoutRequestLimitPerDay.value) || 5
-    if (payoutRequestsCount > createPayoutRequestLimit) throw new AppException(Errors.CREATE_PAYOUT_REQUEST_LIMIT)
+    if (payoutRequestsCount >= createPayoutRequestLimit) throw new AppException(Errors.CREATE_PAYOUT_REQUEST_LIMIT)
 
     //BR-57: Daily maximum amount of payout requests is 50,000,000 VND.
     const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50_000_000

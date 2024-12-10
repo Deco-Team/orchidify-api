@@ -62,7 +62,7 @@ let InstructorPayoutRequestController = class InstructorPayoutRequestController 
             this.settingService.findByKey(constant_3.SettingKey.PayoutAmountLimitPerDay)
         ]);
         const createPayoutRequestLimit = Number(createPayoutRequestLimitPerDay.value) || 5;
-        if (payoutRequestsCount > createPayoutRequestLimit)
+        if (payoutRequestsCount >= createPayoutRequestLimit)
             throw new app_exception_1.AppException(error_1.Errors.CREATE_PAYOUT_REQUEST_LIMIT);
         const payoutAmountLimit = Number(payoutAmountLimitPerDay.value) || 50000000;
         if (payoutUsage + createPayoutRequestDto.amount > payoutAmountLimit)

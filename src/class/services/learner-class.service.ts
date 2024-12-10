@@ -110,7 +110,7 @@ export class LearnerClassService implements ILearnerClassService {
     projection = LEARNER_VIEW_MY_CLASS_LIST_PROJECTION
   ) {
     const { title, type, level, status, fromPrice, toPrice } = queryClassDto
-    const { sort, limit, page } = pagination
+    const { limit, page } = pagination
     const learnerClassFilter: Record<string, any> = {
       learnerId: new Types.ObjectId(learnerId)
     }
@@ -217,6 +217,47 @@ export class LearnerClassService implements ILearnerClassService {
         }
       },
       {
+        $addFields: {
+          sortPriority: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $eq: ['$status', ClassStatus.PUBLISHED]
+                  },
+                  then: 4
+                },
+                {
+                  case: {
+                    $eq: ['$status', ClassStatus.IN_PROGRESS]
+                  },
+                  then: 3
+                },
+                {
+                  case: {
+                    $eq: ['$status', ClassStatus.COMPLETED]
+                  },
+                  then: 2
+                },
+                {
+                  case: {
+                    $eq: ['$status', ClassStatus.CANCELED]
+                  },
+                  then: 1
+                }
+              ],
+              default: 0
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          sortPriority: -1,
+          createdAt: -1
+        }
+      },
+      {
         $facet: {
           count: [
             {
@@ -224,9 +265,6 @@ export class LearnerClassService implements ILearnerClassService {
             }
           ],
           list: [
-            {
-              $sort: sort
-            },
             {
               $skip: (page - 1) * limit
             },

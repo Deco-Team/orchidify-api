@@ -65,7 +65,7 @@ let LearnerClassService = class LearnerClassService {
     }
     async listMyClassesByLearner(learnerId, pagination, queryClassDto, projection = constant_2.LEARNER_VIEW_MY_CLASS_LIST_PROJECTION) {
         const { title, type, level, status, fromPrice, toPrice } = queryClassDto;
-        const { sort, limit, page } = pagination;
+        const { limit, page } = pagination;
         const learnerClassFilter = {
             learnerId: new mongoose_1.Types.ObjectId(learnerId)
         };
@@ -162,6 +162,47 @@ let LearnerClassService = class LearnerClassService {
                 }
             },
             {
+                $addFields: {
+                    sortPriority: {
+                        $switch: {
+                            branches: [
+                                {
+                                    case: {
+                                        $eq: ['$status', constant_1.ClassStatus.PUBLISHED]
+                                    },
+                                    then: 4
+                                },
+                                {
+                                    case: {
+                                        $eq: ['$status', constant_1.ClassStatus.IN_PROGRESS]
+                                    },
+                                    then: 3
+                                },
+                                {
+                                    case: {
+                                        $eq: ['$status', constant_1.ClassStatus.COMPLETED]
+                                    },
+                                    then: 2
+                                },
+                                {
+                                    case: {
+                                        $eq: ['$status', constant_1.ClassStatus.CANCELED]
+                                    },
+                                    then: 1
+                                }
+                            ],
+                            default: 0
+                        }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    sortPriority: -1,
+                    createdAt: -1
+                }
+            },
+            {
                 $facet: {
                     count: [
                         {
@@ -169,9 +210,6 @@ let LearnerClassService = class LearnerClassService {
                         }
                     ],
                     list: [
-                        {
-                            $sort: sort
-                        },
                         {
                             $skip: (page - 1) * limit
                         },
