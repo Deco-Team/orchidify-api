@@ -65,7 +65,7 @@ let LearnerClassService = class LearnerClassService {
     }
     async listMyClassesByLearner(learnerId, pagination, queryClassDto, projection = constant_2.LEARNER_VIEW_MY_CLASS_LIST_PROJECTION) {
         const { title, type, level, status, fromPrice, toPrice } = queryClassDto;
-        const { limit, page } = pagination;
+        const { sort, limit, page } = pagination;
         const learnerClassFilter = {
             learnerId: new mongoose_1.Types.ObjectId(learnerId)
         };
@@ -198,8 +198,8 @@ let LearnerClassService = class LearnerClassService {
             },
             {
                 $sort: {
+                    ...sort,
                     sortPriority: -1,
-                    createdAt: -1
                 }
             },
             {

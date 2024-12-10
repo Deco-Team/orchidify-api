@@ -110,7 +110,7 @@ export class LearnerClassService implements ILearnerClassService {
     projection = LEARNER_VIEW_MY_CLASS_LIST_PROJECTION
   ) {
     const { title, type, level, status, fromPrice, toPrice } = queryClassDto
-    const { limit, page } = pagination
+    const { sort, limit, page } = pagination
     const learnerClassFilter: Record<string, any> = {
       learnerId: new Types.ObjectId(learnerId)
     }
@@ -253,8 +253,8 @@ export class LearnerClassService implements ILearnerClassService {
       },
       {
         $sort: {
+          ...sort,
           sortPriority: -1,
-          createdAt: -1
         }
       },
       {
