@@ -1,0 +1,145 @@
+@startuml Transaction Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class TransactionController {
+  -transactionService: ITransactionService
+  +list()
+  +getDetail()
+}
+
+class PaymentController {
+  -paymentService: IPaymentService
+  +webhookMomo()
+  +webhookStripe()
+}
+
+' Interfaces
+interface ITransactionService {
+  +create(createTransactionDto: CreateTransactionDto): Promise<TransactionDocument>
+  +findById(transactionId: string): Promise<TransactionDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<TransactionDocument>
+  +list(pagination: PaginationParams, queryTransactionDto: QueryTransactionDto)
+  +viewReportTransactionByDate(params: {fromDate: Date, toDate: Date}): Promise<any[]>
+  +viewInstructorReportTransactionByDate(params: {fromDate: Date, toDate: Date, instructorId: Types.ObjectId}): Promise<any[]>
+  +viewInstructorReportTransactionCountByMonth(params: {fromDate: Date, toDate: Date, instructorId: Types.ObjectId}): Promise<any[]>
+}
+
+interface IPaymentService {
+  +setStrategy(paymentMethod: PaymentMethod): void
+  +verifyPaymentWebhookData(webhookData: any): any
+  +createTransaction(createPaymentDto: any): any
+  +getTransaction(queryPaymentDto: any): any
+  +refundTransaction(refundPaymentDto: any): any
+  +getRefundTransaction(queryPaymentDto: any): any
+  +getPaymentList(filter: any, paginationParams: PaginationParams): Promise<any>
+  +processWebhook(webhookData: any): Promise<any>
+}
+
+interface ITransactionRepository {
+}
+
+class TransactionService {
+  -transactionRepository: ITransactionRepository
+  +create()
+  +findById()
+  +update()
+  +list()
+  +viewReportTransactionByDate()
+  +viewInstructorReportTransactionByDate()
+  +viewInstructorReportTransactionCountByMonth()
+}
+
+class PaymentService {
+  -strategy: IPaymentStrategy
+  -transactionRepository: ITransactionRepository
+  -momoPaymentStrategy: MomoPaymentStrategy
+  -zaloPayPaymentStrategy: ZaloPayPaymentStrategy
+  -payOSPaymentStrategy: PayOSPaymentStrategy
+  -stripePaymentStrategy: StripePaymentStrategy
+  +setStrategy()
+  +verifyPaymentWebhookData()
+  +createTransaction()
+  +getTransaction()
+  +refundTransaction()
+  +getRefundTransaction()
+  +getPaymentList()
+  +processWebhook()
+}
+
+class TransactionRepository {
+  +model: PaginateModel<TransactionDocument>
+}
+
+abstract class AbstractRepository {
+  -model: PaginateModel<T>
+  +findOne()
+  +firstOrFail()
+  +findMany()
+  +paginate()
+  +create()
+  +updateOneOrFail()
+  +findOneAndUpdate()
+  +updateMany()
+  +findOneAndDelete()
+  +deleteMany()
+}
+
+' DTOs
+class BaseTransactionDto {
+  +_id: string
+  +type: TransactionType
+  +paymentMethod: PaymentMethod
+  +amount: number
+  +debitAccount: BaseTransactionAccountDto
+  +creditAccount: BaseTransactionAccountDto
+  +description: string
+  +status: TransactionStatus
+  +payment: BasePaymentDto
+  +payout: BasePayoutDto
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity Transaction {
+  +_id: string
+  +type: TransactionType
+  +paymentMethod: PaymentMethod
+  +amount: number
+  +debitAccount: TransactionAccount
+  +creditAccount: TransactionAccount
+  +description: string
+  +status: TransactionStatus
+  +payment: Payment
+  +payout: Payout
+}
+
+' Relationships
+TransactionController ..> ITransactionService
+PaymentController ..> IPaymentService
+
+ITransactionService <|.. TransactionService
+IPaymentService <|.. PaymentService
+
+TransactionService ..> ITransactionRepository
+PaymentService ..> ITransactionRepository
+
+TransactionService ..> BaseTransactionDto
+PaymentService ..> BaseTransactionDto
+
+ITransactionRepository <|.. TransactionRepository
+ITransactionRepository --|> AbstractRepository
+TransactionRepository --|> AbstractRepository
+
+TransactionRepository ..> Transaction
+BaseTransactionDto -- Transaction
+
+@enduml

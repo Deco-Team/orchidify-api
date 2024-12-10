@@ -1,0 +1,117 @@
+@startuml Recruitment Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementRecruitmentController {
+  -recruitmentService: IRecruitmentService
+  +list()
+  +getDetail()
+  +processApplication()
+  +processInterview()
+  +reject()
+}
+
+' Interfaces
+interface IRecruitmentService {
+  +create(createRecruitmentDto: any): Promise<RecruitmentDocument>
+  +findById(recruitmentId: string): Promise<RecruitmentDocument>
+  +findOneByApplicationEmailAndStatus(email: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument>
+  +findByHandledByAndStatus(handledBy: string, status: RecruitmentStatus[]): Promise<RecruitmentDocument[]>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<RecruitmentDocument>
+  +list(pagination: PaginationParams, queryRecruitmentDto: QueryRecruitmentDto)
+  +processRecruitmentApplication(recruitmentId: string, dto: ProcessRecruitmentApplicationDto, userAuth: UserAuth): Promise<SuccessResponse>
+  +processRecruitmentInterview(recruitmentId: string, userAuth: UserAuth): Promise<SuccessResponse>
+  +rejectRecruitmentProcess(recruitmentId: string, dto: RejectRecruitmentProcessDto, userAuth: UserAuth): Promise<SuccessResponse>
+  +expiredRecruitmentProcess(recruitmentId: string, userAuth: UserAuth): Promise<SuccessResponse>
+}
+
+interface IRecruitmentRepository {
+}
+
+class RecruitmentService {
+  -recruitmentRepository: IRecruitmentRepository
+  -helperService: HelperService
+  -settingService: ISettingService
+  -queueProducerService: IQueueProducerService
+  -notificationService: INotificationService
+  +create()
+  +findById()
+  +findOneByApplicationEmailAndStatus()
+  +findByHandledByAndStatus()
+  +update()
+  +list()
+  +processRecruitmentApplication()
+  +processRecruitmentInterview()
+  +rejectRecruitmentProcess()
+  +expiredRecruitmentProcess()
+  -getExpiredAt()
+  -addAutoExpiredJobWhenCreateRecruitmentApplication()
+  -updateAutoExpiredJobWhenCreateRecruitmentApplication()
+}
+
+class RecruitmentRepository {
+  +model: PaginateModel<RecruitmentDocument>
+}
+
+abstract class AbstractRepository {
+  -model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne(params: {conditions, projection?, populates?, options?}): Promise<T | undefined>
+  +findMany(params: {conditions, projection?, populates?, sort?, options?}): Promise<Array<T>>
+  +paginate(conditions: FilterQuery<T>, options?: PaginateOptions): Promise<PaginateResult<T>>
+  +create(payload: Record<string, any>, options?: SaveOptions): Promise<T>
+  +findOneAndUpdate(conditions: FilterQuery<T>, payload: UpdateQuery<T>, options?: QueryOptions): Promise<T>
+}
+
+' DTOs
+class BaseRecruitmentDto {
+  +_id: string
+  +applicationInfo: ApplicationInfoDto
+  +meetingUrl: string
+  +meetingDate: string
+  +status: RecruitmentStatus
+  +histories: RecruitmentStatusHistoryDto[]
+  +rejectReason: string
+  +isInstructorAdded: boolean
+  +handledBy: Types.ObjectId | Staff
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity Recruitment {
+  +_id: string
+  +applicationInfo: ApplicationInfo
+  +meetingUrl: string
+  +meetingDate: Date
+  +status: RecruitmentStatus
+  +histories: RecruitmentStatusHistory[]
+  +rejectReason: string
+  +isInstructorAdded: boolean
+  +handledBy: Types.ObjectId | Staff
+}
+
+' Relationships
+ManagementRecruitmentController ..> IRecruitmentService
+
+IRecruitmentService <|.. RecruitmentService
+
+RecruitmentService ..> IRecruitmentRepository
+
+RecruitmentService ..> BaseRecruitmentDto
+
+IRecruitmentRepository <|.. RecruitmentRepository
+IRecruitmentRepository --|> AbstractRepository
+RecruitmentRepository --|> AbstractRepository
+
+RecruitmentRepository ..> Recruitment
+BaseRecruitmentDto -- Recruitment
+
+@enduml

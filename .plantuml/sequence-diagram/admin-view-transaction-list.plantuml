@@ -1,0 +1,39 @@
+@startuml
+
+actor Admin
+participant TransactionListScreen
+participant TransactionController
+participant ITransactionService
+participant ITransactionRepository
+database Database
+
+activate Admin
+Admin -> TransactionListScreen: access
+activate TransactionListScreen
+
+TransactionListScreen -> TransactionController: list(pagination, queryTransactionDto)
+activate TransactionController
+
+TransactionController -> ITransactionService: list(pagination, queryTransactionDto)
+activate ITransactionService
+
+ITransactionService -> ITransactionRepository: paginate(data)
+activate ITransactionRepository
+
+ITransactionRepository -> Database: execute(payload)
+activate Database
+
+Database --> ITransactionRepository: return data
+deactivate Database
+
+ITransactionRepository --> ITransactionService: return data
+deactivate ITransactionRepository
+
+ITransactionService --> TransactionController: return data
+deactivate ITransactionService
+
+TransactionController --> TransactionListScreen: return transaction list
+deactivate TransactionController
+TransactionListScreen --> Admin: show transaction list
+
+@enduml
