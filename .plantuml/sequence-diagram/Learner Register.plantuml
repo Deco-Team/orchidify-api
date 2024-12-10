@@ -4,7 +4,7 @@ actor Learner
 participant LearnerRegisterScreen
 participant LearnerAuthController
 participant IAuthService
-participant IHelperService
+participant HelperService
 participant ILearnerService
 participant IOtpService
 participant INotificationService
@@ -40,10 +40,10 @@ alt found learner
     LearnerAuthController --> LearnerRegisterScreen: return error
     LearnerRegisterScreen --> Learner: show error message
 else not found learner
-    IAuthService -> IHelperService: hashPassword(password)
-    activate IHelperService
-    IHelperService --> IAuthService: return hashed password
-    deactivate IHelperService
+    IAuthService -> HelperService: hashPassword(password)
+    activate HelperService
+    HelperService --> IAuthService: return hashed password
+    deactivate HelperService
     IAuthService -> ILearnerService: create(createLearnerDto)
     activate ILearnerService
     ILearnerService -> ILearnerRepository: create(createLearnerDto)
@@ -56,10 +56,10 @@ else not found learner
     deactivate ILearnerRepository
     ILearnerService --> IAuthService: return data
     deactivate ILearnerService
-    IAuthService -> IHelperService: generateRandomString()
-    activate IHelperService
-    IHelperService --> IAuthService: return data
-    deactivate IHelperService
+    IAuthService -> HelperService: generateRandomString()
+    activate HelperService
+    HelperService --> IAuthService: return data
+    deactivate HelperService
     IAuthService -> IOtpService: create(createOtpDto)
     activate IOtpService
     IOtpService -> IOtpRepository: create(createOtpDto)

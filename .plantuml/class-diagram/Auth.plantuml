@@ -1,0 +1,233 @@
+@startuml Auth Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+class ManagementAuthController {
+    - authService: IAuthService
+    + login()
+    + logout()
+    + refreshToken()
+}
+
+class LearnerAuthController {
+    - authService: IAuthService
+    + login()
+    + logout()
+    + refreshToken()
+    + register()
+    + verifyOtp()
+    + resendOtp()
+}
+
+class InstructorAuthController {
+    - authService: IAuthService
+    + login()
+    + logout()
+    + refreshToken()
+    + register()
+}
+
+' Service Interfaces
+interface IAuthUserService {
+    + findByEmail(email: string, projection?: string | Record<string, any>)
+    + findById(id: string): Promise<any>
+}
+
+interface IAuthService {
+    + login(loginDto: LoginDto, role: UserRole): Promise<TokenResponse>
+    + logout(refreshTokenDto: RefreshTokenDto): Promise<SuccessResponse>
+    + refreshToken(id: string, role: UserRole, refreshToken: string): Promise<TokenResponse>
+    + registerByInstructor(instructorRegisterDto: InstructorRegisterDto): Promise<SuccessResponse>
+    + registerByLearner(learnerRegisterDto: LearnerRegisterDto): Promise<SuccessResponse>
+    + verifyOtpByLearner(learnerVerifyAccountDto: LearnerVerifyAccountDto): Promise<SuccessResponse>
+    + resendOtpByLearner(learnerResendOtpDto: LearnerResendOtpDto): Promise<SuccessResponse>
+}
+
+interface IOtpService {
+    + create(createOtpDto: CreateOtpDto, options?: SaveOptions): Promise<OtpDocument>
+    + update(conditions: FilterQuery<Otp>, payload: UpdateQuery<Otp>, options?: QueryOptions): Promise<OtpDocument>
+    + findByCode(code: string): Promise<OtpDocument>
+    + findByUserIdAndRole(userId: string, role: UserRole): Promise<OtpDocument>
+    + clearOtp(code: string): void
+}
+
+interface IUserTokenService {
+    + create(createUserTokenDto: CreateUserTokenDto, options?: SaveOptions): Promise<UserToken>
+    + update(conditions: FilterQuery<UserToken>, payload: UpdateQuery<UserToken>, options?: QueryOptions): Promise<UserToken>
+    + findByRefreshToken(refreshToken: string): Promise<UserToken>
+    + disableRefreshToken(refreshToken: string): Promise<UserToken>
+    + clearAllRefreshTokensOfUser(userId: Types.ObjectId, role: UserRole): Promise<void>
+}
+
+' Service Implementations
+class AuthService {
+    - learnerService: ILearnerService
+    - instructorService: IInstructorService
+    - staffService: IStaffService
+    - gardenManagerService: IGardenManagerService
+    - userTokenService: IUserTokenService
+    - otpService: IOtpService
+    - recruitmentService: IRecruitmentService
+    - settingService: ISettingService
+    - jwtService: JwtService
+    - helperService: HelperService
+    - configService: ConfigService
+    - notificationService: INotificationService
+    - reportService: IReportService
+    - authUserServiceMap: Record<UserRole, IAuthUserService>
+    - generateTokens()
+    - updateReportWhenLearnerRegistered()
+    - updateReportWhenLearnerVerified()
+    - updateReportWhenInstructorRegistered()
+    + login()
+    + logout()
+    + refreshToken()
+    + registerByInstructor()
+    + registerByLearner()
+    + verifyOtpByLearner()
+    + resendOtpByLearner()
+}
+
+class OtpService {
+    - otpRepository: IOtpRepository
+    + create()
+    + update()
+    + findByCode()
+    + findByUserIdAndRole()
+    + clearOtp()
+}
+
+class UserTokenService {
+    - userTokenRepository: IUserTokenRepository
+    + create()
+    + update()
+    + findByRefreshToken()
+    + disableRefreshToken()
+    + clearAllRefreshTokensOfUser()
+}
+
+' Repository Interfaces
+interface IOtpRepository {
+}
+
+interface IUserTokenRepository {
+}
+
+' Repository Implementations
+abstract class AbstractRepository {
+    + model: PaginateModel<T>
+    + constructor(model: PaginateModel<T>)
+    + findOne()
+    + firstOrFail()
+    + findMany()
+    + paginate()
+    + create()
+    + updateOneOrFail()
+    + findOneAndUpdate()
+    + updateMany()
+    + findOneAndDelete()
+    + deleteMany()
+}
+
+class OtpRepository {
+    + model: PaginateModel<OtpDocument>
+}
+
+class UserTokenRepository {
+    + model: PaginateModel<UserToken>
+}
+
+' DTOs
+class LoginDto {
+    + email: string
+    + password: string
+}
+
+class RefreshTokenDto {
+    + refreshToken: string
+}
+
+class InstructorRegisterDto {
+    + email: string
+    + name: string
+    + phone: string
+    + cv: string
+    + note: string
+}
+
+class LearnerRegisterDto {
+    + email: string
+    + name: string
+    + password: string
+}
+
+class CreateOtpDtp {
+    + userId: string
+    + role: UserRole
+    + code: string
+    + expiredAt: Date
+}
+
+class CreateUserTokenDto {
+    + userId: string
+    + role: UserRole
+    + refreshToken: string
+}
+
+' Schemas
+entity Otp {
+    + _id: string
+    + code: string
+    + userId: string
+    + role: UserRole
+    + expiredAt: Date
+}
+
+entity UserToken {
+    + _id: string
+    + userId: string
+    + role: UserRole
+    + refreshToken: string
+    + enabled: boolean
+}
+
+
+' Relationships
+ManagementAuthController ..> IAuthService
+LearnerAuthController ..> IAuthService
+InstructorAuthController ..> IAuthService
+
+IAuthService <|.. AuthService
+IAuthUserService <.. AuthService
+IOtpService <.. AuthService
+IUserTokenService <.. AuthService
+IOtpService <|.. OtpService
+IOtpService ..> IOtpRepository
+IUserTokenService <|.. UserTokenService
+UserTokenService ..> IUserTokenRepository
+
+AbstractRepository <|-- IOtpRepository
+AbstractRepository <|-- OtpRepository
+IOtpRepository <|.. OtpRepository
+AbstractRepository <|-- IUserTokenRepository
+AbstractRepository <|-- UserTokenRepository
+IUserTokenRepository <|.. UserTokenRepository
+
+AuthService ..> LoginDto
+AuthService ..> RefreshTokenDto
+AuthService ..> InstructorRegisterDto
+AuthService ..> LearnerRegisterDto
+AuthService ..> CreateOtpDtp
+AuthService ..> CreateUserTokenDto
+
+OtpRepository ..> Otp
+UserTokenRepository ..> UserToken
+
+@enduml

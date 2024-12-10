@@ -1,0 +1,121 @@
+@startuml Garden Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+class ManagementGardenController {
+    - gardenService: IGardenService
+    - gardenManagerService: IGardenManagerService
+    - classService: IClassService
+    + list()
+    + getDetail()
+    + create()
+    + update()
+    + deactivate()
+    + activate()
+    + getAvailableGardenList()
+}
+
+class LearnerGardenController {
+    - gardenService: IGardenService
+    + getDetail()
+}
+
+' Service Interfaces
+interface IGardenService {
+    + create(createGardenDto: CreateGardenDto, options?: SaveOptions): Promise<GardenDocument>
+    + findById(gardenId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<GardenDocument>
+    + findOneBy(conditions: FilterQuery<Garden>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<GardenDocument>
+    + update(conditions: FilterQuery<Garden>, payload: UpdateQuery<Garden>, options?: QueryOptions): Promise<GardenDocument>
+    + findManyByGardenManagerId(gardenManagerId: string): Promise<GardenDocument[]>
+    + list(pagination: PaginationParams, queryGardenDto: QueryGardenDto, projection?: string | Record<string, any>, populate?: Array<PopulateOptions>)
+    + getAvailableGardenList(queryAvailableGardenDto: QueryAvailableGardenDto): Promise<AvailableGardenListItemResponse[]>
+}
+
+' Service Implementations
+class GardenService {
+    - appLogger: AppLogger
+    - gardenRepository: IGardenRepository
+    - gardenTimesheetService: IGardenTimesheetService
+    + create()
+    + findById()
+    + findOneBy()
+    + update()
+    + findManyByGardenManagerId()
+    + list()
+    + getAvailableGardenList()
+}
+
+' Repository Interfaces
+interface IGardenRepository {
+}
+
+' Repository Implementations
+abstract class AbstractRepository {
+    + model: PaginateModel<T>
+    + constructor(model: PaginateModel<T>)
+    + findOne()
+    + firstOrFail()
+    + findMany()
+    + paginate()
+    + create()
+    + updateOneOrFail()
+    + findOneAndUpdate()
+    + updateMany()
+    + findOneAndDelete()
+    + deleteMany()
+}
+
+class GardenRepository {
+    + model: PaginateModel<GardenDocument>
+}
+
+' DTOs
+class BaseGardenDto {
+    + _id: string
+    + name: string
+    + description: string
+    + address: string
+    + addressLink: string
+    + images: Array<string>
+    + status: GardenStatus
+    + maxClass: number
+    + gardenManagerId: string
+    + createdAt: Date
+    + updatedAt: Date
+}
+
+' Schema
+class Garden {
+    + _id: string
+    + name: string
+    + description: string
+    + address: string
+    + addressLink: string
+    + images: Array<string>
+    + status: GardenStatus
+    + maxClass: number
+    + gardenManagerId: string
+}
+
+' Relationships
+ManagementGardenController ..> IGardenService
+LearnerGardenController ..> IGardenService
+
+IGardenService <|.. GardenService
+GardenService ..> IGardenRepository
+GardenService ..> BaseGardenDto
+
+AbstractRepository <|-- IGardenRepository
+AbstractRepository <|-- GardenRepository
+IGardenRepository <|.. GardenRepository
+
+GardenRepository ..> Garden
+
+@enduml

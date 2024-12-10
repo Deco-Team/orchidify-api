@@ -5,7 +5,7 @@ participant LoginScreen
 participant LearnerAuthController
 participant IAuthService
 participant ILearnerService
-participant IHelperService
+participant HelperService
 participant IUserTokenService
 participant ILearnerRepository
 participant IUserTokenRepository
@@ -44,10 +44,10 @@ else inactive learner
     LearnerAuthController --> LoginScreen: return error
     LoginScreen --> Learner: show error message
 else valid learner
-    IAuthService -> IHelperService: comparePassword(password, hashedPassword)
-    activate IHelperService
-    IHelperService --> IAuthService: return data
-    deactivate IHelperService
+    IAuthService -> HelperService: comparePassword(password, hashedPassword)
+    activate HelperService
+    HelperService --> IAuthService: return data
+    deactivate HelperService
     alt wrong password
         IAuthService --> LearnerAuthController: return error
         LearnerAuthController --> LoginScreen: return error

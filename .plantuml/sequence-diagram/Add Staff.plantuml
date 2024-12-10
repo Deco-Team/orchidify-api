@@ -4,7 +4,7 @@ actor Admin
 participant AddStaffScreen
 participant ManagementStaffController
 participant IStaffService
-participant IHelperService
+participant HelperService
 participant INotificationService
 participant IStaffRepository
 database Database
@@ -33,10 +33,10 @@ alt found staff
 else not found staff
     ManagementStaffController -> IStaffService: create(createStaffDto)
     activate IStaffService
-    IStaffService -> IHelperService: hashPassword(password)
-    activate IHelperService
-    IHelperService --> IStaffService: return hashed password
-    deactivate IHelperService
+    IStaffService -> HelperService: hashPassword(password)
+    activate HelperService
+    HelperService --> IStaffService: return hashed password
+    deactivate HelperService
     IStaffService -> IStaffService: generate staff code
     IStaffService -> IStaffRepository: create(createStaffDto)
     activate IStaffRepository
