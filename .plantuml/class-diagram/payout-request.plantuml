@@ -1,0 +1,147 @@
+@startuml Payout Request Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementPayoutRequestController {
+  -payoutRequestService: IPayoutRequestService
+  +list()
+  +getDetail()
+  +approve()
+  +reject()
+  +markAsHasMadePayout()
+}
+
+class InstructorPayoutRequestController {
+  -payoutRequestService: IPayoutRequestService
+  -settingService: ISettingService
+  -instructorService: IInstructorService
+  +list()
+  +getDetail()
+  +createPayoutRequest()
+  +cancel()
+  +getPayoutUsage()
+}
+
+' Interfaces
+interface IPayoutRequestService {
+  +createPayoutRequest(createPayoutRequestDto: CreatePayoutRequestDto): Promise<PayoutRequestDocument>
+  +findById(payoutRequestId: string): Promise<PayoutRequestDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<PayoutRequestDocument>
+  +list(pagination: PaginationParams, queryPayoutRequestDto: QueryPayoutRequestDto)
+  +findMany(conditions: FilterQuery): Promise<PayoutRequestDocument[]>
+  +countByCreatedByAndDate(createdBy: string, date: Date): Promise<number>
+  +cancelPayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>
+  +approvePayoutRequest(payoutRequestId: string, userAuth: UserAuth): Promise<SuccessResponse>
+  +rejectPayoutRequest(payoutRequestId: string, rejectPayoutRequestDto: RejectPayoutRequestDto, userAuth: UserAuth): Promise<SuccessResponse>
+  +markHasMadePayout(payoutRequestId: string, markHasMadePayoutDto: MarkHasMadePayoutDto, userAuth: UserAuth): Promise<SuccessResponse>
+  +getPayoutUsage(params: {createdBy: string, date: Date}): Promise<number>
+}
+
+interface IPayoutRequestRepository {
+}
+
+class PayoutRequestService {
+  -payoutRequestRepository: IPayoutRequestRepository
+  -instructorService: IInstructorService
+  -connection: Connection
+  -queueProducerService: IQueueProducerService
+  -settingService: ISettingService
+  -helperService: HelperService
+  -transactionService: ITransactionService
+  -notificationService: INotificationService
+  -staffService: IStaffService
+  -reportService: IReportService
+  +createPayoutRequest()
+  +findById()
+  +update()
+  +list()
+  +findMany()
+  +countByCreatedByAndDate()
+  +cancelPayoutRequest()
+  +approvePayoutRequest()
+  +rejectPayoutRequest()
+  +markHasMadePayout()
+  +getPayoutUsage()
+}
+
+class PayoutRequestRepository {
+  +model: PaginateModel<PayoutRequestDocument>
+}
+
+abstract class AbstractRepository {
+  -model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne()
+  +firstOrFail()
+  +findMany()
+  +paginate()
+  +create()
+  +updateOneOrFail()
+  +findOneAndUpdate()
+  +updateMany()
+  +findOneAndDelete()
+  +deleteMany()
+}
+
+' DTOs
+class BasePayoutRequestDto {
+  +_id: string
+  +amount: number
+  +status: PayoutRequestStatus
+  +rejectReason: string
+  +histories: PayoutRequestStatusHistory[]
+  +description: string
+  +createdBy: Types.ObjectId
+  +handledBy: Types.ObjectId
+  +transactionId: Types.ObjectId
+  +hasMadePayout: boolean
+  +transactionCode: string
+  +attachment: BaseMediaDto
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity PayoutRequest {
+  +_id: string
+  +amount: number
+  +status: PayoutRequestStatus
+  +rejectReason: string
+  +histories: PayoutRequestStatusHistory[]
+  +description: string
+  +createdBy: Types.ObjectId
+  +handledBy: Types.ObjectId
+  +transactionId: Types.ObjectId
+  +hasMadePayout: boolean
+  +transactionCode: string
+  +attachment: BaseMediaDto
+}
+
+' Relationships
+ManagementPayoutRequestController ..> IPayoutRequestService
+InstructorPayoutRequestController ..> IPayoutRequestService
+
+IPayoutRequestService <|.. PayoutRequestService
+
+PayoutRequestService ..> IPayoutRequestRepository
+
+ManagementPayoutRequestController ..> BasePayoutRequestDto
+InstructorPayoutRequestController ..> BasePayoutRequestDto
+PayoutRequestService ..> BasePayoutRequestDto
+
+IPayoutRequestRepository <|.. PayoutRequestRepository
+
+IPayoutRequestRepository --|> AbstractRepository
+PayoutRequestRepository --|> AbstractRepository
+
+PayoutRequestRepository ..> PayoutRequest
+BasePayoutRequestDto -- PayoutRequest
+
+@enduml

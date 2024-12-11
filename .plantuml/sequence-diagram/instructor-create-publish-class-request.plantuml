@@ -1,0 +1,104 @@
+@startuml
+actor Instructor
+activate Instructor
+
+participant CreatePublishClassRequestScreen
+Instructor -> CreatePublishClassRequestScreen: access
+activate CreatePublishClassRequestScreen
+CreatePublishClassRequestScreen -> CreatePublishClassRequestScreen: fill class request information form
+
+participant GardenTimesheetController
+CreatePublishClassRequestScreen -> GardenTimesheetController: viewAvailableTime(queryAvailableTimeDto)
+activate GardenTimesheetController
+
+participant IGardenTimesheetService
+GardenTimesheetController -> IGardenTimesheetService: viewAvailableTime(queryAvailableTimeDto)
+activate IGardenTimesheetService
+
+participant IGardenTimesheetRepository
+IGardenTimesheetService -> IGardenTimesheetRepository: query(dates, ACTIVE)
+activate IGardenTimesheetRepository
+
+database Database
+IGardenTimesheetRepository -> Database: aggregate(params)
+activate Database
+Database --> IGardenTimesheetRepository: return data
+deactivate Database
+
+IGardenTimesheetRepository --> IGardenTimesheetService: return data
+deactivate IGardenTimesheetRepository
+
+IGardenTimesheetService -> IGardenTimesheetService: calculate available slots
+
+IGardenTimesheetService --> GardenTimesheetController: return slots
+deactivate IGardenTimesheetService
+
+GardenTimesheetController --> CreatePublishClassRequestScreen: show available slots
+deactivate GardenTimesheetController
+
+CreatePublishClassRequestScreen -> CreatePublishClassRequestScreen: select available slots & submit
+
+participant ClassRequestController
+CreatePublishClassRequestScreen -> ClassRequestController: createPublishClassRequest(createRequestDto)
+activate ClassRequestController
+ClassRequestController -> ClassRequestController: check create request limit per day
+ClassRequestController -> ClassRequestController: check class request for course has been made
+ClassRequestController -> ClassRequestController: validate slots
+
+alt invalid data
+    ClassRequestController --> CreatePublishClassRequestScreen: show error message
+end
+
+participant IClassRequestService
+ClassRequestController -> IClassRequestService: createPublishClassRequest(createRequestDto)
+activate IClassRequestService
+
+participant IClassRequestRepository
+IClassRequestService -> IClassRequestRepository: create(createRequestDto)
+activate IClassRequestRepository
+
+database Database
+IClassRequestRepository -> Database: save(payload)
+activate Database
+Database --> IClassRequestRepository: return data
+deactivate Database
+
+IClassRequestRepository --> IClassRequestService: return data
+deactivate IClassRequestRepository
+
+participant IQueueProducerService
+IClassRequestService -> IQueueProducerService: addJob(ClassRequestAutoExpired, classRequestId)
+activate IQueueProducerService
+
+queue Queue
+IQueueProducerService -> Queue: add(payload)
+activate Queue
+Queue --> IQueueProducerService: return job
+deactivate Queue
+
+IQueueProducerService --> IClassRequestService: return job
+deactivate IQueueProducerService
+
+participant INotificationService
+IClassRequestService -> INotificationService: send notification to staff
+activate INotificationService
+
+INotificationService --> IClassRequestService: return data
+deactivate INotificationService
+
+participant IReportService
+IClassRequestService -> IReportService: update class request report
+activate IReportService
+
+IReportService --> IClassRequestService: return data
+deactivate IReportService
+
+IClassRequestService --> ClassRequestController: return data
+deactivate IClassRequestService
+
+ClassRequestController --> CreatePublishClassRequestScreen: show success message
+deactivate ClassRequestController
+
+database Database
+queue Queue
+@enduml
