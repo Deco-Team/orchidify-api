@@ -1,0 +1,36 @@
+@startuml
+actor User
+activate User
+
+participant Screen
+User -> Screen: access
+activate Screen
+Screen -> Screen: request grant notification
+
+participant UserDeviceController
+Screen -> UserDeviceController: create(createInstructorDto)
+activate UserDeviceController
+
+participant IUserDeviceService
+UserDeviceController -> IUserDeviceService: update(token, createUserDeviceDto, upsert)
+activate IUserDeviceService
+
+participant IUserDeviceRepository
+IUserDeviceService -> IUserDeviceRepository: findOneAndUpdate(token, createUserDeviceDto, upsert)
+activate IUserDeviceRepository
+
+database Database
+IUserDeviceRepository -> Database: save(payload)
+activate Database
+Database --> IUserDeviceRepository: return data
+deactivate Database
+
+IUserDeviceRepository --> IUserDeviceService: return data
+deactivate IUserDeviceRepository
+
+IUserDeviceService --> UserDeviceController: return data
+deactivate IUserDeviceService
+
+UserDeviceController --> Screen: show success message
+deactivate UserDeviceController
+@enduml

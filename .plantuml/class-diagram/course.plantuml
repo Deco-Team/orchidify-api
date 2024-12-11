@@ -1,0 +1,245 @@
+@startuml Course Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class ManagementCourseController {
+  -courseService: ICourseService
+  -courseSessionService: ICourseSessionService
+  -courseAssignmentService: ICourseAssignmentService
+  +list()
+  +getDetail()
+  +getSessionDetail()
+  +getAssignmentDetail()
+}
+
+class InstructorCourseController {
+  -courseService: ICourseService
+  -courseSessionService: ICourseSessionService
+  -courseAssignmentService: ICourseAssignmentService
+  -settingService: ISettingService
+  -reportService: IReportService
+  +list()
+  +getDetail()
+  +getSessionDetail()
+  +getAssignmentDetail()
+  +create()
+  +update()
+  +delete()
+}
+
+class CourseController {
+  -courseService: ICourseService
+  -learnerClassService: ILearnerClassService
+  +list()
+  +listForLearner()
+  +listBestSellerCourseForLearner()
+  +listRecommendedCourseForLearner()
+  +getDetail()
+}
+
+class InstructorCourseComboController {
+  -courseComboService: ICourseComboService
+  -courseService: ICourseService
+  -reportService: IReportService
+  +list()
+  +getDetail()
+  +create()
+  +update()
+  +delete()
+}
+
+class ManagementCourseComboController {
+  -courseComboService: ICourseComboService
+  +list()
+  +getDetail()
+}
+
+' Interfaces
+interface ICourseService {
+  +create(createCourseDto: CreateCourseDto): Promise<CourseDocument>
+  +findById(courseId: string): Promise<CourseDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<CourseDocument>
+  +listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseDto)
+  +listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseDto)
+  +listPublicCourses(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto)
+  +listByLearner(pagination: PaginationParams, queryCourseDto: PublicQueryCourseDto, userAuth: UserAuth)
+  +findManyByStatus(status: CourseStatus[]): Promise<CourseDocument[]>
+  +findMany(conditions: FilterQuery): Promise<CourseDocument[]>
+  +viewReportCourseByRate(): Promise<any[]>
+}
+
+interface ICourseComboService {
+  +create(createCourseComboDto: CreateCourseComboDto): Promise<CourseDocument>
+  +findById(courseId: string): Promise<CourseDocument>
+  +update(conditions: FilterQuery, payload: UpdateQuery): Promise<CourseDocument>
+  +listByInstructor(instructorId: string, pagination: PaginationParams, queryCourseDto: QueryCourseComboDto)
+  +listByStaff(pagination: PaginationParams, queryCourseDto: StaffQueryCourseComboDto)
+  +findMany(conditions: FilterQuery): Promise<CourseDocument[]>
+}
+
+interface ICourseSessionService {
+  +findOneBy(params: {sessionId: string, courseId: string, instructorId?: string}): Promise<Session>
+}
+
+interface ICourseAssignmentService {
+  +findOneBy(params: {assignmentId: string, courseId: string, instructorId?: string}): Promise<Assignment>
+}
+
+interface ICourseRepository {
+}
+
+class CourseService {
+  -courseRepository: ICourseRepository
+  -helperService: HelperService
+  -learnerClassService: ILearnerClassService
+  +create()
+  +findById()
+  +update()
+  +listByInstructor()
+  +listByStaff()
+  +listPublicCourses()
+  +listByLearner()
+  +listBestSellerCoursesByLearner()
+  +listRecommendedCoursesByLearner()
+  +findManyByStatus()
+  +findMany()
+  +viewReportCourseByRate()
+  -generateCode()
+}
+
+class CourseComboService {
+  -courseRepository: ICourseRepository
+  +create()
+  +findById()
+  +update()
+  +listByInstructor()
+  +listByStaff()
+  +findMany()
+  -generateCode()
+}
+
+class CourseSessionService {
+  -courseRepository: ICourseRepository
+  +findOneBy()
+}
+
+class CourseAssignmentService {
+  -courseRepository: ICourseRepository
+  +findOneBy()
+}
+
+class CourseRepository {
+  +model: PaginateModel<CourseDocument>
+}
+
+abstract class AbstractRepository {
+  - model: PaginateModel<T>
+  + constructor(model: PaginateModel<T>)
+  + findOne(params: {conditions, projection?, populates?, options?}): Promise<T | undefined>
+  + firstOrFail(params: {conditions, projection?, options?, populates?, error?}): Promise<T>
+  + findMany(params: {conditions, projection?, populates?, sort?, options?}): Promise<Array<T>>
+  + paginate(conditions: FilterQuery<T>, options?: PaginateOptions): Promise<PaginateResult<T>>
+  + create(payload: Record<string, any>, options?: SaveOptions): Promise<T>
+  + updateOneOrFail(conditions: FilterQuery<T>, payload: object, options?: SaveOptions): Promise<T>
+  + findOneAndUpdate(conditions: FilterQuery<T>, payload: UpdateQuery<T>, options?: QueryOptions): Promise<T>
+  + updateMany(conditions: FilterQuery<T>, payload: UpdateQuery<T>, options?): Promise<UpdateWriteOpResult>
+  + findOneAndDelete(conditions: FilterQuery<T>, options?: QueryOptions): Promise<T>
+  + deleteMany(conditions: FilterQuery<T>, options?): Promise<DeleteResult>
+}
+
+' DTOs
+class BaseCourseDto {
+  +_id: string
+  +code: string
+  +title: string
+  +description: string
+  +price: number
+  +level: CourseLevel
+  +type: string[]
+  +duration: number
+  +thumbnail: string
+  +media: BaseMediaDto[]
+  +status: CourseStatus
+  +sessions: BaseSessionDto[]
+  +childCourseIds: string[]
+  +learnerLimit: number
+  +rate: number
+  +discount: number
+  +gardenRequiredToolkits: string
+  +instructorId: string
+  +isRequesting: Boolean
+  +ratingSummary: BaseRatingSummaryDto
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+' Schemas
+entity Course {
+  +_id: string
+  +code: string
+  +title: string
+  +description: string
+  +price: number
+  +level: CourseLevel
+  +type: string[]
+  +duration: number
+  +thumbnail: string
+  +media: BaseMediaDto[]
+  +status: CourseStatus
+  +sessions: Session[]
+  +childCourseIds: Types.ObjectId[]
+  +learnerLimit: number
+  +learnerQuantity: number
+  +rate: number
+  +discount: number
+  +gardenRequiredToolkits: string
+  +instructorId: Types.ObjectId
+  +isRequesting: boolean
+  +ratingSummary: BaseRatingSummaryDto
+}
+
+' Relationships
+ManagementCourseComboController ..> ICourseComboService
+
+InstructorCourseComboController ..> ICourseComboService
+InstructorCourseComboController ..> ICourseService
+
+InstructorCourseController ..> ICourseService
+InstructorCourseController ..> ICourseSessionService
+InstructorCourseController ..> ICourseAssignmentService
+
+CourseController ..> ICourseService
+
+ManagementCourseController ..> ICourseService
+ManagementCourseController ..> ICourseSessionService
+ManagementCourseController ..> ICourseAssignmentService
+
+ICourseService <|.. CourseService
+ICourseSessionService <|.. CourseSessionService
+ICourseAssignmentService <|.. CourseAssignmentService
+ICourseComboService <|.. CourseComboService
+
+CourseService ..> ICourseRepository
+CourseSessionService ..> ICourseRepository
+CourseAssignmentService ..> ICourseRepository
+CourseComboService ..> ICourseRepository
+
+CourseService ..> BaseCourseDto
+CourseSessionService ..> BaseCourseDto
+CourseAssignmentService ..> BaseCourseDto
+CourseComboService ..> BaseCourseDto
+
+ICourseRepository <|.. CourseRepository
+ICourseRepository --|> AbstractRepository
+CourseRepository --|> AbstractRepository
+
+CourseRepository ..> Course
+BaseCourseDto -- Course
+@enduml

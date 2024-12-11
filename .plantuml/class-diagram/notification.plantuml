@@ -1,0 +1,133 @@
+@startuml Notification Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+  BackgroundColor White
+  ArrowColor Black
+  BorderColor Black
+}
+
+' Controllers
+class UserDeviceController {
+  -userDeviceService: IUserDeviceService
+  -firebaseMessagingService: IFirebaseMessagingService
+  +get(fcmToken: string)
+  +create(createUserDeviceDto: CreateUserDeviceDto)
+  -subscribeFirebaseMessagingTopic()
+}
+
+' Interfaces
+interface IUserDeviceService {
+  +create(createUserDeviceDto: CreateUserDeviceDto): Promise<UserDeviceDocument>
+  +findById(userDeviceId: string): Promise<UserDeviceDocument>
+  +findByFcmToken(fcmToken: string): Promise<UserDeviceDocument>
+  +findOneBy(conditions: FilterQuery<UserDevice>): Promise<UserDeviceDocument>
+  +findMany(conditions: FilterQuery<UserDeviceDocument>): Promise<UserDeviceDocument[]>
+  +update(conditions: FilterQuery<UserDevice>, payload: UpdateQuery<UserDevice>): Promise<UserDeviceDocument>
+}
+
+interface INotificationService {
+  +sendMail(options: MailSendOptions): Promise<void>
+  +sendFirebaseCloudMessaging(sendNotificationDto: SendNotificationDto): Promise<{success: boolean}>
+  +sendTopicFirebaseCloudMessaging(sendTopicNotificationDto: SendTopicNotificationDto): Promise<{success: boolean}>
+}
+
+interface IUserDeviceRepository {
+}
+
+class UserDeviceService {
+  -userDeviceRepository: IUserDeviceRepository
+  -appLogger: AppLogger
+  +create()
+  +update()
+  +findById()
+  +findByFcmToken()
+  +findOneBy()
+  +findMany()
+}
+
+class NotificationService {
+  -mailService: MailerService
+  -firebaseFirestoreService: IFirebaseFirestoreService
+  -firebaseMessagingService: IFirebaseMessagingService 
+  -userDeviceService: IUserDeviceService
+  -appLogger: AppLogger
+  +sendMail()
+  +sendFirebaseCloudMessaging()
+  +sendTopicFirebaseCloudMessaging()
+}
+
+class UserDeviceRepository {
+  +model: PaginateModel<UserDeviceDocument>
+}
+
+abstract class AbstractRepository {
+  -model: PaginateModel<T>
+  +constructor(model: PaginateModel<T>)
+  +findOne()
+  +firstOrFail()
+  +findMany()
+  +paginate()
+  +create()
+  +updateOneOrFail()
+  +findOneAndUpdate()
+  +updateMany()
+  +findOneAndDelete()
+  +deleteMany()
+}
+
+' DTOs
+class BaseUserDeviceDto {
+  +_id: string
+  +userId: Types.ObjectId
+  +userRole: UserRole
+  +fcmToken: string
+  +browser: string
+  +os: string
+  +status: UserDeviceStatus
+  +createdAt: Date
+  +updatedAt: Date
+}
+
+class BaseNotificationDto {
+  +_id: string
+  +title: string
+  +body: string
+  +data: object
+  +receiverIds: string[]
+  +topic: string
+  +createdAt: Date
+}
+
+' Schemas
+entity UserDevice {
+  +_id: string
+  +userId: Types.ObjectId
+  +userRole: UserRole
+  +fcmToken: string
+  +browser: string
+  +os: string
+  +status: UserDeviceStatus
+}
+
+' Relationships
+UserDeviceController ..> IUserDeviceService
+
+IUserDeviceService <|.. UserDeviceService
+INotificationService <|.. NotificationService
+
+UserDeviceService ..> IUserDeviceRepository
+NotificationService ..> IUserDeviceService
+
+UserDeviceService ..> BaseUserDeviceDto
+NotificationService ..> BaseNotificationDto
+
+IUserDeviceRepository <|.. UserDeviceRepository
+IUserDeviceRepository --|> AbstractRepository
+UserDeviceRepository --|> AbstractRepository
+
+UserDeviceRepository ..> UserDevice
+BaseUserDeviceDto -- UserDevice
+
+@enduml
