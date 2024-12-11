@@ -1,0 +1,77 @@
+@startuml
+
+actor Learner
+participant LoginScreen
+participant LearnerAuthController
+participant IAuthService
+participant ILearnerService
+participant HelperService
+participant IUserTokenService
+participant ILearnerRepository
+participant IUserTokenRepository
+database Database
+
+activate Learner
+Learner -> LoginScreen: access
+activate LoginScreen
+LoginScreen -> LoginScreen: fill email and password
+LoginScreen -> LearnerAuthController: login(loginDto)
+activate LearnerAuthController
+LearnerAuthController -> IAuthService: login(loginDto, userRole)
+activate IAuthService
+IAuthService -> ILearnerService: findByEmail(email)
+activate ILearnerService
+ILearnerService ->ILearnerRepository: findOne(email)
+activate ILearnerRepository
+ILearnerRepository -> Database: query(payload)
+activate Database
+Database --> ILearnerRepository: return data
+deactivate Database
+ILearnerRepository --> ILearnerService: return data
+deactivate ILearnerRepository
+ILearnerService --> IAuthService: return data
+deactivate ILearnerService
+alt not found learner 
+    IAuthService --> LearnerAuthController: return error
+    LearnerAuthController --> LoginScreen: return error
+    LoginScreen --> Learner: show error message
+else unverified learner
+    IAuthService --> LearnerAuthController: return error
+    LearnerAuthController --> LoginScreen: return error
+    LoginScreen --> Learner: show error message
+else inactive learner
+    IAuthService --> LearnerAuthController: return error
+    LearnerAuthController --> LoginScreen: return error
+    LoginScreen --> Learner: show error message
+else valid learner
+    IAuthService -> HelperService: comparePassword(password, hashedPassword)
+    activate HelperService
+    HelperService --> IAuthService: return data
+    deactivate HelperService
+    alt wrong password
+        IAuthService --> LearnerAuthController: return error
+        LearnerAuthController --> LoginScreen: return error
+        LoginScreen --> Learner: show error message
+    else correct password
+        IAuthService -> IAuthService: generate access token and refresh token
+        IAuthService -> IUserTokenService: create(accessToken, refreshToken)
+        activate IUserTokenService
+        IUserTokenService -> IUserTokenRepository: create(createUserTokenDto)
+        activate IUserTokenRepository
+        IUserTokenRepository -> Database: save(payload)
+        activate Database
+        Database --> IUserTokenRepository: return data
+        deactivate Database
+        IUserTokenRepository --> IUserTokenService: return data
+        deactivate IUserTokenRepository
+        IUserTokenService --> IAuthService: return data
+        deactivate IUserTokenService
+        IAuthService --> LearnerAuthController: return access token and refresh token
+        deactivate IAuthService
+        LearnerAuthController --> LoginScreen: return access token and refresh token
+        deactivate LearnerAuthController
+        LoginScreen --> Learner: show success message
+    end
+end
+
+@enduml

@@ -1,0 +1,123 @@
+@startuml Feedback Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+class InstructorFeedbackController {
+    - feedbackService: IFeedbackService
+    - courseService: ICourseService
+    - classService: IClassService
+    + listCourseFeedback()
+    + listClassFeedback()
+}
+
+class LearnerFeedbackController {
+    - feedbackService: IFeedbackService
+    - classService: IClassService
+    - learnerClassService: ILearnerClassService
+    + list()
+    + listClassFeedback()
+    + sendFeedback()
+    + getFeedbackDetail()
+}
+
+class ManagementFeedbackController {
+    - feedbackService: IFeedbackService
+    + listCourseFeedback()
+    + listClassFeedback()
+}
+
+' Service Interfaces
+interface IFeedbackService {
+    + sendFeedback(sendFeedbackDto: SendFeedbackDto, classRatingSummary: BaseRatingSummaryDto, courseRatingSummary: BaseRatingSummaryDto): Promise<SuccessResponse>
+    + create(sendFeedbackDto: SendFeedbackDto, options?: SaveOptions): Promise<FeedbackDocument>
+    + findById(feedbackId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<FeedbackDocument>
+    + findOneBy(conditions: FilterQuery<Feedback>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<FeedbackDocument>
+    + findMany(conditions: FilterQuery<FeedbackDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<FeedbackDocument[]>
+    + update(conditions: FilterQuery<Feedback>, payload: UpdateQuery<Feedback>, options?: QueryOptions): Promise<FeedbackDocument>
+    + list(pagination: PaginationParams, queryFeedbackDto: QueryFeedbackDto, projection?: string | Record<string, any>, populate?: Array<PopulateOptions>)
+}
+
+' Service Implementations
+class FeedbackService {
+    - appLogger: AppLogger
+    - connection: Connection
+    - feedbackRepository: IFeedbackRepository
+    - classService: IClassService
+    - courseService: ICourseService
+    + sendFeedback()
+    + create()
+    + findById()
+    + findOneBy()
+    + findMany()
+    + update()
+    + list()
+}
+
+' Repository Interfaces
+interface IFeedbackRepository {
+}
+
+' Repository Implementations
+abstract class AbstractRepository {
+    + model: PaginateModel<T>
+    + constructor(model: PaginateModel<T>)
+    + findOne()
+    + firstOrFail()
+    + findMany()
+    + paginate()
+    + create()
+    + updateOneOrFail()
+    + findOneAndUpdate()
+    + updateMany()
+    + findOneAndDelete()
+    + deleteMany()
+}
+
+class FeedbackRepository {
+    + model: PaginateModel<FeedbackDocument>
+}
+
+' DTOs
+
+class BaseFeedbackDto {
+    + _id: string
+    + rate: number
+    + comment: string
+    + learnerId: string
+    + classId: string
+    + courseId: string
+    + createdAt: Date
+    + updatedAt: Date
+}
+
+' Schema
+class Feedback {
+    + _id: string
+    + rate: number
+    + comment: string
+    + learnerId: string
+    + classId: string
+    + courseId: string
+}
+
+' Relationships
+InstructorFeedbackController ..> IFeedbackService
+LearnerFeedbackController ..> IFeedbackService
+ManagementFeedbackController ..> IFeedbackService
+
+IFeedbackService <|.. FeedbackService
+FeedbackService ..> IFeedbackRepository
+FeedbackService ..> BaseFeedbackDto
+
+AbstractRepository <|-- IFeedbackRepository
+AbstractRepository <|-- FeedbackRepository
+IFeedbackRepository <|.. FeedbackRepository
+
+FeedbackRepository ..> Feedback

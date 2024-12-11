@@ -1,0 +1,103 @@
+@startuml Attendance Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+class InstructorAttendanceController {
+    - attendanceService: IAttendanceService
+    - gardenTimesheetService: IGardenTimesheetService
+    - learnerClassService: ILearnerClassService
+    + list()
+    + takeAttendance()
+}
+
+' Service Interfaces
+interface IAttendanceService {
+    + create(takeAttendanceDto: TakeAttendanceDto, options?: SaveOptions): Promise<AttendanceDocument>
+    + findById(attendanceId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<AttendanceDocument>
+    + findOneBy(conditions: FilterQuery<Attendance>, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<AttendanceDocument>
+    + findMany(conditions: FilterQuery<AttendanceDocument>, projection?: Record<string, any>, populates?: Array<PopulateOptions>): Promise<AttendanceDocument[]>
+    + update(conditions: FilterQuery<Attendance>, payload: UpdateQuery<Attendance>, options?: QueryOptions): Promise<AttendanceDocument>
+    + list(queryAttendanceDto: QueryAttendanceDto, projection?: string | Record<string, any>, populate?: Array<PopulateOptions>)
+    + bulkWrite(slotId: string, takeAttendanceDto: TakeAttendanceDto[], classId: string)
+}
+
+' Service Implementations
+class AttendanceService {
+    - appLogger: AppLogger
+    - attendanceRepository: IAttendanceRepository
+    + create()
+    + findById()
+    + findOneBy()
+    + findMany()
+    + update()
+    + list()
+    + bulkWrite()
+}
+
+' Repository Interfaces
+interface IAttendanceRepository {
+}
+
+' Repository Implementations
+abstract class AbstractRepository {
+    + model: PaginateModel<T>
+    + constructor(model: PaginateModel<T>)
+    + findOne()
+    + firstOrFail()
+    + findMany()
+    + paginate()
+    + create()
+    + updateOneOrFail()
+    + findOneAndUpdate()
+    + updateMany()
+    + findOneAndDelete()
+    + deleteMany()
+}
+
+class AttendanceRepository {
+    + model: PaginateModel<AttendanceDocument>
+}
+
+' Schemas
+entity Attendance {
+    + _id: string
+    + status: AttendanceStatus
+    + note: string
+    + learnerId: string
+    + slotId: string
+    + classId: string
+}
+
+' DTOs
+class BaseAttendanceDto {
+    + _id: string
+    + status: AttendanceStatus
+    + note: string
+    + learnerId: string
+    + slotId: string
+    + classId: string
+    + createdAt: Date
+    + updatedAt: Date
+}
+
+' Relationships
+InstructorAttendanceController ..> IAttendanceService
+
+IAttendanceService <|.. AttendanceService
+AttendanceService ..> IAttendanceRepository
+AttendanceService ..> BaseAttendanceDto
+
+AbstractRepository <|-- IAttendanceRepository
+AbstractRepository <|-- AttendanceRepository
+IAttendanceRepository <|.. AttendanceRepository
+
+AttendanceRepository ..> Attendance
+
+@enduml

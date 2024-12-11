@@ -1,0 +1,60 @@
+@startuml
+
+actor Admin
+participant AddStaffScreen
+participant ManagementStaffController
+participant IStaffService
+participant HelperService
+participant INotificationService
+participant IStaffRepository
+database Database
+
+activate Admin
+Admin -> AddStaffScreen: access
+activate AddStaffScreen
+AddStaffScreen -> AddStaffScreen: fill the add staff form
+AddStaffScreen -> ManagementStaffController: create(createStaffDto)
+activate ManagementStaffController
+ManagementStaffController -> IStaffService: findByEmail(email)
+activate IStaffService
+IStaffService -> IStaffRepository: findOne(email)
+activate IStaffRepository
+IStaffRepository -> Database: query(payload)
+activate Database
+Database --> IStaffRepository: return data
+deactivate Database
+IStaffRepository --> IStaffService: return data
+deactivate IStaffRepository
+IStaffService --> ManagementStaffController: return data
+deactivate IStaffService
+alt found staff
+    ManagementStaffController --> AddStaffScreen: return error
+    AddStaffScreen --> Admin: show error message
+else not found staff
+    ManagementStaffController -> IStaffService: create(createStaffDto)
+    activate IStaffService
+    IStaffService -> HelperService: hashPassword(password)
+    activate HelperService
+    HelperService --> IStaffService: return hashed password
+    deactivate HelperService
+    IStaffService -> IStaffService: generate staff code
+    IStaffService -> IStaffRepository: create(createStaffDto)
+    activate IStaffRepository
+    IStaffRepository -> Database: save(payload)
+    activate Database
+    Database --> IStaffRepository: return data
+    deactivate Database
+    IStaffRepository --> IStaffService: return data
+    deactivate IStaffRepository
+    IStaffService -> INotificationService: send email to garden manager
+    activate INotificationService
+    INotificationService --> IStaffService: return data
+    deactivate INotificationService
+    IStaffService --> ManagementStaffController: return data
+    deactivate IStaffService
+    ManagementStaffController --> AddStaffScreen: return data
+    deactivate ManagementStaffController
+    AddStaffScreen --> Admin: show success message
+end
+
+@enduml

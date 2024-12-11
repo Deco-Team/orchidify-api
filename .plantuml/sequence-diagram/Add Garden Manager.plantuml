@@ -1,0 +1,64 @@
+@startuml
+
+actor Staff
+participant AddGardenManagerScreen
+participant ManagementGardenManagerController
+participant IGardenManagerService
+participant HelperService
+participant INotificationService
+participant IGardeManagerRepository
+database Database
+
+activate Staff
+Staff -> AddGardenManagerScreen: access
+activate AddGardenManagerScreen
+AddGardenManagerScreen -> AddGardenManagerScreen: fill add garden manager form
+AddGardenManagerScreen -> ManagementGardenManagerController: create(createGardenManagerDto)
+activate ManagementGardenManagerController
+ManagementGardenManagerController -> IGardenManagerService: findByEmail(email)
+activate IGardenManagerService
+IGardenManagerService -> IGardeManagerRepository: findOne(email)
+activate IGardeManagerRepository
+IGardeManagerRepository -> Database: query(payload)
+activate Database
+Database --> IGardeManagerRepository: return data
+deactivate Database
+IGardeManagerRepository --> IGardenManagerService: return data
+deactivate IGardeManagerRepository
+IGardenManagerService --> ManagementGardenManagerController: return data
+deactivate IGardenManagerService
+alt found garden manager
+    ManagementGardenManagerController --> AddGardenManagerScreen: return error
+    AddGardenManagerScreen --> Staff: show error message
+else not found garden manager
+    ManagementGardenManagerController -> IGardenManagerService: create(createGardenManagerDto)
+    activate IGardenManagerService
+    IGardenManagerService -> HelperService: generateRandomString()
+    activate HelperService
+    HelperService --> IGardenManagerService: return data
+    deactivate HelperService
+    IGardenManagerService -> HelperService: hashPassword(password)
+    activate HelperService
+    HelperService --> IGardenManagerService: return hashed password
+    deactivate HelperService
+    IGardenManagerService -> IGardeManagerRepository: create(createGardenManagerDto)
+    activate IGardeManagerRepository
+    IGardeManagerRepository -> Database: save(payload)
+    activate Database
+    Database --> IGardeManagerRepository: return data
+    deactivate Database
+    IGardeManagerRepository --> IGardenManagerService: return data
+    deactivate IGardeManagerRepository
+    IGardenManagerService -> INotificationService: send email to garden manager
+    activate INotificationService
+    INotificationService --> IGardenManagerService: return data
+    deactivate INotificationService
+    IGardenManagerService --> ManagementGardenManagerController: return data
+    deactivate IGardenManagerService
+    ManagementGardenManagerController --> AddGardenManagerScreen: return data
+    deactivate ManagementGardenManagerController
+    AddGardenManagerScreen --> Staff: show success message
+end
+
+
+@enduml
