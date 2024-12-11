@@ -1,0 +1,92 @@
+@startuml
+
+actor Instructor
+participant TakeAttendancePage
+participant InstructorAttendanceController
+participant IGardenTimesheetService
+participant ILearnerClassService
+participant IAttendanceService
+participant IGardenTimesheetRepository
+participant ILearnerClassRepository
+participant IAttendanceRepository
+database Database
+
+activate Instructor
+Instructor -> TakeAttendancePage: access
+activate TakeAttendancePage
+TakeAttendancePage -> TakeAttendancePage: click take attendance button
+TakeAttendancePage -> InstructorAttendanceController: takeAttendance(slotId, takeMultipleAttendanceDto)
+activate InstructorAttendanceController
+InstructorAttendanceController -> IGardenTimesheetService: findOneBy(slotId, instructorId)
+activate IGardenTimesheetService
+IGardenTimesheetService -> IGardenTimesheetRepository: findOne(slotId, instructorId)
+activate IGardenTimesheetRepository
+IGardenTimesheetRepository -> Database: query(payload)
+activate Database
+Database --> IGardenTimesheetRepository: return data
+deactivate Database
+IGardenTimesheetRepository --> IGardenTimesheetService: return data
+deactivate IGardenTimesheetRepository
+IGardenTimesheetService --> InstructorAttendanceController: return data
+deactivate IGardenTimesheetService
+alt not found garden timesheet slot
+    InstructorAttendanceController --> TakeAttendancePage: return error
+    TakeAttendancePage --> Instructor: show error message
+else found garden timesheet slot
+    InstructorAttendanceController -> InstructorAttendanceController: check take attendance time
+    alt invalid take attendance time
+        InstructorAttendanceController --> TakeAttendancePage: return error
+        TakeAttendancePage --> Instructor: show error message
+    else valid take attendance time
+        InstructorAttendanceController -> ILearnerClassService: findMany(classId)
+        activate ILearnerClassService
+        ILearnerClassService -> ILearnerClassRepository: findMany(classId)
+        activate ILearnerClassRepository
+        ILearnerClassRepository -> Database: query(payload)
+        activate Database
+        Database --> ILearnerClassRepository: return data
+        deactivate Database
+        ILearnerClassRepository --> ILearnerClassService: return data
+        deactivate ILearnerClassRepository
+        ILearnerClassService --> InstructorAttendanceController: return data
+        deactivate ILearnerClassService
+        InstructorAttendanceController -> InstructorAttendanceController: validate submitted learner attendance
+        alt invalid
+            InstructorAttendanceController --> TakeAttendancePage: return error
+            TakeAttendancePage --> Instructor: show error message
+        else valid
+            InstructorAttendanceController -> InstructorAttendanceController: check if slot has been taken attendance
+            alt slot has been taken attendance
+                InstructorAttendanceController -> IGardenTimesheetService: update(slotId, updateGardenTimesheetDto)
+                activate IGardenTimesheetService
+                IGardenTimesheetService -> IGardenTimesheetRepository: findOneAndUpdate(slotId, updateGardenTimesheetDto)
+                activate IGardenTimesheetRepository
+                IGardenTimesheetRepository -> Database: findOneAndUpdate(conditions, payload)
+                activate Database
+                Database --> IGardenTimesheetRepository: return data
+                deactivate Database
+                IGardenTimesheetRepository --> IGardenTimesheetService: return data
+                deactivate IGardenTimesheetRepository
+                IGardenTimesheetService --> InstructorAttendanceController: return data
+                deactivate IGardenTimesheetService
+            end
+            InstructorAttendanceController -> IAttendanceService: bulkWrite(slotId, attendanceLearners, classId)
+            activate IAttendanceService
+            IAttendanceService -> IAttendanceRepository: bulkWrite(slotId, attendanceLearners, classId)
+            activate IAttendanceRepository
+            IAttendanceRepository -> Database: bulkWrite(payload)
+            activate Database
+            Database --> IAttendanceRepository: return data
+            deactivate Database
+            IAttendanceRepository --> IAttendanceService: return data
+            deactivate IAttendanceRepository
+            IAttendanceService --> InstructorAttendanceController: return data
+            deactivate IAttendanceService
+            InstructorAttendanceController --> TakeAttendancePage: return data
+            deactivate InstructorAttendanceController
+            TakeAttendancePage --> Instructor: show success message
+        end
+    end
+end
+
+@enduml

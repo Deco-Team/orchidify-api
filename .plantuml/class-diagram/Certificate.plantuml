@@ -1,0 +1,98 @@
+@startuml Certificate Module
+
+skinparam classAttributeIconSize 0
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+class LearnerCertificateController {
+    - certificateService: ICertificateService
+    + list()
+    + getDetail()
+}
+
+' Service Interfaces
+interface ICertificateService {
+    + create(createCertificateDto: CreateCertificateDto, options?: SaveOptions): Promise<CertificateDocument>
+    + findById(certificateId: string, projection?: string | Record<string, any>, populates?: Array<PopulateOptions>): Promise<CertificateDocument>
+    + update(conditions: FilterQuery<Certificate>, payload: UpdateQuery<Certificate>, options?: QueryOptions): Promise<CertificateDocument>
+    + list(pagination: PaginationParams, queryCertificateDto: QueryCertificateDto)
+    + generateCertificateCode(length?: number, startTime?: number): string
+}
+
+' Service Implementations
+class CertificateService {
+    - certificateRepository: ICertificateRepository
+    - helperService: HelperService
+    + create()
+    + findById()
+    + update()
+    + list()
+    + generateCertificateCode()
+}
+
+' Repository Interfaces
+interface ICertificateRepository {
+}
+
+' Repository Implementations
+abstract class AbstractRepository {
+    + model: PaginateModel<T>
+    + constructor(model: PaginateModel<T>)
+    + findOne()
+    + firstOrFail()
+    + findMany()
+    + paginate()
+    + create()
+    + updateOneOrFail()
+    + findOneAndUpdate()
+    + updateMany()
+    + findOneAndDelete()
+    + deleteMany()
+}
+
+class CertificateRepository {
+    + model: PaginateModel<CertificateDocument>
+}
+
+' DTOs
+class BaseCertificateDto {
+  _id: string
+  email: string
+  name: string
+  code: string
+  url: string
+  ownerId: string
+  learnerClassId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+' Schemas
+class Certificate {
+  _id: string
+  name: string
+  code: string
+  url: string
+  ownerId: string
+  learnerClassId: string
+}
+
+' Relationships
+LearnerCertificateController ..> ICertificateService
+
+ICertificateService <|.. CertificateService
+CertificateService ..> ICertificateRepository
+CertificateService ..> BaseCertificateDto
+
+AbstractRepository <|-- ICertificateRepository
+AbstractRepository <|-- CertificateRepository
+ICertificateRepository <|.. CertificateRepository
+
+CertificateRepository ..> Certificate
+
+@enduml
