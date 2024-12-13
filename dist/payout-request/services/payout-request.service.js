@@ -104,8 +104,10 @@ let PayoutRequestService = PayoutRequestService_1 = class PayoutRequestService {
         if (createdBy) {
             filter['createdBy'] = new mongoose_1.Types.ObjectId(createdBy);
         }
-        if (hasMadePayout) {
-            filter['hasMadePayout'] = hasMadePayout;
+        if (hasMadePayout !== undefined) {
+            filter['hasMadePayout'] = {
+                $exists: hasMadePayout
+            };
         }
         const validStatus = status?.filter((status) => [
             constant_1.PayoutRequestStatus.PENDING,

@@ -183,8 +183,10 @@ export class PayoutRequestService implements IPayoutRequestService {
       filter['createdBy'] = new Types.ObjectId(createdBy)
     }
 
-    if (hasMadePayout) {
-      filter['hasMadePayout'] = hasMadePayout
+    if (hasMadePayout !== undefined) {
+      filter['hasMadePayout'] = {
+        $exists: hasMadePayout
+      }
     }
 
     const validStatus = status?.filter((status) =>
