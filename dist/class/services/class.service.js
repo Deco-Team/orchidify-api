@@ -322,7 +322,7 @@ let ClassService = class ClassService {
         while (currentDate.isSameOrBefore(endOfDate)) {
             for (let weekday of weekdays) {
                 const searchDate = currentDate.clone().isoWeekday(weekday);
-                if (searchDate.isSameOrAfter(startOfDate) && searchDate.isSameOrBefore(endOfDate)) {
+                if (searchDate.isSameOrAfter(startOfDate) && searchDate.isBefore(endOfDate)) {
                     classDates.push(searchDate.toDate());
                 }
             }
