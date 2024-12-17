@@ -522,7 +522,7 @@ export class ClassQueueConsumer extends WorkerHost {
     await this.notificationService.sendFirebaseCloudMessaging({
       title: `Buổi học sẽ bắt đầu sau 1 tiếng`,
       body: `Lớp ${courseClass.code}: ${courseClass.title} sắp bắt đầu buổi học. Bấm để xem chi tiết.`,
-      receiverIds: learnerClasses.map((learnerId) => learnerId.toString()),
+      receiverIds: learnerClasses.map((learnerClass) => learnerClass?.learnerId?.toString()),
       data: {
         type: FCMNotificationDataType.CLASS,
         id: courseClass._id.toString()
@@ -567,7 +567,7 @@ export class ClassQueueConsumer extends WorkerHost {
       this.gardenService.findById(courseClass.gardenId.toString())
     ])
 
-    const receiverIds = learnerClasses.map((learnerId) => learnerId.toString())
+    const receiverIds = learnerClasses.map((learnerClass) => learnerClass?.learnerId?.toString())
     receiverIds.push(courseClass.instructorId.toString())
     receiverIds.push(garden.gardenManagerId.toString())
 

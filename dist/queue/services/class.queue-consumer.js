@@ -411,7 +411,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
         await this.notificationService.sendFirebaseCloudMessaging({
             title: `Buổi học sẽ bắt đầu sau 1 tiếng`,
             body: `Lớp ${courseClass.code}: ${courseClass.title} sắp bắt đầu buổi học. Bấm để xem chi tiết.`,
-            receiverIds: learnerClasses.map((learnerId) => learnerId.toString()),
+            receiverIds: learnerClasses.map((learnerClass) => learnerClass?.learnerId?.toString()),
             data: {
                 type: constant_4.FCMNotificationDataType.CLASS,
                 id: courseClass._id.toString()
@@ -449,7 +449,7 @@ let ClassQueueConsumer = ClassQueueConsumer_1 = class ClassQueueConsumer extends
             this.learnerClassService.findMany({ classId: new mongoose_1.Types.ObjectId(courseClass._id) }, ['learnerId']),
             this.gardenService.findById(courseClass.gardenId.toString())
         ]);
-        const receiverIds = learnerClasses.map((learnerId) => learnerId.toString());
+        const receiverIds = learnerClasses.map((learnerClass) => learnerClass?.learnerId?.toString());
         receiverIds.push(courseClass.instructorId.toString());
         receiverIds.push(garden.gardenManagerId.toString());
         if (receiverIds.length === 0)
