@@ -74,7 +74,7 @@ export class InstructorReportController {
         ['type', 'data']
       )
     ])
-    if (!reports) {
+    if (reports.length === 0) {
       const initReports = [
         {
           type: ReportType.CourseSum,
@@ -119,7 +119,7 @@ export class InstructorReportController {
       reports = await this.reportService.createMany(initReports)
     }
 
-    if (!requestReports) {
+    if (requestReports.length === 0) {
       const initRequestReports = [
         {
           type: ReportType.ClassRequestSum,
@@ -149,10 +149,10 @@ export class InstructorReportController {
 
     const formatData = []
     formatData.push(reports[0]?.toObject())
-    formatData.push(reports[1].toObject())
+    formatData.push(reports[1]?.toObject())
 
-    const classRequestSum = requestReports[0].toObject()
-    const payoutRequestSum = requestReports[1].toObject()
+    const classRequestSum = requestReports[0]?.toObject()
+    const payoutRequestSum = requestReports[1]?.toObject()
     formatData.push({
       type: 'RequestSum',
       data: {
@@ -164,7 +164,7 @@ export class InstructorReportController {
       }
     })
 
-    formatData.push(reports[2].toObject())
+    formatData.push(reports[2]?.toObject())
 
     return { docs: formatData }
   }

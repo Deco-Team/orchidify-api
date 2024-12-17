@@ -51,7 +51,7 @@ let InstructorReportController = class InstructorReportController {
                 ownerId: new mongoose_1.Types.ObjectId(_id)
             }, ['type', 'data'])
         ]);
-        if (!reports) {
+        if (reports.length === 0) {
             const initReports = [
                 {
                     type: constant_2.ReportType.CourseSum,
@@ -95,7 +95,7 @@ let InstructorReportController = class InstructorReportController {
             ];
             reports = await this.reportService.createMany(initReports);
         }
-        if (!requestReports) {
+        if (requestReports.length === 0) {
             const initRequestReports = [
                 {
                     type: constant_2.ReportType.ClassRequestSum,
@@ -124,9 +124,9 @@ let InstructorReportController = class InstructorReportController {
         }
         const formatData = [];
         formatData.push(reports[0]?.toObject());
-        formatData.push(reports[1].toObject());
-        const classRequestSum = requestReports[0].toObject();
-        const payoutRequestSum = requestReports[1].toObject();
+        formatData.push(reports[1]?.toObject());
+        const classRequestSum = requestReports[0]?.toObject();
+        const payoutRequestSum = requestReports[1]?.toObject();
         formatData.push({
             type: 'RequestSum',
             data: {
@@ -136,7 +136,7 @@ let InstructorReportController = class InstructorReportController {
                 }
             }
         });
-        formatData.push(reports[2].toObject());
+        formatData.push(reports[2]?.toObject());
         return { docs: formatData };
     }
     async viewReportClassDataByStatus(req) {
