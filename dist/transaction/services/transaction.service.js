@@ -45,7 +45,12 @@ let TransactionService = TransactionService_1 = class TransactionService {
         const { type, paymentMethod, status, fromAmount, toAmount } = queryTransactionDto;
         const filter = {
             status: {
-                $in: [constant_1.TransactionStatus.CAPTURED, constant_1.TransactionStatus.ERROR, constant_1.TransactionStatus.CANCELED]
+                $in: [
+                    constant_1.TransactionStatus.CAPTURED,
+                    constant_1.TransactionStatus.ERROR,
+                    constant_1.TransactionStatus.CANCELED,
+                    constant_1.TransactionStatus.REFUNDED
+                ]
             }
         };
         const validType = type?.filter((type) => [constant_2.TransactionType.PAYMENT, constant_2.TransactionType.PAYOUT].includes(type));
@@ -60,7 +65,12 @@ let TransactionService = TransactionService_1 = class TransactionService {
                 $in: validPaymentMethod
             };
         }
-        const validStatus = status?.filter((status) => [constant_1.TransactionStatus.CAPTURED, constant_1.TransactionStatus.ERROR, constant_1.TransactionStatus.CANCELED].includes(status));
+        const validStatus = status?.filter((status) => [
+            constant_1.TransactionStatus.CAPTURED,
+            constant_1.TransactionStatus.ERROR,
+            constant_1.TransactionStatus.CANCELED,
+            constant_1.TransactionStatus.REFUNDED
+        ].includes(status));
         if (validStatus?.length > 0) {
             filter['status'] = {
                 $in: validStatus

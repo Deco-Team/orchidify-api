@@ -4,7 +4,12 @@ import { DataResponse, PaginateResponse } from '@common/contracts/openapi-builde
 import { IsInt, IsOptional, Max, Min } from 'class-validator'
 import { TransactionStatus } from '@common/contracts/constant'
 import { Transform, Type } from 'class-transformer'
-import { PaymentMethod, TRANSACTION_DETAIL_PROJECTION, TRANSACTION_LIST_PROJECTION, TransactionType } from '@transaction/contracts/constant'
+import {
+  PaymentMethod,
+  TRANSACTION_DETAIL_PROJECTION,
+  TRANSACTION_LIST_PROJECTION,
+  TransactionType
+} from '@transaction/contracts/constant'
 import { MIN_PRICE } from '@src/config'
 
 export class QueryTransactionDto {
@@ -25,7 +30,7 @@ export class QueryTransactionDto {
   paymentMethod: PaymentMethod[]
 
   @ApiPropertyOptional({
-    enum: [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED],
+    enum: [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED, TransactionStatus.REFUNDED],
     isArray: true
   })
   @IsOptional()

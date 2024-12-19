@@ -41,7 +41,7 @@ __decorate([
 ], QueryTransactionDto.prototype, "paymentMethod", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        enum: [constant_1.TransactionStatus.CAPTURED, constant_1.TransactionStatus.ERROR, constant_1.TransactionStatus.CANCELED],
+        enum: [constant_1.TransactionStatus.CAPTURED, constant_1.TransactionStatus.ERROR, constant_1.TransactionStatus.CANCELED, constant_1.TransactionStatus.REFUNDED],
         isArray: true
     }),
     (0, class_validator_1.IsOptional)(),

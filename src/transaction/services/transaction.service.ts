@@ -95,7 +95,12 @@ export class TransactionService implements ITransactionService {
     const { type, paymentMethod, status, fromAmount, toAmount } = queryTransactionDto
     const filter: Record<string, any> = {
       status: {
-        $in: [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED]
+        $in: [
+          TransactionStatus.CAPTURED,
+          TransactionStatus.ERROR,
+          TransactionStatus.CANCELED,
+          TransactionStatus.REFUNDED
+        ]
       }
     }
 
@@ -116,7 +121,12 @@ export class TransactionService implements ITransactionService {
     }
 
     const validStatus = status?.filter((status) =>
-      [TransactionStatus.CAPTURED, TransactionStatus.ERROR, TransactionStatus.CANCELED].includes(status)
+      [
+        TransactionStatus.CAPTURED,
+        TransactionStatus.ERROR,
+        TransactionStatus.CANCELED,
+        TransactionStatus.REFUNDED
+      ].includes(status)
     )
     if (validStatus?.length > 0) {
       filter['status'] = {
