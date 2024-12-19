@@ -275,8 +275,15 @@ let StripePaymentStrategy = StripePaymentStrategy_1 = class StripePaymentStrateg
                 this.logger.log('handleChargeRefunded: payment REFUNDED');
                 const transaction = await this.transactionRepository.findOne({
                     conditions: {
+                        $or: [
+                            {
+                                'payment.id': chargeId
+                            },
+                            {
+                                'payment.id': paymentIntentId
+                            }
+                        ],
                         type: constant_2.TransactionType.PAYMENT,
-                        'payment.id': paymentIntentId,
                         status: constant_1.TransactionStatus.CAPTURED
                     }
                 });

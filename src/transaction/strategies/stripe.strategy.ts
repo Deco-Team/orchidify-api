@@ -348,8 +348,15 @@ export class StripePaymentStrategy implements IPaymentStrategy, OnModuleInit {
         // 1.  Update payment to transaction
         const transaction = await this.transactionRepository.findOne({
           conditions: {
+            $or: [
+              {
+                'payment.id': chargeId
+              },
+              {
+                'payment.id': paymentIntentId
+              }
+            ],
             type: TransactionType.PAYMENT,
-            'payment.id': paymentIntentId,
             status: TransactionStatus.CAPTURED
           }
         })
