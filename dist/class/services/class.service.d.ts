@@ -96,12 +96,12 @@ export declare class ClassService implements IClassService {
     }>> & Omit<import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>, never>>;
-    listByInstructor(instructorId: string, pagination: PaginationParams, queryClassDto: QueryClassDto, projection?: readonly ["_id", "code", "title", "startDate", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "learnerQuantity", "weekdays", "slotNumbers", "rate", "ratingSummary", "instructorId", "courseId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Class> & Class & Required<{
+    listByInstructor(instructorId: string, pagination: PaginationParams, queryClassDto: QueryClassDto, projection?: readonly ["_id", "code", "title", "startDate", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "learnerQuantity", "weekdays", "slotNumbers", "rate", "slotNumbers", "progress", "ratingSummary", "instructorId", "courseId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>> & import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>>>;
-    listByStaff(pagination: PaginationParams, queryClassDto: QueryClassDto, projection?: readonly ["_id", "code", "title", "startDate", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "learnerQuantity", "weekdays", "slotNumbers", "rate", "ratingSummary", "instructorId", "courseId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Class> & Class & Required<{
+    listByStaff(pagination: PaginationParams, queryClassDto: QueryClassDto, projection?: readonly ["_id", "code", "title", "startDate", "price", "level", "type", "duration", "thumbnail", "status", "learnerLimit", "learnerQuantity", "weekdays", "slotNumbers", "rate", "slotNumbers", "progress", "ratingSummary", "instructorId", "courseId", "createdAt", "updatedAt"]): Promise<import("mongoose").PaginateResult<import("mongoose").Document<unknown, import("mongoose").PaginateOptions, import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
     }>> & import("mongoose").Document<unknown, {}, Class> & Class & Required<{
         _id: string;
